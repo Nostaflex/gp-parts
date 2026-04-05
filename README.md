@@ -166,3 +166,4 @@ La version statique est un MVP de démonstration. Pour passer en production, les
 
 Mode démo — aucun paiement réel, aucune donnée persistée au-delà du localStorage du navigateur.
 # test protection
+# retest
