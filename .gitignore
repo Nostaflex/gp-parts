@@ -9,6 +9,11 @@ dist/
 next-env.d.ts
 .DS_Store
 
+# Firebase Emulator
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
 # Playwright
 /test-results/
 /playwright-report/

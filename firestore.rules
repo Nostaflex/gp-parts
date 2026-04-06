@@ -1,0 +1,29 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Produits : lecture publique, écriture admin uniquement
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if false; // Phase 4 : remplacer par auth admin
+    }
+
+    // Commandes : lecture/écriture restreinte
+    // Phase 4 : allow create si utilisateur authentifié, read si owner ou admin
+    match /orders/{orderId} {
+      allow read, write: if false;
+    }
+
+    // Catégories (cache) : lecture publique
+    match /metadata/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Règle par défaut : tout bloquer
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
