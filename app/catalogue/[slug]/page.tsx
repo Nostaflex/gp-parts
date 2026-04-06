@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import type { Metadata } from 'next';
 import { ChevronRight, Truck, Shield, RefreshCw } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
@@ -45,9 +46,7 @@ export default function ProductPage({ params }: PageProps) {
       price: (product.price / 100).toFixed(2),
       priceCurrency: 'EUR',
       availability:
-        product.stock > 0
-          ? 'https://schema.org/InStock'
-          : 'https://schema.org/OutOfStock',
+        product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
     },
   };
 
@@ -92,15 +91,16 @@ export default function ProductPage({ params }: PageProps) {
           <div>
             <div className="aspect-square bg-ivory rounded-2xl shadow-subtle flex items-center justify-center overflow-hidden">
               {product.images[0] ? (
-                <img
+                <Image
                   src={product.images[0]}
                   alt={product.name}
+                  width={600}
+                  height={600}
                   className="w-full h-full object-contain p-8"
+                  priority
                 />
               ) : (
-                <span className="text-overline uppercase text-basalt/30">
-                  Image {product.name}
-                </span>
+                <span className="text-overline uppercase text-basalt/30">Image {product.name}</span>
               )}
             </div>
           </div>
@@ -127,21 +127,21 @@ export default function ProductPage({ params }: PageProps) {
               )}
             </div>
 
-            <p className="text-body text-basalt/80 leading-relaxed mb-8">
-              {product.description}
-            </p>
+            <p className="text-body text-basalt/80 leading-relaxed mb-8">{product.description}</p>
 
             {/* Compatibilité */}
             <div className="bg-ivory rounded-xl p-5 mb-6">
-              <h2 className="text-overline uppercase text-basalt/60 mb-3">
-                Compatible avec
-              </h2>
+              <h2 className="text-overline uppercase text-basalt/60 mb-3">Compatible avec</h2>
               <ul className="space-y-2">
                 {product.compatibility.map((c, idx) => (
                   <li key={idx} className="text-body-sm text-basalt">
-                    <span className="font-medium">{c.brand} {c.model}</span>
+                    <span className="font-medium">
+                      {c.brand} {c.model}
+                    </span>
                     <span className="text-basalt/60">
-                      {' '}· {c.yearFrom}{c.yearTo ? `–${c.yearTo}` : '+'}
+                      {' '}
+                      · {c.yearFrom}
+                      {c.yearTo ? `–${c.yearTo}` : '+'}
                     </span>
                   </li>
                 ))}

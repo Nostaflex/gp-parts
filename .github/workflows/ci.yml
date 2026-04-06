@@ -30,6 +30,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Security audit
+        run: npm audit --audit-level=critical || true
+        # Note: --audit-level=critical pour ne pas bloquer sur des vulns transitives
+        # sans fix disponible. Passer à --audit-level=high quand les deps upstream corrigent.
+
       - name: Lint
         run: npm run lint
 

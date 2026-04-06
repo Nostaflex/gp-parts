@@ -1,13 +1,7 @@
 'use client';
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useEffect,
-  type ReactNode,
-} from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
+import Link from 'next/link';
 import { Check, AlertTriangle, Info, X, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -88,12 +82,12 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
       <div className="flex-1 text-body-sm font-medium">
         {toast.message}
         {toast.action && (
-          <a
+          <Link
             href={toast.action.href}
             className="block mt-1 underline text-caption font-medium opacity-90 hover:opacity-100"
           >
             {toast.action.label} →
-          </a>
+          </Link>
         )}
       </div>
       <button

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Trash2, Minus, Plus } from 'lucide-react';
 import { useCart } from './CartProvider';
 import { formatPrice } from '@/lib/utils';
@@ -17,7 +18,13 @@ export function CartItemRow({ item }: CartItemRowProps) {
     <div className="flex gap-4 py-4 border-b border-lin last:border-0">
       <div className="w-20 h-20 bg-lin rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
         {item.image ? (
-          <img src={item.image} alt={item.name} className="w-full h-full object-contain p-2" />
+          <Image
+            src={item.image}
+            alt={item.name}
+            width={80}
+            height={80}
+            className="w-full h-full object-contain p-2"
+          />
         ) : (
           <span className="text-caption text-basalt/40">IMG</span>
         )}
@@ -56,7 +63,9 @@ export function CartItemRow({ item }: CartItemRowProps) {
               className="w-8 h-8 flex items-center justify-center bg-lin/50 hover:bg-lin transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               disabled={item.quantity >= item.stock}
               aria-label="Augmenter la quantité"
-              title={item.quantity >= item.stock ? `Stock maximum atteint (${item.stock})` : undefined}
+              title={
+                item.quantity >= item.stock ? `Stock maximum atteint (${item.stock})` : undefined
+              }
             >
               <Plus size={14} strokeWidth={2} />
             </button>
@@ -78,9 +87,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
           {formatPrice(item.price * item.quantity)}
         </p>
         {item.quantity > 1 && (
-          <p className="text-caption text-basalt/60">
-            {formatPrice(item.price)} / unité
-          </p>
+          <p className="text-caption text-basalt/60">{formatPrice(item.price)} / unité</p>
         )}
       </div>
     </div>

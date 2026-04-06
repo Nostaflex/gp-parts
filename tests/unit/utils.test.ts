@@ -5,10 +5,10 @@ import {
   productSlug,
   generateOrderNumber,
   cn,
-  LOW_STOCK_THRESHOLD,
   getStockStatus,
   getStockLabel,
 } from '../../lib/utils';
+import { LOW_STOCK_THRESHOLD } from '../../lib/config';
 
 // ─── formatPrice ─────────────────────────────────────────────────────
 describe('formatPrice', () => {
@@ -79,9 +79,7 @@ describe('slugify', () => {
 // ─── productSlug ─────────────────────────────────────────────────────
 describe('productSlug', () => {
   it('combine nom et marque', () => {
-    expect(productSlug('Disque de frein avant', 'Peugeot')).toBe(
-      'disque-de-frein-avant-peugeot'
-    );
+    expect(productSlug('Disque de frein avant', 'Peugeot')).toBe('disque-de-frein-avant-peugeot');
   });
 });
 

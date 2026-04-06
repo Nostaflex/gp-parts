@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { ShoppingCart } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -41,11 +42,12 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Image produit — 1:1 ratio */}
         <div className="aspect-square bg-lin rounded-lg mb-4 flex items-center justify-center relative overflow-hidden">
           {product.images[0] ? (
-            <img
+            <Image
               src={product.images[0]}
               alt={product.name}
+              width={300}
+              height={300}
               className="w-full h-full object-contain p-4"
-              loading="lazy"
             />
           ) : (
             <span className="text-overline uppercase text-basalt/30">Image produit</span>
