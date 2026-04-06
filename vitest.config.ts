@@ -19,7 +19,12 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov'],
       include: ['lib/**', 'components/**'],
-      exclude: ['**/*.test.*', '**/node_modules/**'],
+      exclude: [
+        '**/*.test.*',
+        '**/node_modules/**',
+        'lib/firebase.ts', // Firebase SDK init — needs emulator
+        'lib/data/firebase.ts', // FirebaseAdapter — needs emulator
+      ],
       thresholds: {
         lines: 60,
         functions: 55,
