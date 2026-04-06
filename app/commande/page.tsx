@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useCart } from '@/components/cart/CartProvider';
 import { useToast } from '@/components/ui/Toast';
-import { formatPrice, generateOrderNumber, cn } from '@/lib/utils';
+import { formatPrice, cn } from '@/lib/utils';
+import { validateCheckout } from './actions';
 import type { OrderInfo } from '@/lib/types';
 
 const DELIVERY_OPTIONS = [
@@ -76,9 +77,11 @@ export default function CheckoutPage() {
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setPaymentError(null);
+
+    // Validation client (feedback immédiat)
     if (!validate()) {
       showToast({
         type: 'warning',
@@ -86,11 +89,36 @@ export default function CheckoutPage() {
       });
       return;
     }
+
     setSubmitting(true);
 
-    // Simulation de traitement paiement (5% d'échec mock pour tester le flux)
-    const orderNumber = generateOrderNumber();
-    setTimeout(() => {
+    try {
+      // Validation serveur (Server Action) — protection contre le bypass JS
+      const result = await validateCheckout({
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        phone: form.phone,
+        address: form.address,
+        city: form.city,
+        postalCode: form.postalCode,
+        deliveryOption: form.deliveryOption,
+        acceptsCgv: form.acceptsCgv,
+      });
+
+      if (!result.success) {
+        setSubmitting(false);
+        setErrors(result.errors as typeof errors);
+        showToast({
+          type: 'error',
+          message: 'Validation serveur échouée. Vérifiez le formulaire.',
+        });
+        return;
+      }
+
+      // Simulation de traitement paiement (5% d'échec mock pour tester le flux)
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
       const shouldFail = Math.random() < 0.05;
       if (shouldFail) {
         setSubmitting(false);
@@ -100,25 +128,36 @@ export default function CheckoutPage() {
         showToast({ type: 'error', message: 'Paiement refusé — réessayez' });
         return;
       }
+
       try {
+        // Masquer partiellement l'email pour limiter l'exposition PII en sessionStorage
+        const maskedEmail = form.email.replace(
+          /^(.{2})(.*)(@.*)$/,
+          (_, start, middle, domain) => start + '*'.repeat(middle.length) + domain
+        );
         sessionStorage.setItem(
           'gpparts-last-order',
           JSON.stringify({
-            orderNumber,
+            orderNumber: result.orderNumber,
             items,
             total,
             deliveryPrice,
-            email: form.email,
+            email: maskedEmail,
             deliveryOption: form.deliveryOption,
           })
         );
       } catch {}
+
       // Marquer la commande comme placée AVANT clearCart() pour que le useEffect
       // de redirection panier vide ne se déclenche pas pendant la navigation.
       setOrderPlaced(true);
       clearCart();
       router.push('/commande/confirmation');
-    }, 800);
+    } catch {
+      setSubmitting(false);
+      setPaymentError('Une erreur est survenue. Réessayez.');
+      showToast({ type: 'error', message: 'Erreur inattendue — réessayez' });
+    }
   };
 
   if (!isReady || (items.length === 0 && !orderPlaced)) return null;
@@ -138,6 +177,7 @@ export default function CheckoutPage() {
                 label="Prénom"
                 name="firstName"
                 autoComplete="given-name"
+                maxLength={50}
                 value={form.firstName}
                 onChange={(e) => setForm({ ...form, firstName: e.target.value })}
                 error={errors.firstName}
@@ -146,6 +186,7 @@ export default function CheckoutPage() {
                 label="Nom"
                 name="lastName"
                 autoComplete="family-name"
+                maxLength={50}
                 value={form.lastName}
                 onChange={(e) => setForm({ ...form, lastName: e.target.value })}
                 error={errors.lastName}
@@ -156,6 +197,7 @@ export default function CheckoutPage() {
                 name="email"
                 autoComplete="email"
                 inputMode="email"
+                maxLength={100}
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 error={errors.email}
@@ -166,6 +208,7 @@ export default function CheckoutPage() {
                 name="phone"
                 autoComplete="tel"
                 inputMode="tel"
+                maxLength={20}
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 error={errors.phone}
@@ -220,6 +263,7 @@ export default function CheckoutPage() {
                   label="Adresse"
                   name="address"
                   autoComplete="street-address"
+                  maxLength={200}
                   value={form.address}
                   onChange={(e) => setForm({ ...form, address: e.target.value })}
                   error={errors.address}
@@ -240,6 +284,7 @@ export default function CheckoutPage() {
                     label="Ville"
                     name="city"
                     autoComplete="address-level2"
+                    maxLength={100}
                     value={form.city}
                     onChange={(e) => setForm({ ...form, city: e.target.value })}
                     error={errors.city}
@@ -262,8 +307,8 @@ export default function CheckoutPage() {
                 J&apos;accepte les{' '}
                 <a href="/cgv" className="text-volcanic underline">
                   conditions générales de vente
-                </a>
-                {' '}*
+                </a>{' '}
+                *
               </span>
             </label>
             {errors.acceptsCgv && (
