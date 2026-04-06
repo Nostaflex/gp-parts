@@ -85,9 +85,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const existing = prev.find((i) => i.id === product.id);
       if (existing) {
         const newQty = Math.min(existing.quantity + quantity, product.stock);
-        return prev.map((i) =>
-          i.id === product.id ? { ...i, quantity: newQty } : i
-        );
+        return prev.map((i) => (i.id === product.id ? { ...i, quantity: newQty } : i));
       }
       return [
         ...prev,

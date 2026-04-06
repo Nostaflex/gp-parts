@@ -1,10 +1,7 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
-  content: [
-    './app/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-  ],
+  content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
@@ -25,37 +22,37 @@ const config: Config = {
         mono: ['var(--font-mono)', 'monospace'],
       },
       fontSize: {
-        'display': ['3rem', { lineHeight: '1', letterSpacing: '-0.02em', fontWeight: '700' }],
-        'h1': ['2.25rem', { lineHeight: '1.1', letterSpacing: '-0.01em', fontWeight: '700' }],
-        'h2': ['1.875rem', { lineHeight: '1.15', letterSpacing: '-0.01em', fontWeight: '700' }],
-        'h3': ['1.5rem', { lineHeight: '1.2', fontWeight: '700' }],
-        'h4': ['1.25rem', { lineHeight: '1.3', fontWeight: '700' }],
+        display: ['3rem', { lineHeight: '1', letterSpacing: '-0.02em', fontWeight: '700' }],
+        h1: ['2.25rem', { lineHeight: '1.1', letterSpacing: '-0.01em', fontWeight: '700' }],
+        h2: ['1.875rem', { lineHeight: '1.15', letterSpacing: '-0.01em', fontWeight: '700' }],
+        h3: ['1.5rem', { lineHeight: '1.2', fontWeight: '700' }],
+        h4: ['1.25rem', { lineHeight: '1.3', fontWeight: '700' }],
         'body-lg': ['1.125rem', { lineHeight: '1.6' }],
-        'body': ['1rem', { lineHeight: '1.6' }],
+        body: ['1rem', { lineHeight: '1.6' }],
         'body-sm': ['0.875rem', { lineHeight: '1.5' }],
-        'caption': ['0.75rem', { lineHeight: '1.4' }],
-        'overline': ['0.75rem', { lineHeight: '1', letterSpacing: '0.08em', fontWeight: '500' }],
+        caption: ['0.75rem', { lineHeight: '1.4' }],
+        overline: ['0.75rem', { lineHeight: '1', letterSpacing: '0.08em', fontWeight: '500' }],
       },
       borderRadius: {
         pill: '9999px',
       },
       boxShadow: {
-        'subtle': '0 1px 3px rgba(18, 16, 14, 0.06)',
-        'medium': '0 4px 12px rgba(18, 16, 14, 0.08)',
-        'elevated': '0 8px 24px rgba(18, 16, 14, 0.12)',
+        subtle: '0 1px 3px rgba(18, 16, 14, 0.06)',
+        medium: '0 4px 12px rgba(18, 16, 14, 0.08)',
+        elevated: '0 8px 24px rgba(18, 16, 14, 0.12)',
       },
       zIndex: {
-        'nav': '10',
-        'dropdown': '20',
+        nav: '10',
+        dropdown: '20',
         'modal-backdrop': '30',
-        'modal': '31',
-        'toast': '40',
+        modal: '31',
+        toast: '40',
         'cookie-banner': '50',
       },
       transitionDuration: {
-        'fast': '150ms',
-        'normal': '250ms',
-        'slow': '350ms',
+        fast: '150ms',
+        normal: '250ms',
+        slow: '350ms',
       },
       keyframes: {
         'skeleton-pulse': {
@@ -72,7 +69,7 @@ const config: Config = {
         },
       },
       animation: {
-        'skeleton': 'skeleton-pulse 1.8s ease-in-out infinite',
+        skeleton: 'skeleton-pulse 1.8s ease-in-out infinite',
         'slide-up': 'slide-up 250ms ease-out',
         'fade-in': 'fade-in 200ms ease-out',
       },

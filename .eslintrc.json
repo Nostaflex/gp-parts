@@ -1,3 +1,7 @@
 {
-  "extends": "next/core-web-vitals"
+  "extends": ["next/core-web-vitals", "plugin:security/recommended-legacy"],
+  "plugins": ["security"],
+  "rules": {
+    "security/detect-object-injection": "off"
+  }
 }

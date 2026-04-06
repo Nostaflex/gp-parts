@@ -7,8 +7,8 @@ export default function NotFound() {
       <p className="font-title text-display text-volcanic mb-2">404</p>
       <h1 className="font-title text-h2 text-basalt mb-4">Page introuvable</h1>
       <p className="text-body text-basalt/70 mb-8">
-        La page ou la pièce que vous cherchez n&apos;existe pas ou a été déplacée.
-        Vérifiez l&apos;URL ou explorez notre catalogue.
+        La page ou la pièce que vous cherchez n&apos;existe pas ou a été déplacée. Vérifiez
+        l&apos;URL ou explorez notre catalogue.
       </p>
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <ButtonLink href="/" variant="primary" size="md">

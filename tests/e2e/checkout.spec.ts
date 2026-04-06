@@ -13,17 +13,19 @@ test.describe('Checkout — flow complet', () => {
     // 1. Pré-remplir le panier via localStorage pour gagner du temps
     await page.goto('/');
     await page.evaluate(() => {
-      const mockCart = JSON.stringify([{
-        id: 'prod-001-default',
-        productId: 'prod-001',
-        slug: 'disque-de-frein-avant-peugeot',
-        name: 'Disque de frein avant',
-        reference: 'PEU-208-DBF-001',
-        price: 6500,
-        quantity: 1,
-        image: '/images/placeholder-disque.jpg',
-        stock: 12,
-      }]);
+      const mockCart = JSON.stringify([
+        {
+          id: 'prod-001-default',
+          productId: 'prod-001',
+          slug: 'disque-de-frein-avant-peugeot',
+          name: 'Disque de frein avant',
+          reference: 'PEU-208-DBF-001',
+          price: 6500,
+          quantity: 1,
+          image: '/images/categories/freinage.svg',
+          stock: 12,
+        },
+      ]);
       localStorage.setItem('gpparts-cart', mockCart);
     });
     await page.reload();

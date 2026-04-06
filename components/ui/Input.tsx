@@ -19,10 +19,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="flex flex-col gap-1">
         {label && (
-          <label
-            htmlFor={inputId}
-            className="text-body-sm font-body font-medium text-basalt"
-          >
+          <label htmlFor={inputId} className="text-body-sm font-body font-medium text-basalt">
             {label}
           </label>
         )}
@@ -41,7 +38,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             className
           )}
           aria-invalid={!!error}
-          aria-describedby={error ? `${inputId}-error` : helperText ? `${inputId}-helper` : undefined}
+          aria-describedby={
+            error ? `${inputId}-error` : helperText ? `${inputId}-helper` : undefined
+          }
           {...props}
         />
         {error && (

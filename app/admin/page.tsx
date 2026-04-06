@@ -2,22 +2,14 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import {
-  Package,
-  TrendingUp,
-  AlertTriangle,
-  Euro,
-  Search,
-  Tag,
-  Edit3,
-  Eye,
-} from 'lucide-react';
+import { Package, TrendingUp, AlertTriangle, Euro, Search, Tag, Edit3, Eye } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 import { PRODUCTS } from '@/lib/products';
-import { formatPrice, getStockStatus, getStockLabel, cn, LOW_STOCK_THRESHOLD } from '@/lib/utils';
+import { formatPrice, getStockStatus, getStockLabel, cn } from '@/lib/utils';
+import { LOW_STOCK_THRESHOLD } from '@/lib/config';
 import { getCategoryLabel } from '@/lib/categories';
 
 export default function AdminDashboardPage() {
@@ -136,14 +128,16 @@ export default function AdminDashboardPage() {
       {/* Alerte stock faible */}
       {(lowStockCount > 0 || outOfStockCount > 0) && (
         <div className="bg-warning/10 border border-warning/30 rounded-xl p-4 mb-8 flex items-start gap-3">
-          <AlertTriangle size={20} strokeWidth={1.75} className="text-warning flex-shrink-0 mt-0.5" />
+          <AlertTriangle
+            size={20}
+            strokeWidth={1.75}
+            className="text-warning flex-shrink-0 mt-0.5"
+          />
           <div className="flex-1">
-            <p className="font-medium text-body-sm text-basalt">
-              Attention au stock
-            </p>
+            <p className="font-medium text-body-sm text-basalt">Attention au stock</p>
             <p className="text-caption text-basalt/70 mt-0.5">
-              {outOfStockCount} produit{outOfStockCount > 1 ? 's' : ''} en rupture,{' '}
-              {lowStockCount} produit{lowStockCount > 1 ? 's' : ''} en stock faible.
+              {outOfStockCount} produit{outOfStockCount > 1 ? 's' : ''} en rupture, {lowStockCount}{' '}
+              produit{lowStockCount > 1 ? 's' : ''} en stock faible.
             </p>
           </div>
           <Button variant="ghost" size="sm" onClick={() => setFilter('low-stock')}>
@@ -219,9 +213,7 @@ export default function AdminDashboardPage() {
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-lin rounded-lg flex-shrink-0" />
                         <div>
-                          <p className="font-medium text-body-sm text-basalt">
-                            {product.name}
-                          </p>
+                          <p className="font-medium text-body-sm text-basalt">{product.name}</p>
                           {product.isPromoted && (
                             <span className="text-caption text-volcanic font-medium">
                               En promotion
@@ -294,8 +286,8 @@ export default function AdminDashboardPage() {
       </div>
 
       <p className="text-caption text-basalt/50 text-center mt-6">
-        Mode démo — les modifications ne sont pas persistées. Dans la version production,
-        les données seront gérées via Firebase / Firestore.
+        Mode démo — les modifications ne sont pas persistées. Dans la version production, les
+        données seront gérées via Firebase / Firestore.
       </p>
     </div>
   );

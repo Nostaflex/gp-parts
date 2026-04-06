@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <rect width="400" height="400" rx="16" fill="none"/>
+  <!-- Amortisseur — tige supérieure -->
+  <rect x="190" y="60" width="20" height="40" rx="4" fill="#3D3D3D"/>
+  <!-- Œillet supérieur -->
+  <circle cx="200" cy="55" r="12" stroke="#1A1A1A" stroke-width="4" fill="#FDFBF7"/>
+  <!-- Corps principal -->
+  <rect x="175" y="100" width="50" height="120" rx="8" stroke="#1A1A1A" stroke-width="4" fill="#E8E0CE"/>
+  <!-- Piston visible -->
+  <rect x="185" y="110" width="30" height="20" rx="3" fill="#3D3D3D"/>
+  <!-- Ressort hélicoïdal -->
+  <path d="M160 220 Q145 230 160 240 Q200 250 240 240 Q255 230 240 220" stroke="#D4A24C" stroke-width="4" fill="none"/>
+  <path d="M160 240 Q145 250 160 260 Q200 270 240 260 Q255 250 240 240" stroke="#D4A24C" stroke-width="4" fill="none"/>
+  <path d="M160 260 Q145 270 160 280 Q200 290 240 280 Q255 270 240 260" stroke="#D4A24C" stroke-width="4" fill="none"/>
+  <path d="M160 280 Q145 290 160 300 Q200 310 240 300 Q255 290 240 280" stroke="#D4A24C" stroke-width="4" fill="none"/>
+  <!-- Base -->
+  <rect x="170" y="305" width="60" height="15" rx="4" stroke="#1A1A1A" stroke-width="3" fill="#3D3D3D"/>
+  <!-- Œillet inférieur -->
+  <circle cx="200" cy="330" r="10" stroke="#1A1A1A" stroke-width="3" fill="#FDFBF7"/>
+  <!-- Label -->
+  <text x="200" y="370" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" font-weight="600" fill="#1A1A1A">SUSPENSION</text>
+</svg>

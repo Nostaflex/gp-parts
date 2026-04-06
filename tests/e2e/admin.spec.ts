@@ -4,8 +4,23 @@ import { test, expect } from '@playwright/test';
  * Test e2e — Smoke admin.
  * Vérifie que /admin est accessible, affiche les 4 KPIs,
  * la table produits, et que les actions déclenchent le toast démo.
+ *
+ * En CI, ADMIN_USER et ADMIN_PASS doivent être définis comme secrets GitHub.
+ * En local, .env.local fournit les credentials.
  */
+
+const ADMIN_USER = process.env.ADMIN_USER || 'admin';
+const ADMIN_PASS = process.env.ADMIN_PASS || 'gpparts2026!';
+const basicAuth = Buffer.from(`${ADMIN_USER}:${ADMIN_PASS}`).toString('base64');
+
 test.describe('Admin — smoke back-office', () => {
+  // Envoyer le header Basic Auth pour chaque requête
+  test.use({
+    extraHTTPHeaders: {
+      Authorization: `Basic ${basicAuth}`,
+    },
+  });
+
   test('la page /admin charge et affiche les 4 KPIs', async ({ page }) => {
     await page.goto('/admin');
 

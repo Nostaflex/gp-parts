@@ -1,6 +1,8 @@
 // GP Parts — Utilitaires
 // Règle cardinale : les prix sont TOUJOURS en centimes (entier). Jamais de flottant.
 
+import { LOW_STOCK_THRESHOLD } from '@/lib/config';
+
 /**
  * Formate un prix (centimes) en chaîne "65,00 €" avec séparateur français.
  * - Entrée invalide (NaN / non-finie) → "—"
@@ -58,11 +60,23 @@ export function cn(...classes: (string | boolean | undefined | null)[]): string 
 }
 
 /**
- * Retourne le statut de stock pour l'affichage badges.
+ * Parse JSON depuis localStorage/sessionStorage de manière safe.
+ * Retourne le fallback si la clé est absente, corrompue ou si l'env est SSR.
  */
-// Seuil stock faible : ≤ 5 unités (aligné avec l'admin dashboard)
-export const LOW_STOCK_THRESHOLD = 5;
+export function safeJsonParse<T>(key: string, fallback: T): T {
+  if (typeof window === 'undefined') return fallback;
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+}
 
+/**
+ * Retourne le statut de stock pour l'affichage badges.
+ * Seuil stock faible défini dans lib/config.ts (single source of truth).
+ */
 export function getStockStatus(stock: number): 'in-stock' | 'low-stock' | 'out-of-stock' {
   if (stock === 0) return 'out-of-stock';
   if (stock <= LOW_STOCK_THRESHOLD) return 'low-stock';

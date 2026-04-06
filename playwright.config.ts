@@ -17,10 +17,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   // Parallélisme : 1 worker en CI pour limiter la charge, auto en local
   workers: process.env.CI ? 1 : undefined,
-  reporter: [
-    ['list'],
-    ['html', { open: 'never' }],
-  ],
+  reporter: [['list'], ['html', { open: 'never' }]],
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
@@ -33,9 +30,10 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  // Démarre automatiquement `next dev` avant les tests
+  // En CI : `npm start` (production build, plus rapide, plus réaliste).
+  // En local : `npm run dev` (hot reload pour le développement).
   webServer: {
-    command: 'npm run dev',
+    command: process.env.CI ? 'npm start' : 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

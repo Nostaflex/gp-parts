@@ -15,24 +15,24 @@ export default function CgvPage() {
         <section>
           <h2 className="font-title text-h3 text-basalt mb-3">1. Objet</h2>
           <p>
-            Les présentes conditions régissent les ventes de pièces détachées réalisées par
-            GP Parts auprès de ses clients en Guadeloupe.
+            Les présentes conditions régissent les ventes de pièces détachées réalisées par GP Parts
+            auprès de ses clients en Guadeloupe.
           </p>
         </section>
 
         <section>
           <h2 className="font-title text-h3 text-basalt mb-3">2. Commandes</h2>
           <p>
-            Toute commande passée sur le site implique l&apos;acceptation sans réserve des
-            présentes CGV. La validation finale de la commande par le client vaut engagement ferme.
+            Toute commande passée sur le site implique l&apos;acceptation sans réserve des présentes
+            CGV. La validation finale de la commande par le client vaut engagement ferme.
           </p>
         </section>
 
         <section>
           <h2 className="font-title text-h3 text-basalt mb-3">3. Prix et paiement</h2>
           <p>
-            Les prix sont indiqués en euros TTC. Le paiement est effectué en ligne au moment de
-            la commande. GP Parts accepte les cartes bancaires principales via une plateforme
+            Les prix sont indiqués en euros TTC. Le paiement est effectué en ligne au moment de la
+            commande. GP Parts accepte les cartes bancaires principales via une plateforme
             sécurisée.
           </p>
         </section>
@@ -40,8 +40,8 @@ export default function CgvPage() {
         <section>
           <h2 className="font-title text-h3 text-basalt mb-3">4. Livraison et retrait</h2>
           <p>
-            Livraison en Guadeloupe sous 24 à 48h ouvrées (5 € forfaitaire), ou retrait gratuit
-            en boutique à Baie-Mahault sous 24h.
+            Livraison en Guadeloupe sous 24 à 48h ouvrées (5 € forfaitaire), ou retrait gratuit en
+            boutique à Baie-Mahault sous 24h.
           </p>
         </section>
 
@@ -65,8 +65,8 @@ export default function CgvPage() {
         <section>
           <h2 className="font-title text-h3 text-basalt mb-3">7. Litiges</h2>
           <p>
-            En cas de litige, le client est invité à contacter GP Parts à l&apos;amiable. À
-            défaut d&apos;accord, les tribunaux compétents seront ceux du ressort de Pointe-à-Pitre.
+            En cas de litige, le client est invité à contacter GP Parts à l&apos;amiable. À défaut
+            d&apos;accord, les tribunaux compétents seront ceux du ressort de Pointe-à-Pitre.
           </p>
         </section>
       </div>

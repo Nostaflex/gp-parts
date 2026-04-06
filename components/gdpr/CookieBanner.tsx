@@ -63,8 +63,7 @@ export function CookieBanner() {
             <p id="cookie-desc" className="text-body-sm text-basalt/70">
               Nous utilisons des cookies essentiels au fonctionnement du site. Avec votre accord,
               nous utilisons aussi des cookies analytiques pour améliorer votre expérience et
-              marketing pour nos communications. Vous pouvez modifier vos préférences à tout
-              moment.
+              marketing pour nos communications. Vous pouvez modifier vos préférences à tout moment.
             </p>
           </div>
           <button
@@ -82,8 +81,12 @@ export function CookieBanner() {
             <label className="flex items-start gap-3 cursor-not-allowed opacity-60">
               <input type="checkbox" checked disabled className="mt-1" />
               <div>
-                <span className="text-body-sm font-medium text-basalt">Essentiels (obligatoires)</span>
-                <p className="text-caption text-basalt/60">Nécessaires au fonctionnement du site (panier, session).</p>
+                <span className="text-body-sm font-medium text-basalt">
+                  Essentiels (obligatoires)
+                </span>
+                <p className="text-caption text-basalt/60">
+                  Nécessaires au fonctionnement du site (panier, session).
+                </p>
               </div>
             </label>
             <label className="flex items-start gap-3 cursor-pointer">
@@ -95,7 +98,9 @@ export function CookieBanner() {
               />
               <div>
                 <span className="text-body-sm font-medium text-basalt">Analytiques</span>
-                <p className="text-caption text-basalt/60">Nous aide à comprendre comment vous utilisez le site.</p>
+                <p className="text-caption text-basalt/60">
+                  Nous aide à comprendre comment vous utilisez le site.
+                </p>
               </div>
             </label>
             <label className="flex items-start gap-3 cursor-pointer">
@@ -107,7 +112,9 @@ export function CookieBanner() {
               />
               <div>
                 <span className="text-body-sm font-medium text-basalt">Marketing</span>
-                <p className="text-caption text-basalt/60">Pour vous envoyer des promotions pertinentes.</p>
+                <p className="text-caption text-basalt/60">
+                  Pour vous envoyer des promotions pertinentes.
+                </p>
               </div>
             </label>
           </div>

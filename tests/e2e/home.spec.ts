@@ -15,8 +15,6 @@ test.describe('Home page — smoke', () => {
     await expect(page).toHaveTitle(/GP Parts/i);
 
     // La navbar est présente (lien Catalogue visible depuis la home)
-    await expect(
-      page.getByRole('link', { name: /catalogue/i }).first()
-    ).toBeVisible();
+    await expect(page.getByRole('link', { name: /catalogue/i }).first()).toBeVisible();
   });
 });
