@@ -36,6 +36,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Unit tests
+        run: npm run test:unit
+
       - name: Build
         run: npm run build
         env:
@@ -43,7 +46,7 @@ jobs:
           NEXT_TELEMETRY_DISABLED: '1'
 
   e2e:
-    name: Playwright · Smoke
+    name: Playwright · E2E
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: quality
