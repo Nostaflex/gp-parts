@@ -21,7 +21,7 @@ test.describe('Checkout — flow complet', () => {
         reference: 'PEU-208-DBF-001',
         price: 6500,
         quantity: 1,
-        image: '/images/placeholder-disque.jpg',
+        image: '/images/categories/freinage.svg',
         stock: 12,
       }]);
       localStorage.setItem('gpparts-cart', mockCart);

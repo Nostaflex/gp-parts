@@ -15,8 +15,12 @@ export function CartItemRow({ item }: CartItemRowProps) {
 
   return (
     <div className="flex gap-4 py-4 border-b border-lin last:border-0">
-      <div className="w-20 h-20 bg-lin rounded-lg flex-shrink-0 flex items-center justify-center">
-        <span className="text-caption text-basalt/40">IMG</span>
+      <div className="w-20 h-20 bg-lin rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
+        {item.image ? (
+          <img src={item.image} alt={item.name} className="w-full h-full object-contain p-2" />
+        ) : (
+          <span className="text-caption text-basalt/40">IMG</span>
+        )}
       </div>
 
       <div className="flex-1 min-w-0">

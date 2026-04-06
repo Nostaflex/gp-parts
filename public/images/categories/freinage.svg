@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <rect width="400" height="400" rx="16" fill="none"/>
+  <!-- Disque de frein -->
+  <circle cx="200" cy="185" r="120" stroke="#1A1A1A" stroke-width="6" fill="none"/>
+  <circle cx="200" cy="185" r="95" stroke="#3D3D3D" stroke-width="2" fill="none"/>
+  <circle cx="200" cy="185" r="45" stroke="#1A1A1A" stroke-width="4" fill="#E8E0CE"/>
+  <circle cx="200" cy="185" r="20" fill="#1A1A1A"/>
+  <!-- Ventilation slots -->
+  <line x1="200" y1="95" x2="200" y2="115" stroke="#3D3D3D" stroke-width="3" stroke-linecap="round"/>
+  <line x1="260" y1="120" x2="248" y2="137" stroke="#3D3D3D" stroke-width="3" stroke-linecap="round"/>
+  <line x1="295" y1="185" x2="275" y2="185" stroke="#3D3D3D" stroke-width="3" stroke-linecap="round"/>
+  <line x1="260" y1="250" x2="248" y2="233" stroke="#3D3D3D" stroke-width="3" stroke-linecap="round"/>
+  <line x1="200" y1="275" x2="200" y2="255" stroke="#3D3D3D" stroke-width="3" stroke-linecap="round"/>
+  <line x1="140" y1="250" x2="152" y2="233" stroke="#3D3D3D" stroke-width="3" stroke-linecap="round"/>
+  <line x1="105" y1="185" x2="125" y2="185" stroke="#3D3D3D" stroke-width="3" stroke-linecap="round"/>
+  <line x1="140" y1="120" x2="152" y2="137" stroke="#3D3D3D" stroke-width="3" stroke-linecap="round"/>
+  <!-- Plaquette -->
+  <rect x="290" y="145" width="30" height="80" rx="6" fill="#D4A24C" opacity="0.8"/>
+  <!-- Label -->
+  <text x="200" y="355" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" font-weight="600" fill="#1A1A1A">FREINAGE</text>
+</svg>

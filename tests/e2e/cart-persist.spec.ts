@@ -44,7 +44,7 @@ test.describe('Panier — persistance localStorage', () => {
         reference: 'PEU-208-DBF-001',
         price: 6500,
         quantity: 2,
-        image: '/images/placeholder-disque.jpg',
+        image: '/images/categories/freinage.svg',
         stock: 12,
       }]);
       localStorage.setItem('gpparts-cart', mockCart);

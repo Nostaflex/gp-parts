@@ -38,9 +38,18 @@ export function ProductCard({ product }: ProductCardProps) {
         href={`/catalogue/${product.slug}`}
         className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-volcanic focus-visible:ring-offset-2 rounded-lg"
       >
-        {/* Image placeholder — 1:1 ratio */}
+        {/* Image produit — 1:1 ratio */}
         <div className="aspect-square bg-lin rounded-lg mb-4 flex items-center justify-center relative overflow-hidden">
-          <span className="text-overline uppercase text-basalt/30">Image produit</span>
+          {product.images[0] ? (
+            <img
+              src={product.images[0]}
+              alt={product.name}
+              className="w-full h-full object-contain p-4"
+              loading="lazy"
+            />
+          ) : (
+            <span className="text-overline uppercase text-basalt/30">Image produit</span>
+          )}
           {hasPromo && (
             <span className="absolute top-2 left-2">
               <Badge variant="promo">-{promoPercent}%</Badge>

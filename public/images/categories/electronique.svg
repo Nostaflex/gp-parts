@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <rect width="400" height="400" rx="16" fill="none"/>
+  <!-- Batterie — corps -->
+  <rect x="110" y="110" width="180" height="150" rx="10" stroke="#1A1A1A" stroke-width="5" fill="#E8E0CE"/>
+  <!-- Dessus batterie -->
+  <rect x="115" y="105" width="170" height="20" rx="6" fill="#3D3D3D"/>
+  <!-- Borne + -->
+  <rect x="145" y="85" width="24" height="25" rx="4" fill="#D4A24C"/>
+  <text x="157" y="103" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#FDFBF7">+</text>
+  <!-- Borne - -->
+  <rect x="230" y="90" width="20" height="20" rx="4" fill="#3D3D3D"/>
+  <text x="240" y="106" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" font-weight="700" fill="#FDFBF7">−</text>
+  <!-- Cellules -->
+  <rect x="130" y="135" width="55" height="50" rx="4" stroke="#3D3D3D" stroke-width="2" fill="#F5F1E8"/>
+  <rect x="215" y="135" width="55" height="50" rx="4" stroke="#3D3D3D" stroke-width="2" fill="#F5F1E8"/>
+  <rect x="130" y="195" width="55" height="50" rx="4" stroke="#3D3D3D" stroke-width="2" fill="#F5F1E8"/>
+  <rect x="215" y="195" width="55" height="50" rx="4" stroke="#3D3D3D" stroke-width="2" fill="#F5F1E8"/>
+  <!-- Éclair énergie -->
+  <polygon points="200,140 190,175 205,175 195,210 210,170 195,170 205,140" fill="#D4A24C" opacity="0.6"/>
+  <!-- Texte 12V -->
+  <text x="200" y="290" text-anchor="middle" font-family="system-ui, sans-serif" font-size="22" font-weight="700" fill="#3D3D3D">12V 60Ah</text>
+  <!-- Label -->
+  <text x="200" y="355" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" font-weight="600" fill="#1A1A1A">ÉLECTRONIQUE</text>
+</svg>

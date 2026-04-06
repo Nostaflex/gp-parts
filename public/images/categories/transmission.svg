@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <rect width="400" height="400" rx="16" fill="none"/>
+  <!-- Pignon avant (petit) -->
+  <circle cx="140" cy="190" r="35" stroke="#1A1A1A" stroke-width="5" fill="#E8E0CE"/>
+  <circle cx="140" cy="190" r="12" fill="#1A1A1A"/>
+  <!-- Dents pignon -->
+  <circle cx="140" cy="190" r="40" stroke="#3D3D3D" stroke-width="2" stroke-dasharray="8 6" fill="none"/>
+  <!-- Couronne arrière (grand) -->
+  <circle cx="270" cy="190" r="70" stroke="#1A1A1A" stroke-width="5" fill="#E8E0CE"/>
+  <circle cx="270" cy="190" r="50" stroke="#3D3D3D" stroke-width="2" fill="none"/>
+  <circle cx="270" cy="190" r="15" fill="#1A1A1A"/>
+  <!-- Dents couronne -->
+  <circle cx="270" cy="190" r="76" stroke="#3D3D3D" stroke-width="2" stroke-dasharray="10 7" fill="none"/>
+  <!-- Chaîne haute -->
+  <line x1="140" y1="155" x2="270" y2="120" stroke="#D4A24C" stroke-width="6" stroke-linecap="round"/>
+  <!-- Chaîne basse -->
+  <line x1="140" y1="225" x2="270" y2="260" stroke="#D4A24C" stroke-width="6" stroke-linecap="round"/>
+  <!-- Maillons (décoratifs) -->
+  <circle cx="175" cy="145" r="3" fill="#D4A24C"/>
+  <circle cx="210" cy="135" r="3" fill="#D4A24C"/>
+  <circle cx="245" cy="125" r="3" fill="#D4A24C"/>
+  <circle cx="175" cy="235" r="3" fill="#D4A24C"/>
+  <circle cx="210" cy="245" r="3" fill="#D4A24C"/>
+  <circle cx="245" cy="255" r="3" fill="#D4A24C"/>
+  <!-- Label -->
+  <text x="200" y="355" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" font-weight="600" fill="#1A1A1A">TRANSMISSION</text>
+</svg>

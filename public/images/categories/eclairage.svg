@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <rect width="400" height="400" rx="16" fill="none"/>
+  <!-- Phare — réflecteur -->
+  <ellipse cx="200" cy="185" rx="100" ry="90" stroke="#1A1A1A" stroke-width="5" fill="#F5F1E8"/>
+  <!-- Réflecteur intérieur -->
+  <ellipse cx="200" cy="185" rx="70" ry="60" stroke="#3D3D3D" stroke-width="2" fill="#E8E0CE"/>
+  <!-- Ampoule -->
+  <circle cx="200" cy="185" r="22" fill="#D4A24C" opacity="0.9"/>
+  <circle cx="200" cy="185" r="12" fill="#FDFBF7"/>
+  <!-- Rayons lumineux -->
+  <line x1="310" y1="185" x2="350" y2="185" stroke="#D4A24C" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+  <line x1="305" y1="140" x2="340" y2="120" stroke="#D4A24C" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+  <line x1="305" y1="230" x2="340" y2="250" stroke="#D4A24C" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+  <line x1="290" y1="100" x2="315" y2="70" stroke="#D4A24C" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
+  <line x1="290" y1="270" x2="315" y2="300" stroke="#D4A24C" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
+  <!-- Vitre phare -->
+  <path d="M295 105 Q310 185 295 265" stroke="#1A1A1A" stroke-width="4" fill="none"/>
+  <!-- Fixation -->
+  <rect x="90" y="165" width="15" height="40" rx="4" fill="#3D3D3D"/>
+  <!-- Label -->
+  <text x="200" y="355" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" font-weight="600" fill="#1A1A1A">ÉCLAIRAGE</text>
+</svg>

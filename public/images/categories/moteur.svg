@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <rect width="400" height="400" rx="16" fill="none"/>
+  <!-- Bloc moteur -->
+  <rect x="110" y="100" width="180" height="160" rx="12" stroke="#1A1A1A" stroke-width="5" fill="#F5F1E8"/>
+  <!-- Culasse -->
+  <rect x="120" y="80" width="160" height="30" rx="6" stroke="#1A1A1A" stroke-width="4" fill="#E8E0CE"/>
+  <!-- Bougies -->
+  <rect x="155" y="60" width="8" height="28" rx="3" fill="#D4A24C"/>
+  <rect x="195" y="60" width="8" height="28" rx="3" fill="#D4A24C"/>
+  <rect x="235" y="60" width="8" height="28" rx="3" fill="#D4A24C"/>
+  <!-- Pistons -->
+  <rect x="135" y="140" width="40" height="55" rx="4" stroke="#3D3D3D" stroke-width="3" fill="#FDFBF7"/>
+  <rect x="180" y="155" width="40" height="55" rx="4" stroke="#3D3D3D" stroke-width="3" fill="#FDFBF7"/>
+  <rect x="225" y="130" width="40" height="55" rx="4" stroke="#3D3D3D" stroke-width="3" fill="#FDFBF7"/>
+  <!-- Bielles -->
+  <line x1="155" y1="195" x2="155" y2="240" stroke="#1A1A1A" stroke-width="3" stroke-linecap="round"/>
+  <line x1="200" y1="210" x2="200" y2="240" stroke="#1A1A1A" stroke-width="3" stroke-linecap="round"/>
+  <line x1="245" y1="185" x2="245" y2="240" stroke="#1A1A1A" stroke-width="3" stroke-linecap="round"/>
+  <!-- Vilebrequin -->
+  <ellipse cx="200" cy="250" rx="70" ry="12" stroke="#1A1A1A" stroke-width="3" fill="#E8E0CE"/>
+  <!-- Carter -->
+  <path d="M110 260 Q110 300 200 300 Q290 300 290 260" stroke="#1A1A1A" stroke-width="4" fill="none"/>
+  <!-- Label -->
+  <text x="200" y="355" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" font-weight="600" fill="#1A1A1A">MOTEUR</text>
+</svg>

@@ -90,10 +90,18 @@ export default function ProductPage({ params }: PageProps) {
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Image */}
           <div>
-            <div className="aspect-square bg-ivory rounded-2xl shadow-subtle flex items-center justify-center">
-              <span className="text-overline uppercase text-basalt/30">
-                Image {product.name}
-              </span>
+            <div className="aspect-square bg-ivory rounded-2xl shadow-subtle flex items-center justify-center overflow-hidden">
+              {product.images[0] ? (
+                <img
+                  src={product.images[0]}
+                  alt={product.name}
+                  className="w-full h-full object-contain p-8"
+                />
+              ) : (
+                <span className="text-overline uppercase text-basalt/30">
+                  Image {product.name}
+                </span>
+              )}
             </div>
           </div>
 
