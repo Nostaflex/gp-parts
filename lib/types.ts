@@ -20,6 +20,8 @@ export interface VehicleCompatibility {
   yearTo?: number;      // 2021 (undefined = toujours en production)
 }
 
+export type StockType = 'local' | 'precommande';
+
 export interface Product {
   id: string;
   slug: string;
@@ -34,6 +36,12 @@ export interface Product {
   vehicleType: VehicleType;
   compatibility: VehicleCompatibility[];
   stock: number;                  // 0 = rupture, <5 = stock bas
+
+  // v2 — Modèle hybride Scénario B (stock héros + précommande)
+  // Activer ces champs quand le catalogue héros P1 est prêt.
+  // stockType?: StockType;       // 'local' = en stock Guadeloupe, 'precommande' = 8-15j
+  // deliveryDays?: number;       // Jours ouvrés estimés (précommande uniquement)
+
   isPromoted: boolean;
   createdAt: string;              // ISO date
 }
