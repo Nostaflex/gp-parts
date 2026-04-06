@@ -12,6 +12,9 @@
     "test:unit:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "format:check": "prettier --check \"**/*.{ts,tsx,json,css,md}\" --ignore-path .prettierignore",
+    "format:fix": "prettier --write \"**/*.{ts,tsx,json,css,md}\" --ignore-path .prettierignore",
+    "test:coverage": "vitest run --coverage",
     "prepare": "husky"
   },
   "dependencies": {

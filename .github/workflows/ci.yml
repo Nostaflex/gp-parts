@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   quality:
-    name: Lint · Typecheck · Build
+    name: Lint · Format · Typecheck · Tests · Build
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -38,17 +38,29 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Format check
+        run: npx prettier --check "**/*.{ts,tsx,json,css,md}" --ignore-path .prettierignore
+
       - name: Typecheck
         run: npm run typecheck
+
+      - name: Unit tests with coverage
+        run: npx vitest run --coverage
+        env:
+          CI: 'true'
+
+      - name: Check coverage thresholds
+        run: |
+          echo "Coverage thresholds: lines 60%, functions 60%, branches 50%"
+          echo "Thresholds are enforced by vitest.config.ts — the previous step fails if not met."
 
       - name: Build
         run: npm run build
         env:
-          # Évite d'échouer sur des warnings Next/Telemetry en CI.
           NEXT_TELEMETRY_DISABLED: '1'
 
   e2e:
-    name: Playwright · Smoke
+    name: Playwright · E2E
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: quality
@@ -65,6 +77,11 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Build production
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
