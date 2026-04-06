@@ -39,7 +39,9 @@ export default function ConfirmationPage() {
     return (
       <div className="max-w-2xl mx-auto px-4 py-24 text-center">
         <h1 className="font-title text-h2 text-basalt mb-4">Aucune commande récente</h1>
-        <ButtonLink href="/catalogue" variant="primary">Voir le catalogue</ButtonLink>
+        <ButtonLink href="/catalogue" variant="primary">
+          Voir le catalogue
+        </ButtonLink>
       </div>
     );
   }
@@ -75,7 +77,9 @@ export default function ConfirmationPage() {
         <div className="bg-white rounded-xl p-5 shadow-subtle">
           <Package size={24} strokeWidth={1.5} className="text-volcanic mb-3" />
           <h3 className="font-medium text-body text-basalt mb-1">
-            {order.deliveryOption === 'store-pickup' ? 'Retrait en boutique' : 'Livraison à domicile'}
+            {order.deliveryOption === 'store-pickup'
+              ? 'Retrait en boutique'
+              : 'Livraison à domicile'}
           </h3>
           <p className="text-caption text-basalt/60">
             {order.deliveryOption === 'store-pickup' ? 'Prêt sous 24h' : 'Livraison 24-48h'}

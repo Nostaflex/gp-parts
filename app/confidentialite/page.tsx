@@ -15,26 +15,26 @@ export default function ConfidentialitePage() {
         <section>
           <h2 className="font-title text-h3 text-basalt mb-3">Responsable du traitement</h2>
           <p>
-            GP Parts SARL, Baie-Mahault (Guadeloupe), est responsable du traitement de vos
-            données personnelles collectées sur ce site.
+            GP Parts SARL, Baie-Mahault (Guadeloupe), est responsable du traitement de vos données
+            personnelles collectées sur ce site.
           </p>
         </section>
 
         <section>
           <h2 className="font-title text-h3 text-basalt mb-3">Données collectées</h2>
           <p>
-            Nous collectons uniquement les données nécessaires à la gestion de vos commandes :
-            nom, prénom, email, téléphone, adresse de livraison. Aucune donnée bancaire
-            n&apos;est stockée sur nos serveurs.
+            Nous collectons uniquement les données nécessaires à la gestion de vos commandes : nom,
+            prénom, email, téléphone, adresse de livraison. Aucune donnée bancaire n&apos;est
+            stockée sur nos serveurs.
           </p>
         </section>
 
         <section>
           <h2 className="font-title text-h3 text-basalt mb-3">Finalités</h2>
           <p>
-            Vos données sont utilisées pour traiter vos commandes, vous livrer, assurer le
-            service client, et — uniquement avec votre consentement explicite — vous envoyer
-            nos offres commerciales.
+            Vos données sont utilisées pour traiter vos commandes, vous livrer, assurer le service
+            client, et — uniquement avec votre consentement explicite — vous envoyer nos offres
+            commerciales.
           </p>
         </section>
 
@@ -42,8 +42,8 @@ export default function ConfidentialitePage() {
           <h2 className="font-title text-h3 text-basalt mb-3">Durée de conservation</h2>
           <p>
             Les données de commande sont conservées 5 ans à des fins comptables et légales. Les
-            données marketing sont conservées 3 ans après le dernier contact, ou jusqu&apos;à
-            votre opposition.
+            données marketing sont conservées 3 ans après le dernier contact, ou jusqu&apos;à votre
+            opposition.
           </p>
         </section>
 
@@ -51,8 +51,8 @@ export default function ConfidentialitePage() {
           <h2 className="font-title text-h3 text-basalt mb-3">Vos droits</h2>
           <p>
             Conformément au RGPD, vous disposez d&apos;un droit d&apos;accès, de rectification,
-            d&apos;effacement, de limitation, de portabilité et d&apos;opposition concernant
-            vos données. Pour exercer ces droits, contactez-nous à privacy@gpparts.gp.
+            d&apos;effacement, de limitation, de portabilité et d&apos;opposition concernant vos
+            données. Pour exercer ces droits, contactez-nous à privacy@gpparts.gp.
           </p>
         </section>
 

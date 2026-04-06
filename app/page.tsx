@@ -24,7 +24,8 @@ export default function HomePage() {
               <span className="text-volcanic">QUALITÉ</span> ORIGINALE
             </h1>
             <p className="text-body-lg text-basalt/70 mb-8 max-w-lg">
-              Auto · Moto · Livraison 24h partout en Guadeloupe. Qualité garantie, prix transparents.
+              Auto · Moto · Livraison 24h partout en Guadeloupe. Qualité garantie, prix
+              transparents.
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
               <ButtonLink href="/catalogue" variant="primary" size="lg">
@@ -85,7 +86,7 @@ export default function HomePage() {
               {
                 icon: <Clock size={28} strokeWidth={1.5} />,
                 title: 'Support réactif',
-                desc: 'Notre équipe vous répond en moins d\'une heure',
+                desc: "Notre équipe vous répond en moins d'une heure",
               },
             ].map((b) => (
               <div key={b.title} className="flex items-start gap-4">
@@ -128,7 +129,12 @@ export default function HomePage() {
             <h2 className="font-title text-h2 text-basalt mb-2">Produits vedettes</h2>
             <p className="text-body text-basalt/70">Sélection des pièces les plus demandées</p>
           </div>
-          <ButtonLink href="/catalogue" variant="outline" size="sm" className="hidden sm:inline-flex">
+          <ButtonLink
+            href="/catalogue"
+            variant="outline"
+            size="sm"
+            className="hidden sm:inline-flex"
+          >
             Tout voir <ArrowRight size={16} />
           </ButtonLink>
         </div>

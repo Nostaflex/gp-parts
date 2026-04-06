@@ -65,10 +65,7 @@ export function Button({
   ...props
 }: ButtonProps) {
   return (
-    <button
-      className={buttonClasses({ variant, size, fullWidth, className })}
-      {...props}
-    >
+    <button className={buttonClasses({ variant, size, fullWidth, className })} {...props}>
       {children}
     </button>
   );
@@ -96,10 +93,7 @@ export function ButtonLink({
   ...linkProps
 }: ButtonLinkProps) {
   return (
-    <Link
-      className={buttonClasses({ variant, size, fullWidth, className })}
-      {...linkProps}
-    >
+    <Link className={buttonClasses({ variant, size, fullWidth, className })} {...linkProps}>
       {children}
     </Link>
   );

@@ -72,16 +72,16 @@ gpparts/
 
 Palette inspirée des volcans et des eaux caribéennes de la Guadeloupe.
 
-| Token | Valeur | Usage |
-|---|---|---|
-| `cream` | `#F8F7F4` | Fond principal |
-| `ivory` | `#F5F0EB` | Cartes, sections alternées |
-| `lin` | `#E5DDD3` | Bordures, séparateurs |
-| `volcanic` | `#FF4D00` | Accent principal, prix, CTA |
-| `caribbean` | `#00B996` | Succès, stock dispo |
-| `basalt` | `#12100E` | Texte, navigation |
-| `error` | `#DC2626` | Erreurs |
-| `warning` | `#D97706` | Stock faible, alertes |
+| Token       | Valeur    | Usage                       |
+| ----------- | --------- | --------------------------- |
+| `cream`     | `#F8F7F4` | Fond principal              |
+| `ivory`     | `#F5F0EB` | Cartes, sections alternées  |
+| `lin`       | `#E5DDD3` | Bordures, séparateurs       |
+| `volcanic`  | `#FF4D00` | Accent principal, prix, CTA |
+| `caribbean` | `#00B996` | Succès, stock dispo         |
+| `basalt`    | `#12100E` | Texte, navigation           |
+| `error`     | `#DC2626` | Erreurs                     |
+| `warning`   | `#D97706` | Stock faible, alertes       |
 
 **Règle WCAG importante** : le volcanic (#FF4D00) sur cream a un contraste de 3.7:1. Il doit donc être utilisé uniquement sur du texte ≥ 20px bold (`text-h4` minimum) pour respecter les critères "large text" de WCAG AA.
 
@@ -108,6 +108,7 @@ p({
 ```
 
 **Règles importantes** :
+
 - Les prix sont **toujours en centimes** (entiers) pour éviter les erreurs d'arrondi.
 - `stock: 0` rend le produit indisponible à l'achat.
 - `stock: 1-5` affiche "Stock faible" en orange.
@@ -124,6 +125,7 @@ p({
 ## Fonctionnalités implémentées
 
 ### Front (tunnel de commande)
+
 - Page d'accueil avec hero, catégories, produits vedettes, promotions
 - Catalogue avec filtres : type de véhicule (auto/moto), catégorie, recherche texte
 - Fiche produit avec compatibilité véhicule, JSON-LD Schema.org
@@ -134,12 +136,14 @@ p({
 - **Paiement simulé** — pas de collecte de carte bancaire
 
 ### Back office
+
 - Tableau de bord avec KPIs (total produits, stock faible, promos, valeur stock)
 - Alerte stock faible
 - Table produits avec recherche et filtres
 - (Lecture seule dans la version statique)
 
 ### RGPD & légal
+
 - Bannière cookies avec 3 catégories (essentiels, analytiques, marketing)
 - Consentement persisté en localStorage avec timestamp
 - 4 pages légales (mentions, CGV, confidentialité, cookies)
@@ -165,5 +169,7 @@ La version statique est un MVP de démonstration. Pour passer en production, les
 ---
 
 Mode démo — aucun paiement réel, aucune donnée persistée au-delà du localStorage du navigateur.
+
 # retest
+
 # retest

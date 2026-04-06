@@ -13,10 +13,12 @@ export default function CookiesPage() {
 
       <div className="space-y-8 text-body text-basalt/80">
         <section>
-          <h2 className="font-title text-h3 text-basalt mb-3">Qu&apos;est-ce qu&apos;un cookie ?</h2>
+          <h2 className="font-title text-h3 text-basalt mb-3">
+            Qu&apos;est-ce qu&apos;un cookie ?
+          </h2>
           <p>
-            Un cookie est un petit fichier texte déposé sur votre appareil lors de votre visite
-            sur un site web. Il permet de mémoriser certaines informations pour faciliter votre
+            Un cookie est un petit fichier texte déposé sur votre appareil lors de votre visite sur
+            un site web. Il permet de mémoriser certaines informations pour faciliter votre
             navigation ou mesurer l&apos;audience.
           </p>
         </section>
@@ -24,8 +26,8 @@ export default function CookiesPage() {
         <section>
           <h2 className="font-title text-h3 text-basalt mb-3">Cookies essentiels</h2>
           <p>
-            Ces cookies sont indispensables au fonctionnement du site : gestion du panier,
-            session, sécurité. Ils ne peuvent pas être désactivés.
+            Ces cookies sont indispensables au fonctionnement du site : gestion du panier, session,
+            sécurité. Ils ne peuvent pas être désactivés.
           </p>
         </section>
 
@@ -40,16 +42,16 @@ export default function CookiesPage() {
         <section>
           <h2 className="font-title text-h3 text-basalt mb-3">Cookies marketing</h2>
           <p>
-            Avec votre consentement, nous pouvons utiliser des cookies pour personnaliser nos
-            offres et mesurer l&apos;efficacité de nos campagnes.
+            Avec votre consentement, nous pouvons utiliser des cookies pour personnaliser nos offres
+            et mesurer l&apos;efficacité de nos campagnes.
           </p>
         </section>
 
         <section>
           <h2 className="font-title text-h3 text-basalt mb-3">Gérer mes préférences</h2>
           <p>
-            Vous pouvez à tout moment modifier vos préférences cookies en supprimant le cookie
-            de consentement de votre navigateur ou en nous contactant directement.
+            Vous pouvez à tout moment modifier vos préférences cookies en supprimant le cookie de
+            consentement de votre navigateur ou en nous contactant directement.
           </p>
         </section>
       </div>

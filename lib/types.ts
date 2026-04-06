@@ -14,10 +14,10 @@ export type ProductCategory =
   | 'refroidissement';
 
 export interface VehicleCompatibility {
-  brand: string;        // "Peugeot", "Renault", "Yamaha"
-  model: string;        // "208", "Clio IV", "MT-07"
-  yearFrom: number;     // 2015
-  yearTo?: number;      // 2021 (undefined = toujours en production)
+  brand: string; // "Peugeot", "Renault", "Yamaha"
+  model: string; // "208", "Clio IV", "MT-07"
+  yearFrom: number; // 2015
+  yearTo?: number; // 2021 (undefined = toujours en production)
 }
 
 export type StockType = 'local' | 'precommande';
@@ -26,16 +26,16 @@ export interface Product {
   id: string;
   slug: string;
   name: string;
-  reference: string;              // Référence constructeur, ex: "REN-CLO4-DBF-001"
+  reference: string; // Référence constructeur, ex: "REN-CLO4-DBF-001"
   description: string;
-  shortDescription: string;       // Pour les cartes catalogue
-  price: number;                  // EN CENTIMES
-  priceOriginal?: number;         // Prix avant promo (centimes)
+  shortDescription: string; // Pour les cartes catalogue
+  price: number; // EN CENTIMES
+  priceOriginal?: number; // Prix avant promo (centimes)
   images: string[];
   category: ProductCategory;
   vehicleType: VehicleType;
   compatibility: VehicleCompatibility[];
-  stock: number;                  // 0 = rupture, <5 = stock bas
+  stock: number; // 0 = rupture, <5 = stock bas
 
   // v2 — Modèle hybride Scénario B (stock héros + précommande)
   // Activer ces champs quand le catalogue héros P1 est prêt.
@@ -43,19 +43,19 @@ export interface Product {
   // deliveryDays?: number;       // Jours ouvrés estimés (précommande uniquement)
 
   isPromoted: boolean;
-  createdAt: string;              // ISO date
+  createdAt: string; // ISO date
 }
 
 export interface CartItem {
-  id: string;                     // = product.id (pas de variantes sur pièces détachées)
+  id: string; // = product.id (pas de variantes sur pièces détachées)
   productId: string;
-  slug: string;                   // Pour lier vers /catalogue/[slug] depuis le panier
+  slug: string; // Pour lier vers /catalogue/[slug] depuis le panier
   name: string;
   reference: string;
-  price: number;                  // Centimes
+  price: number; // Centimes
   quantity: number;
   image: string;
-  stock: number;                  // Stock max pour limiter la quantité
+  stock: number; // Stock max pour limiter la quantité
 }
 
 export interface DeliveryOption {

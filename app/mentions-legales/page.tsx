@@ -15,9 +15,12 @@ export default function MentionsLegalesPage() {
         <section>
           <h2 className="font-title text-h3 text-basalt mb-3">Éditeur du site</h2>
           <p>
-            GP Parts SARL — Pièces détachées auto et moto en Guadeloupe.<br />
-            Adresse : Zone industrielle de Jarry, 97122 Baie-Mahault, Guadeloupe.<br />
-            SIRET : 000 000 000 00000 (à compléter).<br />
+            GP Parts SARL — Pièces détachées auto et moto en Guadeloupe.
+            <br />
+            Adresse : Zone industrielle de Jarry, 97122 Baie-Mahault, Guadeloupe.
+            <br />
+            SIRET : 000 000 000 00000 (à compléter).
+            <br />
             Email : contact@gpparts.gp — Téléphone : +590 590 00 00 00.
           </p>
         </section>
@@ -29,9 +32,7 @@ export default function MentionsLegalesPage() {
 
         <section>
           <h2 className="font-title text-h3 text-basalt mb-3">Hébergement</h2>
-          <p>
-            Ce site est hébergé sur Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, USA.
-          </p>
+          <p>Ce site est hébergé sur Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, USA.</p>
         </section>
 
         <section>
@@ -49,7 +50,8 @@ export default function MentionsLegalesPage() {
             Le traitement de vos données personnelles est décrit dans notre{' '}
             <a href="/confidentialite" className="text-volcanic underline">
               politique de confidentialité
-            </a>.
+            </a>
+            .
           </p>
         </section>
       </div>

@@ -115,7 +115,7 @@ export function CatalogueClient() {
         // Promus d'abord, puis en stock, puis rupture
         sorted.sort((a, b) => {
           if (a.isPromoted !== b.isPromoted) return a.isPromoted ? -1 : 1;
-          if ((a.stock > 0) !== (b.stock > 0)) return a.stock > 0 ? -1 : 1;
+          if (a.stock > 0 !== b.stock > 0) return a.stock > 0 ? -1 : 1;
           return 0;
         });
     }
@@ -128,7 +128,9 @@ export function CatalogueClient() {
       <nav aria-label="Fil d'Ariane" className="mb-6 text-body-sm text-basalt/60">
         <ol className="flex items-center gap-2">
           <li>
-            <Link href="/" className="hover:text-volcanic transition-colors">Accueil</Link>
+            <Link href="/" className="hover:text-volcanic transition-colors">
+              Accueil
+            </Link>
           </li>
           <li className="text-basalt/30">/</li>
           <li className="text-basalt font-medium">Catalogue</li>
@@ -192,9 +194,7 @@ export function CatalogueClient() {
             onClick={() => setVehicleType(type)}
             className={cn(
               'px-5 py-2 rounded-pill text-body-sm font-medium transition-all duration-fast',
-              vehicleType === type
-                ? 'bg-basalt text-cream'
-                : 'bg-ivory text-basalt hover:bg-lin'
+              vehicleType === type ? 'bg-basalt text-cream' : 'bg-ivory text-basalt hover:bg-lin'
             )}
           >
             {type === 'all' ? 'Tous' : type === 'auto' ? 'Auto' : 'Moto'}
@@ -209,9 +209,7 @@ export function CatalogueClient() {
           onClick={() => setCategory('all')}
           className={cn(
             'px-4 py-1.5 rounded-pill text-body-sm transition-all duration-fast',
-            category === 'all'
-              ? 'bg-volcanic text-white'
-              : 'bg-ivory text-basalt/70 hover:bg-lin'
+            category === 'all' ? 'bg-volcanic text-white' : 'bg-ivory text-basalt/70 hover:bg-lin'
           )}
         >
           Toutes catégories

@@ -4,7 +4,7 @@ import { ButtonLink } from '@/components/ui/Button';
 
 export const metadata: Metadata = {
   title: 'Mon compte',
-  description: "Espace client GP Parts — historique de commandes, adresses, préférences.",
+  description: 'Espace client GP Parts — historique de commandes, adresses, préférences.',
 };
 
 const FEATURES = [

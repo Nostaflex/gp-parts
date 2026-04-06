@@ -26,7 +26,8 @@ export function Footer() {
               <span className="text-volcanic">GP</span> PARTS
             </Link>
             <p className="text-body-sm text-cream/60 mt-4 leading-relaxed">
-              Pièces détachées auto & moto en Guadeloupe. Qualité origine, livraison rapide sur toute l&apos;île.
+              Pièces détachées auto & moto en Guadeloupe. Qualité origine, livraison rapide sur
+              toute l&apos;île.
             </p>
           </div>
 
@@ -69,8 +70,18 @@ export function Footer() {
             <h3 className="text-overline uppercase text-cream/60 mb-4">Contact</h3>
             <ul className="flex flex-col gap-3 text-body-sm text-cream/80">
               <li className="flex items-start gap-2">
-                <MapPin size={16} strokeWidth={1.75} className="mt-0.5 flex-shrink-0 text-volcanic" />
-                <span>Zone Industrielle<br />97122 Baie-Mahault<br />Guadeloupe</span>
+                <MapPin
+                  size={16}
+                  strokeWidth={1.75}
+                  className="mt-0.5 flex-shrink-0 text-volcanic"
+                />
+                <span>
+                  Zone Industrielle
+                  <br />
+                  97122 Baie-Mahault
+                  <br />
+                  Guadeloupe
+                </span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone size={16} strokeWidth={1.75} className="flex-shrink-0 text-volcanic" />
@@ -80,7 +91,10 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Mail size={16} strokeWidth={1.75} className="flex-shrink-0 text-volcanic" />
-                <a href="mailto:contact@gpparts.gp" className="hover:text-volcanic transition-colors">
+                <a
+                  href="mailto:contact@gpparts.gp"
+                  className="hover:text-volcanic transition-colors"
+                >
                   contact@gpparts.gp
                 </a>
               </li>

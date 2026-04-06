@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     locale: 'fr_FR',
     siteName: 'GP Parts',
     title: 'GP Parts — Pièces détachées auto & moto en Guadeloupe',
-    description: 'Qualité origine, livraison rapide sur toute l\'île.',
+    description: "Qualité origine, livraison rapide sur toute l'île.",
   },
   robots: {
     index: true,
@@ -61,7 +61,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={`${bigShoulders.variable} ${instrumentSans.variable} ${monoFont.variable}`}>
+    <html
+      lang="fr"
+      className={`${bigShoulders.variable} ${instrumentSans.variable} ${monoFont.variable}`}
+    >
       <body className="min-h-screen flex flex-col">
         <a href="#main" className="skip-link">
           Aller au contenu principal
