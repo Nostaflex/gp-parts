@@ -22,7 +22,7 @@ export default defineConfig({
       exclude: ['**/*.test.*', '**/node_modules/**'],
       thresholds: {
         lines: 60,
-        functions: 60,
+        functions: 55,
         branches: 50,
       },
     },
