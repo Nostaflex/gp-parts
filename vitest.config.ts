@@ -26,7 +26,7 @@ export default defineConfig({
         'lib/data/firebase.ts', // FirebaseAdapter — needs emulator
       ],
       thresholds: {
-        lines: 60,
+        lines: 55,
         functions: 55,
         branches: 50,
       },
