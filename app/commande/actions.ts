@@ -33,11 +33,8 @@ function sanitize(value: unknown): string {
   return value.trim().replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
 }
 
-function generateOrderNumber(): string {
-  const timestamp = Date.now().toString(36).toUpperCase();
-  const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-  return `GP-${timestamp}-${random}`;
-}
+// Réutilise la fonction partagée de lib/utils.ts (single source of truth)
+import { generateOrderNumber } from '@/lib/utils';
 
 export async function validateCheckout(formData: {
   firstName: string;

@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 import { ChevronRight, Truck, Shield, RefreshCw } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { AddToCartButton } from './AddToCartButton';
-import { getProductBySlug, PRODUCTS } from '@/lib/products';
+import { getAdapter } from '@/lib/data';
 import { formatPrice, getStockStatus, getStockLabel } from '@/lib/utils';
 import { getCategoryLabel } from '@/lib/categories';
 
@@ -14,11 +14,14 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  return PRODUCTS.map((p) => ({ slug: p.slug }));
+  const adapter = await getAdapter();
+  const products = await adapter.getProducts();
+  return products.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const product = getProductBySlug(params.slug);
+  const adapter = await getAdapter();
+  const product = await adapter.getProductBySlug(params.slug);
   if (!product) return { title: 'Produit introuvable' };
   return {
     title: `${product.name} — ${product.reference}`,
@@ -26,8 +29,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default function ProductPage({ params }: PageProps) {
-  const product = getProductBySlug(params.slug);
+export default async function ProductPage({ params }: PageProps) {
+  const adapter = await getAdapter();
+  const product = await adapter.getProductBySlug(params.slug);
   if (!product) notFound();
 
   const stockStatus = getStockStatus(product.stock);
