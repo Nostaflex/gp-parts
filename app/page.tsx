@@ -2,12 +2,15 @@ import Link from 'next/link';
 import { ArrowRight, Truck, Shield, Clock, Zap } from 'lucide-react';
 import { ButtonLink } from '@/components/ui/Button';
 import { ProductCard } from '@/components/products/ProductCard';
-import { getFeaturedProducts, getPromotedProducts } from '@/lib/products';
+import { getAdapter } from '@/lib/data';
 import { CATEGORIES } from '@/lib/categories';
 
-export default function HomePage() {
-  const featured = getFeaturedProducts(4);
-  const promoted = getPromotedProducts();
+export default async function HomePage() {
+  const adapter = await getAdapter();
+  const [featured, promoted] = await Promise.all([
+    adapter.getFeaturedProducts(4),
+    adapter.getPromotedProducts(),
+  ]);
 
   return (
     <>

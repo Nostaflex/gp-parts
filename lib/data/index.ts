@@ -6,7 +6,7 @@ import { StaticAdapter } from './static';
  *
  * Stratégie de sélection :
  * - NEXT_PUBLIC_USE_FIREBASE_EMULATOR=true → FirebaseAdapter (émulateur local)
- * - NEXT_PUBLIC_FIREBASE_PROJECT_ID défini → FirebaseAdapter (cloud)
+ * - NEXT_PUBLIC_FIREBASE_PROJECT_ID défini (et pas demo-gp-parts) → FirebaseAdapter (cloud)
  * - Sinon → StaticAdapter (données en mémoire, défaut)
  *
  * Le switch est transparent : tous les composants appellent getAdapter()
@@ -15,26 +15,27 @@ import { StaticAdapter } from './static';
 let adapterInstance: DataAdapter | null = null;
 
 /**
- * Get the current DataAdapter instance (singleton pattern)
+ * Get the current DataAdapter instance (singleton pattern).
+ *
+ * Utilise un import() dynamique pour FirebaseAdapter afin de ne charger
+ * le SDK Firebase qu'en cas de besoin (tree-shaking friendly).
  */
-export function getAdapter(): DataAdapter {
-  if (!adapterInstance) {
-    const useFirebase =
-      process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true' ||
-      (process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID &&
-        process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID !== 'demo-gp-parts');
+export async function getAdapter(): Promise<DataAdapter> {
+  if (adapterInstance) return adapterInstance;
 
-    if (useFirebase) {
-      // Import dynamique pour ne pas charger Firebase si on ne l'utilise pas
-      // eslint-disable-next-line
-      const { FirebaseAdapter } = require('./firebase');
-      adapterInstance = new FirebaseAdapter();
-    } else {
-      adapterInstance = new StaticAdapter();
-    }
+  const useFirebase =
+    process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true' ||
+    (process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID &&
+      process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID !== 'demo-gp-parts');
+
+  if (useFirebase) {
+    const { FirebaseAdapter } = await import('./firebase');
+    adapterInstance = new FirebaseAdapter();
+  } else {
+    adapterInstance = new StaticAdapter();
   }
-  // adapterInstance is guaranteed non-null after the if block above
-  return adapterInstance!;
+
+  return adapterInstance;
 }
 
 /**
@@ -55,4 +56,5 @@ export function resetAdapter(): void {
 // Re-export types for convenience
 export type { DataAdapter, ProductFilters } from './types';
 export { StaticAdapter } from './static';
-export { FirebaseAdapter } from './firebase';
+// FirebaseAdapter is NOT re-exported statically to avoid eager loading.
+// Use: const { FirebaseAdapter } = await import('@/lib/data/firebase');

@@ -11,6 +11,7 @@ import {
 import { db } from '@/lib/firebase';
 import type { Product, ProductCategory } from '@/lib/types';
 import type { DataAdapter, ProductFilters } from './types';
+import { applyClientFilters } from './filters';
 
 /**
  * FirebaseAdapter — Implements DataAdapter using Firestore.
@@ -26,6 +27,9 @@ export class FirebaseAdapter implements DataAdapter {
 
   /**
    * Convertit un document Firestore en Product typé.
+   *
+   * TODO Phase 4 : remplacer les `as` par un parser Zod pour valider
+   * les données à l'exécution et attraper les corruptions Firestore.
    */
   private docToProduct(docSnap: { id: string; data: () => Record<string, unknown> }): Product {
     const data = docSnap.data();
@@ -55,55 +59,28 @@ export class FirebaseAdapter implements DataAdapter {
     // Acceptable pour < 200 produits. Phase 7+ : Algolia pour search avancé.
 
     let products: Product[];
+    const skipped = new Set<keyof ProductFilters>();
 
     if (filters?.category && !filters?.search && !filters?.minPrice && !filters?.maxPrice) {
       // Cas optimisé : filtre simple par catégorie (query Firestore)
       const q = query(this.productsRef, where('category', '==', filters.category));
       const snapshot = await getDocs(q);
       products = snapshot.docs.map((d) => this.docToProduct(d));
+      skipped.add('category');
     } else if (filters?.vehicleType && !filters?.search) {
       // Cas optimisé : filtre par type de véhicule
       const q = query(this.productsRef, where('vehicleType', '==', filters.vehicleType));
       const snapshot = await getDocs(q);
       products = snapshot.docs.map((d) => this.docToProduct(d));
+      skipped.add('vehicleType');
     } else {
       // Cas général : récupère tout et filtre en mémoire
       const snapshot = await getDocs(this.productsRef);
       products = snapshot.docs.map((d) => this.docToProduct(d));
     }
 
-    // Filtres client-side pour les cas non couverts par Firestore
-    if (filters?.category && (filters?.search || filters?.minPrice || filters?.maxPrice)) {
-      products = products.filter((p) => p.category === filters.category);
-    }
-
-    if (filters?.vehicleType && filters?.search) {
-      products = products.filter((p) => p.vehicleType === filters.vehicleType);
-    }
-
-    if (filters?.search) {
-      const q = filters.search.toLowerCase();
-      products = products.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.reference.toLowerCase().includes(q) ||
-          p.shortDescription.toLowerCase().includes(q)
-      );
-    }
-
-    if (filters?.minPrice !== undefined) {
-      products = products.filter((p) => p.price >= filters.minPrice!);
-    }
-
-    if (filters?.maxPrice !== undefined) {
-      products = products.filter((p) => p.price <= filters.maxPrice!);
-    }
-
-    if (filters?.inStock) {
-      products = products.filter((p) => p.stock > 0);
-    }
-
-    return products;
+    // Filtres client-side via la fonction partagée
+    return applyClientFilters(products, filters, skipped);
   }
 
   async getProductBySlug(slug: string): Promise<Product | null> {

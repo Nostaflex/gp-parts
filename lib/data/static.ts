@@ -1,6 +1,7 @@
 import type { Product } from '@/lib/types';
 import { PRODUCTS } from '@/lib/products';
 import type { DataAdapter, ProductFilters } from './types';
+import { applyClientFilters } from './filters';
 
 /**
  * StaticAdapter — Implements DataAdapter using in-memory PRODUCTS array
@@ -12,39 +13,7 @@ export class StaticAdapter implements DataAdapter {
    * Get all products, optionally filtered by various criteria
    */
   async getProducts(filters?: ProductFilters): Promise<Product[]> {
-    let results = [...PRODUCTS];
-
-    if (filters?.category) {
-      results = results.filter((p) => p.category === filters.category);
-    }
-
-    if (filters?.vehicleType) {
-      results = results.filter((p) => p.vehicleType === filters.vehicleType);
-    }
-
-    if (filters?.search) {
-      const query = filters.search.toLowerCase();
-      results = results.filter(
-        (p) =>
-          p.name.toLowerCase().includes(query) ||
-          p.reference.toLowerCase().includes(query) ||
-          p.shortDescription.toLowerCase().includes(query)
-      );
-    }
-
-    if (filters?.minPrice !== undefined) {
-      results = results.filter((p) => p.price >= filters.minPrice!);
-    }
-
-    if (filters?.maxPrice !== undefined) {
-      results = results.filter((p) => p.price <= filters.maxPrice!);
-    }
-
-    if (filters?.inStock) {
-      results = results.filter((p) => p.stock > 0);
-    }
-
-    return results;
+    return applyClientFilters([...PRODUCTS], filters);
   }
 
   /**
