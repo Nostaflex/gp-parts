@@ -36,5 +36,6 @@ export const productSchema = z.object({
 });
 
 export function parseProduct(data: unknown): Product {
-  return productSchema.parse(data) as Product;
+  // productSchema mirrors Product exactly — Zod infers structurally identical types
+  return productSchema.parse(data);
 }

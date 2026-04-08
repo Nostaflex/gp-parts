@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { getAdapter } from '@/lib/data';
 import Link from 'next/link';
 import { Package, TrendingUp, AlertTriangle, Euro, Search, Tag, Edit3, Eye } from 'lucide-react';
 import { adminSignOut } from '@/lib/auth';
@@ -14,15 +15,22 @@ import { LOW_STOCK_THRESHOLD } from '@/lib/config';
 import { getCategoryLabel } from '@/lib/categories';
 import type { Product } from '@/lib/types';
 
-interface AdminDashboardClientProps {
-  products: Product[];
-}
-
-export function AdminDashboardClient({ products }: AdminDashboardClientProps) {
+export function AdminDashboardClient() {
   const router = useRouter();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'low-stock' | 'promo'>('all');
   const { showToast } = useToast();
+
+  useEffect(() => {
+    getAdapter()
+      .then((adapter) => adapter.getProducts())
+      .then((data) => {
+        setProducts(data);
+        setLoading(false);
+      });
+  }, []);
 
   const notifyDemo = (label: string) =>
     showToast({
@@ -90,6 +98,14 @@ export function AdminDashboardClient({ products }: AdminDashboardClientProps) {
       accent: 'text-basalt',
     },
   ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-body text-basalt/60">Chargement du catalogue...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

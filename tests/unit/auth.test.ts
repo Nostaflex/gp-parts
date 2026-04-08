@@ -14,8 +14,8 @@ vi.mock('@/lib/firebase', () => ({
   auth: {},
 }));
 
-import { adminSignIn, adminSignOut } from '@/lib/auth';
-import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { adminSignIn, adminSignOut, onAuthChange } from '@/lib/auth';
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
 
 describe('auth helpers', () => {
   it('adminSignIn calls signInWithEmailAndPassword', async () => {
@@ -32,5 +32,17 @@ describe('auth helpers', () => {
 
     await adminSignOut();
     expect(mockSignOut).toHaveBeenCalled();
+  });
+
+  it('onAuthChange subscribes and returns unsubscribe function', () => {
+    const unsubscribeMock = vi.fn();
+    const mockOnAuthStateChanged = vi.mocked(onAuthStateChanged);
+    mockOnAuthStateChanged.mockReturnValueOnce(unsubscribeMock);
+
+    const callback = vi.fn();
+    const unsubscribe = onAuthChange(callback);
+
+    expect(mockOnAuthStateChanged).toHaveBeenCalledWith(expect.anything(), callback);
+    expect(unsubscribe).toBe(unsubscribeMock);
   });
 });

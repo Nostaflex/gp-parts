@@ -22,12 +22,16 @@ Repo: github.com/Nostaflex/gp-parts (private) · Prod: gp-parts.vercel.app
 
 ---
 
-## Two Design Systems — NEVER MIX
+## Two Design Systems — NEVER MIX (in new code)
 
-| Route | System | Tokens |
-|---|---|---|
-| `app/` (storefront) | Volcanic Clarity | `bg-cream` `text-volcanic` `border-lin` `bg-ivory` `text-basalt` |
-| `app/admin/` (back-office) | iOS Clarity | `var(--blue)` `var(--bg)` `var(--surface)` `var(--text)` |
+> **Exception documentée :** `app/admin/AdminDashboardClient.tsx` utilise Volcanic Clarity
+> (héritage Phase 1-2, décision intentionnelle pour cohérence visuelle). Cette dette sera
+> soldée en Phase 4.5. Ne pas reproduire ce mélange dans de nouveaux composants admin.
+
+| Route                      | System           | Tokens                                                           |
+| -------------------------- | ---------------- | ---------------------------------------------------------------- |
+| `app/` (storefront)        | Volcanic Clarity | `bg-cream` `text-volcanic` `border-lin` `bg-ivory` `text-basalt` |
+| `app/admin/` (back-office) | iOS Clarity      | `var(--blue)` `var(--bg)` `var(--surface)` `var(--text)`         |
 
 Using Volcanic Clarity tokens inside `app/admin/` or iOS Clarity tokens in the storefront is a **critical violation**.
 
@@ -79,18 +83,22 @@ router.push('/commande/confirmation'); // never reached
 ## Conventions
 
 ### Prices
+
 Always stored as **integers in centimes**. Use `formatPrice()` for display.
+
 ```ts
 // ✅
 const price = 2990; // 29,90 €
-formatPrice(price);  // → "29,90 €"
+formatPrice(price); // → "29,90 €"
 
 // ❌
-const price = 29.90; // floating point errors
+const price = 29.9; // floating point errors
 ```
 
 ### localStorage keys
+
 All keys must be prefixed `gpparts-`.
+
 ```ts
 // ✅
 localStorage.setItem('gpparts-cart', ...);
@@ -100,18 +108,21 @@ localStorage.setItem('cart', ...); // collision risk
 ```
 
 ### Tax
+
 VAT rate for Guadeloupe (971): `VAT_RATE = 0.085` declared in `lib/config.ts`.
 
 ### Import order
+
 ```ts
-import { useState } from 'react';           // 1. React
+import { useState } from 'react'; // 1. React
 import { useRouter } from 'next/navigation'; // 2. Next.js
-import { formatPrice } from '@/lib/utils';  // 3. Internal lib
+import { formatPrice } from '@/lib/utils'; // 3. Internal lib
 import { Button } from '@/components/ui/Button'; // 4. Components
 import type { Product } from '@/lib/types'; // 5. Types (always last)
 ```
 
 ### Autocomplete on all form inputs
+
 ```tsx
 <input name="firstName" autoComplete="given-name" />
 <input name="email" autoComplete="email" type="email" />
@@ -122,26 +133,44 @@ import type { Product } from '@/lib/types'; // 5. Types (always last)
 
 ## Architecture Decisions (ADRs)
 
-| ADR | Decision | Status |
-|---|---|---|
-| 001 | Firebase Firestore (plan Spark, free) | Decided |
+| ADR | Decision                                                               | Status       |
+| --- | ---------------------------------------------------------------------- | ------------ |
+| 001 | Firebase Firestore (plan Spark, free)                                  | Decided      |
 | 002 | Data Adapter pattern: StaticAdapter now → FirebaseAdapter in Phase 3-4 | Implementing |
-| 003 | Vercel Hobby (free), auto-deploy from `main` | Active |
-| 004 | Basic Auth middleware (v1) → Firebase Auth in Phase 4 | v1 active |
+| 003 | Vercel Hobby (free), auto-deploy from `main`                           | Active       |
+| 004 | Basic Auth middleware (v1) → Firebase Auth in Phase 4                  | v1 active    |
 
 **Never call Firebase directly from components or pages — always go through the Data Adapter interface.**
 
 ---
 
-## Current Roadmap Phase: Phase 2 — Tests
+## Completed Phases
 
-Do not start Phase N+1 until Phase N Definition of Done is met and CI is green.
+| Phase                     | Scope                                                                                          | PR(s)          | Status  |
+| ------------------------- | ---------------------------------------------------------------------------------------------- | -------------- | ------- |
+| 1 — MVP                   | Storefront, catalogue, panier, checkout, admin Basic Auth                                      | Initial commit | ✅ Done |
+| 2 — Tests                 | 111 Vitest unit + 17 Playwright E2E, CI (lint/typecheck/build/tests+coverage)                  | #2 #3 #4       | ✅ Done |
+| 3 — Firebase              | Firestore emulator, FirebaseAdapter, Data Adapter pattern, audit qualité (10 fixes + 36 tests) | #5 #6 #7       | ✅ Done |
+| 4 — Firebase Cloud + Auth | Firebase Auth login, Zod validation, SSR fix, seeder cloud, Auth emulator                      | #8 (PR)        | ✅ Done |
 
-Phase 2 remaining:
-- [ ] 3 Playwright E2E anti-regression tests (one per known bug)
-- [ ] Admin smoke test (login → dashboard → orders)
-- [ ] Vitest unit tests for `lib/` (formatPrice, slugify, generateOrderId)
-- [ ] `npm run test:unit` added to CI workflow
+## Current Roadmap Phase: Phase 4.5 — Solde dette technique
+
+Phase 4 est terminée (Firebase Auth + Zod + seeder cloud).
+Phase 4.5 solde la dette avant Phase 5. Ne pas passer à Phase 5 avant.
+
+Phase 4.5 scope :
+
+- [ ] **Design system admin** — réécrire `AdminDashboardClient.tsx` en iOS Clarity pur (`var(--*)`) — supprimer tous les tokens Volcanic Clarity du back-office
+- [ ] **Auth SSR** — implémenter session cookie Firebase (`/api/sessionLogin`) + vérification middleware pour protéger `/admin/*` côté serveur (Phase 4 = guard client-side uniquement)
+- [ ] **E2E admin** — valider les tests Playwright avec l'émulateur Auth connecté (port 9099)
+- [ ] **Seed validation** — `parseProduct()` avant chaque `batch.set()` dans le seeder cloud
+- [ ] **WHATSAPP_NUMBER** — remplacer le placeholder `590XXXXXXXXX` dans `lib/config.ts`
+
+Phase 5 (après 4.5 verte) :
+
+- Emails transactionnels (Resend)
+- Gestion commandes Firestore (CRUD admin)
+- Statuts commandes + notifications
 
 ---
 

@@ -108,7 +108,9 @@ export class FirebaseAdapter implements DataAdapter {
     // Pour un petit catalogue (< 200 produits), on récupère tous les produits
     // et on extrait les catégories. Phase 4+ : utiliser un doc metadata/categories.
     const snapshot = await getDocs(this.productsRef);
-    const categories = new Set(snapshot.docs.map((d) => d.data().category as string));
+    const categories = new Set(
+      snapshot.docs.map((d) => parseProduct({ ...d.data(), id: d.id }).category)
+    );
     return Array.from(categories).sort();
   }
 
@@ -116,9 +118,8 @@ export class FirebaseAdapter implements DataAdapter {
     const snapshot = await getDocs(this.productsRef);
     const brands = new Set<string>();
     snapshot.docs.forEach((d) => {
-      const data = d.data();
-      const compatibility = data.compatibility as Product['compatibility'];
-      compatibility?.forEach((compat) => brands.add(compat.brand));
+      const product = parseProduct({ ...d.data(), id: d.id });
+      product.compatibility.forEach((compat) => brands.add(compat.brand));
     });
     return Array.from(brands).sort();
   }
