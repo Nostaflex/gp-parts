@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // Mock Firebase Auth before import
 vi.mock('firebase/auth', () => ({
@@ -14,23 +14,41 @@ vi.mock('@/lib/firebase', () => ({
   auth: {},
 }));
 
+// Mock fetch pour les appels /api/sessionLogin et /api/sessionLogout
+const mockFetch = vi.fn();
+vi.stubGlobal('fetch', mockFetch);
+
 import { adminSignIn, adminSignOut, onAuthChange } from '@/lib/auth';
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth';
 
 describe('auth helpers', () => {
-  it('adminSignIn calls signInWithEmailAndPassword', async () => {
-    const mockSignIn = vi.mocked(signInWithEmailAndPassword);
-    mockSignIn.mockResolvedValueOnce({ user: { uid: '123' } } as never);
-
-    await adminSignIn('admin@gp-parts.com', 'password');
-    expect(mockSignIn).toHaveBeenCalledWith(expect.anything(), 'admin@gp-parts.com', 'password');
+  beforeEach(() => {
+    mockFetch.mockResolvedValue({ ok: true });
   });
 
-  it('adminSignOut calls signOut', async () => {
+  it('adminSignIn calls signInWithEmailAndPassword et crée le session cookie', async () => {
+    const mockUser = { uid: '123', getIdToken: vi.fn().mockResolvedValue('fake-id-token') };
+    const mockSignIn = vi.mocked(signInWithEmailAndPassword);
+    mockSignIn.mockResolvedValueOnce({ user: mockUser } as never);
+
+    const user = await adminSignIn('admin@gp-parts.com', 'password');
+
+    expect(mockSignIn).toHaveBeenCalledWith(expect.anything(), 'admin@gp-parts.com', 'password');
+    expect(mockUser.getIdToken).toHaveBeenCalled();
+    expect(mockFetch).toHaveBeenCalledWith(
+      '/api/sessionLogin',
+      expect.objectContaining({ method: 'POST' })
+    );
+    expect(user).toBe(mockUser);
+  });
+
+  it('adminSignOut appelle sessionLogout puis signOut Firebase', async () => {
     const mockSignOut = vi.mocked(signOut);
     mockSignOut.mockResolvedValueOnce(undefined);
 
     await adminSignOut();
+
+    expect(mockFetch).toHaveBeenCalledWith('/api/sessionLogout', { method: 'POST' });
     expect(mockSignOut).toHaveBeenCalled();
   });
 

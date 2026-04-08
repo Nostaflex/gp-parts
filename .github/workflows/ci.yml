@@ -62,8 +62,18 @@ jobs:
   e2e:
     name: Playwright · E2E
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     needs: quality
+
+    env:
+      # Identifiants de l'utilisateur test (valeurs fixes — émulateur local uniquement)
+      TEST_ADMIN_EMAIL: admin-test@gp-parts.local
+      TEST_ADMIN_PASSWORD: test-password-e2e
+      # Émulateurs Firebase
+      NEXT_PUBLIC_FIREBASE_PROJECT_ID: demo-gp-parts
+      NEXT_PUBLIC_USE_FIREBASE_EMULATOR: 'true'
+      FIREBASE_AUTH_EMULATOR_HOST: '127.0.0.1:9099'
+      FIRESTORE_EMULATOR_HOST: '127.0.0.1:8080'
 
     steps:
       - name: Checkout
@@ -78,6 +88,26 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Java (requis par Firebase emulators)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Start Firebase emulators (Auth + Firestore)
+        run: npx firebase emulators:start --only auth,firestore --project demo-gp-parts &
+
+      - name: Attendre que les émulateurs soient prêts
+        run: |
+          echo "Waiting for Auth emulator (port 9099)..."
+          timeout 30 bash -c 'until curl -s http://127.0.0.1:9099 > /dev/null; do sleep 1; done'
+          echo "Waiting for Firestore emulator (port 8080)..."
+          timeout 30 bash -c 'until curl -s http://127.0.0.1:8080 > /dev/null; do sleep 1; done'
+          echo "Emulators ready."
+
+      - name: Seed utilisateur admin test dans l'émulateur Auth
+        run: npx tsx scripts/seed-auth-emulator.ts
+
       - name: Build production
         run: npm run build
         env:
@@ -91,8 +121,6 @@ jobs:
         env:
           CI: 'true'
           NEXT_TELEMETRY_DISABLED: '1'
-          ADMIN_USER: ${{ secrets.ADMIN_USER }}
-          ADMIN_PASS: ${{ secrets.ADMIN_PASS }}
 
       - name: Upload Playwright report
         if: always()

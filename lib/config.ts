@@ -23,7 +23,8 @@ export const LOW_STOCK_THRESHOLD = 5;
 export const ORDER_PREFIX = 'GP';
 
 // --- Contact ---
-export const WHATSAPP_NUMBER = '590XXXXXXXXX'; // À remplacer par le vrai numéro
+// Configurer NEXT_PUBLIC_WHATSAPP_NUMBER dans .env.local (ex: 590123456789)
+export const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '590000000000';
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
 
 // --- localStorage keys ---

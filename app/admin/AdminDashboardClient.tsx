@@ -10,10 +10,29 @@ import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
-import { formatPrice, getStockStatus, getStockLabel, cn } from '@/lib/utils';
+import { formatPrice, getStockStatus, getStockLabel } from '@/lib/utils';
 import { LOW_STOCK_THRESHOLD } from '@/lib/config';
 import { getCategoryLabel } from '@/lib/categories';
 import type { Product } from '@/lib/types';
+
+// iOS Clarity — palette du back-office (var(--*) définis dans globals.css)
+const IOS = {
+  bg: 'var(--bg)',
+  surface: 'var(--surface)',
+  text: 'var(--text)',
+  blue: 'var(--blue)',
+  border: 'var(--border)',
+  textMuted: 'rgba(28, 28, 30, 0.6)',
+  textSubtle: 'rgba(28, 28, 30, 0.5)',
+  textGhost: 'rgba(28, 28, 30, 0.2)',
+  borderFaint: 'rgba(198, 198, 200, 0.5)',
+  bgHover: 'rgba(242, 242, 247, 0.8)',
+  // Couleurs sémantiques équivalentes iOS
+  warning: '#FF9500',
+  warningBg: 'rgba(255, 149, 0, 0.1)',
+  warningBorder: 'rgba(255, 149, 0, 0.3)',
+  success: '#34C759',
+} as const;
 
 export function AdminDashboardClient() {
   const router = useRouter();
@@ -38,7 +57,7 @@ export function AdminDashboardClient() {
       message: `"${label}" disponible en v2 (Firestore). Mode démo en lecture seule.`,
     });
 
-  // KPIs calculés dynamiquement à partir des données reçues du serveur
+  // KPIs calculés côté client à partir des données Firestore
   const { totalProducts, lowStockCount, outOfStockCount, promoCount, stockValue } = useMemo(() => {
     let low = 0;
     let out = 0;
@@ -73,36 +92,18 @@ export function AdminDashboardClient() {
   }, [products, search, filter]);
 
   const kpis = [
-    {
-      label: 'Produits en catalogue',
-      value: totalProducts,
-      icon: Package,
-      accent: 'text-volcanic',
-    },
-    {
-      label: 'Stock faible',
-      value: lowStockCount,
-      icon: AlertTriangle,
-      accent: 'text-warning',
-    },
-    {
-      label: 'En promotion',
-      value: promoCount,
-      icon: Tag,
-      accent: 'text-caribbean',
-    },
-    {
-      label: 'Valeur du stock',
-      value: formatPrice(stockValue),
-      icon: Euro,
-      accent: 'text-basalt',
-    },
+    { label: 'Produits en catalogue', value: totalProducts, icon: Package, accentColor: IOS.blue },
+    { label: 'Stock faible', value: lowStockCount, icon: AlertTriangle, accentColor: IOS.warning },
+    { label: 'En promotion', value: promoCount, icon: Tag, accentColor: IOS.success },
+    { label: 'Valeur du stock', value: formatPrice(stockValue), icon: Euro, accentColor: IOS.text },
   ];
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-body text-basalt/60">Chargement du catalogue...</p>
+        <p className="text-body" style={{ color: IOS.textMuted }}>
+          Chargement du catalogue...
+        </p>
       </div>
     );
   }
@@ -112,9 +113,15 @@ export function AdminDashboardClient() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
         <div>
-          <p className="text-overline uppercase text-basalt/50 mb-1">Back office</p>
-          <h1 className="font-title text-h1 text-basalt">Tableau de bord</h1>
-          <p className="text-body text-basalt/60 mt-2">Gestion du stock et des promotions</p>
+          <p className="text-overline uppercase mb-1" style={{ color: IOS.textSubtle }}>
+            Back office
+          </p>
+          <h1 className="font-title text-h1" style={{ color: IOS.text }}>
+            Tableau de bord
+          </h1>
+          <p className="text-body mt-2" style={{ color: IOS.textMuted }}>
+            Gestion du stock et des promotions
+          </p>
         </div>
         <div className="flex gap-2">
           <button
@@ -125,7 +132,7 @@ export function AdminDashboardClient() {
             }}
             style={{
               background: 'transparent',
-              border: '1px solid var(--border, #ddd)',
+              border: '1px solid var(--border)',
               borderRadius: '8px',
               padding: '0.5rem 1rem',
               cursor: 'pointer',
@@ -150,13 +157,21 @@ export function AdminDashboardClient() {
           return (
             <div
               key={kpi.label}
-              className="bg-white rounded-2xl p-5 shadow-subtle border border-lin/50"
+              className="rounded-2xl p-5 shadow-subtle"
+              style={{
+                background: IOS.surface,
+                border: `1px solid ${IOS.borderFaint}`,
+              }}
             >
               <div className="flex items-start justify-between mb-3">
-                <Icon size={22} strokeWidth={1.75} className={kpi.accent} />
+                <Icon size={22} strokeWidth={1.75} style={{ color: kpi.accentColor }} />
               </div>
-              <p className="font-title text-h2 text-basalt mb-1">{kpi.value}</p>
-              <p className="text-caption text-basalt/60">{kpi.label}</p>
+              <p className="font-title text-h2 mb-1" style={{ color: IOS.text }}>
+                {kpi.value}
+              </p>
+              <p className="text-caption" style={{ color: IOS.textMuted }}>
+                {kpi.label}
+              </p>
             </div>
           );
         })}
@@ -164,15 +179,24 @@ export function AdminDashboardClient() {
 
       {/* Alerte stock faible */}
       {(lowStockCount > 0 || outOfStockCount > 0) && (
-        <div className="bg-warning/10 border border-warning/30 rounded-xl p-4 mb-8 flex items-start gap-3">
+        <div
+          className="rounded-xl p-4 mb-8 flex items-start gap-3"
+          style={{
+            background: IOS.warningBg,
+            border: `1px solid ${IOS.warningBorder}`,
+          }}
+        >
           <AlertTriangle
             size={20}
             strokeWidth={1.75}
-            className="text-warning flex-shrink-0 mt-0.5"
+            className="flex-shrink-0 mt-0.5"
+            style={{ color: IOS.warning }}
           />
           <div className="flex-1">
-            <p className="font-medium text-body-sm text-basalt">Attention au stock</p>
-            <p className="text-caption text-basalt/70 mt-0.5">
+            <p className="font-medium text-body-sm" style={{ color: IOS.text }}>
+              Attention au stock
+            </p>
+            <p className="text-caption mt-0.5" style={{ color: IOS.textMuted }}>
               {outOfStockCount} produit{outOfStockCount > 1 ? 's' : ''} en rupture, {lowStockCount}{' '}
               produit{lowStockCount > 1 ? 's' : ''} en stock faible.
             </p>
@@ -184,7 +208,7 @@ export function AdminDashboardClient() {
       )}
 
       {/* Filtres */}
-      <div className="bg-ivory rounded-2xl p-5 mb-6">
+      <div className="rounded-2xl p-5 mb-6" style={{ background: IOS.bg }}>
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <Input
@@ -198,12 +222,16 @@ export function AdminDashboardClient() {
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={cn(
-                  'px-4 h-11 rounded-pill text-body-sm font-medium transition-all',
+                className="px-4 h-11 rounded-pill text-body-sm font-medium transition-all"
+                style={
                   filter === f
-                    ? 'bg-basalt text-cream'
-                    : 'bg-white text-basalt border border-lin hover:border-basalt/30'
-                )}
+                    ? { background: IOS.text, color: IOS.surface }
+                    : {
+                        background: IOS.surface,
+                        color: IOS.text,
+                        border: `1px solid ${IOS.border}`,
+                      }
+                }
               >
                 {f === 'all' ? 'Tous' : f === 'low-stock' ? 'Stock faible' : 'Promotions'}
               </button>
@@ -213,27 +241,51 @@ export function AdminDashboardClient() {
       </div>
 
       {/* Table produits */}
-      <div className="bg-white rounded-2xl shadow-subtle overflow-hidden border border-lin/50">
+      <div
+        className="rounded-2xl shadow-subtle overflow-hidden"
+        style={{
+          background: IOS.surface,
+          border: `1px solid ${IOS.borderFaint}`,
+        }}
+      >
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-ivory border-b border-lin">
+            <thead style={{ background: IOS.bg, borderBottom: `1px solid ${IOS.border}` }}>
               <tr>
-                <th className="text-left text-overline uppercase text-basalt/60 px-5 py-3">
+                <th
+                  className="text-left text-overline uppercase px-5 py-3"
+                  style={{ color: IOS.textMuted }}
+                >
                   Produit
                 </th>
-                <th className="text-left text-overline uppercase text-basalt/60 px-5 py-3">
+                <th
+                  className="text-left text-overline uppercase px-5 py-3"
+                  style={{ color: IOS.textMuted }}
+                >
                   Référence
                 </th>
-                <th className="text-left text-overline uppercase text-basalt/60 px-5 py-3">
+                <th
+                  className="text-left text-overline uppercase px-5 py-3"
+                  style={{ color: IOS.textMuted }}
+                >
                   Catégorie
                 </th>
-                <th className="text-right text-overline uppercase text-basalt/60 px-5 py-3">
+                <th
+                  className="text-right text-overline uppercase px-5 py-3"
+                  style={{ color: IOS.textMuted }}
+                >
                   Prix
                 </th>
-                <th className="text-center text-overline uppercase text-basalt/60 px-5 py-3">
+                <th
+                  className="text-center text-overline uppercase px-5 py-3"
+                  style={{ color: IOS.textMuted }}
+                >
                   Stock
                 </th>
-                <th className="text-right text-overline uppercase text-basalt/60 px-5 py-3">
+                <th
+                  className="text-right text-overline uppercase px-5 py-3"
+                  style={{ color: IOS.textMuted }}
+                >
                   Actions
                 </th>
               </tr>
@@ -244,15 +296,27 @@ export function AdminDashboardClient() {
                 return (
                   <tr
                     key={product.id}
-                    className="border-b border-lin/50 hover:bg-ivory/50 transition-colors"
+                    className="transition-colors"
+                    style={{ borderBottom: `1px solid ${IOS.borderFaint}` }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = IOS.bgHover;
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = '';
+                    }}
                   >
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-lin rounded-lg flex-shrink-0" />
+                        <div
+                          className="w-10 h-10 rounded-lg flex-shrink-0"
+                          style={{ background: IOS.border }}
+                        />
                         <div>
-                          <p className="font-medium text-body-sm text-basalt">{product.name}</p>
+                          <p className="font-medium text-body-sm" style={{ color: IOS.text }}>
+                            {product.name}
+                          </p>
                           {product.isPromoted && (
-                            <span className="text-caption text-volcanic font-medium">
+                            <span className="text-caption font-medium" style={{ color: IOS.blue }}>
                               En promotion
                             </span>
                           )}
@@ -260,28 +324,28 @@ export function AdminDashboardClient() {
                       </div>
                     </td>
                     <td className="px-5 py-4">
-                      <code className="font-mono text-caption text-basalt/70">
+                      <code className="font-mono text-caption" style={{ color: IOS.textMuted }}>
                         {product.reference}
                       </code>
                     </td>
                     <td className="px-5 py-4">
-                      <span className="text-body-sm text-basalt/70">
+                      <span className="text-body-sm" style={{ color: IOS.textMuted }}>
                         {getCategoryLabel(product.category)}
                       </span>
                     </td>
                     <td className="px-5 py-4 text-right">
-                      <div className="font-medium text-body-sm text-basalt">
+                      <div className="font-medium text-body-sm" style={{ color: IOS.text }}>
                         {formatPrice(product.price)}
                       </div>
                       {product.priceOriginal && (
-                        <div className="text-caption text-basalt/40 line-through">
+                        <div className="text-caption line-through" style={{ color: IOS.textGhost }}>
                           {formatPrice(product.priceOriginal)}
                         </div>
                       )}
                     </td>
                     <td className="px-5 py-4 text-center">
                       <div className="inline-flex flex-col items-center gap-1">
-                        <span className="font-medium text-body-sm text-basalt">
+                        <span className="font-medium text-body-sm" style={{ color: IOS.text }}>
                           {product.stock}
                         </span>
                         <Badge variant={status}>{getStockLabel(product.stock)}</Badge>
@@ -291,19 +355,31 @@ export function AdminDashboardClient() {
                       <div className="flex justify-end gap-1">
                         <Link
                           href={`/catalogue/${product.slug}`}
-                          className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-lin transition-colors"
+                          className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors"
                           aria-label="Voir"
+                          onMouseEnter={(e) => {
+                            (e.currentTarget as HTMLElement).style.background = IOS.bg;
+                          }}
+                          onMouseLeave={(e) => {
+                            (e.currentTarget as HTMLElement).style.background = '';
+                          }}
                         >
-                          <Eye size={16} strokeWidth={1.75} className="text-basalt/60" />
+                          <Eye size={16} strokeWidth={1.75} style={{ color: IOS.textMuted }} />
                         </Link>
                         <button
                           type="button"
                           onClick={() => notifyDemo(`Modifier ${product.name}`)}
-                          className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-lin transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-volcanic"
+                          className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--blue)] focus-visible:ring-offset-2"
                           aria-label={`Modifier ${product.name}`}
                           title="Édition disponible en v2"
+                          onMouseEnter={(e) => {
+                            (e.currentTarget as HTMLElement).style.background = IOS.bg;
+                          }}
+                          onMouseLeave={(e) => {
+                            (e.currentTarget as HTMLElement).style.background = '';
+                          }}
                         >
-                          <Edit3 size={16} strokeWidth={1.75} className="text-basalt/60" />
+                          <Edit3 size={16} strokeWidth={1.75} style={{ color: IOS.textMuted }} />
                         </button>
                       </div>
                     </td>
@@ -316,13 +392,20 @@ export function AdminDashboardClient() {
 
         {filtered.length === 0 && (
           <div className="py-16 text-center">
-            <Search size={40} strokeWidth={1.5} className="text-basalt/20 mx-auto mb-3" />
-            <p className="text-body text-basalt/60">Aucun produit trouvé</p>
+            <Search
+              size={40}
+              strokeWidth={1.5}
+              className="mx-auto mb-3"
+              style={{ color: IOS.textGhost }}
+            />
+            <p className="text-body" style={{ color: IOS.textMuted }}>
+              Aucun produit trouvé
+            </p>
           </div>
         )}
       </div>
 
-      <p className="text-caption text-basalt/50 text-center mt-6">
+      <p className="text-caption text-center mt-6" style={{ color: IOS.textSubtle }}>
         Les données proviennent de {products.length > 0 ? 'Firestore' : 'la base statique'}.
       </p>
     </div>
