@@ -1,5 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
 /**
  * Firebase client SDK config.
@@ -21,6 +22,7 @@ const firebaseConfig = {
 // Singleton : init Firebase une seule fois
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 // Connecter à l'émulateur Firestore en dev
 if (process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true') {
@@ -31,5 +33,5 @@ if (process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true') {
   }
 }
 
-export { db };
+export { db, auth };
 export default app;
