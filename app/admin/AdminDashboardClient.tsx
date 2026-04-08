@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Package, TrendingUp, AlertTriangle, Euro, Search, Tag, Edit3, Eye } from 'lucide-react';
+import { adminSignOut } from '@/lib/auth';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -17,6 +19,7 @@ interface AdminDashboardClientProps {
 }
 
 export function AdminDashboardClient({ products }: AdminDashboardClientProps) {
+  const router = useRouter();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'low-stock' | 'promo'>('all');
   const { showToast } = useToast();
@@ -98,6 +101,23 @@ export function AdminDashboardClient({ products }: AdminDashboardClientProps) {
           <p className="text-body text-basalt/60 mt-2">Gestion du stock et des promotions</p>
         </div>
         <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={async () => {
+              await adminSignOut();
+              router.push('/admin/login');
+            }}
+            style={{
+              background: 'transparent',
+              border: '1px solid var(--border, #ddd)',
+              borderRadius: '8px',
+              padding: '0.5rem 1rem',
+              cursor: 'pointer',
+              color: 'var(--text)',
+            }}
+          >
+            Déconnexion
+          </button>
           <Button variant="outline" size="md" onClick={() => notifyDemo('Exporter')}>
             <TrendingUp size={18} strokeWidth={1.75} /> Exporter
           </Button>
