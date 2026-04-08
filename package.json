@@ -17,6 +17,7 @@
     "test:coverage": "vitest run --coverage",
     "firebase:emulators": "firebase emulators:start",
     "firebase:seed": "tsx scripts/seed-firestore.ts",
+    "firebase:seed:cloud": "tsx scripts/seed-firestore-cloud.ts",
     "firebase:dev": "firebase emulators:start & tsx scripts/wait-for-emulator.ts && tsx scripts/seed-firestore.ts",
     "prepare": "husky"
   },
