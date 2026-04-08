@@ -9,6 +9,9 @@ dist/
 next-env.d.ts
 .DS_Store
 
+# Firebase service account (never commit credentials)
+service-account*.json
+
 # Firebase Emulator
 firebase-debug.log
 firestore-debug.log

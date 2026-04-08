@@ -3,6 +3,7 @@ import { getAdapter, resetAdapter, setAdapter, StaticAdapter } from '../../lib/d
 import type { DataAdapter } from '../../lib/data';
 import { applyClientFilters } from '../../lib/data/filters';
 import type { Product } from '../../lib/types';
+import { parseProduct } from '@/lib/schemas/product';
 
 // ─── Mock products pour tester les filtres ───────────────────────────
 const mockProducts: Product[] = [
@@ -217,5 +218,27 @@ describe('applyClientFilters', () => {
     // category est skipped → seul vehicleType='moto' s'applique
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('2');
+  });
+});
+
+// ─── parseProduct integration ────────────────────────────────────────
+describe('parseProduct integration', () => {
+  it('rejects Firestore doc with missing slug', () => {
+    const badDoc = {
+      id: 'bad-001',
+      name: 'Bad Product',
+      reference: 'BAD-001',
+      description: 'Missing slug',
+      shortDescription: 'Bad',
+      price: 1000,
+      images: [],
+      category: 'freinage',
+      vehicleType: 'auto',
+      compatibility: [],
+      stock: 5,
+      isPromoted: false,
+      createdAt: '2025-01-01',
+    };
+    expect(() => parseProduct(badDoc)).toThrow();
   });
 });

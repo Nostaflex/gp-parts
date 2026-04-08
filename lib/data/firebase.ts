@@ -10,6 +10,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Product, ProductCategory } from '@/lib/types';
+import { parseProduct } from '@/lib/schemas/product';
 import type { DataAdapter, ProductFilters } from './types';
 import { applyClientFilters } from './filters';
 
@@ -27,29 +28,12 @@ export class FirebaseAdapter implements DataAdapter {
 
   /**
    * Convertit un document Firestore en Product typé.
-   *
-   * TODO Phase 4 : remplacer les `as` par un parser Zod pour valider
-   * les données à l'exécution et attraper les corruptions Firestore.
+   * Utilise parseProduct() (Zod) pour valider les données à l'exécution
+   * et attraper les corruptions Firestore.
    */
   private docToProduct(docSnap: { id: string; data: () => Record<string, unknown> }): Product {
     const data = docSnap.data();
-    return {
-      id: docSnap.id,
-      slug: data.slug as string,
-      name: data.name as string,
-      reference: data.reference as string,
-      description: data.description as string,
-      shortDescription: data.shortDescription as string,
-      price: data.price as number,
-      priceOriginal: data.priceOriginal as number | undefined,
-      images: data.images as string[],
-      category: data.category as ProductCategory,
-      vehicleType: data.vehicleType as 'auto' | 'moto',
-      compatibility: data.compatibility as Product['compatibility'],
-      stock: data.stock as number,
-      isPromoted: data.isPromoted as boolean,
-      createdAt: data.createdAt as string,
-    };
+    return parseProduct({ ...data, id: docSnap.id });
   }
 
   async getProducts(filters?: ProductFilters): Promise<Product[]> {
@@ -124,7 +108,9 @@ export class FirebaseAdapter implements DataAdapter {
     // Pour un petit catalogue (< 200 produits), on récupère tous les produits
     // et on extrait les catégories. Phase 4+ : utiliser un doc metadata/categories.
     const snapshot = await getDocs(this.productsRef);
-    const categories = new Set(snapshot.docs.map((d) => d.data().category as string));
+    const categories = new Set(
+      snapshot.docs.map((d) => parseProduct({ ...d.data(), id: d.id }).category)
+    );
     return Array.from(categories).sort();
   }
 
@@ -132,9 +118,8 @@ export class FirebaseAdapter implements DataAdapter {
     const snapshot = await getDocs(this.productsRef);
     const brands = new Set<string>();
     snapshot.docs.forEach((d) => {
-      const data = d.data();
-      const compatibility = data.compatibility as Product['compatibility'];
-      compatibility?.forEach((compat) => brands.add(compat.brand));
+      const product = parseProduct({ ...d.data(), id: d.id });
+      product.compatibility.forEach((compat) => brands.add(compat.brand));
     });
     return Array.from(brands).sort();
   }

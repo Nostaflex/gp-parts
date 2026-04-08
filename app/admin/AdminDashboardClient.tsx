@@ -1,8 +1,11 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { getAdapter } from '@/lib/data';
 import Link from 'next/link';
 import { Package, TrendingUp, AlertTriangle, Euro, Search, Tag, Edit3, Eye } from 'lucide-react';
+import { adminSignOut } from '@/lib/auth';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -12,14 +15,22 @@ import { LOW_STOCK_THRESHOLD } from '@/lib/config';
 import { getCategoryLabel } from '@/lib/categories';
 import type { Product } from '@/lib/types';
 
-interface AdminDashboardClientProps {
-  products: Product[];
-}
-
-export function AdminDashboardClient({ products }: AdminDashboardClientProps) {
+export function AdminDashboardClient() {
+  const router = useRouter();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'low-stock' | 'promo'>('all');
   const { showToast } = useToast();
+
+  useEffect(() => {
+    getAdapter()
+      .then((adapter) => adapter.getProducts())
+      .then((data) => {
+        setProducts(data);
+        setLoading(false);
+      });
+  }, []);
 
   const notifyDemo = (label: string) =>
     showToast({
@@ -88,6 +99,14 @@ export function AdminDashboardClient({ products }: AdminDashboardClientProps) {
     },
   ];
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-body text-basalt/60">Chargement du catalogue...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Header */}
@@ -98,6 +117,23 @@ export function AdminDashboardClient({ products }: AdminDashboardClientProps) {
           <p className="text-body text-basalt/60 mt-2">Gestion du stock et des promotions</p>
         </div>
         <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={async () => {
+              await adminSignOut();
+              router.push('/admin/login');
+            }}
+            style={{
+              background: 'transparent',
+              border: '1px solid var(--border, #ddd)',
+              borderRadius: '8px',
+              padding: '0.5rem 1rem',
+              cursor: 'pointer',
+              color: 'var(--text)',
+            }}
+          >
+            Déconnexion
+          </button>
           <Button variant="outline" size="md" onClick={() => notifyDemo('Exporter')}>
             <TrendingUp size={18} strokeWidth={1.75} /> Exporter
           </Button>
