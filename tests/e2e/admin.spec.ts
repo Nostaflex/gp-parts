@@ -8,14 +8,17 @@ import { test, expect } from '@playwright/test';
  * En local, l'émulateur crée l'utilisateur via le seed script.
  */
 
-const TEST_EMAIL = process.env.TEST_ADMIN_EMAIL || 'admin@gp-parts.com';
-const TEST_PASSWORD = process.env.TEST_ADMIN_PASSWORD || 'test-password-123';
+// Smoke tests nécessitent un utilisateur Firebase Auth valide (emulateur ou vrai projet)
+// Sans ces variables → tests skippés (Phase 4.5 : connecter l'émulateur Auth en CI)
+const TEST_EMAIL = process.env.TEST_ADMIN_EMAIL;
+const TEST_PASSWORD = process.env.TEST_ADMIN_PASSWORD;
+const HAS_AUTH_CREDENTIALS = Boolean(TEST_EMAIL && TEST_PASSWORD);
 
 /** Se connecter via la page login Firebase Auth */
 async function adminLogin(page: import('@playwright/test').Page) {
   await page.goto('/admin/login');
-  await page.fill('input[name="email"]', TEST_EMAIL);
-  await page.fill('input[name="password"]', TEST_PASSWORD);
+  await page.fill('input[name="email"]', TEST_EMAIL!);
+  await page.fill('input[name="password"]', TEST_PASSWORD!);
   await page.click('button[type="submit"]');
   // Attendre la redirection vers /admin
   await page.waitForURL('**/admin', { timeout: 10_000 });
@@ -38,6 +41,11 @@ test.describe('Admin — auth', () => {
 });
 
 test.describe('Admin — smoke back-office', () => {
+  test.skip(
+    !HAS_AUTH_CREDENTIALS,
+    'Requires TEST_ADMIN_EMAIL + TEST_ADMIN_PASSWORD (Firebase Auth emulator — Phase 4.5)'
+  );
+
   test.beforeEach(async ({ page }) => {
     await adminLogin(page);
   });
