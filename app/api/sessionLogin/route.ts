@@ -25,7 +25,12 @@ export async function POST(request: NextRequest) {
 
     if (process.env.FIREBASE_AUTH_EMULATOR_HOST) {
       const emulatorHost = process.env.FIREBASE_AUTH_EMULATOR_HOST;
-      if (!/^(127\.0\.0\.1|localhost)(:\d+)?$/.test(emulatorHost)) {
+      const isLocal =
+        emulatorHost === 'localhost' ||
+        emulatorHost.startsWith('localhost:') ||
+        emulatorHost === '127.0.0.1' ||
+        emulatorHost.startsWith('127.0.0.1:');
+      if (!isLocal) {
         console.error('[sessionLogin] FIREBASE_AUTH_EMULATOR_HOST invalide:', emulatorHost);
         return NextResponse.json({ error: 'Configuration invalide' }, { status: 500 });
       }
