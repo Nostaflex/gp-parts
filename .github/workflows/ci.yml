@@ -108,6 +108,9 @@ jobs:
       - name: Seed utilisateur admin test dans l'émulateur Auth
         run: npx tsx scripts/seed-auth-emulator.ts
 
+      - name: Seed produits dans l'émulateur Firestore
+        run: npx tsx scripts/seed-firestore.ts
+
       - name: Build production
         run: npm run build
         env:
