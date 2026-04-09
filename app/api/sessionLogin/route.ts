@@ -24,8 +24,14 @@ export async function POST(request: NextRequest) {
     let cookieValue: string;
 
     if (process.env.FIREBASE_AUTH_EMULATOR_HOST) {
+      const emulatorHost = process.env.FIREBASE_AUTH_EMULATOR_HOST;
+      if (!/^(127\.0\.0\.1|localhost)(:\d+)?$/.test(emulatorHost)) {
+        console.error('[sessionLogin] FIREBASE_AUTH_EMULATOR_HOST invalide:', emulatorHost);
+        return NextResponse.json({ error: 'Configuration invalide' }, { status: 500 });
+      }
       // Émulateur : décoder le JWT sans vérification cryptographique.
-      // Sécurisé : ce chemin n'est actif que lorsque FIREBASE_AUTH_EMULATOR_HOST est défini.
+      // Sécurisé : ce chemin n'est actif que lorsque FIREBASE_AUTH_EMULATOR_HOST est défini
+      // et pointe vers un hôte local.
       const payloadBase64 = idToken.split('.')[1];
       if (!payloadBase64) throw new Error('idToken malformé');
       const payload = JSON.parse(Buffer.from(payloadBase64, 'base64url').toString('utf8'));
@@ -41,7 +47,8 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.json({ status: 'ok' });
     response.cookies.set('__session', cookieValue, COOKIE_OPTIONS);
     return response;
-  } catch {
+  } catch (err) {
+    console.error('[sessionLogin] Échec de traitement du token :', err);
     return NextResponse.json({ error: 'ID token invalide' }, { status: 401 });
   }
 }
