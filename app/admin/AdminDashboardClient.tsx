@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAdapter } from '@/lib/data';
 import Link from 'next/link';
 import { Package, TrendingUp, AlertTriangle, Euro, Search, Tag, Edit3, Eye } from 'lucide-react';
 import { adminSignOut } from '@/lib/auth';
@@ -43,10 +42,17 @@ export function AdminDashboardClient() {
   const { showToast } = useToast();
 
   useEffect(() => {
-    getAdapter()
-      .then((adapter) => adapter.getProducts())
+    fetch('/api/admin/products')
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json() as Promise<Product[]>;
+      })
       .then((data) => {
         setProducts(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('[AdminDashboard] getProducts failed:', err);
         setLoading(false);
       });
   }, []);
