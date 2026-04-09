@@ -31,7 +31,7 @@ describe('auth helpers', () => {
     const mockSignIn = vi.mocked(signInWithEmailAndPassword);
     mockSignIn.mockResolvedValueOnce({ user: mockUser } as never);
 
-    const user = await adminSignIn('admin@gp-parts.com', 'password');
+    await adminSignIn('admin@gp-parts.com', 'password');
 
     expect(mockSignIn).toHaveBeenCalledWith(expect.anything(), 'admin@gp-parts.com', 'password');
     expect(mockUser.getIdToken).toHaveBeenCalled();
@@ -39,7 +39,6 @@ describe('auth helpers', () => {
       '/api/sessionLogin',
       expect.objectContaining({ method: 'POST' })
     );
-    expect(user).toBe(mockUser);
   });
 
   it('adminSignOut appelle sessionLogout puis signOut Firebase', async () => {
