@@ -24,10 +24,13 @@ export async function POST(request: NextRequest) {
     let cookieValue: string;
 
     if (process.env.FIREBASE_AUTH_EMULATOR_HOST) {
-      // Émulateur : createSessionCookie non supporté — on vérifie l'idToken
-      // et on stocke le uid comme valeur de cookie (suffisant pour le middleware)
-      const decoded = await getAdminAuth().verifyIdToken(idToken);
-      cookieValue = decoded.uid;
+      // Émulateur : décoder le JWT sans vérification cryptographique.
+      // Sécurisé : ce chemin n'est actif que lorsque FIREBASE_AUTH_EMULATOR_HOST est défini.
+      const payloadBase64 = idToken.split('.')[1];
+      if (!payloadBase64) throw new Error('idToken malformé');
+      const payload = JSON.parse(Buffer.from(payloadBase64, 'base64url').toString('utf8'));
+      cookieValue = payload.sub ?? payload.user_id;
+      if (!cookieValue) throw new Error('uid introuvable dans le token émulateur');
     } else {
       // Production : session cookie opaque Firebase (JWT signé côté Google)
       cookieValue = await getAdminAuth().createSessionCookie(idToken, {
