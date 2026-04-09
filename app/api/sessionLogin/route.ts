@@ -6,7 +6,8 @@ const SESSION_DURATION_MS = 5 * 24 * 60 * 60 * 1000;
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
+  // secure uniquement en production réelle (HTTPS) — pas en local ni en CI (http://localhost)
+  secure: process.env.NODE_ENV === 'production' && !process.env.FIREBASE_AUTH_EMULATOR_HOST,
   sameSite: 'lax' as const,
   maxAge: SESSION_DURATION_MS / 1000,
   path: '/',
