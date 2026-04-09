@@ -9,6 +9,7 @@ import { resolve } from 'path';
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { PRODUCTS } from '../lib/products';
+import { parseProduct } from '../lib/schemas/product';
 
 const serviceAccountPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 
@@ -32,8 +33,9 @@ async function seed() {
   const batch = db.batch();
 
   for (const product of PRODUCTS) {
-    const ref = db.collection('products').doc(product.id);
-    batch.set(ref, product);
+    const validated = parseProduct(product);
+    const ref = db.collection('products').doc(validated.id);
+    batch.set(ref, validated);
   }
 
   await batch.commit();

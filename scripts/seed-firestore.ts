@@ -15,11 +15,15 @@
  *   4. Crée un document metadata/stats avec les compteurs
  */
 
+// Guard: FIRESTORE_EMULATOR_HOST doit être défini avant les imports Firebase
+if (!process.env.FIRESTORE_EMULATOR_HOST) {
+  console.error('ERROR: FIRESTORE_EMULATOR_HOST doit être défini (ex: 127.0.0.1:8080)');
+  process.exit(1);
+}
+
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-
-// Pointer vers l'émulateur
-process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080';
+import { parseProduct } from '../lib/schemas/product';
 
 // Init Firebase Admin avec un project ID factice (l'émulateur l'accepte)
 const app = initializeApp({
@@ -56,22 +60,23 @@ async function seed() {
   let count = 0;
 
   for (const product of PRODUCTS) {
-    const docRef = db.collection('products').doc(product.id);
+    const validated = parseProduct(product);
+    const docRef = db.collection('products').doc(validated.id);
     batch.set(docRef, {
-      slug: product.slug,
-      name: product.name,
-      reference: product.reference,
-      description: product.description,
-      shortDescription: product.shortDescription,
-      price: product.price,
-      ...(product.priceOriginal && { priceOriginal: product.priceOriginal }),
-      images: product.images,
-      category: product.category,
-      vehicleType: product.vehicleType,
-      compatibility: product.compatibility,
-      stock: product.stock,
-      isPromoted: product.isPromoted,
-      createdAt: product.createdAt,
+      slug: validated.slug,
+      name: validated.name,
+      reference: validated.reference,
+      description: validated.description,
+      shortDescription: validated.shortDescription,
+      price: validated.price,
+      ...(validated.priceOriginal && { priceOriginal: validated.priceOriginal }),
+      images: validated.images,
+      category: validated.category,
+      vehicleType: validated.vehicleType,
+      compatibility: validated.compatibility,
+      stock: validated.stock,
+      isPromoted: validated.isPromoted,
+      createdAt: validated.createdAt,
     });
     count++;
   }

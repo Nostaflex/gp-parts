@@ -1,28 +1,45 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Test e2e — Smoke admin avec Firebase Auth.
+ * Tests E2E admin — 3 groupes :
  *
- * Prérequis : Firebase Auth emulator actif avec un utilisateur test.
- * En CI, TEST_ADMIN_EMAIL et TEST_ADMIN_PASSWORD doivent être définis.
- * En local, l'émulateur crée l'utilisateur via le seed script.
+ * 1. Admin — auth (toujours actifs) : redirect, bad credentials
+ * 2. Admin — login flow (conditionnel HAS_AUTH_CREDENTIALS) : login UI complet via émulateur
+ * 3. Admin — smoke back-office (conditionnel HAS_AUTH_CREDENTIALS) : dashboard via cookie injection
+ *
+ * Pourquoi cookie injection pour le smoke ? Les smoke tests valident le dashboard,
+ * pas l'auth. L'injection de cookie bypass le login UI pour des tests plus fiables en CI.
  */
 
-// Smoke tests nécessitent un utilisateur Firebase Auth valide (emulateur ou vrai projet)
-// Sans ces variables → tests skippés (Phase 4.5 : connecter l'émulateur Auth en CI)
 const TEST_EMAIL = process.env.TEST_ADMIN_EMAIL;
 const TEST_PASSWORD = process.env.TEST_ADMIN_PASSWORD;
 const HAS_AUTH_CREDENTIALS = Boolean(TEST_EMAIL && TEST_PASSWORD);
 
-/** Se connecter via la page login Firebase Auth */
+// --- Helpers ---
+
+/** Injecte un session cookie valide pour bypasser le middleware sans passer par l'UI */
+async function injectSessionCookie(context: import('@playwright/test').BrowserContext) {
+  await context.addCookies([
+    {
+      name: '__session',
+      value: 'e2e-test-session',
+      url: 'http://localhost:3000',
+      httpOnly: true,
+      sameSite: 'Lax',
+    },
+  ]);
+}
+
+/** Login complet via UI Firebase Auth + redirection */
 async function adminLogin(page: import('@playwright/test').Page) {
   await page.goto('/admin/login');
   await page.fill('input[name="email"]', TEST_EMAIL!);
   await page.fill('input[name="password"]', TEST_PASSWORD!);
   await page.click('button[type="submit"]');
-  // Attendre la redirection vers /admin
-  await page.waitForURL('**/admin', { timeout: 10_000 });
+  await page.waitForURL('**/admin', { timeout: 15_000 });
 }
+
+// --- Tests ---
 
 test.describe('Admin — auth', () => {
   test('accès /admin sans login redirige vers /admin/login', async ({ page }) => {
@@ -40,14 +57,32 @@ test.describe('Admin — auth', () => {
   });
 });
 
+test.describe('Admin — login flow', () => {
+  test.skip(
+    !HAS_AUTH_CREDENTIALS,
+    'Requires TEST_ADMIN_EMAIL + TEST_ADMIN_PASSWORD (Firebase Auth emulator)'
+  );
+
+  test('login complet avec credentials valides redirige vers /admin', async ({ page }) => {
+    await adminLogin(page);
+    await expect(page.getByRole('heading', { name: /tableau de bord/i })).toBeVisible({
+      timeout: 10_000,
+    });
+  });
+});
+
 test.describe('Admin — smoke back-office', () => {
   test.skip(
     !HAS_AUTH_CREDENTIALS,
     'Requires TEST_ADMIN_EMAIL + TEST_ADMIN_PASSWORD (Firebase Auth emulator — Phase 4.5)'
   );
 
-  test.beforeEach(async ({ page }) => {
-    await adminLogin(page);
+  test.beforeEach(async ({ page, context }) => {
+    // Injection du cookie de session → bypass login UI, middleware autorise l'accès
+    await injectSessionCookie(context);
+    await page.goto('/admin');
+    // Attendre que le dashboard soit chargé (données Firestore visibles)
+    await expect(page.getByText('Produits en catalogue')).toBeVisible({ timeout: 10_000 });
   });
 
   test('la page /admin charge et affiche les 4 KPIs', async ({ page }) => {

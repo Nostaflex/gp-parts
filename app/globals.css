@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* iOS Clarity — Back-office design system variables */
+:root {
+  --bg: #f2f2f7;
+  --surface: #ffffff;
+  --text: #1c1c1e;
+  --blue: #007aff;
+  --border: #c6c6c8;
+}
+
 @layer base {
   html {
     -webkit-font-smoothing: antialiased;
