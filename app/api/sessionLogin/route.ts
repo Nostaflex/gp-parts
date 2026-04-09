@@ -4,6 +4,14 @@ import { getAdminAuth } from '@/lib/firebase-admin';
 // Durée de vie du session cookie : 5 jours (max Firebase : 14 jours)
 const SESSION_DURATION_MS = 5 * 24 * 60 * 60 * 1000;
 
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax' as const,
+  maxAge: SESSION_DURATION_MS / 1000,
+  path: '/',
+};
+
 export async function POST(request: NextRequest) {
   const { idToken } = (await request.json()) as { idToken: string };
 
@@ -12,18 +20,22 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const sessionCookie = await getAdminAuth().createSessionCookie(idToken, {
-      expiresIn: SESSION_DURATION_MS,
-    });
+    let cookieValue: string;
+
+    if (process.env.FIREBASE_AUTH_EMULATOR_HOST) {
+      // Émulateur : createSessionCookie non supporté — on vérifie l'idToken
+      // et on stocke le uid comme valeur de cookie (suffisant pour le middleware)
+      const decoded = await getAdminAuth().verifyIdToken(idToken);
+      cookieValue = decoded.uid;
+    } else {
+      // Production : session cookie opaque Firebase (JWT signé côté Google)
+      cookieValue = await getAdminAuth().createSessionCookie(idToken, {
+        expiresIn: SESSION_DURATION_MS,
+      });
+    }
 
     const response = NextResponse.json({ status: 'ok' });
-    response.cookies.set('__session', sessionCookie, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: SESSION_DURATION_MS / 1000,
-      path: '/',
-    });
+    response.cookies.set('__session', cookieValue, COOKIE_OPTIONS);
     return response;
   } catch {
     return NextResponse.json({ error: 'ID token invalide' }, { status: 401 });
