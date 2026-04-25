@@ -3,22 +3,23 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Produits : lecture publique, écriture admin uniquement
+    // Produits : lecture publique, écriture admin authentifié uniquement
     match /products/{productId} {
       allow read: if true;
-      allow write: if false; // Phase 4 : remplacer par auth admin
+      allow write: if request.auth != null;
     }
 
-    // Commandes : lecture/écriture restreinte
-    // Phase 4 : allow create si utilisateur authentifié, read si owner ou admin
+    // Commandes : création publique (checkout), lecture/màj admin uniquement
     match /orders/{orderId} {
-      allow read, write: if false;
+      allow create: if true;
+      allow read, update: if request.auth != null;
+      allow delete: if false;
     }
 
-    // Catégories (cache) : lecture publique
+    // Métadonnées (catégories, config) : lecture publique
     match /metadata/{docId} {
       allow read: if true;
-      allow write: if false;
+      allow write: if request.auth != null;
     }
 
     // Règle par défaut : tout bloquer

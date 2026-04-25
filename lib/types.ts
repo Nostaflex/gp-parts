@@ -78,3 +78,52 @@ export interface OrderInfo {
   acceptsCgv: boolean;
   acceptsMarketing: boolean;
 }
+
+// --- Commandes ---
+
+export type OrderStatus =
+  | 'nouvelle'
+  | 'confirmee'
+  | 'preparation'
+  | 'expediee'
+  | 'livree'
+  | 'annulee';
+
+export interface OrderCustomer {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+}
+
+export interface OrderDelivery {
+  option: DeliveryOption['id'];
+  address: string;
+  city: string;
+  postalCode: string;
+  priceInCents: number;
+}
+
+export interface OrderItem {
+  productId: string;
+  slug: string;
+  name: string;
+  reference: string;
+  priceInCents: number;
+  quantity: number;
+  image: string;
+}
+
+export interface Order {
+  id: string;
+  orderNumber: string;
+  status: OrderStatus;
+  customer: OrderCustomer;
+  delivery: OrderDelivery;
+  items: OrderItem[];
+  subtotalInCents: number;
+  totalInCents: number;
+  acceptsMarketing: boolean;
+  createdAt: string;
+  updatedAt: string;
+}

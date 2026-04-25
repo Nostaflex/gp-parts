@@ -32,7 +32,7 @@ export function CartItemRow({ item }: CartItemRowProps) {
 
       <div className="flex-1 min-w-0">
         <Link
-          href={`/catalogue/${item.slug}`}
+          href={`/pieces/${item.slug}`}
           className="text-body font-body font-medium text-basalt hover:text-volcanic transition-colors"
         >
           {item.name}

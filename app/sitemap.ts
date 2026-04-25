@@ -10,9 +10,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${BASE_URL}/`, lastModified: now, changeFrequency: 'weekly', priority: 1 },
-    { url: `${BASE_URL}/catalogue`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
+    { url: `${BASE_URL}/pieces`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
     {
-      url: `${BASE_URL}/catalogue?promo=1`,
+      url: `${BASE_URL}/pieces?promo=1`,
       lastModified: now,
       changeFrequency: 'daily',
       priority: 0.8,
@@ -35,14 +35,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   const categoryRoutes: MetadataRoute.Sitemap = CATEGORIES.map((cat) => ({
-    url: `${BASE_URL}/catalogue?category=${cat.id}`,
+    url: `${BASE_URL}/pieces?category=${cat.id}`,
     lastModified: now,
     changeFrequency: 'weekly',
     priority: 0.7,
   }));
 
   const productRoutes: MetadataRoute.Sitemap = PRODUCTS.map((p) => ({
-    url: `${BASE_URL}/catalogue/${p.slug}`,
+    url: `${BASE_URL}/pieces/${p.slug}`,
     lastModified: new Date(p.createdAt),
     changeFrequency: 'weekly',
     priority: 0.6,

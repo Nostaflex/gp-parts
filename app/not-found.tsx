@@ -14,7 +14,7 @@ export default function NotFound() {
         <ButtonLink href="/" variant="primary" size="md">
           <Home size={18} strokeWidth={1.75} /> Retour à l&apos;accueil
         </ButtonLink>
-        <ButtonLink href="/catalogue" variant="outline" size="md">
+        <ButtonLink href="/pieces" variant="outline" size="md">
           <Search size={18} strokeWidth={1.75} /> Parcourir le catalogue
         </ButtonLink>
       </div>

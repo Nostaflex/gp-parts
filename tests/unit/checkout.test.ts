@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateCheckout } from '../../app/commande/actions';
+import { validateCheckout } from '../../app/(boutique)/commande/actions';
 
 // ─── Données de test valides ─────────────────────────────────────────
 const validData = {

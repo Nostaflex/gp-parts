@@ -1,60 +1,64 @@
 import type { Metadata } from 'next';
+import { CpHeader } from '@/components/cp/CpHeader';
+import { CpBridge } from '@/components/cp/CpBridge';
+import { CpFooter } from '@/components/cp/CpFooter';
+import { LegalTabs } from './LegalTabs';
 
 export const metadata: Metadata = {
-  title: 'Mentions légales',
-  description: 'Mentions légales de GP Parts, pièces détachées en Guadeloupe.',
+  title: 'Mentions légales & Confidentialité',
+  description:
+    'Mentions légales, CGV, politique de confidentialité et cookies de Car Performance Guadeloupe.',
 };
 
 export default function MentionsLegalesPage() {
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      <p className="text-overline uppercase text-basalt/50 mb-2">Informations légales</p>
-      <h1 className="font-title text-h1 text-basalt mb-8">Mentions légales</h1>
+    <>
+      <CpHeader darkSectionIds={['legal-hero']} />
 
-      <div className="prose-custom space-y-8 text-body text-basalt/80">
-        <section>
-          <h2 className="font-title text-h3 text-basalt mb-3">Éditeur du site</h2>
-          <p>
-            GP Parts SARL — Pièces détachées auto et moto en Guadeloupe.
-            <br />
-            Adresse : Zone industrielle de Jarry, 97122 Baie-Mahault, Guadeloupe.
-            <br />
-            SIRET : 000 000 000 00000 (à compléter).
-            <br />
-            Email : contact@gpparts.gp — Téléphone : +590 590 00 00 00.
+      {/* ── HERO ─────────────────────────────── */}
+      <section
+        id="legal-hero"
+        className="relative pt-28 pb-16 px-6 overflow-hidden"
+        style={{ backgroundColor: '#0D0905' }}
+      >
+        <div
+          aria-hidden="true"
+          className="absolute pointer-events-none rounded-full"
+          style={{
+            width: '400px',
+            height: '400px',
+            top: '50%',
+            left: '60%',
+            transform: 'translate(-50%,-50%)',
+            background: 'radial-gradient(circle, rgba(232,114,0,0.08) 0%, transparent 70%)',
+          }}
+        />
+        <div className="max-w-7xl mx-auto relative z-10">
+          <p className="cp-mono text-cp-mango text-xs tracking-widest uppercase mb-4">
+            Car Performance Guadeloupe · Informations légales
           </p>
-        </section>
+          <h1
+            className="cp-title font-black text-cp-cream leading-none"
+            style={{ fontSize: 'clamp(2.5rem,6vw,6rem)' }}
+          >
+            MENTIONS
+            <br />
+            LÉGALES &<br />
+            <span className="text-cp-mango">CONFIDENTIALITÉ</span>
+          </h1>
+          <p className="text-cp-cream/40 text-sm mt-4">Mise à jour — Janvier 2025</p>
+        </div>
+      </section>
 
-        <section>
-          <h2 className="font-title text-h3 text-basalt mb-3">Directeur de la publication</h2>
-          <p>Le représentant légal de GP Parts SARL.</p>
-        </section>
+      <CpBridge fromColor="#0D0905" toColor="#F8F5F0" />
 
-        <section>
-          <h2 className="font-title text-h3 text-basalt mb-3">Hébergement</h2>
-          <p>Ce site est hébergé sur Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, USA.</p>
-        </section>
+      {/* ── CONTENU ──────────────────────────── */}
+      <section className="py-16 px-6 pt-24" style={{ backgroundColor: '#F8F5F0' }}>
+        <LegalTabs />
+      </section>
 
-        <section>
-          <h2 className="font-title text-h3 text-basalt mb-3">Propriété intellectuelle</h2>
-          <p>
-            L&apos;ensemble du contenu du site (textes, images, logos, marques) est la propriété
-            exclusive de GP Parts ou de ses partenaires. Toute reproduction sans autorisation
-            préalable est interdite.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="font-title text-h3 text-basalt mb-3">Données personnelles</h2>
-          <p>
-            Le traitement de vos données personnelles est décrit dans notre{' '}
-            <a href="/confidentialite" className="text-volcanic underline">
-              politique de confidentialité
-            </a>
-            .
-          </p>
-        </section>
-      </div>
-    </div>
+      <CpBridge fromColor="#F8F5F0" toColor="#1A0F06" />
+      <CpFooter />
+    </>
   );
 }

@@ -23,9 +23,14 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Protéger toutes les autres routes /admin/*
   const session = request.cookies.get('__session');
+
   if (!session?.value) {
+    // Routes API → 401 JSON (pas de redirect, le client JS gère)
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+    }
+    // Pages admin → redirect login
     const loginUrl = new URL('/admin/login', request.url);
     return NextResponse.redirect(loginUrl);
   }
@@ -34,5 +39,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/api/admin/:path*'],
 };

@@ -5,16 +5,35 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Volcanic Clarity v1.2 — palette identité
-        cream: '#F8F7F4',
-        ivory: '#F5F0EB',
-        lin: '#E5DDD3',
-        volcanic: '#FF4D00',
-        caribbean: '#00B996',
-        basalt: '#12100E',
-        // Couleurs sémantiques
+        // GP-Parts boutique — aligné sur palette CarPerformance
+        cream: '#F4EDE0', // était #F8F7F4 — harmonisé cp-cream
+        ivory: '#F8F5F0', // était #F5F0EB — harmonisé u-craft
+        lin: '#E5DDD3', // inchangé
+        volcanic: '#E87200', // était #FF4D00 — harmonisé cp-mango
+        caribbean: '#52C88A', // était #00B996 — harmonisé cp-vert-l
+        basalt: '#1A0F06', // était #12100E — harmonisé cp-ink
+        // Couleurs sémantiques GP-Parts
         error: '#DC2626',
         warning: '#D97706',
+
+        // Car Performance — palette globale
+        cp: {
+          cream: '#F4EDE0',
+          ink: '#1A0F06',
+          mango: '#E87200',
+          vert: '#2A5C45',
+          'vert-l': '#52C88A',
+          gold: '#E9C46A',
+        },
+        // Car Performance — univers (backgrounds de section)
+        u: {
+          hero: '#F4EDE0', // Cream Drama
+          cinema: '#0D0905', // Cinéma Sombre
+          foret: '#0E1F18', // Forêt Profonde
+          amber: '#1E0E04', // Ambre Cuir
+          craft: '#F8F5F0', // Craft Ivoire
+          dusk: '#1A1208', // Dusk Tropical
+        },
       },
       fontFamily: {
         title: ['var(--font-title)', 'sans-serif'],
@@ -55,6 +74,7 @@ const config: Config = {
         slow: '350ms',
       },
       keyframes: {
+        // GP-Parts
         'skeleton-pulse': {
           '0%, 100%': { opacity: '0.4' },
           '50%': { opacity: '0.7' },
@@ -67,11 +87,39 @@ const config: Config = {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
         },
+        // Car Performance
+        'cp-reveal': {
+          '0%': { opacity: '0', transform: 'translateY(32px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'cp-orb-pulse': {
+          '0%, 100%': { transform: 'scale(1)', opacity: '0.6' },
+          '50%': { transform: 'scale(1.15)', opacity: '0.9' },
+        },
+        'cp-float': {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-8px)' },
+        },
+        'cp-fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
       },
       animation: {
+        // GP-Parts
         skeleton: 'skeleton-pulse 1.8s ease-in-out infinite',
         'slide-up': 'slide-up 250ms ease-out',
         'fade-in': 'fade-in 200ms ease-out',
+        // Car Performance
+        'cp-reveal': 'cp-reveal 700ms cubic-bezier(0.16,1,0.3,1) both',
+        'cp-orb': 'cp-orb-pulse 6s ease-in-out infinite',
+        'cp-float': 'cp-float 4s ease-in-out infinite',
+        'cp-fade': 'cp-fade-in 500ms ease-out both',
+      },
+      transitionTimingFunction: {
+        'cp-out': 'cubic-bezier(0.16,1,0.3,1)',
+        'cp-spring': 'cubic-bezier(0.34,1.56,0.64,1)',
+        'cp-in': 'cubic-bezier(0.4,0,1,1)',
       },
     },
   },
