@@ -24,13 +24,11 @@ export async function POST(request: NextRequest) {
   const authHost = process.env.FIREBASE_AUTH_EMULATOR_HOST; // ex: 127.0.0.1:9099
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? 'demo-gp-parts';
 
-  // Évite l'avertissement "variable déclarée mais non utilisée"
-  void projectId;
-
   try {
-    // Appel direct à l'API REST de l'émulateur Auth (même endpoint que le client SDK)
+    // Appel direct à l'API REST de l'émulateur Auth
+    // singleProjectMode=true requiert le projectId dans le chemin
     const authRes = await fetch(
-      `http://${authHost}/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=demo-api-key`,
+      `http://${authHost}/identitytoolkit.googleapis.com/v1/projects/${projectId}/accounts:signInWithPassword?key=demo-api-key`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

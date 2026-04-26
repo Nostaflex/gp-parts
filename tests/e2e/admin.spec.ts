@@ -33,6 +33,11 @@ async function injectSessionCookie(context: import('@playwright/test').BrowserCo
 /** Login complet via UI Firebase Auth + redirection */
 async function adminLogin(page: import('@playwright/test').Page) {
   await page.goto('/admin/login');
+  // Dismiss cookie banner if present (may cover the submit button)
+  const acceptBtn = page.getByRole('button', { name: /tout refuser|accepter/i }).first();
+  if (await acceptBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    await acceptBtn.click();
+  }
   await page.fill('input[name="email"]', TEST_EMAIL!);
   await page.fill('input[name="password"]', TEST_PASSWORD!);
   await page.click('button[type="submit"]');
