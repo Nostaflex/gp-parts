@@ -69,6 +69,16 @@ test.describe('Admin — login flow', () => {
     'Requires TEST_ADMIN_EMAIL + TEST_ADMIN_PASSWORD (Firebase Auth emulator)'
   );
 
+  test('emulator-login API retourne 200 pour credentials valides', async ({ page }) => {
+    // Vérifie l'API directement — diagnostique si FIREBASE_AUTH_EMULATOR_HOST est injecté
+    const res = await page.request.post('/api/admin/emulator-login', {
+      data: { email: TEST_EMAIL, password: TEST_PASSWORD },
+    });
+    const body = await res.text();
+    // Inclure le body dans le message d'erreur pour diagnostiquer depuis les logs CI
+    expect(res.status(), `emulator-login status ${res.status()}: ${body}`).toBe(200);
+  });
+
   test('login complet avec credentials valides redirige vers /admin', async ({ page }) => {
     test.setTimeout(60_000); // emulator auth can be slow in CI
     await adminLogin(page);
