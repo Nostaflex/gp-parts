@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Panier — persistance localStorage', () => {
   test('ajouter un produit, recharger, le panier est conservé', async ({ page }) => {
     // 1. Aller sur le catalogue
-    await page.goto('/catalogue');
+    await page.goto('/pieces');
 
     // 2. Cliquer sur le PREMIER bouton "Ajouter au panier" de la liste
     const addToCartBtn = page.getByRole('button', { name: /ajouter au panier/i }).first();

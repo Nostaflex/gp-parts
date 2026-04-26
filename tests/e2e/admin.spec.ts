@@ -36,7 +36,8 @@ async function adminLogin(page: import('@playwright/test').Page) {
   await page.fill('input[name="email"]', TEST_EMAIL!);
   await page.fill('input[name="password"]', TEST_PASSWORD!);
   await page.click('button[type="submit"]');
-  await page.waitForURL('**/admin', { timeout: 15_000 });
+  // Use regex to avoid glob ambiguity; 25s to absorb emulator latency in CI
+  await page.waitForURL(/\/admin$/, { timeout: 25_000 });
 }
 
 // --- Tests ---
@@ -64,6 +65,7 @@ test.describe('Admin — login flow', () => {
   );
 
   test('login complet avec credentials valides redirige vers /admin', async ({ page }) => {
+    test.setTimeout(60_000); // emulator auth can be slow in CI
     await adminLogin(page);
     await expect(page.getByRole('heading', { name: /tableau de bord/i })).toBeVisible({
       timeout: 10_000,

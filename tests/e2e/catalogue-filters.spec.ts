@@ -12,7 +12,7 @@ test.describe('Catalogue /pieces — sync URL ↔ filtres', () => {
   test("chip Moto met à jour l'URL et affiche les résultats", async ({ page }) => {
     await page.goto('/pieces');
 
-    await expect(page.getByText(/pièces? disponibles?/i).first()).toBeVisible();
+    await expect(page.getByText(/pièces? trouvées?/i).first()).toBeVisible();
 
     await page
       .getByRole('button', { name: /^moto$/i })
@@ -20,13 +20,13 @@ test.describe('Catalogue /pieces — sync URL ↔ filtres', () => {
       .click();
 
     await expect(page).toHaveURL(/\/pieces\?.*type=moto/);
-    await expect(page.getByText(/pièces? disponibles?/i).first()).toBeVisible();
+    await expect(page.getByText(/pièces? trouvées?/i).first()).toBeVisible();
   });
 
   test("chip Auto met à jour l'URL sans reload", async ({ page }) => {
     await page.goto('/pieces');
 
-    await expect(page.getByText(/pièces? disponibles?/i).first()).toBeVisible();
+    await expect(page.getByText(/pièces? trouvées?/i).first()).toBeVisible();
 
     await page
       .getByRole('button', { name: /^auto$/i })
@@ -34,13 +34,13 @@ test.describe('Catalogue /pieces — sync URL ↔ filtres', () => {
       .click();
 
     await expect(page).toHaveURL(/\/pieces\?.*type=auto/);
-    await expect(page.getByText(/pièces? disponibles?/i).first()).toBeVisible();
+    await expect(page.getByText(/pièces? trouvées?/i).first()).toBeVisible();
   });
 
   test('accès direct /pieces?type=moto affiche les bons résultats', async ({ page }) => {
     await page.goto('/pieces?type=moto');
 
-    await expect(page.getByText(/pièces? disponibles?/i).first()).toBeVisible();
+    await expect(page.getByText(/pièces? trouvées?/i).first()).toBeVisible();
   });
 
   test('enchaîner Moto puis Tous remet le filtre à zéro', async ({ page }) => {
@@ -58,6 +58,6 @@ test.describe('Catalogue /pieces — sync URL ↔ filtres', () => {
       .click();
     // URL sans paramètre type (ou type absent)
     await expect(page).not.toHaveURL(/type=moto/);
-    await expect(page.getByText(/pièces? disponibles?/i).first()).toBeVisible();
+    await expect(page.getByText(/pièces? trouvées?/i).first()).toBeVisible();
   });
 });
