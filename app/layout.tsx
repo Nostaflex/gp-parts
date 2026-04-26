@@ -2,8 +2,6 @@ import type { Metadata } from 'next';
 import { Big_Shoulders_Display, Instrument_Sans, JetBrains_Mono } from 'next/font/google';
 import { CartProvider } from '@/components/cart/CartProvider';
 import { ToastProvider } from '@/components/ui/Toast';
-import { Navbar } from '@/components/layout/Navbar';
-import { Footer } from '@/components/layout/Footer';
 import { CookieBanner } from '@/components/gdpr/CookieBanner';
 import './globals.css';
 
@@ -29,29 +27,29 @@ const monoFont = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://gpparts.gp'),
+  metadataBase: new URL('https://car-performance.gp'),
   title: {
-    default: 'GP Parts — Pièces détachées auto & moto en Guadeloupe',
-    template: '%s | GP Parts',
+    default: 'Car Performance — Garage auto & moto Guadeloupe',
+    template: '%s | Car Performance',
   },
   description:
-    'Pièces détachées auto et moto de qualité origine, livrées partout en Guadeloupe. Freinage, moteur, transmission, filtres, éclairage et plus.',
+    'Réparation, expertise, location et vente de véhicules en Guadeloupe. Pièces détachées auto & moto livrées partout en Guadeloupe.',
   keywords: [
-    'pièces détachées',
+    'garage',
     'Guadeloupe',
-    'auto',
-    'moto',
-    'freinage',
-    'filtres',
-    'plaquettes',
-    'disques',
+    'réparation auto',
+    'pièces détachées',
+    'location véhicule',
+    'vente VO',
+    'expertise',
+    '971',
   ],
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
-    siteName: 'GP Parts',
-    title: 'GP Parts — Pièces détachées auto & moto en Guadeloupe',
-    description: "Qualité origine, livraison rapide sur toute l'île.",
+    siteName: 'Car Performance',
+    title: 'Car Performance — Garage auto & moto Guadeloupe',
+    description: 'Réparation, expertise, location et vente VO en Guadeloupe.',
   },
   robots: {
     index: true,
@@ -65,17 +63,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="fr"
       className={`${bigShoulders.variable} ${instrumentSans.variable} ${monoFont.variable}`}
     >
-      <body className="min-h-screen flex flex-col">
+      <body className="min-h-dvh flex flex-col cp-clip">
         <a href="#main" className="skip-link">
           Aller au contenu principal
         </a>
         <ToastProvider>
           <CartProvider>
-            <Navbar />
-            <main id="main" className="flex-1 pt-8">
-              {children}
-            </main>
-            <Footer />
+            {children}
             <CookieBanner />
           </CartProvider>
         </ToastProvider>

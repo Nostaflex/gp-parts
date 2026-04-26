@@ -11,6 +11,30 @@
   --border: #c6c6c8;
 }
 
+/* Car Performance — design tokens globaux */
+:root {
+  --cream: #f4ede0;
+  --ink: #1a0f06;
+  --mango: #e87200;
+  --vert: #2a5c45;
+  --vert-l: #52c88a;
+  --gold: #e9c46a;
+
+  --u-hero: #f4ede0;
+  --u-cinema: #0d0905;
+  --u-foret: #0e1f18;
+  --u-amber: #1e0e04;
+  --u-craft: #f8f5f0;
+  --u-dusk: #1a1208;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+
+  --z-header: 100;
+  --z-cursor: 9999;
+}
+
 @layer base {
   html {
     -webkit-font-smoothing: antialiased;
@@ -26,7 +50,7 @@
     outline: none;
   }
 
-  /* Scrollbar style Volcanic Clarity */
+  /* Scrollbar style Car Performance */
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
@@ -56,5 +80,57 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+}
+
+/* ─── Car Performance — utilitaires ──────────── */
+@layer utilities {
+  /* Scroll reveal */
+  .cp-reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition:
+      opacity 700ms var(--ease-out),
+      transform 700ms var(--ease-out);
+  }
+  .cp-reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Overflow — critique pour les bridges SVG */
+  .cp-clip {
+    overflow-x: clip;
+  }
+
+  /* Univers backgrounds */
+  .bg-u-hero {
+    background-color: var(--u-hero);
+  }
+  .bg-u-cinema {
+    background-color: var(--u-cinema);
+  }
+  .bg-u-foret {
+    background-color: var(--u-foret);
+  }
+  .bg-u-amber {
+    background-color: var(--u-amber);
+  }
+  .bg-u-craft {
+    background-color: var(--u-craft);
+  }
+  .bg-u-dusk {
+    background-color: var(--u-dusk);
+  }
+
+  /* Typographie CP — rôles stricts */
+  .cp-title {
+    font-family: 'Big Shoulders Display', sans-serif;
+  }
+  .cp-body {
+    font-family: 'Instrument Sans', sans-serif;
+  }
+  .cp-mono {
+    font-family: 'JetBrains Mono', monospace;
   }
 }

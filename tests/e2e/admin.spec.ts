@@ -33,10 +33,16 @@ async function injectSessionCookie(context: import('@playwright/test').BrowserCo
 /** Login complet via UI Firebase Auth + redirection */
 async function adminLogin(page: import('@playwright/test').Page) {
   await page.goto('/admin/login');
+  // Dismiss cookie banner if present (may cover the submit button)
+  const acceptBtn = page.getByRole('button', { name: /tout refuser|accepter/i }).first();
+  if (await acceptBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    await acceptBtn.click();
+  }
   await page.fill('input[name="email"]', TEST_EMAIL!);
   await page.fill('input[name="password"]', TEST_PASSWORD!);
   await page.click('button[type="submit"]');
-  await page.waitForURL('**/admin', { timeout: 15_000 });
+  // Use regex to avoid glob ambiguity; 25s to absorb emulator latency in CI
+  await page.waitForURL(/\/admin$/, { timeout: 25_000 });
 }
 
 // --- Tests ---
@@ -63,7 +69,18 @@ test.describe('Admin — login flow', () => {
     'Requires TEST_ADMIN_EMAIL + TEST_ADMIN_PASSWORD (Firebase Auth emulator)'
   );
 
+  test('emulator-login API retourne 200 pour credentials valides', async ({ page }) => {
+    // Vérifie l'API directement — diagnostique si FIREBASE_AUTH_EMULATOR_HOST est injecté
+    const res = await page.request.post('/api/admin/emulator-login', {
+      data: { email: TEST_EMAIL, password: TEST_PASSWORD },
+    });
+    const body = await res.text();
+    // Inclure le body dans le message d'erreur pour diagnostiquer depuis les logs CI
+    expect(res.status(), `emulator-login status ${res.status()}: ${body}`).toBe(200);
+  });
+
   test('login complet avec credentials valides redirige vers /admin', async ({ page }) => {
+    test.setTimeout(60_000); // emulator auth can be slow in CI
     await adminLogin(page);
     await expect(page.getByRole('heading', { name: /tableau de bord/i })).toBeVisible({
       timeout: 10_000,

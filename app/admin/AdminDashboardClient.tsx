@@ -128,6 +128,22 @@ export function AdminDashboardClient() {
           <p className="text-body mt-2" style={{ color: IOS.textMuted }}>
             Gestion du stock et des promotions
           </p>
+          <div className="flex gap-3 mt-3">
+            <Link
+              href="/admin"
+              className="text-sm font-semibold underline-offset-2"
+              style={{ color: IOS.blue }}
+            >
+              Produits
+            </Link>
+            <Link
+              href="/admin/commandes"
+              className="text-sm font-semibold underline-offset-2"
+              style={{ color: IOS.blue }}
+            >
+              Commandes
+            </Link>
+          </div>
         </div>
         <div className="flex gap-2">
           <button
@@ -360,7 +376,7 @@ export function AdminDashboardClient() {
                     <td className="px-5 py-4">
                       <div className="flex justify-end gap-1">
                         <Link
-                          href={`/catalogue/${product.slug}`}
+                          href={`/pieces/${product.slug}`}
                           className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors"
                           aria-label="Voir"
                           onMouseEnter={(e) => {

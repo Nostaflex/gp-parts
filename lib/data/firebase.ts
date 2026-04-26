@@ -3,15 +3,20 @@ import {
   getDocs,
   getDoc,
   doc,
+  addDoc,
+  updateDoc,
   query,
   where,
   orderBy,
   limit as firestoreLimit,
+  serverTimestamp,
+  Timestamp,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Product, ProductCategory } from '@/lib/types';
+import type { Product, ProductCategory, Order, OrderStatus } from '@/lib/types';
 import { parseProduct } from '@/lib/schemas/product';
-import type { DataAdapter, ProductFilters } from './types';
+import { parseOrder } from '@/lib/schemas/order';
+import type { DataAdapter, ProductFilters, OrderFilters } from './types';
 import { applyClientFilters } from './filters';
 
 /**
@@ -25,6 +30,7 @@ import { applyClientFilters } from './filters';
  */
 export class FirebaseAdapter implements DataAdapter {
   private readonly productsRef = collection(db, 'products');
+  private readonly ordersRef = collection(db, 'orders');
 
   /**
    * Convertit un document Firestore en Product typé.
@@ -122,5 +128,55 @@ export class FirebaseAdapter implements DataAdapter {
       product.compatibility.forEach((compat) => brands.add(compat.brand));
     });
     return Array.from(brands).sort();
+  }
+
+  async createOrder(order: Omit<Order, 'id'>): Promise<string> {
+    const docRef = await addDoc(this.ordersRef, {
+      ...order,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    return docRef.id;
+  }
+
+  async getOrders(filters?: OrderFilters): Promise<Order[]> {
+    let q = query(this.ordersRef, orderBy('createdAt', 'desc'));
+    if (filters?.status) {
+      q = query(
+        this.ordersRef,
+        where('status', '==', filters.status),
+        orderBy('createdAt', 'desc')
+      );
+    }
+    if (filters?.limit) {
+      q = query(q, firestoreLimit(filters.limit));
+    }
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((d) => this.docToOrder(d));
+  }
+
+  async getOrderById(id: string): Promise<Order | null> {
+    const docRef = doc(db, 'orders', id);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) return null;
+    return this.docToOrder(docSnap);
+  }
+
+  async updateOrderStatus(id: string, status: OrderStatus): Promise<void> {
+    const docRef = doc(db, 'orders', id);
+    await updateDoc(docRef, { status, updatedAt: serverTimestamp() });
+  }
+
+  private docToOrder(docSnap: { id: string; data: () => Record<string, unknown> }): Order {
+    const data = docSnap.data();
+    // Firestore Timestamps → ISO strings
+    const toISO = (v: unknown) =>
+      v instanceof Timestamp ? v.toDate().toISOString() : (v as string);
+    return parseOrder({
+      ...data,
+      id: docSnap.id,
+      createdAt: toISO(data.createdAt),
+      updatedAt: toISO(data.updatedAt),
+    });
   }
 }

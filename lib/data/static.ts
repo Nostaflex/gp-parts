@@ -1,6 +1,6 @@
-import type { Product } from '@/lib/types';
+import type { Product, Order, OrderStatus } from '@/lib/types';
 import { PRODUCTS } from '@/lib/products';
-import type { DataAdapter, ProductFilters } from './types';
+import type { DataAdapter, ProductFilters, OrderFilters } from './types';
 import { applyClientFilters } from './filters';
 
 /**
@@ -8,6 +8,10 @@ import { applyClientFilters } from './filters';
  * This serves as the default adapter before migrating to Firestore.
  * Wraps existing helper functions (getProductBySlug, etc.) in async functions.
  */
+// In-memory store pour les tests et le mode statique
+const ORDERS_STORE: Order[] = [];
+let orderIdCounter = 1;
+
 export class StaticAdapter implements DataAdapter {
   /**
    * Get all products, optionally filtered by various criteria
@@ -72,5 +76,32 @@ export class StaticAdapter implements DataAdapter {
       });
     });
     return Array.from(brands).sort();
+  }
+
+  async createOrder(order: Omit<Order, 'id'>): Promise<string> {
+    const id = `static-order-${orderIdCounter++}`;
+    ORDERS_STORE.push({ ...order, id });
+    return id;
+  }
+
+  async getOrders(filters?: OrderFilters): Promise<Order[]> {
+    let orders = [...ORDERS_STORE].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    if (filters?.status) orders = orders.filter((o) => o.status === filters.status);
+    if (filters?.limit) orders = orders.slice(0, filters.limit);
+    return orders;
+  }
+
+  async getOrderById(id: string): Promise<Order | null> {
+    return ORDERS_STORE.find((o) => o.id === id) ?? null;
+  }
+
+  async updateOrderStatus(id: string, status: OrderStatus): Promise<void> {
+    const order = ORDERS_STORE.find((o) => o.id === id);
+    if (order) {
+      order.status = status;
+      order.updatedAt = new Date().toISOString();
+    }
   }
 }

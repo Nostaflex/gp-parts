@@ -1,4 +1,4 @@
-import type { Product, ProductCategory } from '@/lib/types';
+import type { Product, ProductCategory, Order, OrderStatus } from '@/lib/types';
 
 export interface ProductFilters {
   category?: ProductCategory;
@@ -7,6 +7,11 @@ export interface ProductFilters {
   minPrice?: number;
   maxPrice?: number;
   inStock?: boolean;
+}
+
+export interface OrderFilters {
+  status?: OrderStatus;
+  limit?: number;
 }
 
 export interface DataAdapter {
@@ -18,4 +23,9 @@ export interface DataAdapter {
   getFeaturedProducts(limit?: number): Promise<Product[]>;
   getCategories(): Promise<string[]>;
   getBrands(): Promise<string[]>;
+
+  createOrder(order: Omit<Order, 'id'>): Promise<string>;
+  getOrders(filters?: OrderFilters): Promise<Order[]>;
+  getOrderById(id: string): Promise<Order | null>;
+  updateOrderStatus(id: string, status: OrderStatus): Promise<void>;
 }

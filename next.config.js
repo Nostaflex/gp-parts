@@ -33,7 +33,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https://images.unsplash.com https://firebasestorage.googleapis.com https://res.cloudinary.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "connect-src 'self'",
+              "connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com",
               "frame-ancestors 'self'",
             ].join('; '),
           },

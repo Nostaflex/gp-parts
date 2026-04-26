@@ -84,6 +84,10 @@ describe('getAdapter', () => {
       getFeaturedProducts: async () => [],
       getCategories: async () => [],
       getBrands: async () => [],
+      createOrder: async () => 'mock-id',
+      getOrders: async () => [],
+      getOrderById: async () => null,
+      updateOrderStatus: async () => {},
     };
     setAdapter(mockAdapter);
     const adapter = await getAdapter();

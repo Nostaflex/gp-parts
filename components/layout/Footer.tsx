@@ -9,10 +9,10 @@ const LEGAL_LINKS = [
 ];
 
 const CATEGORIES = [
-  { href: '/catalogue?category=freinage', label: 'Freinage' },
-  { href: '/catalogue?category=moteur', label: 'Moteur' },
-  { href: '/catalogue?category=transmission', label: 'Transmission' },
-  { href: '/catalogue?category=filtres', label: 'Filtres' },
+  { href: '/pieces?category=freinage', label: 'Freinage' },
+  { href: '/pieces?category=moteur', label: 'Moteur' },
+  { href: '/pieces?category=transmission', label: 'Transmission' },
+  { href: '/pieces?category=filtres', label: 'Filtres' },
 ];
 
 export function Footer() {

@@ -10,10 +10,31 @@ export const CURRENCY = 'EUR';
 export const LOCALE = 'fr-FR';
 
 // --- Livraison ---
-// Frais non encore tranchés (chantier produit P2).
-// Placeholder : à modifier avant Phase 6 technique.
 export const DELIVERY_FEE = 0; // en centimes (0 = gratuit par défaut)
 export const FREE_DELIVERY_THRESHOLD = 8000; // en centimes (80 €) — 0 = pas de seuil
+
+// Source unique des options de livraison — partagé client + serveur
+// Le champ `icon` est ajouté côté client uniquement (Lucide ne tourne pas serveur)
+export const DELIVERY_OPTIONS_CONFIG = [
+  {
+    id: 'store-pickup' as const,
+    label: 'Retrait en boutique',
+    description: 'Baie-Mahault · Sous 24h',
+    priceInCents: 0,
+  },
+  {
+    id: 'island-delivery' as const,
+    label: 'Livraison à domicile',
+    description: 'Toute la Guadeloupe · 24-48h',
+    priceInCents: 500,
+  },
+] as const;
+
+export type DeliveryOptionId = (typeof DELIVERY_OPTIONS_CONFIG)[number]['id'];
+
+export function getDeliveryPrice(optionId: string): number {
+  return DELIVERY_OPTIONS_CONFIG.find((o) => o.id === optionId)?.priceInCents ?? 0;
+}
 
 // --- Stock ---
 // Seuil d'alerte back-office « stock bas »
