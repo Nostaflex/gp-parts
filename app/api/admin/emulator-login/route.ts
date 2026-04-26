@@ -44,13 +44,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Credentials invalides' }, { status: 401 });
     }
 
-    const { idToken } = (await authRes.json()) as { idToken: string };
+    const authData = (await authRes.json()) as { idToken: string; localId?: string };
+    const { idToken, localId } = authData;
 
-    // Décoder le JWT pour extraire l'uid (même logique que /api/sessionLogin)
-    const payloadBase64 = idToken.split('.')[1];
-    if (!payloadBase64) throw new Error('idToken malformé');
-    const payload = JSON.parse(Buffer.from(payloadBase64, 'base64url').toString('utf8'));
-    const cookieValue = (payload.sub as string) ?? (payload.user_id as string);
+    // Extract UID: try JWT payload first, fall back to localId from response body.
+    // The emulator JWT may use sub, user_id, or omit both — localId is always present.
+    let cookieValue: string | undefined;
+    try {
+      const payloadBase64 = idToken.split('.')[1];
+      if (payloadBase64) {
+        const payload = JSON.parse(
+          Buffer.from(payloadBase64, 'base64url').toString('utf8')
+        ) as Record<string, unknown>;
+        cookieValue = (payload.sub as string) || (payload.user_id as string) || undefined;
+      }
+    } catch {
+      // JWT decode failed — fall through to localId
+    }
+    if (!cookieValue && localId) cookieValue = localId;
     if (!cookieValue) throw new Error('uid introuvable dans le token émulateur');
 
     const response = NextResponse.json({ status: 'ok' });

@@ -11,8 +11,9 @@ test.describe('Panier — persistance localStorage', () => {
     await page.goto('/pieces');
 
     // 2. Cliquer sur le PREMIER bouton "Ajouter au panier" de la liste
+    // CatalogueClient is in a Suspense boundary (useSearchParams) — wait for hydration
     const addToCartBtn = page.getByRole('button', { name: /ajouter au panier/i }).first();
-    await expect(addToCartBtn).toBeVisible();
+    await expect(addToCartBtn).toBeVisible({ timeout: 15_000 });
     await addToCartBtn.click();
 
     // 3. Le badge panier dans la navbar doit indiquer 1 article

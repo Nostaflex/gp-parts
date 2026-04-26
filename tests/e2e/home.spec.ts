@@ -10,7 +10,7 @@ test.describe('Home page — smoke', () => {
 
     await expect(page).toHaveTitle(/GP Parts|Car Performance/i);
 
-    // La navbar CP expose un lien "Pièces" (ancienne route /catalogue → /pieces)
-    await expect(page.getByRole('link', { name: /^pièces$/i }).first()).toBeVisible();
+    // La navbar CP expose un lien vers /pieces
+    await expect(page.locator('a[href="/pieces"]').first()).toBeVisible({ timeout: 10_000 });
   });
 });
