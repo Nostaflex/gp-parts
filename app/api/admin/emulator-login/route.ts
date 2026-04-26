@@ -25,10 +25,9 @@ export async function POST(request: NextRequest) {
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? 'demo-gp-parts';
 
   try {
-    // Appel direct à l'API REST de l'émulateur Auth
-    // singleProjectMode=true requiert le projectId dans le chemin
+    // Appel direct à l'API REST de l'émulateur Auth (endpoint v1 standard sans project ID)
     const authRes = await fetch(
-      `http://${authHost}/identitytoolkit.googleapis.com/v1/projects/${projectId}/accounts:signInWithPassword?key=demo-api-key`,
+      `http://${authHost}/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=demo-api-key`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
