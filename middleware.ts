@@ -39,5 +39,6 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/api/admin/:path*'],
+  // emulator-login est exclu : c'est lui qui crée la session, pas besoin d'en avoir une
+  matcher: ['/admin/:path*', '/api/admin/((?!emulator-login).*)'],
 };
