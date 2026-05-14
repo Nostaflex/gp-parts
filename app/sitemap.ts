@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { PRODUCTS } from '@/lib/products';
 import { CATEGORIES } from '@/lib/categories';
+import { VEHICULES } from '@/lib/vehicules';
 
 // URL de base : pilotée par env (production) avec fallback dev
 const BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://gpparts.gp').replace(/\/$/, '');
@@ -48,5 +49,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  return [...staticRoutes, ...categoryRoutes, ...productRoutes];
+  const vehiculeRoutes: MetadataRoute.Sitemap = VEHICULES.map((v) => ({
+    url: `${BASE_URL}/vente-vo/${v.id}`,
+    lastModified: now,
+    changeFrequency: 'weekly',
+    priority: 0.7,
+  }));
+
+  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...vehiculeRoutes];
 }

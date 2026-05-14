@@ -1,97 +1,12 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { VEHICULES } from '@/lib/vehicules';
 
 type Energie = 'Toutes' | 'Essence' | 'Diesel' | 'Hybride';
 type BudgetMax = 15000 | 20000 | 30000 | 999999;
-
-type Vehicule = {
-  id: string;
-  marque: string;
-  modele: string;
-  annee: number;
-  km: number;
-  energie: 'Essence' | 'Diesel' | 'Hybride';
-  transmission: string;
-  places: number;
-  options: string[];
-  prix: number;
-  mensualite: number;
-  image: string;
-};
-
-const VEHICULES: Vehicule[] = [
-  {
-    id: 'peugeot-308sw',
-    marque: 'Peugeot',
-    modele: '308 SW GT Line',
-    annee: 2021,
-    km: 42000,
-    energie: 'Diesel',
-    transmission: 'BVA',
-    places: 5,
-    options: ['Climatisation', 'GPS'],
-    prix: 18900,
-    mensualite: 289,
-    image: 'https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=600&q=80&fit=crop',
-  },
-  {
-    id: 'renault-clio',
-    marque: 'Renault',
-    modele: 'Clio V Intens',
-    annee: 2022,
-    km: 28000,
-    energie: 'Essence',
-    transmission: 'BVM',
-    places: 5,
-    options: ['Clim auto'],
-    prix: 14500,
-    mensualite: 219,
-    image: 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=600&q=80&fit=crop',
-  },
-  {
-    id: 'citroen-c3',
-    marque: 'Citroën',
-    modele: 'C3 Shine Pack',
-    annee: 2020,
-    km: 55000,
-    energie: 'Essence',
-    transmission: 'BVM',
-    places: 5,
-    options: ['Clim manuelle'],
-    prix: 11200,
-    mensualite: 169,
-    image: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&q=80&fit=crop',
-  },
-  {
-    id: 'vw-golf',
-    marque: 'Volkswagen',
-    modele: 'Golf VIII Life',
-    annee: 2023,
-    km: 15000,
-    energie: 'Diesel',
-    transmission: 'BVA',
-    places: 5,
-    options: ['Carplay', 'Régulateur'],
-    prix: 24900,
-    mensualite: 379,
-    image: 'https://images.unsplash.com/photo-1471444928139-48c5bf5173f8?w=600&q=80&fit=crop',
-  },
-  {
-    id: 'toyota-yaris',
-    marque: 'Toyota',
-    modele: 'Yaris Cross',
-    annee: 2022,
-    km: 32000,
-    energie: 'Hybride',
-    transmission: 'BVA',
-    places: 5,
-    options: ['SUV compact', 'Hybride'],
-    prix: 16800,
-    mensualite: 255,
-    image: 'https://images.unsplash.com/photo-1590362891991-f776e747a588?w=600&q=80&fit=crop',
-  },
-];
 
 const ENERGIES: Energie[] = ['Toutes', 'Essence', 'Diesel', 'Hybride'];
 const BUDGETS: { label: string; val: BudgetMax }[] = [
@@ -201,17 +116,19 @@ export function VenteVoClient() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {vehiculesFiltres.map((v) => (
-                <div
+                <Link
                   key={v.id}
-                  className="bg-white rounded-2xl border border-[#E5DDD3] overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_60px_rgba(26,15,6,0.10)]"
+                  href={`/vente-vo/${v.id}`}
+                  className="group bg-white rounded-2xl border border-[#E5DDD3] overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_60px_rgba(26,15,6,0.10)] hover:border-cp-mango/40 focus:outline-none focus:ring-2 focus:ring-cp-mango/50"
                 >
                   {/* Image */}
                   <div className="relative h-48 overflow-hidden bg-[#F8F5F0]">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    <Image
                       src={v.image}
                       alt={`${v.marque} ${v.modele}`}
-                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-[#1A0F06]/80 to-transparent">
                       <p className="cp-title text-[0.75rem] font-bold text-[#E9C46A] tracking-widest uppercase">
@@ -232,7 +149,7 @@ export function VenteVoClient() {
                     </p>
 
                     <div className="flex flex-wrap gap-2 mb-3">
-                      {v.options.map((o) => (
+                      {v.options.slice(0, 3).map((o) => (
                         <span
                           key={o}
                           className="cp-mono text-[0.6rem] text-cp-ink/40 tracking-wide"
@@ -254,7 +171,7 @@ export function VenteVoClient() {
                       >
                         <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                       </svg>
-                      GARANTIE 6 MOIS INCLUSE
+                      GARANTIE 12 MOIS INCLUSE
                     </div>
 
                     <div className="flex items-end justify-between pt-4 border-t border-[#F8F5F0]">
@@ -264,33 +181,12 @@ export function VenteVoClient() {
                         </p>
                         <p className="text-xs text-cp-ink/35 mt-0.5">ou {v.mensualite} €/mois</p>
                       </div>
-                      <div className="flex gap-2">
-                        <a
-                          href={`/contact?sujet=${encodeURIComponent('Vente VO')}&vehicule=${encodeURIComponent(`${v.marque} ${v.modele}`)}&ref=${encodeURIComponent(v.id)}`}
-                          className="px-4 py-2 rounded-xl bg-cp-ink text-cp-cream text-xs font-semibold hover:bg-cp-mango transition-colors"
-                        >
-                          Je suis intéressé
-                        </a>
-                        <a
-                          href="tel:+590590000000"
-                          className="w-9 h-9 rounded-xl border border-[#E5DDD3] flex items-center justify-center text-cp-ink/50 hover:border-cp-mango hover:text-cp-mango transition-colors"
-                          aria-label="Appeler"
-                        >
-                          <svg
-                            width="14"
-                            height="14"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.5a19.79 19.79 0 01-3-8.59A2 2 0 012.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 9.91a16 16 0 006.16 6.16l1.27-.83a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" />
-                          </svg>
-                        </a>
-                      </div>
+                      <span className="px-4 py-2 rounded-xl bg-cp-ink text-cp-cream text-xs font-semibold group-hover:bg-cp-mango transition-colors">
+                        Voir le véhicule →
+                      </span>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}
