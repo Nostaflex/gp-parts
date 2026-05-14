@@ -139,7 +139,7 @@ export default function PiecesLayout({ children }: { children: ReactNode }) {
             <div>
               <p className="text-cp-cream/30 text-xs uppercase tracking-widest mb-4">Services</p>
               <div className="flex flex-col gap-2">
-                {['/reparation', '/location', '/vente-vehicule'].map((href) => (
+                {['/reparation', '/location', '/vente-vehicule', '/vente-moto'].map((href) => (
                   <Link
                     key={href}
                     href={href}

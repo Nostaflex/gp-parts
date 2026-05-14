@@ -4,7 +4,13 @@ import { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle, Upload, X } from 'lucide-react';
 
-type Sujet = 'Renseignement' | 'Devis réparation' | 'Location' | 'Vente véhicule' | 'Autre';
+type Sujet =
+  | 'Renseignement'
+  | 'Devis réparation'
+  | 'Location'
+  | 'Vente véhicule'
+  | 'Vente moto'
+  | 'Autre';
 
 type FormData = {
   prenom: string;
@@ -22,6 +28,7 @@ const SUJETS: Sujet[] = [
   'Devis réparation',
   'Location',
   'Vente véhicule',
+  'Vente moto',
   'Autre',
 ];
 

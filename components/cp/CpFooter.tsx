@@ -27,6 +27,7 @@ export function CpFooter() {
                 { href: '/reparation', label: 'Réparation' },
                 { href: '/location', label: 'Location' },
                 { href: '/vente-vehicule', label: 'Vente véhicule' },
+                { href: '/vente-moto', label: 'Vente moto' },
               ].map((l) => (
                 <Link
                   key={l.href}

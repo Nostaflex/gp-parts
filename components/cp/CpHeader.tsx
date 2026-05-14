@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { href: '/reparation', label: 'Réparation' },
   { href: '/location', label: 'Location' },
   { href: '/vente-vehicule', label: 'Vente véhicule' },
+  { href: '/vente-moto', label: 'Vente moto' },
   { href: '/pieces', label: 'Pièces' },
   { href: '/contact', label: 'Contact' },
 ];

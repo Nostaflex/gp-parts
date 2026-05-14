@@ -1,0 +1,141 @@
+import type { Metadata } from 'next';
+import { CpHeader } from '@/components/cp/CpHeader';
+import { CpBridge } from '@/components/cp/CpBridge';
+import { CpFooter } from '@/components/cp/CpFooter';
+import { VenteMotoClient } from './VenteMotoClient';
+import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'Vente de motos — Occasion & Neuf',
+  description:
+    "Achetez une moto d'occasion contrôlée ou neuve à commander en Guadeloupe. Roadster, sport, trail, scooter — toutes cylindrées. Garantie incluse, financement sur mesure.",
+};
+
+export default function VenteMotoPage() {
+  return (
+    <>
+      <CpHeader darkSectionIds={['moto-hero']} />
+
+      {/* ── HERO ─────────────────────────────── */}
+      <section
+        id="moto-hero"
+        className="relative pt-20 overflow-hidden"
+        style={{ backgroundColor: '#1E0E04' }}
+      >
+        <div
+          aria-hidden="true"
+          className="absolute pointer-events-none rounded-full"
+          style={{
+            width: '600px',
+            height: '600px',
+            top: '50%',
+            left: '72%',
+            transform: 'translate(-50%, -50%)',
+            background: 'radial-gradient(circle, rgba(184,130,11,0.12) 0%, transparent 70%)',
+          }}
+        />
+
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-0 items-end min-h-[75vh] relative z-10">
+          <div className="py-16 md:py-24">
+            <nav
+              aria-label="Fil d'Ariane"
+              className="flex items-center gap-2 text-xs mb-8"
+              style={{ color: 'rgba(248,237,216,0.3)' }}
+            >
+              <Link href="/" className="hover:text-[#E9C46A] transition-colors">
+                Accueil
+              </Link>
+              <svg
+                width="10"
+                height="10"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path d="m9 18 6-6-6-6" />
+              </svg>
+              <span style={{ color: 'rgba(248,237,216,0.6)' }}>Vente moto</span>
+            </nav>
+
+            <p
+              className="cp-mono text-xs tracking-widest uppercase mb-5"
+              style={{ color: '#E9C46A' }}
+            >
+              Motos contrôlées · Garantie incluse
+            </p>
+            <h1
+              className="cp-title font-black leading-none mb-6"
+              style={{ color: '#F8EDD8', fontSize: 'clamp(3rem, 7vw, 7rem)' }}
+            >
+              VENTE
+              <br />
+              <span style={{ color: '#E9C46A' }}>MOTO</span>
+            </h1>
+            <p
+              className="text-base leading-relaxed max-w-md mb-8"
+              style={{ color: 'rgba(192,144,96,0.9)' }}
+            >
+              Chaque moto est contrôlée par nos techniciens, garantie et prête à rouler. Roadster,
+              sport, trail, scooter — toutes cylindrées disponibles.
+            </p>
+
+            <div className="flex flex-wrap gap-2 mb-8">
+              {[
+                'Contrôlée par nos techniciens',
+                'Garantie incluse',
+                'Financement disponible',
+                'Reprise possible',
+              ].map((g) => (
+                <span
+                  key={g}
+                  className="cp-mono text-xs px-3 py-1.5 rounded-full"
+                  style={{
+                    background: 'rgba(233,196,106,0.08)',
+                    border: '1px solid rgba(233,196,106,0.15)',
+                    color: 'rgba(192,144,96,0.9)',
+                  }}
+                >
+                  {g}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div
+            className="hidden md:block h-full relative overflow-hidden"
+            style={{ minHeight: '500px' }}
+          >
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{
+                backgroundImage:
+                  "url('https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=900&q=80&fit=crop')",
+                filter: 'brightness(0.7) saturate(0.9)',
+              }}
+            />
+            <div
+              className="absolute inset-0"
+              style={{
+                background: 'linear-gradient(to right, rgba(28,14,4,0.65) 0%, transparent 50%)',
+              }}
+            />
+            <div
+              className="absolute bottom-0 left-0 right-0 h-2/5"
+              style={{ background: 'linear-gradient(to top, #1E0E04 0%, transparent 100%)' }}
+            />
+          </div>
+        </div>
+      </section>
+
+      <CpBridge fromColor="#1E0E04" toColor="#F4EDE0" />
+
+      {/* ── CATALOGUE + REPRISE (client) ── */}
+      <VenteMotoClient />
+
+      <CpBridge fromColor="#F4EDE0" toColor="#1A0F06" />
+      <CpFooter />
+    </>
+  );
+}

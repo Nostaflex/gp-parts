@@ -30,12 +30,20 @@ const UNIVERS = [
     accent: '#52C88A',
   },
   {
-    id: 'vente-vo',
+    id: 'vente-vehicule',
     href: '/vente-vehicule',
     label: 'Vente véhicule',
     tag: '03',
-    desc: "Véhicules d'occasion sélectionnés, contrôlés et garantis par nos soins.",
+    desc: "Véhicules d'occasion ou neufs, contrôlés et garantis par nos soins.",
     accent: '#2A5C45',
+  },
+  {
+    id: 'vente-moto',
+    href: '/vente-moto',
+    label: 'Vente moto',
+    tag: '04',
+    desc: 'Roadster, sport, trail, scooter — toutes cylindrées, occasion ou neuf.',
+    accent: '#C8392E',
   },
 ];
 
@@ -408,7 +416,7 @@ export default function HomePage() {
             <div>
               <p className="text-cp-cream/30 text-xs uppercase tracking-widest mb-4">Services</p>
               <div className="flex flex-col gap-2">
-                {['/reparation', '/location', '/vente-vehicule'].map((href) => (
+                {['/reparation', '/location', '/vente-vehicule', '/vente-moto'].map((href) => (
                   <Link
                     key={href}
                     href={href}
