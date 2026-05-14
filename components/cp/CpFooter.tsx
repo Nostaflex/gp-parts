@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
 export function CpFooter() {
@@ -6,9 +7,14 @@ export function CpFooter() {
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
           <div>
-            <p className="cp-title text-cp-cream font-black text-2xl mb-3">
-              CAR<span className="text-cp-mango">PERF.</span>
-            </p>
+            <Image
+              src="/images/logo-carperformance.svg"
+              alt="Car Performance"
+              width={180}
+              height={60}
+              className="h-14 w-auto mb-3"
+            />
+            <span className="sr-only">Car Performance</span>
             <p className="text-cp-cream/40 text-sm leading-relaxed">
               Votre garage de confiance en Guadeloupe — passion, conseil technique, pièces de
               qualité.
