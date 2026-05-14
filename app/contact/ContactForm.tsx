@@ -320,7 +320,7 @@ export function ContactForm() {
           onClick={submit}
           className="w-full py-3.5 rounded-xl bg-cp-vert-l text-[#0E1F18] text-sm font-bold hover:bg-cp-vert-l/90 transition-colors"
         >
-          Envoyer le message
+          Je suis intéressé
         </button>
       </div>
     </div>
