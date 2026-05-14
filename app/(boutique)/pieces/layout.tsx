@@ -127,7 +127,8 @@ export default function PiecesLayout({ children }: { children: ReactNode }) {
                 CAR<span className="text-cp-mango">PERF.</span>
               </p>
               <p className="text-cp-cream/40 text-sm leading-relaxed">
-                Votre garage de confiance en Guadeloupe depuis 2010 — 16 ans d&apos;expérience.
+                Votre garage de confiance en Guadeloupe — passion, conseil technique, pièces de
+                qualité.
               </p>
             </div>
             <div>
