@@ -7,7 +7,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'À propos',
   description:
-    "Car Performance Guadeloupe depuis 2010. Garage de confiance à Pointe-à-Pitre, 15 ans d'expertise automobile, équipe locale passionnée.",
+    'Car Performance Guadeloupe. Garage à Pointe-à-Pitre, équipe locale passionnée, conseil technique sur pièces auto et moto.',
 };
 
 const VALEURS = [
@@ -46,7 +46,6 @@ const EQUIPE = [
     prenom: 'Stéphane',
     nom: 'M.',
     role: 'Fondateur & Directeur',
-    depuis: '2010',
     image:
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80&fit=crop&crop=face',
   },
@@ -54,7 +53,6 @@ const EQUIPE = [
     prenom: 'Christelle',
     nom: 'B.',
     role: 'Responsable accueil & RDV',
-    depuis: '2013',
     image:
       'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80&fit=crop&crop=face',
   },
@@ -62,7 +60,6 @@ const EQUIPE = [
     prenom: 'Jérôme',
     nom: 'L.',
     role: 'Chef mécanicien',
-    depuis: '2011',
     image:
       'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80&fit=crop&crop=face',
   },
@@ -70,7 +67,6 @@ const EQUIPE = [
     prenom: 'Nadège',
     nom: 'C.',
     role: 'Technicienne carrosserie',
-    depuis: '2017',
     image:
       'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80&fit=crop&crop=face',
   },
@@ -128,7 +124,7 @@ export default function AProposPage() {
               <span className="text-cp-ink/60">À propos</span>
             </nav>
             <p className="cp-mono text-cp-mango text-xs tracking-widest uppercase mb-5">
-              Notre histoire · Depuis 2010
+              Notre histoire
             </p>
             <h1
               className="cp-title font-black text-cp-ink leading-none mb-6"
@@ -143,14 +139,13 @@ export default function AProposPage() {
               <em className="text-cp-mango not-italic">ANTILLES</em>
             </h1>
             <p className="text-cp-ink/55 text-base leading-relaxed max-w-md mb-8">
-              Né en Guadeloupe, pensé pour les Guadeloupéens. Car Performance, c&apos;est 15 ans de
-              savoir-faire mécanique et une équipe qui aime vraiment les voitures.
+              Né en Guadeloupe, pensé pour les Guadeloupéens. Car Performance, c&apos;est une équipe
+              qui aime vraiment les voitures — et qui le fait avec passion et savoir-faire.
             </p>
             <div className="flex items-center gap-3">
-              <span className="cp-title font-black text-cp-ink text-4xl">2010</span>
               <span className="text-cp-ink/40 text-sm">
-                Année de fondation
-                <br />à Pointe-à-Pitre
+                Atelier à Pointe-à-Pitre
+                <br />— Guadeloupe (971)
               </span>
             </div>
           </div>
@@ -168,9 +163,9 @@ export default function AProposPage() {
             </div>
             {/* Badge */}
             <div className="absolute bottom-6 left-6 bg-cp-ink/90 backdrop-blur-sm rounded-xl px-5 py-4 border border-cp-cream/10">
-              <p className="cp-title font-black text-cp-mango text-3xl leading-none">15</p>
-              <p className="text-xs text-cp-cream font-semibold mt-1">Années d&apos;expertise</p>
-              <p className="text-[0.65rem] text-cp-cream/40 mt-0.5">au service des Guadeloupéens</p>
+              <p className="cp-title font-black text-cp-mango text-2xl leading-none">971</p>
+              <p className="text-xs text-cp-cream font-semibold mt-1">Au cœur</p>
+              <p className="text-[0.65rem] text-cp-cream/40 mt-0.5">de la Guadeloupe</p>
             </div>
             {/* Tag */}
             <div className="absolute top-6 right-6 cp-mono text-xs text-cp-ink/50 bg-cp-cream/80 backdrop-blur-sm px-3 py-1.5 rounded-full">
@@ -242,43 +237,19 @@ export default function AProposPage() {
               className="cp-title font-black text-cp-ink leading-none mb-6"
               style={{ fontSize: 'clamp(2rem,4vw,4rem)' }}
             >
-              15 ANS À<br />
-              VOS CÔTÉS
+              NOTRE
+              <br />
+              PASSION
             </h2>
             <p className="text-cp-ink/55 text-base leading-relaxed mb-6">
-              Fondé en 2010 par Stéphane dans un petit atelier de Jarry, Car Performance est devenu
-              en 15 ans le garage de référence en Guadeloupe. Ce qui n&apos;a pas changé : la
-              passion du travail bien fait et l&apos;envie de rendre service.
+              Lancé par Stéphane à Pointe-à-Pitre, Car Performance est un garage indépendant qui
+              prend soin des voitures et des motos des Guadeloupéens. Ce qui nous anime : la passion
+              du travail bien fait et l&apos;envie de rendre service.
             </p>
             <p className="text-cp-ink/55 text-base leading-relaxed mb-8">
-              Aujourd&apos;hui, notre équipe de 8 techniciens prend en charge toutes les marques —
-              de la vidange express à la rénovation complète — dans un atelier de 400 m² équipé des
-              derniers outils diagnostiques.
+              Notre équipe prend en charge toutes les marques — de la vidange express à la
+              rénovation complète — avec un conseil technique honnête et des pièces de qualité.
             </p>
-
-            {/* Timeline */}
-            <div className="flex flex-col gap-4">
-              {[
-                { annee: '2010', fait: "Ouverture de l'atelier à Jarry, 2 mécaniciens" },
-                { annee: '2014', fait: 'Certification expertise automobile' },
-                { annee: '2018', fait: 'Extension 400 m² + service carrosserie' },
-                { annee: '2022', fait: 'Lancement de la boutique pièces en ligne' },
-                { annee: '2025', fait: '15 ans · 8 techniciens · 500+ pièces en stock' },
-              ].map((t) => (
-                <div key={t.annee} className="flex gap-4 items-start">
-                  <span className="cp-mono font-bold text-cp-mango text-sm flex-shrink-0 w-12">
-                    {t.annee}
-                  </span>
-                  <div className="flex items-start gap-3 flex-1">
-                    <div
-                      className="w-px h-full bg-[#E5DDD3] flex-shrink-0 mt-2"
-                      style={{ minHeight: '16px' }}
-                    />
-                    <p className="text-cp-ink/60 text-sm">{t.fait}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* Photos stack */}
@@ -344,7 +315,6 @@ export default function AProposPage() {
                   {m.prenom} {m.nom}
                 </p>
                 <p className="text-cp-cream/45 text-xs mt-1">{m.role}</p>
-                <p className="cp-mono text-[0.6rem] text-cp-mango/60 mt-0.5">Depuis {m.depuis}</p>
               </div>
             ))}
           </div>
@@ -407,8 +377,7 @@ export default function AProposPage() {
             <span className="text-cp-mango">RENDEZ-VOUS</span>
           </h2>
           <p className="text-cp-cream/45 text-base leading-relaxed mb-10">
-            Réparation, expertise, location ou achat — notre équipe est disponible du lundi au
-            samedi.
+            Réparation, location ou achat — notre équipe est disponible du lundi au samedi.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link

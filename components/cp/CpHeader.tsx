@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 const NAV_LINKS = [
   { href: '/reparation', label: 'Réparation' },
-  { href: '/expertise', label: 'Expertise' },
   { href: '/location', label: 'Location' },
-  { href: '/vente-vo', label: 'Vente VO' },
+  { href: '/vente-vehicule', label: 'Vente véhicule' },
+  { href: '/vente-moto', label: 'Vente moto' },
   { href: '/pieces', label: 'Pièces' },
   { href: '/contact', label: 'Contact' },
 ];
@@ -66,9 +67,17 @@ export function CpHeader({ darkSectionIds = [] }: CpHeaderProps) {
         {/* Logo */}
         <Link
           href="/"
-          className="cp-title font-bold text-xl tracking-tight hover:opacity-80 transition-opacity"
+          aria-label="Car Performance — accueil"
+          className="flex items-center hover:opacity-80 transition-opacity"
         >
-          CAR<span className="text-cp-mango">PERFORMANCE</span>
+          <Image
+            src="/images/logo-carperformance.svg"
+            alt="Car Performance"
+            width={140}
+            height={48}
+            priority
+            className="h-12 w-auto"
+          />
         </Link>
 
         {/* Desktop nav */}

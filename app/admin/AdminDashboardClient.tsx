@@ -128,7 +128,7 @@ export function AdminDashboardClient() {
           <p className="text-body mt-2" style={{ color: IOS.textMuted }}>
             Gestion du stock et des promotions
           </p>
-          <div className="flex gap-3 mt-3">
+          <div className="flex gap-3 mt-3 flex-wrap">
             <Link
               href="/admin"
               className="text-sm font-semibold underline-offset-2"
@@ -142,6 +142,20 @@ export function AdminDashboardClient() {
               style={{ color: IOS.blue }}
             >
               Commandes
+            </Link>
+            <Link
+              href="/admin/estimation"
+              className="text-sm font-semibold underline-offset-2"
+              style={{ color: IOS.blue }}
+            >
+              Estimation reprise
+            </Link>
+            <Link
+              href="/admin/leboncoin"
+              className="text-sm font-semibold underline-offset-2"
+              style={{ color: IOS.blue }}
+            >
+              Export Leboncoin
             </Link>
           </div>
         </div>

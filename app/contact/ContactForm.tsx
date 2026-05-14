@@ -1,9 +1,16 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { CheckCircle, Upload, X } from 'lucide-react';
 
-type Sujet = 'Renseignement' | 'Devis réparation' | 'Expertise' | 'Location' | 'Vente VO' | 'Autre';
+type Sujet =
+  | 'Renseignement'
+  | 'Devis réparation'
+  | 'Location'
+  | 'Vente véhicule'
+  | 'Vente moto'
+  | 'Autre';
 
 type FormData = {
   prenom: string;
@@ -19,9 +26,9 @@ type FormData = {
 const SUJETS: Sujet[] = [
   'Renseignement',
   'Devis réparation',
-  'Expertise',
   'Location',
-  'Vente VO',
+  'Vente véhicule',
+  'Vente moto',
   'Autre',
 ];
 
@@ -30,6 +37,7 @@ const field =
 const lbl = 'block text-xs font-semibold text-cp-vert-l/70 uppercase tracking-wider mb-1.5';
 
 export function ContactForm() {
+  const searchParams = useSearchParams();
   const [done, setDone] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
@@ -44,6 +52,42 @@ export function ContactForm() {
     files: [],
     consent: false,
   });
+
+  // Pré-remplissage depuis URL: ?sujet=Vente+VO&vehicule=X&ref=Y&financement=1&reprise=1
+  // Pattern "Je suis intéressé" / "Estimation reprise" — context vient depuis vente-vo.
+  useEffect(() => {
+    const urlSujet = searchParams.get('sujet');
+    const urlVehicule = searchParams.get('vehicule');
+    const urlRef = searchParams.get('ref');
+    const urlFinancement = searchParams.get('financement');
+    const urlReprise = searchParams.get('reprise');
+    if (!urlSujet && !urlVehicule && !urlRef && !urlFinancement && !urlReprise) return;
+    setData((d) => {
+      const validSujet = SUJETS.includes(urlSujet as Sujet) ? (urlSujet as Sujet) : d.sujet;
+      const prefilled: string[] = [];
+      if (urlFinancement === '1') {
+        prefilled.push("Demande d'étude de financement.");
+      }
+      if (urlReprise === '1') {
+        prefilled.push(
+          "Demande d'estimation reprise de mon véhicule actuel.",
+          '',
+          'Mon véhicule à céder :',
+          '- Marque / Modèle :',
+          '- Année :',
+          '- Kilométrage :',
+          '- État général :'
+        );
+      }
+      if (urlVehicule) prefilled.push(`Je suis intéressé par : ${urlVehicule}`);
+      if (urlRef) prefilled.push(`Référence : ${urlRef}`);
+      return {
+        ...d,
+        sujet: validSujet,
+        message: prefilled.length ? `${prefilled.join('\n')}\n\n` : d.message,
+      };
+    });
+  }, [searchParams]);
 
   const set = <K extends keyof FormData>(k: K, v: FormData[K]) => {
     setData((d) => ({ ...d, [k]: v }));
@@ -298,7 +342,7 @@ export function ContactForm() {
           onClick={submit}
           className="w-full py-3.5 rounded-xl bg-cp-vert-l text-[#0E1F18] text-sm font-bold hover:bg-cp-vert-l/90 transition-colors"
         >
-          Envoyer le message
+          Je suis intéressé
         </button>
       </div>
     </div>

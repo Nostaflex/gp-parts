@@ -2,16 +2,16 @@ import type { Metadata } from 'next';
 import { CpHeader } from '@/components/cp/CpHeader';
 import { CpBridge } from '@/components/cp/CpBridge';
 import { CpFooter } from '@/components/cp/CpFooter';
-import { VenteVoClient } from './VenteVoClient';
+import { VenteVehiculeClient } from './VenteVehiculeClient';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: "Vente de véhicules d'occasion",
+  title: 'Vente de véhicules — Occasion & Neuf',
   description:
-    "Achetez un véhicule d'occasion certifié en Guadeloupe. Garantie 6 mois incluse, expertisé, financement sur mesure. Toutes marques.",
+    "Achetez un véhicule d'occasion contrôlé ou neuf à commander en Guadeloupe. Garantie incluse, financement sur mesure. Toutes marques.",
 };
 
-export default function VenteVoPage() {
+export default function VenteVehiculePage() {
   return (
     <>
       <CpHeader darkSectionIds={['vo-hero']} />
@@ -58,14 +58,14 @@ export default function VenteVoPage() {
               >
                 <path d="m9 18 6-6-6-6" />
               </svg>
-              <span style={{ color: 'rgba(248,237,216,0.6)' }}>Vente VO</span>
+              <span style={{ color: 'rgba(248,237,216,0.6)' }}>Vente véhicule</span>
             </nav>
 
             <p
               className="cp-mono text-xs tracking-widest uppercase mb-5"
               style={{ color: '#E9C46A' }}
             >
-              Véhicules certifiés · Garantie incluse
+              Véhicules contrôlés · Garantie incluse
             </p>
             <h1
               className="cp-title font-black leading-none mb-6"
@@ -79,15 +79,15 @@ export default function VenteVoPage() {
               className="text-base leading-relaxed max-w-md mb-8"
               style={{ color: 'rgba(192,144,96,0.9)' }}
             >
-              Chaque véhicule est expertisé par nos techniciens, garanti 6 mois et prêt à rouler.
+              Chaque véhicule est contrôlé par nos techniciens, garanti 12 mois et prêt à rouler.
               Financement sur mesure disponible.
             </p>
 
             {/* Garanties pills */}
             <div className="flex flex-wrap gap-2 mb-8">
               {[
-                'Expertisé par nos techniciens',
-                'Garantie 6 mois incluse',
+                'Contrôlé par nos techniciens',
+                'Garantie 12 mois incluse',
                 'Financement disponible',
                 'Reprise possible',
               ].map((g) => (
@@ -159,7 +159,7 @@ export default function VenteVoPage() {
       <CpBridge fromColor="#1E0E04" toColor="#F4EDE0" />
 
       {/* ── CLIENT COMPONENT (catalogue + financement) ── */}
-      <VenteVoClient />
+      <VenteVehiculeClient />
 
       {/* Bridge financement → footer */}
       <CpBridge fromColor="#2C1A08" toColor="#1A0F06" />

@@ -1,14 +1,15 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
+import Link from 'next/link';
 import { CpHeader } from '@/components/cp/CpHeader';
 import { CpBridge } from '@/components/cp/CpBridge';
 import { CpFooter } from '@/components/cp/CpFooter';
 import { LocationClient } from './LocationClient';
-import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Location de véhicules',
+  title: 'Location de véhicules — Racoon',
   description:
-    'Location de voitures en Guadeloupe. Kilométrage illimité, assurance incluse, disponible dès demain. Citadines, berlines, SUV et utilitaires.',
+    'Location de voitures Racoon en Guadeloupe. Explore la Guadeloupe en toute liberté. Kilométrage illimité, assurance incluse, disponible dès demain.',
 };
 
 export default function LocationPage() {
@@ -77,22 +78,24 @@ export default function LocationPage() {
               className="cp-mono text-xs tracking-widest uppercase mb-5"
               style={{ color: '#E9C46A' }}
             >
-              Disponible immédiatement
+              Racoon · Disponible immédiatement
             </p>
             <h1
               className="cp-title font-black leading-none mb-6"
               style={{ color: '#F8EDD8', fontSize: 'clamp(3rem, 7vw, 7rem)' }}
             >
-              LOCATION
+              EXPLORE LA
               <br />
-              <span style={{ color: '#E9C46A' }}>EN GUADELOUPE</span>
+              <span style={{ color: '#E9C46A' }}>GUADELOUPE</span>
+              <br />
+              EN TOUTE LIBERTÉ
             </h1>
             <p
               className="text-base leading-relaxed max-w-md mb-8"
               style={{ color: 'rgba(192,144,96,0.9)' }}
             >
-              Véhicules récents, kilométrage illimité, remis en main propre. Réservez en ligne,
-              récupérez votre véhicule dès demain.
+              Notre flotte Racoon : véhicules récents, kilométrage illimité, remis en main propre.
+              Réservez en ligne, récupérez votre véhicule dès demain.
             </p>
 
             {/* Avantages */}
@@ -141,28 +144,25 @@ export default function LocationPage() {
             </div>
           </div>
 
-          {/* Image */}
+          {/* Image — véhicule Racoon */}
           <div
-            className="hidden md:block h-full relative overflow-hidden"
+            className="hidden md:flex h-full relative overflow-hidden items-center justify-center"
             style={{ minHeight: '450px' }}
           >
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage:
-                  "url('https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=900&q=80&fit=crop')",
-                filter: 'brightness(0.6) saturate(0.85)',
-              }}
+            <Image
+              src="/images/vehicule-racoon.webp"
+              alt="Véhicule Racoon — flotte de location Car Performance Guadeloupe"
+              width={2000}
+              height={1333}
+              priority
+              sizes="(max-width: 1024px) 90vw, 50vw"
+              className="w-full h-auto object-contain"
             />
             <div
-              className="absolute inset-0"
+              className="absolute inset-0 pointer-events-none"
               style={{
-                background: 'linear-gradient(to right, rgba(28,14,4,0.65) 0%, transparent 50%)',
+                background: 'linear-gradient(to right, rgba(28,14,4,0.4) 0%, transparent 30%)',
               }}
-            />
-            <div
-              className="absolute bottom-0 left-0 right-0 h-2/5"
-              style={{ background: 'linear-gradient(to top, #1E0E04 0%, transparent 100%)' }}
             />
           </div>
         </div>

@@ -1,98 +1,15 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { VEHICULES } from '@/lib/vehicules';
 
 type Energie = 'Toutes' | 'Essence' | 'Diesel' | 'Hybride';
 type BudgetMax = 15000 | 20000 | 30000 | 999999;
+type TypeFiltre = 'Tous' | 'Occasion' | 'Neuf';
 
-type Vehicule = {
-  id: string;
-  marque: string;
-  modele: string;
-  annee: number;
-  km: number;
-  energie: 'Essence' | 'Diesel' | 'Hybride';
-  transmission: string;
-  places: number;
-  options: string[];
-  prix: number;
-  mensualite: number;
-  image: string;
-};
-
-const VEHICULES: Vehicule[] = [
-  {
-    id: 'peugeot-308sw',
-    marque: 'Peugeot',
-    modele: '308 SW GT Line',
-    annee: 2021,
-    km: 42000,
-    energie: 'Diesel',
-    transmission: 'BVA',
-    places: 5,
-    options: ['Climatisation', 'GPS'],
-    prix: 18900,
-    mensualite: 289,
-    image: 'https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=600&q=80&fit=crop',
-  },
-  {
-    id: 'renault-clio',
-    marque: 'Renault',
-    modele: 'Clio V Intens',
-    annee: 2022,
-    km: 28000,
-    energie: 'Essence',
-    transmission: 'BVM',
-    places: 5,
-    options: ['Clim auto'],
-    prix: 14500,
-    mensualite: 219,
-    image: 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=600&q=80&fit=crop',
-  },
-  {
-    id: 'citroen-c3',
-    marque: 'Citroën',
-    modele: 'C3 Shine Pack',
-    annee: 2020,
-    km: 55000,
-    energie: 'Essence',
-    transmission: 'BVM',
-    places: 5,
-    options: ['Clim manuelle'],
-    prix: 11200,
-    mensualite: 169,
-    image: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&q=80&fit=crop',
-  },
-  {
-    id: 'vw-golf',
-    marque: 'Volkswagen',
-    modele: 'Golf VIII Life',
-    annee: 2023,
-    km: 15000,
-    energie: 'Diesel',
-    transmission: 'BVA',
-    places: 5,
-    options: ['Carplay', 'Régulateur'],
-    prix: 24900,
-    mensualite: 379,
-    image: 'https://images.unsplash.com/photo-1471444928139-48c5bf5173f8?w=600&q=80&fit=crop',
-  },
-  {
-    id: 'toyota-yaris',
-    marque: 'Toyota',
-    modele: 'Yaris Cross',
-    annee: 2022,
-    km: 32000,
-    energie: 'Hybride',
-    transmission: 'BVA',
-    places: 5,
-    options: ['SUV compact', 'Hybride'],
-    prix: 16800,
-    mensualite: 255,
-    image: 'https://images.unsplash.com/photo-1590362891991-f776e747a588?w=600&q=80&fit=crop',
-  },
-];
-
+const TYPES: TypeFiltre[] = ['Tous', 'Occasion', 'Neuf'];
 const ENERGIES: Energie[] = ['Toutes', 'Essence', 'Diesel', 'Hybride'];
 const BUDGETS: { label: string; val: BudgetMax }[] = [
   { label: 'Tous budgets', val: 999999 },
@@ -101,7 +18,8 @@ const BUDGETS: { label: string; val: BudgetMax }[] = [
   { label: '< 30 000 €', val: 30000 },
 ];
 
-export function VenteVoClient() {
+export function VenteVehiculeClient() {
+  const [typeFiltre, setTypeFiltre] = useState<TypeFiltre>('Tous');
   const [energie, setEnergie] = useState<Energie>('Toutes');
   const [budget, setBudget] = useState<BudgetMax>(999999);
 
@@ -120,8 +38,16 @@ export function VenteVoClient() {
 
   const vehiculesFiltres = useMemo(
     () =>
-      VEHICULES.filter((v) => (energie === 'Toutes' || v.energie === energie) && v.prix <= budget),
-    [energie, budget]
+      VEHICULES.filter((v) => {
+        const matchType =
+          typeFiltre === 'Tous' ||
+          (typeFiltre === 'Occasion' && v.type === 'occasion') ||
+          (typeFiltre === 'Neuf' && v.type === 'neuf');
+        const matchEnergie = energie === 'Toutes' || v.energie === energie;
+        const matchBudget = v.prix <= budget;
+        return matchType && matchEnergie && matchBudget;
+      }),
+    [typeFiltre, energie, budget]
   );
 
   return (
@@ -140,10 +66,29 @@ export function VenteVoClient() {
             >
               Véhicules <em className="text-cp-mango not-italic">disponibles</em>
             </h2>
+            <p className="text-sm text-cp-ink/55 mt-3 max-w-lg">
+              Occasion contrôlée ou neuf à commander — toutes nos voitures sont garanties.
+            </p>
           </div>
 
           {/* Filtres */}
           <div className="flex flex-wrap gap-4 mb-8 items-end">
+            <div>
+              <p className="text-xs font-semibold text-cp-ink/50 uppercase tracking-wider mb-2">
+                Type
+              </p>
+              <div className="flex gap-2">
+                {TYPES.map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTypeFiltre(t)}
+                    className={`text-xs px-4 py-2 rounded-full border transition-all ${typeFiltre === t ? 'bg-cp-mango border-cp-mango text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/50 hover:border-cp-mango hover:text-cp-mango'}`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div>
               <p className="text-xs font-semibold text-cp-ink/50 uppercase tracking-wider mb-2">
                 Énergie
@@ -190,6 +135,7 @@ export function VenteVoClient() {
               </p>
               <button
                 onClick={() => {
+                  setTypeFiltre('Tous');
                   setEnergie('Toutes');
                   setBudget(999999);
                 }}
@@ -201,25 +147,34 @@ export function VenteVoClient() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {vehiculesFiltres.map((v) => (
-                <div
+                <Link
                   key={v.id}
-                  className="bg-white rounded-2xl border border-[#E5DDD3] overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_60px_rgba(26,15,6,0.10)]"
+                  href={`/vente-vehicule/${v.id}`}
+                  className="group bg-white rounded-2xl border border-[#E5DDD3] overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_60px_rgba(26,15,6,0.10)] hover:border-cp-mango/40 focus:outline-none focus:ring-2 focus:ring-cp-mango/50"
                 >
                   {/* Image */}
                   <div className="relative h-48 overflow-hidden bg-[#F8F5F0]">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    <Image
                       src={v.image}
                       alt={`${v.marque} ${v.modele}`}
-                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-[#1A0F06]/80 to-transparent">
                       <p className="cp-title text-[0.75rem] font-bold text-[#E9C46A] tracking-widest uppercase">
                         {v.marque}
                       </p>
                     </div>
+                    <span
+                      className={`absolute top-3 left-3 text-white cp-mono text-[0.6rem] px-2.5 py-1 rounded-full tracking-widest uppercase ${
+                        v.type === 'neuf' ? 'bg-cp-mango/90' : 'bg-cp-ink/80'
+                      }`}
+                    >
+                      {v.type === 'neuf' ? 'Neuf' : 'Occasion'}
+                    </span>
                     <span className="absolute top-3 right-3 bg-[#52C88A]/90 text-white cp-mono text-[0.6rem] px-2.5 py-1 rounded-full tracking-wide">
-                      ✓ Expertisé
+                      ✓ {v.type === 'neuf' ? 'Garantie 3 ans' : 'Contrôlé'}
                     </span>
                   </div>
 
@@ -232,7 +187,7 @@ export function VenteVoClient() {
                     </p>
 
                     <div className="flex flex-wrap gap-2 mb-3">
-                      {v.options.map((o) => (
+                      {v.options.slice(0, 3).map((o) => (
                         <span
                           key={o}
                           className="cp-mono text-[0.6rem] text-cp-ink/40 tracking-wide"
@@ -254,7 +209,7 @@ export function VenteVoClient() {
                       >
                         <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                       </svg>
-                      GARANTIE 6 MOIS INCLUSE
+                      GARANTIE 12 MOIS INCLUSE
                     </div>
 
                     <div className="flex items-end justify-between pt-4 border-t border-[#F8F5F0]">
@@ -264,36 +219,117 @@ export function VenteVoClient() {
                         </p>
                         <p className="text-xs text-cp-ink/35 mt-0.5">ou {v.mensualite} €/mois</p>
                       </div>
-                      <div className="flex gap-2">
-                        <a
-                          href="/reparation"
-                          className="px-4 py-2 rounded-xl bg-cp-ink text-cp-cream text-xs font-semibold hover:bg-cp-mango transition-colors"
-                        >
-                          Nous contacter
-                        </a>
-                        <a
-                          href="tel:+590590000000"
-                          className="w-9 h-9 rounded-xl border border-[#E5DDD3] flex items-center justify-center text-cp-ink/50 hover:border-cp-mango hover:text-cp-mango transition-colors"
-                          aria-label="Appeler"
-                        >
-                          <svg
-                            width="14"
-                            height="14"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.5a19.79 19.79 0 01-3-8.59A2 2 0 012.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 9.91a16 16 0 006.16 6.16l1.27-.83a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" />
-                          </svg>
-                        </a>
-                      </div>
+                      <span className="px-4 py-2 rounded-xl bg-cp-ink text-cp-cream text-xs font-semibold group-hover:bg-cp-mango transition-colors">
+                        Voir le véhicule →
+                      </span>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* ── REPRISE / ESTIMATION (#13 Stephane) ────────────── */}
+      <section className="px-6 py-20" style={{ backgroundColor: '#F4EDE0' }}>
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <p className="cp-mono text-xs text-cp-mango tracking-widest uppercase mb-3">
+                Reprise & estimation
+              </p>
+              <h2 className="cp-title font-black text-cp-ink leading-tight mb-4 text-3xl md:text-4xl">
+                Vous avez un véhicule
+                <br />
+                <span className="text-cp-mango">à céder ?</span>
+              </h2>
+              <p className="text-cp-ink/65 text-base leading-relaxed mb-6 max-w-md">
+                Nous estimons votre véhicule gratuitement et vous proposons une reprise au meilleur
+                prix. La somme peut servir d&apos;apport pour votre nouvelle voiture, ou vous être
+                versée directement.
+              </p>
+
+              <ul className="flex flex-col gap-3 mb-8">
+                {[
+                  'Estimation gratuite sous 24h ouvrées',
+                  'Sans engagement de votre part',
+                  'Reprise déduite du prix du nouveau véhicule',
+                  'Rachat ferme possible même sans achat',
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3 text-sm text-cp-ink/70">
+                    <svg
+                      width="16"
+                      height="16"
+                      fill="none"
+                      stroke="#2A5C45"
+                      strokeWidth="2.5"
+                      viewBox="0 0 24 24"
+                      className="mt-0.5 flex-shrink-0"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+
+              <a
+                href={`/contact?sujet=${encodeURIComponent('Vente véhicule')}&reprise=1`}
+                className="inline-flex items-center gap-2 bg-cp-ink text-cp-cream text-sm font-semibold px-6 py-3.5 rounded-xl hover:bg-cp-mango transition-colors"
+              >
+                Demander une estimation gratuite →
+              </a>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-[#E5DDD3] p-6 md:p-8 shadow-sm">
+              <p className="cp-mono text-[0.65rem] text-cp-ink/40 tracking-widest uppercase mb-4">
+                Comment ça marche
+              </p>
+
+              <ol className="flex flex-col gap-5">
+                {[
+                  {
+                    n: '01',
+                    titre: 'Envoyez-nous les infos',
+                    desc: 'Marque, modèle, année, kilométrage, état général + 3-5 photos via le formulaire.',
+                  },
+                  {
+                    n: '02',
+                    titre: 'On revient vers vous sous 24h',
+                    desc: 'Notre équipe étudie votre dossier et vous propose une fourchette de reprise.',
+                  },
+                  {
+                    n: '03',
+                    titre: 'Estimation sur place',
+                    desc: "Vous passez à l'atelier de Pointe-à-Pitre. Inspection visuelle + essai routier.",
+                  },
+                  {
+                    n: '04',
+                    titre: 'Offre ferme + transaction',
+                    desc: 'Si tout correspond, offre définitive sous 48h. Paiement immédiat ou déduction.',
+                  },
+                ].map((step) => (
+                  <li key={step.n} className="flex gap-4">
+                    <span className="cp-mono font-bold text-cp-mango text-sm flex-shrink-0 w-8">
+                      {step.n}
+                    </span>
+                    <div>
+                      <p className="cp-title font-black text-cp-ink text-sm mb-1">{step.titre}</p>
+                      <p className="text-xs text-cp-ink/55 leading-relaxed">{step.desc}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+
+              <p className="text-[0.65rem] text-cp-ink/35 leading-relaxed mt-6 pt-5 border-t border-[#F0E8DC]">
+                L&apos;estimation prend en compte la cote Argus, l&apos;état du véhicule, le marché
+                local et la demande. Reprise hors véhicules accidentés non roulants ou sans contrôle
+                technique valide.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -501,7 +537,7 @@ export function VenteVoClient() {
                 href="/reparation"
                 className="w-full py-3 rounded-xl bg-cp-ink text-cp-cream text-sm font-semibold hover:bg-cp-mango transition-colors text-center block"
               >
-                Nous contacter pour financer
+                Je suis intéressé par ce financement
               </a>
               <p className="text-[0.65rem] text-cp-ink/30 text-center leading-relaxed">
                 Simulation non contractuelle. TAEG fixe 4,99%. Offre soumise à acceptation.

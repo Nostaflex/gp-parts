@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { CpHeader } from '@/components/cp/CpHeader';
 import { CpBridge } from '@/components/cp/CpBridge';
@@ -8,7 +9,7 @@ import { CpOpenBadge } from '@/components/cp/CpOpenBadge';
 export const metadata: Metadata = {
   title: 'Accueil',
   description:
-    'Car Performance — Garage auto & moto en Guadeloupe. Réparation, expertise à distance, location et vente de véhicules.',
+    'Car Performance — Garage auto & moto en Guadeloupe. Réparation, location et vente de véhicules.',
 };
 
 const UNIVERS = [
@@ -21,36 +22,36 @@ const UNIVERS = [
     accent: '#E87200',
   },
   {
-    id: 'expertise',
-    href: '/expertise',
-    label: 'Expertise',
-    tag: '02',
-    desc: 'Estimation à distance par photo. Recevez votre devis sans vous déplacer.',
-    accent: '#E9C46A',
-  },
-  {
     id: 'location',
     href: '/location',
     label: 'Location',
-    tag: '03',
+    tag: '02',
     desc: 'Véhicules de remplacement Racoon disponibles pendant votre réparation.',
     accent: '#52C88A',
   },
   {
-    id: 'vente-vo',
-    href: '/vente-vo',
-    label: 'Vente VO',
-    tag: '04',
-    desc: "Véhicules d'occasion sélectionnés, contrôlés et garantis par nos soins.",
+    id: 'vente-vehicule',
+    href: '/vente-vehicule',
+    label: 'Vente véhicule',
+    tag: '03',
+    desc: "Véhicules d'occasion ou neufs, contrôlés et garantis par nos soins.",
     accent: '#2A5C45',
+  },
+  {
+    id: 'vente-moto',
+    href: '/vente-moto',
+    label: 'Vente moto',
+    tag: '04',
+    desc: 'Roadster, sport, trail, scooter — toutes cylindrées, occasion ou neuf.',
+    accent: '#C8392E',
   },
 ];
 
 const STATS = [
-  { value: '15', unit: 'ans', label: "d'expérience" },
-  { value: '400', unit: 'm²', label: 'de garage' },
-  { value: '500+', unit: '', label: 'clients fidèles' },
   { value: '971', unit: '🏝', label: 'Guadeloupe' },
+  { value: '24h', unit: '', label: 'délai réponse' },
+  { value: '12', unit: 'mois', label: 'garantie pièces' },
+  { value: '4.99', unit: '%', label: 'financement TAEG' },
 ];
 
 const TEMOIGNAGES = [
@@ -62,7 +63,7 @@ const TEMOIGNAGES = [
   {
     text: "J'ai envoyé mes photos le matin, j'avais un devis détaillé l'après-midi. Efficace !",
     author: 'Thierry M.',
-    role: 'Client expertise à distance',
+    role: 'Client devis pièces',
   },
   {
     text: "Le véhicule de remplacement m'a sauvé la mise. Merci pour la disponibilité.",
@@ -131,8 +132,7 @@ export default function HomePage() {
           </CpReveal>
           <CpReveal delay={2}>
             <p className="text-cp-cream/60 text-lg max-w-xl mb-10 leading-relaxed">
-              Réparation, expertise à distance, location et vente de véhicules. Votre garage de
-              confiance en Guadeloupe.
+              Réparation, location et vente de véhicules. Votre garage de confiance en Guadeloupe.
             </p>
           </CpReveal>
           <CpReveal delay={3}>
@@ -155,10 +155,10 @@ export default function HomePage() {
                 </svg>
               </Link>
               <Link
-                href="/expertise"
+                href="/vente-vehicule"
                 className="inline-flex items-center gap-2 border border-cp-cream/30 text-cp-cream font-semibold px-6 py-3 rounded-full hover:bg-cp-cream/10 transition-colors"
               >
-                Expertise à distance
+                Voir les véhicules
               </Link>
             </div>
           </CpReveal>
@@ -387,7 +387,7 @@ export default function HomePage() {
                 href="/contact"
                 className="mt-6 w-full inline-flex justify-center items-center gap-2 bg-cp-mango text-cp-cream font-semibold px-6 py-3 rounded-full hover:bg-cp-mango/90 transition-colors text-sm"
               >
-                Nous contacter
+                Je suis intéressé
               </Link>
             </div>
           </CpReveal>
@@ -401,17 +401,22 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
             <div>
-              <p className="cp-title text-cp-cream font-black text-2xl mb-3">
-                CAR<span className="text-cp-mango">PERF.</span>
-              </p>
+              <Image
+                src="/images/logo-carperformance.svg"
+                alt="Car Performance"
+                width={180}
+                height={60}
+                className="h-14 w-auto mb-3"
+              />
               <p className="text-cp-cream/40 text-sm leading-relaxed">
-                Votre garage de confiance en Guadeloupe depuis 2010.
+                Votre garage de confiance en Guadeloupe — passion, conseil technique, pièces de
+                qualité.
               </p>
             </div>
             <div>
               <p className="text-cp-cream/30 text-xs uppercase tracking-widest mb-4">Services</p>
               <div className="flex flex-col gap-2">
-                {['/reparation', '/expertise', '/location', '/vente-vo'].map((href) => (
+                {['/reparation', '/location', '/vente-vehicule', '/vente-moto'].map((href) => (
                   <Link
                     key={href}
                     href={href}

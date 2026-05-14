@@ -11,6 +11,13 @@ const nextConfig = {
     ],
     formats: ['image/avif', 'image/webp'],
   },
+  // Redirects 301 — ancien chemin /vente-vo → /vente-vehicule (rename 2026-05-14)
+  async redirects() {
+    return [
+      { source: '/vente-vo', destination: '/vente-vehicule', permanent: true },
+      { source: '/vente-vo/:id', destination: '/vente-vehicule/:id', permanent: true },
+    ];
+  },
   // Security headers
   async headers() {
     return [
