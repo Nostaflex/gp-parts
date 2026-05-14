@@ -222,8 +222,10 @@ export function EstimationClient() {
                 </div>
               )}
               <p className="text-[0.7rem] mt-3 italic" style={{ color: IOS.textSubtle }}>
-                Source: NHTSA vPIC (US gov, gratuit). Couverture variable selon constructeur/année.
-                Si données incomplètes, saisis-les manuellement ci-dessous.
+                Source: NHTSA vPIC (US gov, gratuit, sans clé). Couverture variable selon
+                constructeur : bonne pour Peugeot / VW / Toyota / BMW vendus mondialement, faible
+                pour Renault / Citroën / Dacia (uniquement EU). Si données incomplètes, complète
+                manuellement depuis la carte grise du client.
               </p>
             </section>
 
