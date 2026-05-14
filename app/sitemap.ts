@@ -50,7 +50,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   const vehiculeRoutes: MetadataRoute.Sitemap = VEHICULES.map((v) => ({
-    url: `${BASE_URL}/vente-vo/${v.id}`,
+    url: `${BASE_URL}/vente-vehicule/${v.id}`,
     lastModified: now,
     changeFrequency: 'weekly',
     priority: 0.7,

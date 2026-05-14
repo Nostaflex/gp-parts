@@ -10,7 +10,7 @@ type Props = {
   vehiculeId: string;
 };
 
-const TAEG = 0.0499; // 4,99% taux fixe (cohérent simulateur global VenteVoClient)
+const TAEG = 0.0499; // 4,99% taux fixe (cohérent simulateur global VenteVehiculeClient)
 
 function calcMensualite(montant: number, dureeMois: number): number {
   if (montant <= 0 || dureeMois <= 0) return 0;
@@ -30,7 +30,7 @@ export function FinancementSimulator({ prix, marque, modele, vehiculeId }: Props
   const coutTotal = mensualite * duree;
   const interets = Math.max(0, coutTotal - montantFinance);
 
-  const contactHref = `/contact?sujet=${encodeURIComponent('Vente VO')}&vehicule=${encodeURIComponent(`${marque} ${modele}`)}&ref=${encodeURIComponent(vehiculeId)}&financement=1`;
+  const contactHref = `/contact?sujet=${encodeURIComponent('Vente véhicule')}&vehicule=${encodeURIComponent(`${marque} ${modele}`)}&ref=${encodeURIComponent(vehiculeId)}&financement=1`;
 
   return (
     <div className="bg-white border border-[#E5DDD3] rounded-2xl p-6 md:p-8">

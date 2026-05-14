@@ -7,7 +7,9 @@ import { VEHICULES } from '@/lib/vehicules';
 
 type Energie = 'Toutes' | 'Essence' | 'Diesel' | 'Hybride';
 type BudgetMax = 15000 | 20000 | 30000 | 999999;
+type TypeFiltre = 'Tous' | 'Occasion' | 'Neuf';
 
+const TYPES: TypeFiltre[] = ['Tous', 'Occasion', 'Neuf'];
 const ENERGIES: Energie[] = ['Toutes', 'Essence', 'Diesel', 'Hybride'];
 const BUDGETS: { label: string; val: BudgetMax }[] = [
   { label: 'Tous budgets', val: 999999 },
@@ -16,7 +18,8 @@ const BUDGETS: { label: string; val: BudgetMax }[] = [
   { label: '< 30 000 €', val: 30000 },
 ];
 
-export function VenteVoClient() {
+export function VenteVehiculeClient() {
+  const [typeFiltre, setTypeFiltre] = useState<TypeFiltre>('Tous');
   const [energie, setEnergie] = useState<Energie>('Toutes');
   const [budget, setBudget] = useState<BudgetMax>(999999);
 
@@ -35,8 +38,16 @@ export function VenteVoClient() {
 
   const vehiculesFiltres = useMemo(
     () =>
-      VEHICULES.filter((v) => (energie === 'Toutes' || v.energie === energie) && v.prix <= budget),
-    [energie, budget]
+      VEHICULES.filter((v) => {
+        const matchType =
+          typeFiltre === 'Tous' ||
+          (typeFiltre === 'Occasion' && v.type === 'occasion') ||
+          (typeFiltre === 'Neuf' && v.type === 'neuf');
+        const matchEnergie = energie === 'Toutes' || v.energie === energie;
+        const matchBudget = v.prix <= budget;
+        return matchType && matchEnergie && matchBudget;
+      }),
+    [typeFiltre, energie, budget]
   );
 
   return (
@@ -55,10 +66,29 @@ export function VenteVoClient() {
             >
               Véhicules <em className="text-cp-mango not-italic">disponibles</em>
             </h2>
+            <p className="text-sm text-cp-ink/55 mt-3 max-w-lg">
+              Occasion contrôlée ou neuf à commander — toutes nos voitures sont garanties.
+            </p>
           </div>
 
           {/* Filtres */}
           <div className="flex flex-wrap gap-4 mb-8 items-end">
+            <div>
+              <p className="text-xs font-semibold text-cp-ink/50 uppercase tracking-wider mb-2">
+                Type
+              </p>
+              <div className="flex gap-2">
+                {TYPES.map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTypeFiltre(t)}
+                    className={`text-xs px-4 py-2 rounded-full border transition-all ${typeFiltre === t ? 'bg-cp-mango border-cp-mango text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/50 hover:border-cp-mango hover:text-cp-mango'}`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div>
               <p className="text-xs font-semibold text-cp-ink/50 uppercase tracking-wider mb-2">
                 Énergie
@@ -105,6 +135,7 @@ export function VenteVoClient() {
               </p>
               <button
                 onClick={() => {
+                  setTypeFiltre('Tous');
                   setEnergie('Toutes');
                   setBudget(999999);
                 }}
@@ -118,7 +149,7 @@ export function VenteVoClient() {
               {vehiculesFiltres.map((v) => (
                 <Link
                   key={v.id}
-                  href={`/vente-vo/${v.id}`}
+                  href={`/vente-vehicule/${v.id}`}
                   className="group bg-white rounded-2xl border border-[#E5DDD3] overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_60px_rgba(26,15,6,0.10)] hover:border-cp-mango/40 focus:outline-none focus:ring-2 focus:ring-cp-mango/50"
                 >
                   {/* Image */}
@@ -135,8 +166,15 @@ export function VenteVoClient() {
                         {v.marque}
                       </p>
                     </div>
+                    <span
+                      className={`absolute top-3 left-3 text-white cp-mono text-[0.6rem] px-2.5 py-1 rounded-full tracking-widest uppercase ${
+                        v.type === 'neuf' ? 'bg-cp-mango/90' : 'bg-cp-ink/80'
+                      }`}
+                    >
+                      {v.type === 'neuf' ? 'Neuf' : 'Occasion'}
+                    </span>
                     <span className="absolute top-3 right-3 bg-[#52C88A]/90 text-white cp-mono text-[0.6rem] px-2.5 py-1 rounded-full tracking-wide">
-                      ✓ Contrôlé
+                      ✓ {v.type === 'neuf' ? 'Garantie 3 ans' : 'Contrôlé'}
                     </span>
                   </div>
 
@@ -238,7 +276,7 @@ export function VenteVoClient() {
               </ul>
 
               <a
-                href={`/contact?sujet=${encodeURIComponent('Vente VO')}&reprise=1`}
+                href={`/contact?sujet=${encodeURIComponent('Vente véhicule')}&reprise=1`}
                 className="inline-flex items-center gap-2 bg-cp-ink text-cp-cream text-sm font-semibold px-6 py-3.5 rounded-xl hover:bg-cp-mango transition-colors"
               >
                 Demander une estimation gratuite →

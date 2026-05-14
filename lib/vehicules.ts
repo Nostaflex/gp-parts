@@ -6,6 +6,7 @@
 
 export type Energie = 'Essence' | 'Diesel' | 'Hybride';
 export type Disponibilite = 'disponible' | 'reserve' | 'vendu';
+export type TypeVehicule = 'occasion' | 'neuf';
 
 export type Caracteristiques = {
   puissance?: string;
@@ -23,6 +24,7 @@ export type Caracteristiques = {
 
 export type Vehicule = {
   id: string;
+  type: TypeVehicule;
   marque: string;
   modele: string;
   annee: number;
@@ -44,6 +46,7 @@ export type Vehicule = {
 export const VEHICULES: Vehicule[] = [
   {
     id: 'peugeot-308sw',
+    type: 'occasion',
     marque: 'Peugeot',
     modele: '308 SW GT Line',
     annee: 2021,
@@ -82,6 +85,7 @@ export const VEHICULES: Vehicule[] = [
   },
   {
     id: 'renault-clio',
+    type: 'occasion',
     marque: 'Renault',
     modele: 'Clio V Intens',
     annee: 2022,
@@ -120,6 +124,7 @@ export const VEHICULES: Vehicule[] = [
   },
   {
     id: 'citroen-c3',
+    type: 'occasion',
     marque: 'Citroën',
     modele: 'C3 Shine Pack',
     annee: 2020,
@@ -158,6 +163,7 @@ export const VEHICULES: Vehicule[] = [
   },
   {
     id: 'vw-golf',
+    type: 'occasion',
     marque: 'Volkswagen',
     modele: 'Golf VIII Life',
     annee: 2023,
@@ -196,6 +202,7 @@ export const VEHICULES: Vehicule[] = [
   },
   {
     id: 'toyota-yaris',
+    type: 'occasion',
     marque: 'Toyota',
     modele: 'Yaris Cross',
     annee: 2022,
@@ -232,6 +239,86 @@ export const VEHICULES: Vehicule[] = [
     reference: 'GP-V-YARIS-005',
     disponibilite: 'disponible',
   },
+
+  // ─────────── NEUF ───────────
+  {
+    id: 'dacia-sandero-neuf',
+    type: 'neuf',
+    marque: 'Dacia',
+    modele: 'Sandero Essential',
+    annee: 2026,
+    km: 0,
+    energie: 'Essence',
+    transmission: 'BVM',
+    places: 5,
+    options: ['Clim manuelle', 'Bluetooth', 'Radio DAB'],
+    prix: 12990,
+    mensualite: 199,
+    image: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&q=80&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1200&q=85&fit=crop',
+      'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=1200&q=85&fit=crop',
+      'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=1200&q=85&fit=crop',
+      'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1200&q=85&fit=crop',
+      'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=1200&q=85&fit=crop',
+    ],
+    description:
+      'Dacia Sandero Essential neuve, modèle 2026. La citadine la plus abordable du marché, parfaite pour démarrer ou comme deuxième véhicule. Moteur essence SCe 65 ch sobre et fiable. Équipement essentiel inclus : climatisation, Bluetooth, radio numérique. Garantie constructeur 3 ans / 100 000 km. Livraison sous 4-6 semaines en Guadeloupe.',
+    caracteristiques: {
+      puissance: '65 ch',
+      cylindree: '1.0 SCe',
+      consommation: '5.4 L/100km',
+      co2: '121 g/km',
+      couleur: 'Au choix',
+      carrosserie: 'Citadine',
+      portes: 5,
+      critAir: "Crit'Air 1",
+      premiereCirculation: 'À immatriculer',
+      proprietaires: 0,
+      garantie: '3 ans / 100 000 km constructeur',
+    },
+    reference: 'GP-N-SANDERO-001',
+    disponibilite: 'disponible',
+  },
+  {
+    id: 'peugeot-208-neuf',
+    type: 'neuf',
+    marque: 'Peugeot',
+    modele: '208 Allure',
+    annee: 2026,
+    km: 0,
+    energie: 'Essence',
+    transmission: 'BVA',
+    places: 5,
+    options: ['i-Cockpit 3D', 'Carplay sans fil', 'Caméra recul', 'Régulateur adaptatif'],
+    prix: 22500,
+    mensualite: 339,
+    image: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=600&q=80&fit=crop',
+    images: [
+      'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1200&q=85&fit=crop',
+      'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=1200&q=85&fit=crop',
+      'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=1200&q=85&fit=crop',
+      'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=1200&q=85&fit=crop',
+      'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1200&q=85&fit=crop',
+    ],
+    description:
+      "Peugeot 208 Allure neuve, modèle 2026. Design distinctif, finition soignée, technologies de pointe avec l'i-Cockpit 3D et la connectivité Apple CarPlay sans fil. Moteur essence PureTech 100 ch boîte EAT8 réactive. Idéal pour la ville et les escapades en Guadeloupe. Garantie constructeur 2 ans + extension possible. Livraison sous 6-8 semaines.",
+    caracteristiques: {
+      puissance: '100 ch',
+      cylindree: '1.2 PureTech',
+      consommation: '5.4 L/100km',
+      co2: '122 g/km',
+      couleur: 'Au choix',
+      carrosserie: 'Citadine',
+      portes: 5,
+      critAir: "Crit'Air 1",
+      premiereCirculation: 'À immatriculer',
+      proprietaires: 0,
+      garantie: '2 ans constructeur + extension Car Performance',
+    },
+    reference: 'GP-N-208-002',
+    disponibilite: 'disponible',
+  },
 ];
 
 export function getVehiculeById(id: string): Vehicule | undefined {
@@ -240,4 +327,8 @@ export function getVehiculeById(id: string): Vehicule | undefined {
 
 export function getAllVehiculeIds(): string[] {
   return VEHICULES.map((v) => v.id);
+}
+
+export function getVehiculesByType(type: TypeVehicule): Vehicule[] {
+  return VEHICULES.filter((v) => v.type === type);
 }

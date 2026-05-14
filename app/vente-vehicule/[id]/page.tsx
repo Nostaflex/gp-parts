@@ -73,7 +73,7 @@ export default async function VehiculeDetailPage({ params }: Props) {
   const v = getVehiculeById(id);
   if (!v) notFound();
 
-  const contactHref = `/contact?sujet=${encodeURIComponent('Vente VO')}&vehicule=${encodeURIComponent(`${v.marque} ${v.modele}`)}&ref=${encodeURIComponent(v.id)}`;
+  const contactHref = `/contact?sujet=${encodeURIComponent('Vente véhicule')}&vehicule=${encodeURIComponent(`${v.marque} ${v.modele}`)}&ref=${encodeURIComponent(v.id)}`;
 
   const dispoLabel =
     v.disponibilite === 'disponible'
@@ -110,8 +110,8 @@ export default async function VehiculeDetailPage({ params }: Props) {
               Accueil
             </Link>
             <span aria-hidden="true">›</span>
-            <Link href="/vente-vo" className="hover:text-cp-mango transition-colors">
-              Vente VO
+            <Link href="/vente-vehicule" className="hover:text-cp-mango transition-colors">
+              Vente véhicule
             </Link>
             <span aria-hidden="true">›</span>
             <span className="text-cp-ink/70">

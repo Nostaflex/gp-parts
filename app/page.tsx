@@ -31,8 +31,8 @@ const UNIVERS = [
   },
   {
     id: 'vente-vo',
-    href: '/vente-vo',
-    label: 'Vente VO',
+    href: '/vente-vehicule',
+    label: 'Vente véhicule',
     tag: '03',
     desc: "Véhicules d'occasion sélectionnés, contrôlés et garantis par nos soins.",
     accent: '#2A5C45',
@@ -147,7 +147,7 @@ export default function HomePage() {
                 </svg>
               </Link>
               <Link
-                href="/vente-vo"
+                href="/vente-vehicule"
                 className="inline-flex items-center gap-2 border border-cp-cream/30 text-cp-cream font-semibold px-6 py-3 rounded-full hover:bg-cp-cream/10 transition-colors"
               >
                 Voir les véhicules
@@ -408,7 +408,7 @@ export default function HomePage() {
             <div>
               <p className="text-cp-cream/30 text-xs uppercase tracking-widest mb-4">Services</p>
               <div className="flex flex-col gap-2">
-                {['/reparation', '/location', '/vente-vo'].map((href) => (
+                {['/reparation', '/location', '/vente-vehicule'].map((href) => (
                   <Link
                     key={href}
                     href={href}

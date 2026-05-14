@@ -2,16 +2,16 @@ import type { Metadata } from 'next';
 import { CpHeader } from '@/components/cp/CpHeader';
 import { CpBridge } from '@/components/cp/CpBridge';
 import { CpFooter } from '@/components/cp/CpFooter';
-import { VenteVoClient } from './VenteVoClient';
+import { VenteVehiculeClient } from './VenteVehiculeClient';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: "Vente de véhicules d'occasion",
+  title: 'Vente de véhicules — Occasion & Neuf',
   description:
-    "Achetez un véhicule d'occasion contrôlé en Guadeloupe. Garantie 12 mois incluse, financement sur mesure. Toutes marques.",
+    "Achetez un véhicule d'occasion contrôlé ou neuf à commander en Guadeloupe. Garantie incluse, financement sur mesure. Toutes marques.",
 };
 
-export default function VenteVoPage() {
+export default function VenteVehiculePage() {
   return (
     <>
       <CpHeader darkSectionIds={['vo-hero']} />
@@ -58,7 +58,7 @@ export default function VenteVoPage() {
               >
                 <path d="m9 18 6-6-6-6" />
               </svg>
-              <span style={{ color: 'rgba(248,237,216,0.6)' }}>Vente VO</span>
+              <span style={{ color: 'rgba(248,237,216,0.6)' }}>Vente véhicule</span>
             </nav>
 
             <p
@@ -159,7 +159,7 @@ export default function VenteVoPage() {
       <CpBridge fromColor="#1E0E04" toColor="#F4EDE0" />
 
       {/* ── CLIENT COMPONENT (catalogue + financement) ── */}
-      <VenteVoClient />
+      <VenteVehiculeClient />
 
       {/* Bridge financement → footer */}
       <CpBridge fromColor="#2C1A08" toColor="#1A0F06" />

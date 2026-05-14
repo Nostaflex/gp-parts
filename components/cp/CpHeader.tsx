@@ -7,7 +7,7 @@ import Link from 'next/link';
 const NAV_LINKS = [
   { href: '/reparation', label: 'Réparation' },
   { href: '/location', label: 'Location' },
-  { href: '/vente-vo', label: 'Vente VO' },
+  { href: '/vente-vehicule', label: 'Vente véhicule' },
   { href: '/pieces', label: 'Pièces' },
   { href: '/contact', label: 'Contact' },
 ];
