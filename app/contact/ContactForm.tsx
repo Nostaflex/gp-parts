@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle, Upload, X } from 'lucide-react';
 
-type Sujet = 'Renseignement' | 'Devis réparation' | 'Expertise' | 'Location' | 'Vente VO' | 'Autre';
+type Sujet = 'Renseignement' | 'Devis réparation' | 'Location' | 'Vente VO' | 'Autre';
 
 type FormData = {
   prenom: string;
@@ -17,14 +17,7 @@ type FormData = {
   consent: boolean;
 };
 
-const SUJETS: Sujet[] = [
-  'Renseignement',
-  'Devis réparation',
-  'Expertise',
-  'Location',
-  'Vente VO',
-  'Autre',
-];
+const SUJETS: Sujet[] = ['Renseignement', 'Devis réparation', 'Location', 'Vente VO', 'Autre'];
 
 const field =
   'w-full px-4 py-3 rounded-xl border border-cp-cream/20 bg-white/5 text-cp-cream placeholder:text-cp-cream/20 text-sm outline-none transition-all focus:border-cp-vert-l focus:ring-2 focus:ring-cp-vert-l/10';

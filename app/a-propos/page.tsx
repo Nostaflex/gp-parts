@@ -377,8 +377,7 @@ export default function AProposPage() {
             <span className="text-cp-mango">RENDEZ-VOUS</span>
           </h2>
           <p className="text-cp-cream/45 text-base leading-relaxed mb-10">
-            Réparation, expertise, location ou achat — notre équipe est disponible du lundi au
-            samedi.
+            Réparation, location ou achat — notre équipe est disponible du lundi au samedi.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link

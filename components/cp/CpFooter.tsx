@@ -19,7 +19,6 @@ export function CpFooter() {
             <div className="flex flex-col gap-2">
               {[
                 { href: '/reparation', label: 'Réparation' },
-                { href: '/expertise', label: 'Expertise' },
                 { href: '/location', label: 'Location' },
                 { href: '/vente-vo', label: 'Vente VO' },
               ].map((l) => (

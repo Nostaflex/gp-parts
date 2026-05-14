@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     template: '%s | Car Performance',
   },
   description:
-    'Réparation, expertise, location et vente de véhicules en Guadeloupe. Pièces détachées auto & moto livrées partout en Guadeloupe.',
+    'Réparation, location et vente de véhicules en Guadeloupe. Pièces détachées auto & moto livrées partout en Guadeloupe.',
   keywords: [
     'garage',
     'Guadeloupe',
@@ -41,7 +41,6 @@ export const metadata: Metadata = {
     'pièces détachées',
     'location véhicule',
     'vente VO',
-    'expertise',
     '971',
   ],
   openGraph: {
@@ -49,7 +48,7 @@ export const metadata: Metadata = {
     locale: 'fr_FR',
     siteName: 'Car Performance',
     title: 'Car Performance — Garage auto & moto Guadeloupe',
-    description: 'Réparation, expertise, location et vente VO en Guadeloupe.',
+    description: 'Réparation, location et vente VO en Guadeloupe.',
   },
   robots: {
     index: true,

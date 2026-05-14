@@ -8,7 +8,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: "Vente de véhicules d'occasion",
   description:
-    "Achetez un véhicule d'occasion certifié en Guadeloupe. Garantie 12 mois incluse, expertisé, financement sur mesure. Toutes marques.",
+    "Achetez un véhicule d'occasion contrôlé en Guadeloupe. Garantie 12 mois incluse, financement sur mesure. Toutes marques.",
 };
 
 export default function VenteVoPage() {
@@ -65,7 +65,7 @@ export default function VenteVoPage() {
               className="cp-mono text-xs tracking-widest uppercase mb-5"
               style={{ color: '#E9C46A' }}
             >
-              Véhicules certifiés · Garantie incluse
+              Véhicules contrôlés · Garantie incluse
             </p>
             <h1
               className="cp-title font-black leading-none mb-6"
@@ -79,14 +79,14 @@ export default function VenteVoPage() {
               className="text-base leading-relaxed max-w-md mb-8"
               style={{ color: 'rgba(192,144,96,0.9)' }}
             >
-              Chaque véhicule est expertisé par nos techniciens, garanti 12 mois et prêt à rouler.
+              Chaque véhicule est contrôlé par nos techniciens, garanti 12 mois et prêt à rouler.
               Financement sur mesure disponible.
             </p>
 
             {/* Garanties pills */}
             <div className="flex flex-wrap gap-2 mb-8">
               {[
-                'Expertisé par nos techniciens',
+                'Contrôlé par nos techniciens',
                 'Garantie 12 mois incluse',
                 'Financement disponible',
                 'Reprise possible',

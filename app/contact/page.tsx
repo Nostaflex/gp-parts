@@ -9,7 +9,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Contact',
   description:
-    'Contactez Car Performance Guadeloupe. Réponse sous 24h. Réparation, expertise, location, vente VO — notre équipe est à votre écoute.',
+    'Contactez Car Performance Guadeloupe. Réponse sous 24h. Réparation, location, vente VO — notre équipe est à votre écoute.',
 };
 
 const HORAIRES = [

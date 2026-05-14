@@ -219,7 +219,7 @@ export function VenteVoClient() {
                       </p>
                     </div>
                     <span className="absolute top-3 right-3 bg-[#52C88A]/90 text-white cp-mono text-[0.6rem] px-2.5 py-1 rounded-full tracking-wide">
-                      ✓ Expertisé
+                      ✓ Contrôlé
                     </span>
                   </div>
 
