@@ -193,6 +193,108 @@ export function VenteVoClient() {
         </div>
       </section>
 
+      {/* ── REPRISE / ESTIMATION (#13 Stephane) ────────────── */}
+      <section className="px-6 py-20" style={{ backgroundColor: '#F4EDE0' }}>
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <p className="cp-mono text-xs text-cp-mango tracking-widest uppercase mb-3">
+                Reprise & estimation
+              </p>
+              <h2 className="cp-title font-black text-cp-ink leading-tight mb-4 text-3xl md:text-4xl">
+                Vous avez un véhicule
+                <br />
+                <span className="text-cp-mango">à céder ?</span>
+              </h2>
+              <p className="text-cp-ink/65 text-base leading-relaxed mb-6 max-w-md">
+                Nous estimons votre véhicule gratuitement et vous proposons une reprise au meilleur
+                prix. La somme peut servir d&apos;apport pour votre nouvelle voiture, ou vous être
+                versée directement.
+              </p>
+
+              <ul className="flex flex-col gap-3 mb-8">
+                {[
+                  'Estimation gratuite sous 24h ouvrées',
+                  'Sans engagement de votre part',
+                  'Reprise déduite du prix du nouveau véhicule',
+                  'Rachat ferme possible même sans achat',
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3 text-sm text-cp-ink/70">
+                    <svg
+                      width="16"
+                      height="16"
+                      fill="none"
+                      stroke="#2A5C45"
+                      strokeWidth="2.5"
+                      viewBox="0 0 24 24"
+                      className="mt-0.5 flex-shrink-0"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+
+              <a
+                href={`/contact?sujet=${encodeURIComponent('Vente VO')}&reprise=1`}
+                className="inline-flex items-center gap-2 bg-cp-ink text-cp-cream text-sm font-semibold px-6 py-3.5 rounded-xl hover:bg-cp-mango transition-colors"
+              >
+                Demander une estimation gratuite →
+              </a>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-[#E5DDD3] p-6 md:p-8 shadow-sm">
+              <p className="cp-mono text-[0.65rem] text-cp-ink/40 tracking-widest uppercase mb-4">
+                Comment ça marche
+              </p>
+
+              <ol className="flex flex-col gap-5">
+                {[
+                  {
+                    n: '01',
+                    titre: 'Envoyez-nous les infos',
+                    desc: 'Marque, modèle, année, kilométrage, état général + 3-5 photos via le formulaire.',
+                  },
+                  {
+                    n: '02',
+                    titre: 'On revient vers vous sous 24h',
+                    desc: 'Notre équipe étudie votre dossier et vous propose une fourchette de reprise.',
+                  },
+                  {
+                    n: '03',
+                    titre: 'Estimation sur place',
+                    desc: "Vous passez à l'atelier de Pointe-à-Pitre. Inspection visuelle + essai routier.",
+                  },
+                  {
+                    n: '04',
+                    titre: 'Offre ferme + transaction',
+                    desc: 'Si tout correspond, offre définitive sous 48h. Paiement immédiat ou déduction.',
+                  },
+                ].map((step) => (
+                  <li key={step.n} className="flex gap-4">
+                    <span className="cp-mono font-bold text-cp-mango text-sm flex-shrink-0 w-8">
+                      {step.n}
+                    </span>
+                    <div>
+                      <p className="cp-title font-black text-cp-ink text-sm mb-1">{step.titre}</p>
+                      <p className="text-xs text-cp-ink/55 leading-relaxed">{step.desc}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+
+              <p className="text-[0.65rem] text-cp-ink/35 leading-relaxed mt-6 pt-5 border-t border-[#F0E8DC]">
+                L&apos;estimation prend en compte la cote Argus, l&apos;état du véhicule, le marché
+                local et la demande. Reprise hors véhicules accidentés non roulants ou sans contrôle
+                technique valide.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── BRIDGE catalogue → financement ── */}
       <div
         className="relative z-10"

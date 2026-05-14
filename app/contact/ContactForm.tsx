@@ -40,19 +40,31 @@ export function ContactForm() {
     consent: false,
   });
 
-  // Pré-remplissage depuis URL: ?sujet=Vente+VO&vehicule=Renault+Clio&ref=GP-V-123&financement=1
-  // Pattern "Je suis intéressé" — context vient depuis fiche véhicule / pièce.
+  // Pré-remplissage depuis URL: ?sujet=Vente+VO&vehicule=X&ref=Y&financement=1&reprise=1
+  // Pattern "Je suis intéressé" / "Estimation reprise" — context vient depuis vente-vo.
   useEffect(() => {
     const urlSujet = searchParams.get('sujet');
     const urlVehicule = searchParams.get('vehicule');
     const urlRef = searchParams.get('ref');
     const urlFinancement = searchParams.get('financement');
-    if (!urlSujet && !urlVehicule && !urlRef && !urlFinancement) return;
+    const urlReprise = searchParams.get('reprise');
+    if (!urlSujet && !urlVehicule && !urlRef && !urlFinancement && !urlReprise) return;
     setData((d) => {
       const validSujet = SUJETS.includes(urlSujet as Sujet) ? (urlSujet as Sujet) : d.sujet;
       const prefilled: string[] = [];
       if (urlFinancement === '1') {
         prefilled.push("Demande d'étude de financement.");
+      }
+      if (urlReprise === '1') {
+        prefilled.push(
+          "Demande d'estimation reprise de mon véhicule actuel.",
+          '',
+          'Mon véhicule à céder :',
+          '- Marque / Modèle :',
+          '- Année :',
+          '- Kilométrage :',
+          '- État général :'
+        );
       }
       if (urlVehicule) prefilled.push(`Je suis intéressé par : ${urlVehicule}`);
       if (urlRef) prefilled.push(`Référence : ${urlRef}`);
