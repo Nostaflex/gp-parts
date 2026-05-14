@@ -40,16 +40,20 @@ export function ContactForm() {
     consent: false,
   });
 
-  // Pré-remplissage depuis URL: ?sujet=Vente+VO&vehicule=Renault+Clio&ref=GP-V-123
+  // Pré-remplissage depuis URL: ?sujet=Vente+VO&vehicule=Renault+Clio&ref=GP-V-123&financement=1
   // Pattern "Je suis intéressé" — context vient depuis fiche véhicule / pièce.
   useEffect(() => {
     const urlSujet = searchParams.get('sujet');
     const urlVehicule = searchParams.get('vehicule');
     const urlRef = searchParams.get('ref');
-    if (!urlSujet && !urlVehicule && !urlRef) return;
+    const urlFinancement = searchParams.get('financement');
+    if (!urlSujet && !urlVehicule && !urlRef && !urlFinancement) return;
     setData((d) => {
       const validSujet = SUJETS.includes(urlSujet as Sujet) ? (urlSujet as Sujet) : d.sujet;
       const prefilled: string[] = [];
+      if (urlFinancement === '1') {
+        prefilled.push("Demande d'étude de financement.");
+      }
       if (urlVehicule) prefilled.push(`Je suis intéressé par : ${urlVehicule}`);
       if (urlRef) prefilled.push(`Référence : ${urlRef}`);
       return {

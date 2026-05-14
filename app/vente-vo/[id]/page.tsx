@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { CpHeader } from '@/components/cp/CpHeader';
 import { CpFooter } from '@/components/cp/CpFooter';
 import { VEHICULES, getVehiculeById, type Vehicule } from '@/lib/vehicules';
+import { FinancementSimulator } from './FinancementSimulator';
 import { VehiculeGallery } from './VehiculeGallery';
 
 // Statically generate all vehicle pages at build time
@@ -292,10 +293,10 @@ export default async function VehiculeDetailPage({ params }: Props) {
         </div>
       </section>
 
-      {/* GARANTIES + FINANCEMENT teaser */}
-      <section className="px-6 py-20 bg-cp-cream">
+      {/* GARANTIES — bandeau slim */}
+      <section className="px-6 py-12 bg-cp-cream">
         <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
               {
                 title: 'Garantie 12 mois',
@@ -306,8 +307,8 @@ export default async function VehiculeDetailPage({ params }: Props) {
                 desc: 'Inspection complète, distribution + freinage vérifiés.',
               },
               {
-                title: 'Financement sur mesure',
-                desc: 'Crédit, LOA, reprise possible. TAEG 4,99%.',
+                title: 'Reprise possible',
+                desc: 'Estimation gratuite de votre véhicule actuel.',
               },
             ].map((g) => (
               <div key={g.title} className="bg-white border border-[#E5DDD3] rounded-xl p-5">
@@ -316,8 +317,38 @@ export default async function VehiculeDetailPage({ params }: Props) {
               </div>
             ))}
           </div>
+        </div>
+      </section>
 
-          {/* CTA bottom */}
+      {/* FINANCEMENT intégré (#7 Stephane: "le financement à mettre directement dans la page détails avec les infos") */}
+      <section className="px-6 py-20 bg-[#F8F5F0]">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <p className="cp-mono text-xs text-cp-mango tracking-widest uppercase mb-3">
+              Financement
+            </p>
+            <h2 className="cp-title font-black text-cp-ink text-3xl md:text-4xl leading-tight mb-3">
+              Roulez maintenant,
+              <br />
+              <span className="text-cp-mango">payez à votre rythme</span>
+            </h2>
+            <p className="text-sm text-cp-ink/60 max-w-md mx-auto">
+              Ajustez l&apos;apport et la durée. Calcul instantané sur ce véhicule précis.
+            </p>
+          </div>
+
+          <FinancementSimulator
+            prix={v.prix}
+            marque={v.marque}
+            modele={v.modele}
+            vehiculeId={v.id}
+          />
+        </div>
+      </section>
+
+      {/* CTA final */}
+      <section className="px-6 py-16 bg-cp-cream">
+        <div className="max-w-3xl mx-auto">
           <div className="bg-cp-ink rounded-2xl p-8 md:p-10 text-center">
             <p className="cp-title font-black text-cp-cream text-2xl md:text-3xl mb-3">
               Ce véhicule vous intéresse ?
