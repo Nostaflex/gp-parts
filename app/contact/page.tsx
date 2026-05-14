@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { CpHeader } from '@/components/cp/CpHeader';
 import { CpBridge } from '@/components/cp/CpBridge';
@@ -108,8 +109,10 @@ export default function ContactPage() {
       {/* ── MAIN ─────────────────────────────── */}
       <section id="contact-main" className="py-24 px-6" style={{ backgroundColor: '#0E1F18' }}>
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-          {/* Formulaire */}
-          <ContactForm />
+          {/* Formulaire — Suspense requis car ContactForm utilise useSearchParams */}
+          <Suspense fallback={<div className="h-96 bg-white/5 rounded-2xl animate-pulse" />}>
+            <ContactForm />
+          </Suspense>
 
           {/* Infos */}
           <div className="flex flex-col gap-6">

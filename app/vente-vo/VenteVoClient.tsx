@@ -266,10 +266,10 @@ export function VenteVoClient() {
                       </div>
                       <div className="flex gap-2">
                         <a
-                          href="/reparation"
+                          href={`/contact?sujet=${encodeURIComponent('Vente VO')}&vehicule=${encodeURIComponent(`${v.marque} ${v.modele}`)}&ref=${encodeURIComponent(v.id)}`}
                           className="px-4 py-2 rounded-xl bg-cp-ink text-cp-cream text-xs font-semibold hover:bg-cp-mango transition-colors"
                         >
-                          Nous contacter
+                          Je suis intéressé
                         </a>
                         <a
                           href="tel:+590590000000"
@@ -501,7 +501,7 @@ export function VenteVoClient() {
                 href="/reparation"
                 className="w-full py-3 rounded-xl bg-cp-ink text-cp-cream text-sm font-semibold hover:bg-cp-mango transition-colors text-center block"
               >
-                Nous contacter pour financer
+                Je suis intéressé par ce financement
               </a>
               <p className="text-[0.65rem] text-cp-ink/30 text-center leading-relaxed">
                 Simulation non contractuelle. TAEG fixe 4,99%. Offre soumise à acceptation.

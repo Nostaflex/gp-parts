@@ -387,7 +387,7 @@ export default function HomePage() {
                 href="/contact"
                 className="mt-6 w-full inline-flex justify-center items-center gap-2 bg-cp-mango text-cp-cream font-semibold px-6 py-3 rounded-full hover:bg-cp-mango/90 transition-colors text-sm"
               >
-                Nous contacter
+                Je suis intéressé
               </Link>
             </div>
           </CpReveal>
@@ -405,7 +405,7 @@ export default function HomePage() {
                 CAR<span className="text-cp-mango">PERF.</span>
               </p>
               <p className="text-cp-cream/40 text-sm leading-relaxed">
-                Votre garage de confiance en Guadeloupe depuis 2010.
+                Votre garage de confiance en Guadeloupe depuis 2010 — 16 ans d&apos;expérience.
               </p>
             </div>
             <div>

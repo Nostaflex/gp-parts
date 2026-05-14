@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { CheckCircle, Upload, X } from 'lucide-react';
 
 type Sujet = 'Renseignement' | 'Devis réparation' | 'Expertise' | 'Location' | 'Vente VO' | 'Autre';
@@ -30,6 +31,7 @@ const field =
 const lbl = 'block text-xs font-semibold text-cp-vert-l/70 uppercase tracking-wider mb-1.5';
 
 export function ContactForm() {
+  const searchParams = useSearchParams();
   const [done, setDone] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
@@ -44,6 +46,26 @@ export function ContactForm() {
     files: [],
     consent: false,
   });
+
+  // Pré-remplissage depuis URL: ?sujet=Vente+VO&vehicule=Renault+Clio&ref=GP-V-123
+  // Pattern "Je suis intéressé" — context vient depuis fiche véhicule / pièce.
+  useEffect(() => {
+    const urlSujet = searchParams.get('sujet');
+    const urlVehicule = searchParams.get('vehicule');
+    const urlRef = searchParams.get('ref');
+    if (!urlSujet && !urlVehicule && !urlRef) return;
+    setData((d) => {
+      const validSujet = SUJETS.includes(urlSujet as Sujet) ? (urlSujet as Sujet) : d.sujet;
+      const prefilled: string[] = [];
+      if (urlVehicule) prefilled.push(`Je suis intéressé par : ${urlVehicule}`);
+      if (urlRef) prefilled.push(`Référence : ${urlRef}`);
+      return {
+        ...d,
+        sujet: validSujet,
+        message: prefilled.length ? `${prefilled.join('\n')}\n\n` : d.message,
+      };
+    });
+  }, [searchParams]);
 
   const set = <K extends keyof FormData>(k: K, v: FormData[K]) => {
     setData((d) => ({ ...d, [k]: v }));
