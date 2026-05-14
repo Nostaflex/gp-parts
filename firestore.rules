@@ -3,26 +3,70 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Produits : lecture publique, écriture admin authentifié uniquement
-    match /products/{productId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+    // Helper: user authentifié + email vérifié + email dans whitelist meta/admins
+    function isAdmin() {
+      return request.auth != null
+          && request.auth.token.email_verified == true
+          && exists(/databases/$(database)/documents/meta/admins)
+          && get(/databases/$(database)/documents/meta/admins).data.emails.hasAny([request.auth.token.email]);
     }
 
-    // Commandes : création publique (checkout), lecture/màj admin uniquement
-    match /orders/{orderId} {
-      allow create: if true;
-      allow read, update: if request.auth != null;
+    // Catalogue public en lecture, admin en écriture
+    match /products/{doc=**} {
+      allow read;
+      allow write: if isAdmin();
+    }
+
+    match /vehicules/{doc=**} {
+      allow read;
+      allow write: if isAdmin();
+    }
+
+    match /motos/{doc=**} {
+      allow read;
+      allow write: if isAdmin();
+    }
+
+    // Commandes: création publique (checkout), lecture/update admin, jamais delete
+    match /orders/{doc} {
+      allow create;
+      allow read, update: if isAdmin();
       allow delete: if false;
     }
 
-    // Métadonnées (catégories, config) : lecture publique
-    match /metadata/{docId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+    // Demandes (contact/reprise/financement): création publique, lecture/update admin
+    // Pas hard delete (RGPD: soft delete via status='deleted')
+    match /demandes/{doc} {
+      allow create;
+      allow read, update: if isAdmin();
+      allow delete: if false;
     }
 
-    // Règle par défaut : tout bloquer
+    // Leboncoin drafts: admin only (lecture + écriture)
+    match /leboncoin_drafts/{doc=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // Audit log: immutable, jamais update/delete même admin
+    match /audit_log/{doc} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // Meta (whitelist admins + config): admin only
+    // Note: meta/admins contient PII (emails admins), pas lecture publique
+    match /meta/{doc=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // Legacy metadata (rétro-compat, lecture publique catégories)
+    match /metadata/{docId} {
+      allow read;
+      allow write: if isAdmin();
+    }
+
+    // Default deny
     match /{document=**} {
       allow read, write: if false;
     }
