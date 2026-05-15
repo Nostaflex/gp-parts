@@ -2,8 +2,9 @@
 
 import { generateOrderNumber } from '@/lib/utils';
 import { getAdapter } from '@/lib/data';
-import { getResend, EMAIL_FROM } from '@/lib/email';
+import { getResend, EMAIL_FROM, EMAIL_ADMIN } from '@/lib/email';
 import { buildOrderConfirmationEmail } from '@/lib/emails/orderConfirmation';
+import { buildOrderNotificationEmail } from '@/lib/emails/orderNotification';
 import { getDeliveryPrice } from '@/lib/config';
 import type { CartItem, Order } from '@/lib/types';
 
@@ -167,13 +168,33 @@ export async function validateCheckout(formData: {
 
   const orderId = await adapter.createOrder(orderData);
 
-  // Email confirmation — fire-and-forget (ne bloque pas le checkout si Resend échoue)
+  // Emails — fire-and-forget (ne bloquent jamais le checkout si Resend échoue)
   if (process.env.RESEND_API_KEY) {
     const fullOrder: Order = { ...orderData, id: orderId };
-    const { subject, html } = buildOrderConfirmationEmail(fullOrder);
+
+    // 1. Confirmation client
+    const confirmation = buildOrderConfirmationEmail(fullOrder);
     getResend()
-      .emails.send({ from: EMAIL_FROM, to: email, subject, html })
-      .catch((err) => console.error('[checkout] Email confirmation failed:', err));
+      .emails.send({
+        from: EMAIL_FROM,
+        to: email,
+        subject: confirmation.subject,
+        html: confirmation.html,
+      })
+      .catch((err) => console.error('[checkout] Email confirmation client échoué:', err));
+
+    // 2. Notification gérant (Stephane) — uniquement si RESEND_ADMIN_EMAIL configurée
+    if (EMAIL_ADMIN) {
+      const notification = buildOrderNotificationEmail(fullOrder);
+      getResend()
+        .emails.send({
+          from: EMAIL_FROM,
+          to: EMAIL_ADMIN,
+          subject: notification.subject,
+          html: notification.html,
+        })
+        .catch((err) => console.error('[checkout] Email notification gérant échoué:', err));
+    }
   }
 
   return { success: true, errors: {}, orderNumber };
