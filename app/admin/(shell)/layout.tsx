@@ -7,9 +7,16 @@ import { AdminShell } from '@/components/admin/AdminShell';
  * rendues dans la coquille (sidebar + topbar). `/admin/login` est hors de
  * ce group → pas de shell.
  *
- * Phase 6 : ajouter le slot Parallel Route `@modal` (drawer Demandes) en
- * paramètre de ce layout + `<AdminShell modal={modal}>`.
+ * Slot Parallel Route `@modal` câblé (Phase 2 infra) : inerte tant qu'aucune
+ * route ne l'intercepte. Phase 6 ajoutera `@modal/(.)demandes/[id]` pour le
+ * drawer Demandes URL-synced.
  */
-export default function ShellLayout({ children }: { children: ReactNode }) {
-  return <AdminShell>{children}</AdminShell>;
+export default function ShellLayout({
+  children,
+  modal,
+}: {
+  children: ReactNode;
+  modal: ReactNode;
+}) {
+  return <AdminShell modal={modal}>{children}</AdminShell>;
 }
