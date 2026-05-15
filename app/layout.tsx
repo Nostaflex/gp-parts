@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import { Big_Shoulders_Display, Instrument_Sans, JetBrains_Mono } from 'next/font/google';
+import { Big_Shoulders, Instrument_Sans, JetBrains_Mono } from 'next/font/google';
 import { CartProvider } from '@/components/cart/CartProvider';
 import { ToastProvider } from '@/components/ui/Toast';
 import { CookieBanner } from '@/components/gdpr/CookieBanner';
 import './globals.css';
 
-const bigShoulders = Big_Shoulders_Display({
+const bigShoulders = Big_Shoulders({
   subsets: ['latin'],
   variable: '--font-title',
   weight: ['700'],
