@@ -13,3 +13,10 @@ export function getResend(): Resend {
 }
 
 export const EMAIL_FROM = 'Car Performance <commandes@carperformance.gp>';
+
+/**
+ * Adresse du gérant (Stephane) notifiée à chaque nouvelle commande.
+ * Configurée via RESEND_ADMIN_EMAIL (cf. .env.example). Si absente, la
+ * notification interne est silencieusement ignorée (le checkout ne casse pas).
+ */
+export const EMAIL_ADMIN = process.env.RESEND_ADMIN_EMAIL;

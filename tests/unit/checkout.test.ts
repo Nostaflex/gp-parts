@@ -1,5 +1,21 @@
 import { describe, it, expect } from 'vitest';
-import { validateCheckout } from '../../app/(boutique)/commande/actions';
+
+import { validateCheckout } from '../../app/(boutique)/(checkout)/commande/actions';
+
+import type { CartItem } from '@/lib/types';
+
+// Panier minimal valide : prod-001 existe dans le StaticAdapter (défaut en test)
+const validItems: CartItem[] = [
+  {
+    productId: 'prod-001',
+    slug: 'placeholder',
+    name: 'Placeholder',
+    reference: 'REF-001',
+    priceInCents: 1000,
+    quantity: 1,
+    image: '',
+  } as unknown as CartItem,
+];
 
 // ─── Données de test valides ─────────────────────────────────────────
 const validData = {
@@ -12,6 +28,8 @@ const validData = {
   postalCode: '97110',
   deliveryOption: 'island-delivery',
   acceptsCgv: true,
+  items: validItems,
+  subtotalInCents: 1000,
 };
 
 // ─── Cas nominal ─────────────────────────────────────────────────────
