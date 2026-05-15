@@ -14,7 +14,6 @@
  */
 
 import { useState } from 'react';
-import Link from 'next/link';
 
 const IOS = {
   bg: 'var(--bg)',
@@ -137,18 +136,11 @@ export function EstimationClient() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: IOS.bg }}>
+    <div>
       <div className="max-w-5xl mx-auto px-6 py-10">
         {/* Header */}
         <div className="mb-8">
-          <Link
-            href="/admin"
-            className="text-sm font-medium mb-2 inline-block"
-            style={{ color: IOS.blue }}
-          >
-            ← Retour au tableau de bord
-          </Link>
-          <h1 className="text-3xl font-bold mt-2" style={{ color: IOS.text }}>
+          <h1 className="text-3xl font-bold" style={{ color: IOS.text }}>
             Estimation reprise
           </h1>
           <p className="text-sm mt-2" style={{ color: IOS.textMuted }}>

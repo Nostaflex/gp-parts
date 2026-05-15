@@ -17,7 +17,6 @@
  */
 
 import { useState, useMemo } from 'react';
-import Link from 'next/link';
 import { VEHICULES, type Vehicule } from '@/lib/vehicules';
 import { MOTOS, type Moto } from '@/lib/motos';
 
@@ -69,17 +68,10 @@ export function LeboncoinExportClient() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: IOS.bg }}>
+    <div>
       <div className="max-w-6xl mx-auto px-6 py-10">
         <div className="mb-8">
-          <Link
-            href="/admin"
-            className="text-sm font-medium mb-2 inline-block"
-            style={{ color: IOS.blue }}
-          >
-            ← Retour au tableau de bord
-          </Link>
-          <h1 className="text-3xl font-bold mt-2" style={{ color: IOS.text }}>
+          <h1 className="text-3xl font-bold" style={{ color: IOS.text }}>
             Export Leboncoin
           </h1>
           <p className="text-sm mt-2 max-w-3xl" style={{ color: IOS.textMuted }}>

@@ -1,4 +1,11 @@
+import type { Metadata } from 'next';
+
 import { AdminDashboardClient } from './AdminDashboardClient';
+
+export const metadata: Metadata = {
+  title: 'Tableau de bord — Admin GP Parts',
+  robots: { index: false, follow: false },
+};
 
 /**
  * Phase 4 : le fetch des produits est déplacé côté client dans AdminDashboardClient.

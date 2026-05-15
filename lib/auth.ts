@@ -54,6 +54,37 @@ export async function adminSignOut(): Promise<void> {
   await signOut(auth);
 }
 
+/**
+ * Force le rafraîchissement de la session admin.
+ *
+ * Récupère un ID token frais (`getIdToken(true)`) et recrée le session
+ * cookie SSR. Utile si la whitelist `meta/admins` a changé après le login
+ * (ajout/retrait d'un admin) — évite d'attendre l'expiration du cookie 5j.
+ *
+ * No-op en mode émulateur (le cookie émulateur n'a pas de TTL court).
+ */
+export async function refreshAdminSession(): Promise<void> {
+  if (process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true') {
+    return;
+  }
+
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error('Aucune session active');
+  }
+
+  const idToken = await user.getIdToken(true);
+  const res = await fetch('/api/sessionLogin', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ idToken }),
+  });
+
+  if (!res.ok) {
+    throw new Error('Impossible de rafraîchir la session serveur');
+  }
+}
+
 export function onAuthChange(callback: (user: User | null) => void): () => void {
   return onAuthStateChanged(auth, callback);
 }
