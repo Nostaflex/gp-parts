@@ -1,10 +1,8 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Package, TrendingUp, AlertTriangle, Euro, Search, Tag, Edit3, Eye } from 'lucide-react';
-import { adminSignOut } from '@/lib/auth';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -34,7 +32,6 @@ const IOS = {
 } as const;
 
 export function AdminDashboardClient() {
-  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -128,55 +125,8 @@ export function AdminDashboardClient() {
           <p className="text-body mt-2" style={{ color: IOS.textMuted }}>
             Gestion du stock et des promotions
           </p>
-          <div className="flex gap-3 mt-3 flex-wrap">
-            <Link
-              href="/admin"
-              className="text-sm font-semibold underline-offset-2"
-              style={{ color: IOS.blue }}
-            >
-              Produits
-            </Link>
-            <Link
-              href="/admin/commandes"
-              className="text-sm font-semibold underline-offset-2"
-              style={{ color: IOS.blue }}
-            >
-              Commandes
-            </Link>
-            <Link
-              href="/admin/estimation"
-              className="text-sm font-semibold underline-offset-2"
-              style={{ color: IOS.blue }}
-            >
-              Estimation reprise
-            </Link>
-            <Link
-              href="/admin/leboncoin"
-              className="text-sm font-semibold underline-offset-2"
-              style={{ color: IOS.blue }}
-            >
-              Export Leboncoin
-            </Link>
-          </div>
         </div>
         <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={async () => {
-              await adminSignOut();
-              router.push('/admin/login');
-            }}
-            style={{
-              background: 'transparent',
-              border: '1px solid var(--border)',
-              borderRadius: '8px',
-              padding: '0.5rem 1rem',
-              cursor: 'pointer',
-              color: 'var(--text)',
-            }}
-          >
-            Déconnexion
-          </button>
           <Button variant="outline" size="md" onClick={() => notifyDemo('Exporter')}>
             <TrendingUp size={18} strokeWidth={1.75} /> Exporter
           </Button>

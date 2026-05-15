@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
 import {
   ChevronDown,
   ChevronUp,
@@ -295,16 +294,11 @@ export function OrdersClient() {
   }, {});
 
   return (
-    <div style={{ background: IOS.bg, minHeight: '100vh' }}>
+    <div>
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <div className="flex gap-3 mb-1">
-              <Link href="/admin" className="text-sm font-semibold" style={{ color: IOS.blue }}>
-                ← Produits
-              </Link>
-            </div>
             <h1 className="font-title text-h1" style={{ color: IOS.text }}>
               Commandes
             </h1>

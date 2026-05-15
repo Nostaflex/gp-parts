@@ -18,7 +18,7 @@ export default function AdminLoginPage() {
 
     try {
       await adminSignIn(email, password);
-      router.push('/admin');
+      router.push('/admin/dashboard');
     } catch {
       setError('Email ou mot de passe incorrect');
     } finally {

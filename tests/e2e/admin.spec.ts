@@ -41,8 +41,9 @@ async function adminLogin(page: import('@playwright/test').Page) {
   await page.fill('input[name="email"]', TEST_EMAIL!);
   await page.fill('input[name="password"]', TEST_PASSWORD!);
   await page.click('button[type="submit"]');
-  // Use regex to avoid glob ambiguity; 25s to absorb emulator latency in CI
-  await page.waitForURL(/\/admin$/, { timeout: 25_000 });
+  // Admin CMS v3 Phase 1 : login redirige vers /admin/dashboard (shell route group).
+  // 25s pour absorber la latence émulateur en CI.
+  await page.waitForURL(/\/admin\/dashboard$/, { timeout: 25_000 });
 }
 
 // --- Tests ---
@@ -97,7 +98,7 @@ test.describe('Admin — smoke back-office', () => {
   test.beforeEach(async ({ page, context }) => {
     // Injection du cookie de session → bypass login UI, middleware autorise l'accès
     await injectSessionCookie(context);
-    await page.goto('/admin');
+    await page.goto('/admin/dashboard');
     // Attendre que le dashboard soit chargé (données Firestore visibles)
     await expect(page.getByText('Produits en catalogue')).toBeVisible({ timeout: 10_000 });
   });
