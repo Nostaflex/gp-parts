@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { CheckCircle } from 'lucide-react';
 
 type Categorie = 'Toutes' | 'Citadine' | 'Berline' | 'SUV' | 'Utilitaire';
@@ -122,6 +122,7 @@ export function LocationClient() {
   const [dateDepart, setDateDepart] = useState('');
   const [dateRetour, setDateRetour] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const formSectionRef = useRef<HTMLElement>(null);
   const [showForm, setShowForm] = useState(false);
   const [step, setStep] = useState<Step>(0);
   const [done, setDone] = useState(false);
@@ -158,6 +159,12 @@ export function LocationClient() {
     setFormData((d) => ({ ...d, vehiculeId: id, dateDepart, dateRetour }));
     setShowForm(true);
     setStep(0);
+    // Le formulaire est rendu en bas de page (après le catalogue) : sans ce
+    // scroll, le clic « Réserver » paraît sans effet. requestAnimationFrame
+    // laisse React peindre la section avant de scroller.
+    requestAnimationFrame(() => {
+      formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   };
 
   const validate = (): boolean => {
@@ -430,7 +437,11 @@ export function LocationClient() {
 
       {/* ── FORMULAIRE RÉSERVATION ─────────── */}
       {showForm && vehiculeSelectionne && (
-        <section className="py-24 px-6 pt-32" style={{ backgroundColor: '#2C1A08' }}>
+        <section
+          ref={formSectionRef}
+          className="py-24 px-6 pt-32"
+          style={{ backgroundColor: '#2C1A08' }}
+        >
           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
             {/* Info */}
             <div className="lg:sticky lg:top-24">
