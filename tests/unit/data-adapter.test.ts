@@ -197,6 +197,14 @@ describe('StaticAdapter — vehicules/motos/demandes', () => {
     expect(filtered.every((d) => d.type === target)).toBe(true);
   });
 
+  it('chaque véhicule statique a un updatedAt ISO (régression Phase 4)', async () => {
+    const vehicules = await adapter.getVehicules();
+    for (const v of vehicules) {
+      expect(typeof v.updatedAt).toBe('string');
+      expect(Number.isNaN(Date.parse(v.updatedAt))).toBe(false);
+    }
+  });
+
   it('getVehicules() throw en production (fallback statique dev-only)', async () => {
     vi.stubEnv('NODE_ENV', 'production');
     try {
