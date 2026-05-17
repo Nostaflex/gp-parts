@@ -13,10 +13,12 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Product, ProductCategory, Order, OrderStatus } from '@/lib/types';
+import type { Product, ProductCategory, Order, OrderStatus, Demande } from '@/lib/types';
+import type { Vehicule } from '@/lib/vehicules';
+import type { Moto } from '@/lib/motos';
 import { parseProduct } from '@/lib/schemas/product';
 import { parseOrder } from '@/lib/schemas/order';
-import type { DataAdapter, ProductFilters, OrderFilters } from './types';
+import type { DataAdapter, ProductFilters, OrderFilters, DemandeFilters } from './types';
 import { applyClientFilters } from './filters';
 
 /**
@@ -31,6 +33,9 @@ import { applyClientFilters } from './filters';
 export class FirebaseAdapter implements DataAdapter {
   private readonly productsRef = collection(db, 'products');
   private readonly ordersRef = collection(db, 'orders');
+  private readonly vehiculesRef = collection(db, 'vehicules');
+  private readonly motosRef = collection(db, 'motos');
+  private readonly demandesRef = collection(db, 'demandes');
 
   /**
    * Convertit un document Firestore en Product typé.
@@ -178,5 +183,38 @@ export class FirebaseAdapter implements DataAdapter {
       createdAt: toISO(data.createdAt),
       updatedAt: toISO(data.updatedAt),
     });
+  }
+
+  // ─── Admin CMS v3 — Phase 3 (lecture seule) ────────────────────────
+  // Validation Zod des documents : Phase 4 (lib/schemas/vehicule|moto|
+  // demande.ts). Ici, lecture brute typée — cohérent avec le découpage spec.
+
+  async getVehicules(): Promise<Vehicule[]> {
+    const snapshot = await getDocs(this.vehiculesRef);
+    return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }) as Vehicule);
+  }
+
+  async getMotos(): Promise<Moto[]> {
+    const snapshot = await getDocs(this.motosRef);
+    return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }) as Moto);
+  }
+
+  async getDemandes(filters?: DemandeFilters): Promise<Demande[]> {
+    let q = query(this.demandesRef, orderBy('createdAt', 'desc'));
+    if (filters?.status) {
+      q = query(
+        this.demandesRef,
+        where('status', '==', filters.status),
+        orderBy('createdAt', 'desc')
+      );
+    }
+    if (filters?.type) {
+      q = query(q, where('type', '==', filters.type));
+    }
+    if (filters?.limit) {
+      q = query(q, firestoreLimit(filters.limit));
+    }
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }) as Demande);
   }
 }

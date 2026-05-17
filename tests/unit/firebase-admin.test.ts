@@ -12,9 +12,15 @@ vi.mock('firebase-admin/auth', () => ({
   getAuth: vi.fn(() => ({ mock: 'auth-instance' })),
 }));
 
-import { getAdminAuth } from '@/lib/firebase-admin';
+// Mock firebase-admin/firestore
+vi.mock('firebase-admin/firestore', () => ({
+  getFirestore: vi.fn(() => ({ mock: 'firestore-instance' })),
+}));
+
+import { getAdminAuth, getAdminFirestore } from '@/lib/firebase-admin';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase-admin/firestore';
 
 describe('getAdminAuth', () => {
   beforeEach(() => {
@@ -71,5 +77,35 @@ describe('getAdminAuth', () => {
     delete process.env.FIREBASE_ADMIN_PROJECT_ID;
     delete process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
     delete process.env.FIREBASE_ADMIN_PRIVATE_KEY;
+  });
+});
+
+describe('getAdminFirestore', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(getApps).mockReturnValue([]);
+  });
+
+  it('returns Firestore instance from the admin app (emulator)', () => {
+    process.env.FIREBASE_AUTH_EMULATOR_HOST = '127.0.0.1:9099';
+    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID = 'demo-gp-parts';
+
+    getAdminFirestore();
+
+    expect(initializeApp).toHaveBeenCalledWith({ projectId: 'demo-gp-parts' });
+    expect(getFirestore).toHaveBeenCalled();
+
+    delete process.env.FIREBASE_AUTH_EMULATOR_HOST;
+    delete process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+  });
+
+  it('reuses the existing admin app instead of re-initializing', () => {
+    const mockApp = { name: 'existing-app' } as never;
+    vi.mocked(getApps).mockReturnValue([mockApp]);
+
+    getAdminFirestore();
+
+    expect(initializeApp).not.toHaveBeenCalled();
+    expect(getFirestore).toHaveBeenCalledWith(mockApp);
   });
 });

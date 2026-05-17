@@ -1,4 +1,14 @@
-import type { Product, ProductCategory, Order, OrderStatus } from '@/lib/types';
+import type {
+  Product,
+  ProductCategory,
+  Order,
+  OrderStatus,
+  Demande,
+  DemandeStatus,
+  DemandeType,
+} from '@/lib/types';
+import type { Vehicule } from '@/lib/vehicules';
+import type { Moto } from '@/lib/motos';
 
 export interface ProductFilters {
   category?: ProductCategory;
@@ -11,6 +21,12 @@ export interface ProductFilters {
 
 export interface OrderFilters {
   status?: OrderStatus;
+  limit?: number;
+}
+
+export interface DemandeFilters {
+  status?: DemandeStatus;
+  type?: DemandeType;
   limit?: number;
 }
 
@@ -28,4 +44,10 @@ export interface DataAdapter {
   getOrders(filters?: OrderFilters): Promise<Order[]>;
   getOrderById(id: string): Promise<Order | null>;
   updateOrderStatus(id: string, status: OrderStatus): Promise<void>;
+
+  // Admin CMS v3 — Phase 3+. Lecture seule ici ; les mutations passent par
+  // des Server Actions dédiées (requireAdmin + audit log).
+  getVehicules(): Promise<Vehicule[]>;
+  getMotos(): Promise<Moto[]>;
+  getDemandes(filters?: DemandeFilters): Promise<Demande[]>;
 }
