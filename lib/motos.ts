@@ -40,6 +40,7 @@ export type Moto = {
   caracteristiques: CaracteristiquesMoto;
   reference: string;
   disponibilite: Disponibilite;
+  updatedAt: string; // ISO date — optimistic lock + tri admin (Phase 4b)
 };
 
 export const MOTOS: Moto[] = [
@@ -79,6 +80,7 @@ export const MOTOS: Moto[] = [
     },
     reference: 'GP-M-MT07-001',
     disponibilite: 'disponible',
+    updatedAt: '2026-04-16T00:00:00.000Z',
   },
   {
     id: 'honda-cb500x',
@@ -115,6 +117,7 @@ export const MOTOS: Moto[] = [
     },
     reference: 'GP-M-CB500X-002',
     disponibilite: 'disponible',
+    updatedAt: '2026-04-21T00:00:00.000Z',
   },
   {
     id: 'kawasaki-z900',
@@ -151,6 +154,7 @@ export const MOTOS: Moto[] = [
     },
     reference: 'GP-M-Z900-003',
     disponibilite: 'disponible',
+    updatedAt: '2026-04-26T00:00:00.000Z',
   },
   {
     id: 'piaggio-mp3-500',
@@ -187,6 +191,7 @@ export const MOTOS: Moto[] = [
     },
     reference: 'GP-M-MP3-004',
     disponibilite: 'disponible',
+    updatedAt: '2026-05-01T00:00:00.000Z',
   },
   {
     id: 'bmw-r1250gs',
@@ -223,6 +228,7 @@ export const MOTOS: Moto[] = [
     },
     reference: 'GP-M-R1250-005',
     disponibilite: 'disponible',
+    updatedAt: '2026-05-03T00:00:00.000Z',
   },
 
   // ─────────── NEUF ───────────
@@ -261,6 +267,7 @@ export const MOTOS: Moto[] = [
     },
     reference: 'GP-MN-PCX125-001',
     disponibilite: 'disponible',
+    updatedAt: '2026-05-06T00:00:00.000Z',
   },
   {
     id: 'yamaha-tracer-9-neuf',
@@ -297,6 +304,7 @@ export const MOTOS: Moto[] = [
     },
     reference: 'GP-MN-TRACER9-002',
     disponibilite: 'disponible',
+    updatedAt: '2026-05-09T00:00:00.000Z',
   },
 ];
 
