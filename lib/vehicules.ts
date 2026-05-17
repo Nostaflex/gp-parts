@@ -83,7 +83,7 @@ export const VEHICULES: Vehicule[] = [
     },
     reference: 'GP-V-308SW-001',
     disponibilite: 'disponible',
-    updatedAt: '2026-05-01T00:00:00.000Z',
+    updatedAt: '2026-04-15T00:00:00.000Z',
   },
   {
     id: 'renault-clio',
@@ -123,7 +123,7 @@ export const VEHICULES: Vehicule[] = [
     },
     reference: 'GP-V-CLIO-002',
     disponibilite: 'disponible',
-    updatedAt: '2026-05-01T00:00:00.000Z',
+    updatedAt: '2026-04-20T00:00:00.000Z',
   },
   {
     id: 'citroen-c3',
@@ -163,7 +163,7 @@ export const VEHICULES: Vehicule[] = [
     },
     reference: 'GP-V-C3-003',
     disponibilite: 'disponible',
-    updatedAt: '2026-05-01T00:00:00.000Z',
+    updatedAt: '2026-04-25T00:00:00.000Z',
   },
   {
     id: 'vw-golf',
@@ -203,7 +203,7 @@ export const VEHICULES: Vehicule[] = [
     },
     reference: 'GP-V-GOLF-004',
     disponibilite: 'disponible',
-    updatedAt: '2026-05-01T00:00:00.000Z',
+    updatedAt: '2026-04-30T00:00:00.000Z',
   },
   {
     id: 'toyota-yaris',
@@ -243,7 +243,7 @@ export const VEHICULES: Vehicule[] = [
     },
     reference: 'GP-V-YARIS-005',
     disponibilite: 'disponible',
-    updatedAt: '2026-05-01T00:00:00.000Z',
+    updatedAt: '2026-05-02T00:00:00.000Z',
   },
 
   // ─────────── NEUF ───────────
@@ -285,7 +285,7 @@ export const VEHICULES: Vehicule[] = [
     },
     reference: 'GP-N-SANDERO-001',
     disponibilite: 'disponible',
-    updatedAt: '2026-05-01T00:00:00.000Z',
+    updatedAt: '2026-05-05T00:00:00.000Z',
   },
   {
     id: 'peugeot-208-neuf',
@@ -325,7 +325,7 @@ export const VEHICULES: Vehicule[] = [
     },
     reference: 'GP-N-208-002',
     disponibilite: 'disponible',
-    updatedAt: '2026-05-01T00:00:00.000Z',
+    updatedAt: '2026-05-08T00:00:00.000Z',
   },
 ];
 
