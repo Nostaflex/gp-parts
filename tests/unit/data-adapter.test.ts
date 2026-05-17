@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { getAdapter, resetAdapter, setAdapter, StaticAdapter } from '../../lib/data';
 import type { DataAdapter } from '../../lib/data';
 import { applyClientFilters } from '../../lib/data/filters';
@@ -88,6 +88,9 @@ describe('getAdapter', () => {
       getOrders: async () => [],
       getOrderById: async () => null,
       updateOrderStatus: async () => {},
+      getVehicules: async () => [],
+      getMotos: async () => [],
+      getDemandes: async () => [],
     };
     setAdapter(mockAdapter);
     const adapter = await getAdapter();
@@ -152,6 +155,57 @@ describe('StaticAdapter', () => {
     expect(categories.length).toBeGreaterThan(0);
     const sorted = [...categories].sort();
     expect(categories).toEqual(sorted);
+  });
+});
+
+// ─── StaticAdapter — vehicules / motos / demandes (Phase 3) ──────────
+describe('StaticAdapter — vehicules/motos/demandes', () => {
+  const adapter = new StaticAdapter();
+
+  it('getVehicules() délègue au dataset VEHICULES (non vide en dev)', async () => {
+    const vehicules = await adapter.getVehicules();
+    expect(vehicules.length).toBeGreaterThan(0);
+    expect(vehicules[0]).toHaveProperty('marque');
+    expect(vehicules[0]).toHaveProperty('prix');
+  });
+
+  it('getMotos() délègue au dataset MOTOS (non vide en dev)', async () => {
+    const motos = await adapter.getMotos();
+    expect(motos.length).toBeGreaterThan(0);
+    expect(motos[0]).toHaveProperty('categorie');
+  });
+
+  it('getDemandes() retourne des fixtures en dev', async () => {
+    const demandes = await adapter.getDemandes();
+    expect(demandes.length).toBeGreaterThan(0);
+    expect(demandes[0]).toHaveProperty('email');
+    expect(demandes[0]).toHaveProperty('status');
+  });
+
+  it('getDemandes() filtre par status', async () => {
+    const all = await adapter.getDemandes();
+    const target = all[0].status;
+    const filtered = await adapter.getDemandes({ status: target });
+    expect(filtered.every((d) => d.status === target)).toBe(true);
+  });
+
+  it('getDemandes() filtre par type et respecte limit', async () => {
+    const all = await adapter.getDemandes();
+    const target = all[0].type;
+    const filtered = await adapter.getDemandes({ type: target, limit: 1 });
+    expect(filtered.length).toBeLessThanOrEqual(1);
+    expect(filtered.every((d) => d.type === target)).toBe(true);
+  });
+
+  it('getVehicules() throw en production (fallback statique dev-only)', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    try {
+      await expect(adapter.getVehicules()).rejects.toThrow(/Firebase/i);
+      await expect(adapter.getMotos()).rejects.toThrow(/Firebase/i);
+      await expect(adapter.getDemandes()).rejects.toThrow(/Firebase/i);
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 });
 

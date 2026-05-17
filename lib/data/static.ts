@@ -1,7 +1,68 @@
-import type { Product, Order, OrderStatus } from '@/lib/types';
+import type { Product, Order, OrderStatus, Demande } from '@/lib/types';
 import { PRODUCTS } from '@/lib/products';
-import type { DataAdapter, ProductFilters, OrderFilters } from './types';
+import { VEHICULES } from '@/lib/vehicules';
+import { MOTOS } from '@/lib/motos';
+import type { Vehicule } from '@/lib/vehicules';
+import type { Moto } from '@/lib/motos';
+import type { DataAdapter, ProductFilters, OrderFilters, DemandeFilters } from './types';
 import { applyClientFilters } from './filters';
+
+// Fixtures CRM pour le dev local sans émulateur Firebase. En production,
+// les demandes viennent exclusivement de Firestore (cf. garde NODE_ENV).
+const DEMANDES_FIXTURES: Demande[] = [
+  {
+    id: 'dem-001',
+    type: 'vehicule',
+    status: 'nouvelle',
+    nom: 'Jean Dupont',
+    email: 'jean.dupont@example.gp',
+    telephone: '0690112233',
+    message: 'Bonjour, la Peugeot 308 SW est-elle toujours disponible ?',
+    resourceRef: 'peugeot-308sw',
+    createdAt: '2026-05-10T09:15:00.000Z',
+    updatedAt: '2026-05-10T09:15:00.000Z',
+    expiresAt: Date.parse('2027-05-10T09:15:00.000Z'),
+  },
+  {
+    id: 'dem-002',
+    type: 'piece',
+    status: 'en_cours',
+    nom: 'Marie Latour',
+    email: 'marie.latour@example.gp',
+    telephone: '0696445566',
+    message: 'Avez-vous des plaquettes de frein pour Clio IV en stock ?',
+    notes: 'Rappeler après 17h — devis envoyé le 12/05.',
+    createdAt: '2026-05-12T14:30:00.000Z',
+    updatedAt: '2026-05-13T08:00:00.000Z',
+    expiresAt: Date.parse('2027-05-12T14:30:00.000Z'),
+  },
+  {
+    id: 'dem-003',
+    type: 'financement',
+    status: 'traitee',
+    nom: 'Carl Sévère',
+    email: 'carl.severe@example.gp',
+    telephone: '0690778899',
+    message: 'Simulation de financement pour la Yamaha MT-07.',
+    resourceRef: 'yamaha-mt07',
+    notes: 'Dossier transmis au partenaire financier — clos.',
+    createdAt: '2026-05-08T11:00:00.000Z',
+    updatedAt: '2026-05-14T16:45:00.000Z',
+    expiresAt: Date.parse('2027-05-08T11:00:00.000Z'),
+  },
+];
+
+// Le fallback statique des données back-office est réservé au dev local.
+// En production, vehicules/motos/demandes proviennent exclusivement de
+// Firestore (cf. spec Admin CMS v3 Phase 3).
+function assertDevFallback(method: string): void {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      `StaticAdapter.${method}() : fallback statique réservé au développement. ` +
+        `En production, configurer Firebase (NEXT_PUBLIC_FIREBASE_PROJECT_ID).`
+    );
+  }
+}
 
 /**
  * StaticAdapter — Implements DataAdapter using in-memory PRODUCTS array
@@ -103,5 +164,28 @@ export class StaticAdapter implements DataAdapter {
       order.status = status;
       order.updatedAt = new Date().toISOString();
     }
+  }
+
+  // ─── Admin CMS v3 — Phase 3 (lecture seule, dev fallback) ──────────
+
+  async getVehicules(): Promise<Vehicule[]> {
+    assertDevFallback('getVehicules');
+    return [...VEHICULES];
+  }
+
+  async getMotos(): Promise<Moto[]> {
+    assertDevFallback('getMotos');
+    return [...MOTOS];
+  }
+
+  async getDemandes(filters?: DemandeFilters): Promise<Demande[]> {
+    assertDevFallback('getDemandes');
+    let demandes = [...DEMANDES_FIXTURES].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    if (filters?.status) demandes = demandes.filter((d) => d.status === filters.status);
+    if (filters?.type) demandes = demandes.filter((d) => d.type === filters.type);
+    if (filters?.limit) demandes = demandes.slice(0, filters.limit);
+    return demandes;
   }
 }

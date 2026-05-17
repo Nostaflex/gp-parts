@@ -127,3 +127,28 @@ export interface Order {
   createdAt: string;
   updatedAt: string;
 }
+
+// --- Demandes CRM (Admin CMS v3 — Phase 3+) ---
+// Créées publiquement via le formulaire de contact, traitées en back-office.
+// PII client : jamais loggée dans audit_log (cf. lib/admin/audit.ts).
+
+export type DemandeType = 'contact' | 'vehicule' | 'moto' | 'piece' | 'financement';
+
+export type DemandeStatus = 'nouvelle' | 'en_cours' | 'traitee' | 'deleted';
+
+export interface Demande {
+  id: string;
+  type: DemandeType;
+  status: DemandeStatus;
+  nom: string;
+  email: string;
+  telephone: string;
+  message: string;
+  // Référence optionnelle vers la ressource concernée (id véhicule/moto/produit)
+  resourceRef?: string;
+  // Notes internes ajoutées par l'admin (jamais exposées côté public)
+  notes?: string;
+  createdAt: string; // ISO date
+  updatedAt: string; // ISO date
+  expiresAt: number; // unix ms — TTL Firestore native (purge RGPD)
+}

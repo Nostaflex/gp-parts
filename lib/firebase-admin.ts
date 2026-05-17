@@ -8,9 +8,11 @@
  */
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase-admin/firestore';
 
 import type { App } from 'firebase-admin/app';
 import type { Auth } from 'firebase-admin/auth';
+import type { Firestore } from 'firebase-admin/firestore';
 
 function getAdminApp(): App {
   if (getApps().length > 0) return getApps()[0];
@@ -38,4 +40,15 @@ function getAdminApp(): App {
 
 export function getAdminAuth(): Auth {
   return getAuth(getAdminApp());
+}
+
+/**
+ * Firestore via Admin SDK (Node.js runtime uniquement).
+ *
+ * Utilisé par les Server Actions admin (Phase 3+) : whitelist `meta/admins`,
+ * audit log, CRUD vehicules/motos/demandes. Contourne les Security Rules
+ * (privilèges service account) — toujours protéger l'accès via requireAdmin().
+ */
+export function getAdminFirestore(): Firestore {
+  return getFirestore(getAdminApp());
 }
