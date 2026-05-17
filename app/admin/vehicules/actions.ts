@@ -10,32 +10,40 @@ import { computeDiff } from '@/lib/admin/diff';
 
 import type { FormActionState } from '@/components/admin/FormShell';
 
+function sanitize(value: unknown): string {
+  if (typeof value !== 'string') return '';
+  return value.trim().replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+}
+
 function parseForm(formData: FormData) {
   const images = formData.getAll('images').map(String).filter(Boolean);
   const optionsRaw = String(formData.get('options') ?? '');
   const num = (k: string) => Number(formData.get(k));
 
-  const carac = {
-    puissance: String(formData.get('car_puissance') ?? '') || undefined,
-    cylindree: String(formData.get('car_cylindree') ?? '') || undefined,
-    consommation: String(formData.get('car_consommation') ?? '') || undefined,
-    co2: String(formData.get('car_co2') ?? '') || undefined,
-    couleur: String(formData.get('car_couleur') ?? '') || undefined,
-    carrosserie: String(formData.get('car_carrosserie') ?? '') || undefined,
-    critAir: String(formData.get('car_critair') ?? '') || undefined,
-    premiereCirculation: String(formData.get('car_premiere_circulation') ?? '') || undefined,
-    garantie: String(formData.get('car_garantie') ?? '') || undefined,
-  };
+  const caracEntries: [string, string][] = [
+    ['puissance', String(formData.get('car_puissance') ?? '').trim()],
+    ['cylindree', String(formData.get('car_cylindree') ?? '').trim()],
+    ['consommation', String(formData.get('car_consommation') ?? '').trim()],
+    ['co2', String(formData.get('car_co2') ?? '').trim()],
+    ['couleur', String(formData.get('car_couleur') ?? '').trim()],
+    ['carrosserie', String(formData.get('car_carrosserie') ?? '').trim()],
+    ['critAir', String(formData.get('car_critair') ?? '').trim()],
+    ['premiereCirculation', String(formData.get('car_premiere_circulation') ?? '').trim()],
+    ['garantie', String(formData.get('car_garantie') ?? '').trim()],
+  ];
+  const carac: Record<string, string> = Object.fromEntries(
+    caracEntries.filter(([, v]) => v !== '')
+  );
 
   return {
-    id: String(formData.get('id') ?? ''),
+    id: sanitize(formData.get('id')),
     type: String(formData.get('type') ?? ''),
-    marque: String(formData.get('marque') ?? ''),
-    modele: String(formData.get('modele') ?? ''),
+    marque: sanitize(formData.get('marque')),
+    modele: sanitize(formData.get('modele')),
     annee: num('annee'),
     km: num('km'),
     energie: String(formData.get('energie') ?? ''),
-    transmission: String(formData.get('transmission') ?? ''),
+    transmission: sanitize(formData.get('transmission')),
     places: num('places'),
     options: optionsRaw
       .split('\n')
@@ -45,9 +53,9 @@ function parseForm(formData: FormData) {
     mensualite: num('mensualite'),
     image: images[0] ?? '',
     images,
-    description: String(formData.get('description') ?? ''),
+    description: sanitize(formData.get('description')),
     caracteristiques: carac,
-    reference: String(formData.get('reference') ?? ''),
+    reference: sanitize(formData.get('reference')),
     disponibilite: String(formData.get('disponibilite') ?? ''),
     updatedAt: new Date().toISOString(),
   };
@@ -97,6 +105,7 @@ export async function updateVehicule(
   const ref = db.doc(`vehicules/${data.id}`);
 
   let conflict = false;
+  let auditDiff: Record<string, { before: unknown; after: unknown }> = {};
   await db.runTransaction(async (tx) => {
     const snap = await tx.get(ref);
     const before = (snap.data?.() ?? {}) as Record<string, unknown>;
@@ -105,13 +114,7 @@ export async function updateVehicule(
       return;
     }
     tx.update(ref, data);
-    await writeAuditLog({
-      actor: session.email,
-      action: 'update',
-      resourceType: 'vehicule',
-      resourceId: data.id,
-      diff: computeDiff(before, data as Record<string, unknown>),
-    });
+    auditDiff = computeDiff(before, data as Record<string, unknown>);
   });
 
   if (conflict) {
@@ -121,6 +124,14 @@ export async function updateVehicule(
       },
     };
   }
+
+  await writeAuditLog({
+    actor: session.email,
+    action: 'update',
+    resourceType: 'vehicule',
+    resourceId: data.id,
+    diff: auditDiff,
+  });
 
   revalidateTag('vehicules');
   revalidateTag(`vehicule:${data.id}`);

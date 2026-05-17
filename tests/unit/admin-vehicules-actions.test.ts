@@ -119,6 +119,16 @@ describe('Server Actions véhicules', () => {
     expect(res).toBeUndefined(); // redirect() en succès
   });
 
+  it('createVehicule : caracteristiques vides ne produisent pas de undefined (Firestore reject)', async () => {
+    // base ne fournit aucun champ car_* → toutes les caractéristiques sont vides
+    await createVehicule(null, fd(base));
+    const written = setMock.mock.calls[0][0];
+    // Firestore Admin SDK rejette les undefined : le doc ne doit en contenir aucun
+    expect(Object.values(written.caracteristiques)).not.toContain(undefined);
+    // les clés vides sont simplement absentes (pas présentes à undefined)
+    expect('puissance' in written.caracteristiques).toBe(false);
+  });
+
   it('createVehicule : Zod invalide → { errors } sans écrire', async () => {
     const res = await createVehicule(null, fd({ ...base, prix: '-1' }));
     expect(setMock).not.toHaveBeenCalled();
