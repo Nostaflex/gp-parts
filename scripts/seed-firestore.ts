@@ -12,7 +12,8 @@
  *   1. Se connecte à l'émulateur Firestore (localhost:8080)
  *   2. Supprime tous les documents existants dans la collection 'products'
  *   3. Importe les produits depuis lib/products.ts
- *   4. Crée un document metadata/stats avec les compteurs
+ *   4. Supprime puis importe la collection 'vehicules' depuis lib/vehicules.ts
+ *   5. Crée un document metadata/stats avec les compteurs
  */
 
 // Guard: FIRESTORE_EMULATOR_HOST doit être défini avant les imports Firebase
@@ -24,6 +25,7 @@ if (!process.env.FIRESTORE_EMULATOR_HOST) {
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { parseProduct } from '../lib/schemas/product';
+import { parseVehicule } from '../lib/schemas/vehicule';
 
 // Init Firebase Admin avec un project ID factice (l'émulateur l'accepte)
 const app = initializeApp({
@@ -84,7 +86,30 @@ async function seed() {
   await batch.commit();
   console.log(`✅ ${count} produits importés dans 'products'`);
 
-  // 3. Créer les métadonnées
+  // 3. Importer les véhicules (même pattern que les produits)
+  const { VEHICULES } = await import('../lib/vehicules');
+
+  console.log(`\n🚗 ${VEHICULES.length} véhicules trouvés dans lib/vehicules.ts`);
+
+  const deletedVehicules = await clearCollection('vehicules');
+  if (deletedVehicules > 0) {
+    console.log(`🗑️  ${deletedVehicules} documents supprimés de 'vehicules'`);
+  }
+
+  const vehiculesBatch = db.batch();
+  let vehiculesCount = 0;
+
+  for (const vehicule of VEHICULES) {
+    const validated = parseVehicule(vehicule);
+    const docRef = db.collection('vehicules').doc(validated.id);
+    vehiculesBatch.set(docRef, validated);
+    vehiculesCount++;
+  }
+
+  await vehiculesBatch.commit();
+  console.log(`✅ ${vehiculesCount} véhicules importés dans 'vehicules'`);
+
+  // 4. Créer les métadonnées
   const categories = [...new Set(PRODUCTS.map((p) => p.category))].sort();
   const brands = [...new Set(PRODUCTS.flatMap((p) => p.compatibility.map((c) => c.brand)))].sort();
 
@@ -99,6 +124,8 @@ async function seed() {
       inStock: PRODUCTS.filter((p) => p.stock > 0).length,
       outOfStock: PRODUCTS.filter((p) => p.stock === 0).length,
       promoted: PRODUCTS.filter((p) => p.isPromoted).length,
+      vehiculesCount: VEHICULES.length,
+      vehiculesDisponibles: VEHICULES.filter((v) => v.disponibilite === 'disponible').length,
     });
 
   console.log(`📊 Métadonnées créées: ${categories.length} catégories, ${brands.length} marques`);
