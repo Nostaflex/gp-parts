@@ -166,6 +166,7 @@ describe('Server Actions véhicules', () => {
     });
     const res = await updateVehicule(null, fd({ ...base, updatedAt: '2026-05-01T00:00:00.000Z' }));
     expect(txUpdateMock).not.toHaveBeenCalled();
+    expect(writeAuditLogMock).not.toHaveBeenCalled();
     expect(res).toMatchObject({ errors: { _form: expect.any(Array) } });
   });
 
