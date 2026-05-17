@@ -197,14 +197,32 @@ describe('StaticAdapter — vehicules/motos/demandes', () => {
     expect(filtered.every((d) => d.type === target)).toBe(true);
   });
 
-  it('getVehicules() throw en production (fallback statique dev-only)', async () => {
+  it('chaque véhicule statique a un updatedAt ISO (régression Phase 4)', async () => {
+    const vehicules = await adapter.getVehicules();
+    for (const v of vehicules) {
+      expect(typeof v.updatedAt).toBe('string');
+      expect(Number.isNaN(Date.parse(v.updatedAt))).toBe(false);
+    }
+  });
+
+  it('getVehicules/Motos/Demandes : fallback non-bloquant en production (warn, pas throw)', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.stubEnv('NODE_ENV', 'production');
     try {
-      await expect(adapter.getVehicules()).rejects.toThrow(/Firebase/i);
-      await expect(adapter.getMotos()).rejects.toThrow(/Firebase/i);
-      await expect(adapter.getDemandes()).rejects.toThrow(/Firebase/i);
+      const v = await adapter.getVehicules();
+      const m = await adapter.getMotos();
+      const d = await adapter.getDemandes();
+      expect(v.length).toBeGreaterThan(0);
+      expect(m.length).toBeGreaterThan(0);
+      expect(Array.isArray(d)).toBe(true);
+      // warn émis au plus une fois par process malgré 3 appels.
+      // Flag _devFallbackWarned module-level, non resettable depuis le
+      // test → si un test prod antérieur l'a déjà consommé, 0 appel est
+      // correct. Le contrat verrouillé : JAMAIS plus d'un warn.
+      expect(warnSpy.mock.calls.length).toBeLessThanOrEqual(1);
     } finally {
       vi.unstubAllEnvs();
+      warnSpy.mockRestore();
     }
   });
 });

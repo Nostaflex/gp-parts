@@ -1,0 +1,315 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+
+import { FormShell, FieldError, SubmitButton } from '@/components/admin/FormShell';
+import { ImageUploader } from '@/components/admin/ImageUploader';
+import { createVehicule, updateVehicule } from '@/app/admin/vehicules/actions';
+
+import type { Vehicule } from '@/lib/vehicules';
+
+const FIELD =
+  'h-11 px-3 rounded-[10px] border bg-[var(--surface)] text-[var(--text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--blue)]';
+const TEXTAREA = FIELD.replace('h-11', 'py-2');
+const LABEL = 'text-body-sm font-medium text-[var(--text)] mb-1 block';
+
+export function VehiculeForm({ initial }: { initial?: Vehicule }) {
+  const router = useRouter();
+  const isEdit = !!initial;
+
+  const [vehiculeId] = useState(() => initial?.id ?? `vehicule-${Date.now().toString(36)}`);
+  const [images, setImages] = useState<string[]>(initial?.images ?? []);
+
+  return (
+    <FormShell
+      action={isEdit ? updateVehicule : createVehicule}
+      onSuccess={() => router.push('/admin/vehicules')}
+      successMessage={isEdit ? 'Véhicule mis à jour.' : 'Véhicule créé.'}
+    >
+      <input type="hidden" name="id" value={vehiculeId} />
+      {isEdit && <input type="hidden" name="updatedAt" value={initial!.updatedAt} />}
+      {images.map((url) => (
+        <input key={url} type="hidden" name="images" value={url} />
+      ))}
+
+      <fieldset className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <legend className={LABEL}>Identité</legend>
+        <div>
+          <label className={LABEL} htmlFor="marque">
+            Marque
+          </label>
+          <input id="marque" name="marque" defaultValue={initial?.marque} className={FIELD} />
+          <FieldError name="marque" />
+        </div>
+        <div>
+          <label className={LABEL} htmlFor="modele">
+            Modèle
+          </label>
+          <input id="modele" name="modele" defaultValue={initial?.modele} className={FIELD} />
+          <FieldError name="modele" />
+        </div>
+        <div>
+          <label className={LABEL} htmlFor="type">
+            Type
+          </label>
+          <select
+            id="type"
+            name="type"
+            defaultValue={initial?.type ?? 'occasion'}
+            className={FIELD}
+          >
+            <option value="occasion">Occasion</option>
+            <option value="neuf">Neuf</option>
+          </select>
+          <FieldError name="type" />
+        </div>
+        <div>
+          <label className={LABEL} htmlFor="reference">
+            Référence
+          </label>
+          <input
+            id="reference"
+            name="reference"
+            defaultValue={initial?.reference}
+            className={FIELD}
+          />
+          <FieldError name="reference" />
+        </div>
+      </fieldset>
+
+      <fieldset className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <legend className={LABEL}>Caractéristiques techniques</legend>
+        <div>
+          <label className={LABEL} htmlFor="annee">
+            Année
+          </label>
+          <input
+            id="annee"
+            name="annee"
+            type="number"
+            defaultValue={initial?.annee}
+            className={FIELD}
+          />
+          <FieldError name="annee" />
+        </div>
+        <div>
+          <label className={LABEL} htmlFor="km">
+            Kilométrage
+          </label>
+          <input id="km" name="km" type="number" defaultValue={initial?.km} className={FIELD} />
+          <FieldError name="km" />
+        </div>
+        <div>
+          <label className={LABEL} htmlFor="energie">
+            Énergie
+          </label>
+          <select
+            id="energie"
+            name="energie"
+            defaultValue={initial?.energie ?? 'Essence'}
+            className={FIELD}
+          >
+            <option>Essence</option>
+            <option>Diesel</option>
+            <option>Hybride</option>
+          </select>
+          <FieldError name="energie" />
+        </div>
+        <div>
+          <label className={LABEL} htmlFor="transmission">
+            Transmission
+          </label>
+          <input
+            id="transmission"
+            name="transmission"
+            defaultValue={initial?.transmission}
+            className={FIELD}
+          />
+          <FieldError name="transmission" />
+        </div>
+        <div>
+          <label className={LABEL} htmlFor="places">
+            Places
+          </label>
+          <input
+            id="places"
+            name="places"
+            type="number"
+            defaultValue={initial?.places ?? 5}
+            className={FIELD}
+          />
+          <FieldError name="places" />
+        </div>
+      </fieldset>
+
+      <fieldset className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <legend className={LABEL}>Commercial</legend>
+        <div>
+          <label className={LABEL} htmlFor="prix">
+            Prix (€)
+          </label>
+          <input
+            id="prix"
+            name="prix"
+            type="number"
+            defaultValue={initial?.prix}
+            className={FIELD}
+          />
+          <FieldError name="prix" />
+        </div>
+        <div>
+          <label className={LABEL} htmlFor="mensualite">
+            Mensualité (€)
+          </label>
+          <input
+            id="mensualite"
+            name="mensualite"
+            type="number"
+            defaultValue={initial?.mensualite}
+            className={FIELD}
+          />
+          <FieldError name="mensualite" />
+        </div>
+        <div>
+          <label className={LABEL} htmlFor="disponibilite">
+            Disponibilité
+          </label>
+          <select
+            id="disponibilite"
+            name="disponibilite"
+            defaultValue={initial?.disponibilite ?? 'disponible'}
+            className={FIELD}
+          >
+            <option value="disponible">Disponible</option>
+            <option value="reserve">Réservé</option>
+            <option value="vendu">Vendu</option>
+          </select>
+          <FieldError name="disponibilite" />
+        </div>
+      </fieldset>
+
+      <div>
+        <label className={LABEL} htmlFor="description">
+          Description
+        </label>
+        <textarea
+          id="description"
+          name="description"
+          rows={4}
+          defaultValue={initial?.description}
+          className={TEXTAREA}
+        />
+        <FieldError name="description" />
+      </div>
+      <div>
+        <label className={LABEL} htmlFor="options">
+          Options (une par ligne)
+        </label>
+        <textarea
+          id="options"
+          name="options"
+          rows={3}
+          defaultValue={initial?.options?.join('\n')}
+          className={TEXTAREA}
+        />
+      </div>
+
+      <fieldset className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <legend className={LABEL}>Détails</legend>
+        <input
+          name="car_puissance"
+          aria-label="Puissance"
+          placeholder="Puissance"
+          defaultValue={initial?.caracteristiques.puissance}
+          className={FIELD}
+        />
+        <input
+          name="car_cylindree"
+          aria-label="Cylindrée"
+          placeholder="Cylindrée"
+          defaultValue={initial?.caracteristiques.cylindree}
+          className={FIELD}
+        />
+        <input
+          name="car_couleur"
+          aria-label="Couleur"
+          placeholder="Couleur"
+          defaultValue={initial?.caracteristiques.couleur}
+          className={FIELD}
+        />
+        <input
+          name="car_consommation"
+          aria-label="Consommation"
+          placeholder="Consommation"
+          defaultValue={initial?.caracteristiques.consommation}
+          className={FIELD}
+        />
+        <input
+          name="car_co2"
+          aria-label="CO2"
+          placeholder="CO2"
+          defaultValue={initial?.caracteristiques.co2}
+          className={FIELD}
+        />
+        <input
+          name="car_carrosserie"
+          aria-label="Carrosserie"
+          placeholder="Carrosserie"
+          defaultValue={initial?.caracteristiques.carrosserie}
+          className={FIELD}
+        />
+        <input
+          name="car_critair"
+          aria-label="Crit'Air"
+          placeholder="Crit'Air"
+          defaultValue={initial?.caracteristiques.critAir}
+          className={FIELD}
+        />
+        <input
+          name="car_premiere_circulation"
+          aria-label="Première circulation"
+          placeholder="Première circulation"
+          defaultValue={initial?.caracteristiques.premiereCirculation}
+          className={FIELD}
+        />
+        <input
+          name="car_garantie"
+          aria-label="Garantie"
+          placeholder="Garantie"
+          defaultValue={initial?.caracteristiques.garantie}
+          className={FIELD}
+        />
+        <input
+          name="car_portes"
+          type="number"
+          aria-label="Nombre de portes"
+          placeholder="Portes"
+          defaultValue={initial?.caracteristiques.portes}
+          className={FIELD}
+        />
+        <input
+          name="car_proprietaires"
+          type="number"
+          aria-label="Nombre de propriétaires"
+          placeholder="Propriétaires"
+          defaultValue={initial?.caracteristiques.proprietaires}
+          className={FIELD}
+        />
+      </fieldset>
+
+      <div>
+        <p className={LABEL}>Photos (5 max)</p>
+        <ImageUploader
+          folder="vehicules"
+          entityId={vehiculeId}
+          value={images}
+          onChange={setImages}
+          max={5}
+        />
+      </div>
+
+      <SubmitButton>{isEdit ? 'Enregistrer' : 'Créer le véhicule'}</SubmitButton>
+    </FormShell>
+  );
+}

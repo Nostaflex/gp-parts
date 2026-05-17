@@ -55,11 +55,15 @@ const DEMANDES_FIXTURES: Demande[] = [
 // Le fallback statique des données back-office est réservé au dev local.
 // En production, vehicules/motos/demandes proviennent exclusivement de
 // Firestore (cf. spec Admin CMS v3 Phase 3).
-function assertDevFallback(method: string): void {
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error(
-      `StaticAdapter.${method}() : fallback statique réservé au développement. ` +
-        `En production, configurer Firebase (NEXT_PUBLIC_FIREBASE_PROJECT_ID).`
+let _devFallbackWarned = false;
+function warnDevFallback(method: string): void {
+  if (process.env.NODE_ENV === 'production' && !_devFallbackWarned) {
+    _devFallbackWarned = true;
+    console.warn(
+      `[StaticAdapter] ${method}() utilisé en production : fallback statique ` +
+        `actif. Attendu uniquement si Firebase non configuré ` +
+        `(NEXT_PUBLIC_FIREBASE_PROJECT_ID absent). En prod Vercel normale, ` +
+        `FirebaseAdapter est utilisé. (warn émis une seule fois par process)`
     );
   }
 }
@@ -169,17 +173,17 @@ export class StaticAdapter implements DataAdapter {
   // ─── Admin CMS v3 — Phase 3 (lecture seule, dev fallback) ──────────
 
   async getVehicules(): Promise<Vehicule[]> {
-    assertDevFallback('getVehicules');
+    warnDevFallback('getVehicules');
     return [...VEHICULES];
   }
 
   async getMotos(): Promise<Moto[]> {
-    assertDevFallback('getMotos');
+    warnDevFallback('getMotos');
     return [...MOTOS];
   }
 
   async getDemandes(filters?: DemandeFilters): Promise<Demande[]> {
-    assertDevFallback('getDemandes');
+    warnDevFallback('getDemandes');
     let demandes = [...DEMANDES_FIXTURES].sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );

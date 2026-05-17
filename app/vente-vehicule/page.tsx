@@ -3,7 +3,12 @@ import { CpHeader } from '@/components/cp/CpHeader';
 import { CpBridge } from '@/components/cp/CpBridge';
 import { CpFooter } from '@/components/cp/CpFooter';
 import { VenteVehiculeClient } from './VenteVehiculeClient';
+import { getCachedVehicules } from '@/lib/data/vehicules-cache';
 import Link from 'next/link';
+
+// Symétrie ISR avec [id]/page.tsx : revalidateTag('vehicules') prime sur
+// mutation ; ce TTL n'est qu'un fallback de fraîcheur.
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: 'Vente de véhicules — Occasion & Neuf',
@@ -11,7 +16,9 @@ export const metadata: Metadata = {
     "Achetez un véhicule d'occasion contrôlé ou neuf à commander en Guadeloupe. Garantie incluse, financement sur mesure. Toutes marques.",
 };
 
-export default function VenteVehiculePage() {
+export default async function VenteVehiculePage() {
+  const vehicules = await getCachedVehicules();
+
   return (
     <>
       <CpHeader darkSectionIds={['vo-hero']} />
@@ -159,7 +166,7 @@ export default function VenteVehiculePage() {
       <CpBridge fromColor="#1E0E04" toColor="#F4EDE0" />
 
       {/* ── CLIENT COMPONENT (catalogue + financement) ── */}
-      <VenteVehiculeClient />
+      <VenteVehiculeClient vehicules={vehicules} />
 
       {/* Bridge financement → footer */}
       <CpBridge fromColor="#2C1A08" toColor="#1A0F06" />
