@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { VEHICULES } from '@/lib/vehicules';
+import type { Vehicule } from '@/lib/vehicules';
 
 type Energie = 'Toutes' | 'Essence' | 'Diesel' | 'Hybride';
 type BudgetMax = 15000 | 20000 | 30000 | 999999;
@@ -18,7 +18,7 @@ const BUDGETS: { label: string; val: BudgetMax }[] = [
   { label: '< 30 000 €', val: 30000 },
 ];
 
-export function VenteVehiculeClient() {
+export function VenteVehiculeClient({ vehicules }: { vehicules: Vehicule[] }) {
   const [typeFiltre, setTypeFiltre] = useState<TypeFiltre>('Tous');
   const [energie, setEnergie] = useState<Energie>('Toutes');
   const [budget, setBudget] = useState<BudgetMax>(999999);
@@ -38,7 +38,7 @@ export function VenteVehiculeClient() {
 
   const vehiculesFiltres = useMemo(
     () =>
-      VEHICULES.filter((v) => {
+      vehicules.filter((v) => {
         const matchType =
           typeFiltre === 'Tous' ||
           (typeFiltre === 'Occasion' && v.type === 'occasion') ||
@@ -47,7 +47,7 @@ export function VenteVehiculeClient() {
         const matchBudget = v.prix <= budget;
         return matchType && matchEnergie && matchBudget;
       }),
-    [typeFiltre, energie, budget]
+    [vehicules, typeFiltre, energie, budget]
   );
 
   return (

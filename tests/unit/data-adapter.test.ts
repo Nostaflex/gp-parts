@@ -205,14 +205,20 @@ describe('StaticAdapter — vehicules/motos/demandes', () => {
     }
   });
 
-  it('getVehicules() throw en production (fallback statique dev-only)', async () => {
+  it('getVehicules/Motos/Demandes : fallback non-bloquant en production (warn, pas throw)', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.stubEnv('NODE_ENV', 'production');
     try {
-      await expect(adapter.getVehicules()).rejects.toThrow(/Firebase/i);
-      await expect(adapter.getMotos()).rejects.toThrow(/Firebase/i);
-      await expect(adapter.getDemandes()).rejects.toThrow(/Firebase/i);
+      const v = await adapter.getVehicules();
+      const m = await adapter.getMotos();
+      const d = await adapter.getDemandes();
+      expect(v.length).toBeGreaterThan(0);
+      expect(m.length).toBeGreaterThan(0);
+      expect(Array.isArray(d)).toBe(true);
+      expect(warnSpy).toHaveBeenCalled();
     } finally {
       vi.unstubAllEnvs();
+      warnSpy.mockRestore();
     }
   });
 });

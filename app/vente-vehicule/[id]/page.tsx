@@ -3,20 +3,35 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { CpHeader } from '@/components/cp/CpHeader';
 import { CpFooter } from '@/components/cp/CpFooter';
-import { VEHICULES, getVehiculeById, type Vehicule } from '@/lib/vehicules';
+import type { Vehicule } from '@/lib/vehicules';
+import { getCachedVehicules } from '@/lib/data/vehicules-cache';
 import { FinancementSimulator } from './FinancementSimulator';
 import { VehiculeGallery } from './VehiculeGallery';
 
-// Statically generate all vehicle pages at build time
+// Filet ISR : revalidateTag('vehicules') (Server Actions admin) prime sur
+// mutation ; ce TTL n'est qu'un fallback de fraîcheur.
+export const revalidate = 3600;
+
+// Enumère les params au build. Les 7 ids sont déclarés à Next
+// (route SSG, regex générée). En ISR, le HTML est matérialisé au
+// 1er hit puis caché CDN, et régénéré sur revalidateTag('vehicules').
 export async function generateStaticParams() {
-  return VEHICULES.map((v) => ({ id: v.id }));
+  // Source DIRECTE (pas unstable_cache) : generateStaticParams s'exécute
+  // hors contexte de requête/render — getCachedVehicules() y throw
+  // "Invariant: incrementalCache missing". Le cache invalidable par tag
+  // n'a de sens qu'au rendu de page (contexte requête).
+  const { getAdapter } = await import('@/lib/data');
+  const adapter = await getAdapter();
+  const vehicules = await adapter.getVehicules();
+  return vehicules.map((v) => ({ id: v.id }));
 }
 
 type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const v = getVehiculeById(id);
+  const vehicules = await getCachedVehicules();
+  const v = vehicules.find((veh) => veh.id === id);
   if (!v) {
     return { title: 'Véhicule introuvable' };
   }
@@ -70,7 +85,8 @@ function vehicleJsonLd(v: Vehicule) {
 
 export default async function VehiculeDetailPage({ params }: Props) {
   const { id } = await params;
-  const v = getVehiculeById(id);
+  const vehicules = await getCachedVehicules();
+  const v = vehicules.find((veh) => veh.id === id);
   if (!v) notFound();
 
   const contactHref = `/contact?sujet=${encodeURIComponent('Vente véhicule')}&vehicule=${encodeURIComponent(`${v.marque} ${v.modele}`)}&ref=${encodeURIComponent(v.id)}`;
