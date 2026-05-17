@@ -31,9 +31,24 @@ function parseForm(formData: FormData) {
     ['premiereCirculation', String(formData.get('car_premiere_circulation') ?? '').trim()],
     ['garantie', String(formData.get('car_garantie') ?? '').trim()],
   ];
-  const carac: Record<string, string> = Object.fromEntries(
+  const carac: Record<string, string | number> = Object.fromEntries(
     caracEntries.filter(([, v]) => v !== '')
   );
+
+  // portes / proprietaires sont des NOMBRES (pas des strings comme les 9
+  // ci-dessus). On ne pose la clé que si une valeur numérique valide est
+  // fournie — sinon clé absente (cohérent avec le strip undefined :
+  // Firestore Admin SDK rejette undefined/NaN).
+  const portesRaw = formData.get('car_portes');
+  const portes = Number(portesRaw);
+  if (portesRaw !== null && portesRaw !== '' && !Number.isNaN(portes)) {
+    carac.portes = portes;
+  }
+  const proprietairesRaw = formData.get('car_proprietaires');
+  const proprietaires = Number(proprietairesRaw);
+  if (proprietairesRaw !== null && proprietairesRaw !== '' && !Number.isNaN(proprietaires)) {
+    carac.proprietaires = proprietaires;
+  }
 
   return {
     id: sanitize(formData.get('id')),

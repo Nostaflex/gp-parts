@@ -129,6 +129,20 @@ describe('Server Actions véhicules', () => {
     expect('puissance' in written.caracteristiques).toBe(false);
   });
 
+  it('createVehicule : preserve caracteristiques.portes et proprietaires (number)', async () => {
+    await createVehicule(null, fd({ ...base, car_portes: '5', car_proprietaires: '2' }));
+    const written = setMock.mock.calls[0][0];
+    expect(written.caracteristiques.portes).toBe(5);
+    expect(written.caracteristiques.proprietaires).toBe(2);
+  });
+
+  it('createVehicule : car_portes vide → clé absente (pas de undefined/NaN, Firestore reject)', async () => {
+    await createVehicule(null, fd(base)); // base ne fournit pas car_portes
+    const written = setMock.mock.calls[0][0];
+    expect('portes' in written.caracteristiques).toBe(false);
+    expect('proprietaires' in written.caracteristiques).toBe(false);
+  });
+
   it('createVehicule : Zod invalide → { errors } sans écrire', async () => {
     const res = await createVehicule(null, fd({ ...base, prix: '-1' }));
     expect(setMock).not.toHaveBeenCalled();

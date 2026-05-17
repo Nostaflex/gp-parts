@@ -280,6 +280,22 @@ export function VehiculeForm({ initial }: { initial?: Vehicule }) {
           defaultValue={initial?.caracteristiques.garantie}
           className={FIELD}
         />
+        <input
+          name="car_portes"
+          type="number"
+          aria-label="Nombre de portes"
+          placeholder="Portes"
+          defaultValue={initial?.caracteristiques.portes}
+          className={FIELD}
+        />
+        <input
+          name="car_proprietaires"
+          type="number"
+          aria-label="Nombre de propriétaires"
+          placeholder="Propriétaires"
+          defaultValue={initial?.caracteristiques.proprietaires}
+          className={FIELD}
+        />
       </fieldset>
 
       <div>
