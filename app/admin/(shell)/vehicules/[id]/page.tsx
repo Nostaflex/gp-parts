@@ -14,6 +14,10 @@ export const dynamic = 'force-dynamic';
 export default async function EditVehiculePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const adapter = await getAdapter();
+  // Charge tous les véhicules puis filtre par id : l'interface DataAdapter
+  // n'expose pas getVehiculeById. Acceptable au volume actuel (catalogue
+  // physique, ~7 véhicules). TODO: ajouter getVehiculeById à DataAdapter
+  // si le catalogue dépasse ~50 véhicules.
   const vehicules = await adapter.getVehicules();
   const vehicule = vehicules.find((v) => v.id === id);
   if (!vehicule) notFound();
