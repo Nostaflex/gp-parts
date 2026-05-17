@@ -27,11 +27,16 @@ describe('computeDiff', () => {
 
   it('détecte un changement dans un tableau', () => {
     const d = computeDiff({ options: ['ABS'] }, { options: ['ABS', 'GPS'] });
-    expect(d.options).toBeDefined();
+    expect(d).toEqual({ options: { before: ['ABS'], after: ['ABS', 'GPS'] } });
   });
 
   it('inclut les nouvelles clés présentes uniquement dans after', () => {
     const d = computeDiff({ a: 1 }, { a: 1, b: 2 });
     expect(d).toEqual({ b: { before: undefined, after: 2 } });
+  });
+
+  it('inclut les clés présentes uniquement dans before (champ supprimé)', () => {
+    const d = computeDiff({ a: 1, b: 2 }, { a: 1 });
+    expect(d).toEqual({ b: { before: 2, after: undefined } });
   });
 });

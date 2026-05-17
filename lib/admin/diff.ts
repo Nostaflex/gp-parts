@@ -3,6 +3,10 @@
  * Égalité profonde via JSON pour objets/tableaux imbriqués
  * (caracteristiques, options). Suffisant : pas de fonctions ni dates
  * dans les documents véhicule.
+ *
+ * Limites assumées (sans impact sur les données véhicule réelles) :
+ * suppose l'ordre des clés d'objet stable (faux positif sinon) et
+ * aucun `undefined` dans les tableaux (normalisé en null par JSON).
  */
 export function computeDiff(
   before: Record<string, unknown>,
