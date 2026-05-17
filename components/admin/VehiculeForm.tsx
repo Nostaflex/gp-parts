@@ -33,7 +33,8 @@ export function VehiculeForm({ initial }: { initial?: Vehicule }) {
         <input key={url} type="hidden" name="images" value={url} />
       ))}
 
-      <fieldset className="grid grid-cols-2 gap-3">
+      <fieldset className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <legend className={LABEL}>Identité</legend>
         <div>
           <label className={LABEL} htmlFor="marque">
             Marque
@@ -77,7 +78,8 @@ export function VehiculeForm({ initial }: { initial?: Vehicule }) {
         </div>
       </fieldset>
 
-      <fieldset className="grid grid-cols-2 gap-3">
+      <fieldset className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <legend className={LABEL}>Caractéristiques techniques</legend>
         <div>
           <label className={LABEL} htmlFor="annee">
             Année
@@ -141,7 +143,8 @@ export function VehiculeForm({ initial }: { initial?: Vehicule }) {
         </div>
       </fieldset>
 
-      <fieldset className="grid grid-cols-3 gap-3">
+      <fieldset className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <legend className={LABEL}>Commercial</legend>
         <div>
           <label className={LABEL} htmlFor="prix">
             Prix (€)
@@ -212,7 +215,8 @@ export function VehiculeForm({ initial }: { initial?: Vehicule }) {
         />
       </div>
 
-      <fieldset className="grid grid-cols-3 gap-3">
+      <fieldset className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <legend className={LABEL}>Détails</legend>
         <input
           name="car_puissance"
           aria-label="Puissance"
@@ -279,7 +283,7 @@ export function VehiculeForm({ initial }: { initial?: Vehicule }) {
       </fieldset>
 
       <div>
-        <label className={LABEL}>Photos (5 max)</label>
+        <p className={LABEL}>Photos (5 max)</p>
         <ImageUploader
           folder="vehicules"
           entityId={vehiculeId}
