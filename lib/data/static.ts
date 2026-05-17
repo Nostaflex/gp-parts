@@ -55,13 +55,15 @@ const DEMANDES_FIXTURES: Demande[] = [
 // Le fallback statique des données back-office est réservé au dev local.
 // En production, vehicules/motos/demandes proviennent exclusivement de
 // Firestore (cf. spec Admin CMS v3 Phase 3).
+let _devFallbackWarned = false;
 function warnDevFallback(method: string): void {
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === 'production' && !_devFallbackWarned) {
+    _devFallbackWarned = true;
     console.warn(
       `[StaticAdapter] ${method}() utilisé en production : fallback statique ` +
         `actif. Attendu uniquement si Firebase non configuré ` +
         `(NEXT_PUBLIC_FIREBASE_PROJECT_ID absent). En prod Vercel normale, ` +
-        `FirebaseAdapter est utilisé.`
+        `FirebaseAdapter est utilisé. (warn émis une seule fois par process)`
     );
   }
 }

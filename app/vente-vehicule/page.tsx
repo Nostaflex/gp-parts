@@ -6,6 +6,10 @@ import { VenteVehiculeClient } from './VenteVehiculeClient';
 import { getCachedVehicules } from '@/lib/data/vehicules-cache';
 import Link from 'next/link';
 
+// Symétrie ISR avec [id]/page.tsx : revalidateTag('vehicules') prime sur
+// mutation ; ce TTL n'est qu'un fallback de fraîcheur.
+export const revalidate = 3600;
+
 export const metadata: Metadata = {
   title: 'Vente de véhicules — Occasion & Neuf',
   description:

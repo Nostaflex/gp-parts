@@ -215,7 +215,11 @@ describe('StaticAdapter — vehicules/motos/demandes', () => {
       expect(v.length).toBeGreaterThan(0);
       expect(m.length).toBeGreaterThan(0);
       expect(Array.isArray(d)).toBe(true);
-      expect(warnSpy).toHaveBeenCalled();
+      // warn émis au plus une fois par process malgré 3 appels.
+      // Flag _devFallbackWarned module-level, non resettable depuis le
+      // test → si un test prod antérieur l'a déjà consommé, 0 appel est
+      // correct. Le contrat verrouillé : JAMAIS plus d'un warn.
+      expect(warnSpy.mock.calls.length).toBeLessThanOrEqual(1);
     } finally {
       vi.unstubAllEnvs();
       warnSpy.mockRestore();

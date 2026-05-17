@@ -87,6 +87,8 @@ export default async function VehiculeDetailPage({ params }: Props) {
   const { id } = await params;
   const vehicules = await getCachedVehicules();
   const v = vehicules.find((veh) => veh.id === id);
+  // Véhicule supprimé en live entre build (generateStaticParams) et requête :
+  // find() → undefined → notFound() → 404 correct (pas d'erreur 500, ISR géré).
   if (!v) notFound();
 
   const contactHref = `/contact?sujet=${encodeURIComponent('Vente véhicule')}&vehicule=${encodeURIComponent(`${v.marque} ${v.modele}`)}&ref=${encodeURIComponent(v.id)}`;
