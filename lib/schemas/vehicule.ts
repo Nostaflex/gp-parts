@@ -1,9 +1,9 @@
 import { z } from 'zod';
 import type { Vehicule } from '@/lib/vehicules';
 
-const currentYear = new Date().getFullYear();
+const currentYear = new Date().getFullYear(); // intentionally evaluated at module load
 
-const caracteristiquesSchema = z.object({
+const vehiculeCaracteristiquesSchema = z.object({
   puissance: z.string().optional(),
   cylindree: z.string().optional(),
   consommation: z.string().optional(),
@@ -37,13 +37,13 @@ export const VehiculeSchema = z.object({
   image: z.string().url(),
   images: z.array(z.string().url()).min(1).max(5),
   description: z.string().min(1),
-  caracteristiques: caracteristiquesSchema,
+  caracteristiques: vehiculeCaracteristiquesSchema,
   reference: z.string().min(1),
   disponibilite: z.enum(['disponible', 'reserve', 'vendu']),
   updatedAt: z.string(),
 });
 
 export function parseVehicule(data: unknown): Vehicule {
-  // VehiculeSchema miroir exact de Vehicule (types structurellement identiques)
-  return VehiculeSchema.parse(data) as Vehicule;
+  // VehiculeSchema mirrors Vehicule exactly — Zod infers structurally identical types
+  return VehiculeSchema.parse(data);
 }
