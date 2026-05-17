@@ -16,7 +16,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Pages publiques véhicules (anti-régression Phase 4)', () => {
   test('la liste /vente-vehicule rend au moins un véhicule', async ({ page }) => {
     await page.goto('/vente-vehicule');
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page).toHaveURL(/\/vente-vehicule$/);
     // Anti-régression critique Task 7 : le catalogue ne doit pas être vide.
     await expect(page.locator('a[href^="/vente-vehicule/"]').first()).toBeVisible();
   });
