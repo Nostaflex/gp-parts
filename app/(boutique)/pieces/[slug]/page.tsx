@@ -8,6 +8,7 @@ import { AddToCartButton } from './AddToCartButton';
 import { getAdapter } from '@/lib/data';
 import { formatPrice, getStockStatus, getStockLabel } from '@/lib/utils';
 import { getCategoryLabel } from '@/lib/categories';
+import { safeJsonLd } from '@/lib/safe-json-ld';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -58,10 +59,7 @@ export default async function ProductPage(props: PageProps) {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Breadcrumb */}

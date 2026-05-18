@@ -7,6 +7,7 @@ import type { Vehicule } from '@/lib/vehicules';
 import { getCachedVehicules } from '@/lib/data/vehicules-cache';
 import { FinancementSimulator } from './FinancementSimulator';
 import { VehiculeGallery } from './VehiculeGallery';
+import { safeJsonLd } from '@/lib/safe-json-ld';
 
 // Filet ISR : revalidateTag('vehicules') (Server Actions admin) prime sur
 // mutation ; ce TTL n'est qu'un fallback de fraîcheur.
@@ -112,7 +113,7 @@ export default async function VehiculeDetailPage({ params }: Props) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(vehicleJsonLd(v)) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(vehicleJsonLd(v)) }}
       />
       <CpHeader />
 
