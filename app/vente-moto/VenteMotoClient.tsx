@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MOTOS, type CategorieMoto, type Permis } from '@/lib/motos';
+import type { Moto, CategorieMoto, Permis } from '@/lib/motos';
 
 type TypeFiltre = 'Tous' | 'Occasion' | 'Neuf';
 type CategorieFiltre = 'Toutes' | CategorieMoto;
@@ -28,7 +28,7 @@ const BUDGETS: { label: string; val: BudgetMax }[] = [
   { label: '< 15 000 €', val: 15000 },
 ];
 
-export function VenteMotoClient() {
+export function VenteMotoClient({ motos }: { motos: Moto[] }) {
   const [typeFiltre, setTypeFiltre] = useState<TypeFiltre>('Tous');
   const [categorie, setCategorie] = useState<CategorieFiltre>('Toutes');
   const [permis, setPermis] = useState<PermisFiltre>('Tous');
@@ -36,7 +36,7 @@ export function VenteMotoClient() {
 
   const motosFiltrees = useMemo(
     () =>
-      MOTOS.filter((m) => {
+      motos.filter((m) => {
         const matchType =
           typeFiltre === 'Tous' ||
           (typeFiltre === 'Occasion' && m.type === 'occasion') ||
@@ -46,7 +46,7 @@ export function VenteMotoClient() {
         const matchBudget = m.prix <= budget;
         return matchType && matchCat && matchPermis && matchBudget;
       }),
-    [typeFiltre, categorie, permis, budget]
+    [motos, typeFiltre, categorie, permis, budget]
   );
 
   return (

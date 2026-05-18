@@ -3,19 +3,35 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { CpHeader } from '@/components/cp/CpHeader';
 import { CpFooter } from '@/components/cp/CpFooter';
-import { MOTOS, getMotoById, type Moto } from '@/lib/motos';
+import type { Moto } from '@/lib/motos';
+import { getCachedMotos } from '@/lib/data/motos-cache';
 import { FinancementMotoSimulator } from './FinancementMotoSimulator';
 import { MotoGallery } from './MotoGallery';
 
+// Filet ISR : revalidateTag('motos') (Server Actions admin) prime sur
+// mutation ; ce TTL n'est qu'un fallback de fraîcheur.
+export const revalidate = 3600;
+
+// Enumère les params au build. Les 7 ids sont déclarés à Next
+// (route SSG, regex générée). En ISR, le HTML est matérialisé au
+// 1er hit puis caché CDN, et régénéré sur revalidateTag('motos').
 export async function generateStaticParams() {
-  return MOTOS.map((m) => ({ id: m.id }));
+  // Source DIRECTE (pas unstable_cache) : generateStaticParams s'exécute
+  // hors contexte de requête/render — getCachedMotos() y throw
+  // "Invariant: incrementalCache missing". Le cache invalidable par tag
+  // n'a de sens qu'au rendu de page (contexte requête).
+  const { getAdapter } = await import('@/lib/data');
+  const adapter = await getAdapter();
+  const motos = await adapter.getMotos();
+  return motos.map((m) => ({ id: m.id }));
 }
 
 type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const m = getMotoById(id);
+  const motos = await getCachedMotos();
+  const m = motos.find((moto) => moto.id === id);
   if (!m) {
     return { title: 'Moto introuvable' };
   }
@@ -67,7 +83,10 @@ function motoJsonLd(m: Moto) {
 
 export default async function MotoDetailPage({ params }: Props) {
   const { id } = await params;
-  const m = getMotoById(id);
+  const motos = await getCachedMotos();
+  const m = motos.find((moto) => moto.id === id);
+  // Moto supprimée en live entre build (generateStaticParams) et requête :
+  // find() → undefined → notFound() → 404 correct (pas d'erreur 500, ISR géré).
   if (!m) notFound();
 
   const contactHref = `/contact?sujet=${encodeURIComponent('Vente moto')}&vehicule=${encodeURIComponent(`${m.marque} ${m.modele}`)}&ref=${encodeURIComponent(m.id)}`;
