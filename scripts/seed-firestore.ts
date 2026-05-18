@@ -13,7 +13,8 @@
  *   2. Supprime tous les documents existants dans la collection 'products'
  *   3. Importe les produits depuis lib/products.ts
  *   4. Supprime puis importe la collection 'vehicules' depuis lib/vehicules.ts
- *   5. Crée un document metadata/stats avec les compteurs
+ *   5. Supprime puis importe la collection 'motos' depuis lib/motos.ts
+ *   6. Crée un document metadata/stats avec les compteurs
  */
 
 // Guard: FIRESTORE_EMULATOR_HOST doit être défini avant les imports Firebase
@@ -26,6 +27,7 @@ import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { parseProduct } from '../lib/schemas/product';
 import { parseVehicule } from '../lib/schemas/vehicule';
+import { parseMoto } from '../lib/schemas/moto';
 
 // Init Firebase Admin avec un project ID factice (l'émulateur l'accepte)
 const app = initializeApp({
@@ -109,7 +111,30 @@ async function seed() {
   await vehiculesBatch.commit();
   console.log(`✅ ${vehiculesCount} véhicules importés dans 'vehicules'`);
 
-  // 4. Créer les métadonnées
+  // 4. Importer les motos (même pattern que les véhicules)
+  const { MOTOS } = await import('../lib/motos');
+
+  console.log(`\n🏍️ ${MOTOS.length} motos trouvées dans lib/motos.ts`);
+
+  const deletedMotos = await clearCollection('motos');
+  if (deletedMotos > 0) {
+    console.log(`🗑️  ${deletedMotos} documents supprimés de 'motos'`);
+  }
+
+  const motosBatch = db.batch();
+  let motosCount = 0;
+
+  for (const moto of MOTOS) {
+    const validated = parseMoto(moto);
+    const docRef = db.collection('motos').doc(validated.id);
+    motosBatch.set(docRef, validated);
+    motosCount++;
+  }
+
+  await motosBatch.commit();
+  console.log(`✅ ${motosCount} motos importées dans 'motos'`);
+
+  // 5. Créer les métadonnées
   const categories = [...new Set(PRODUCTS.map((p) => p.category))].sort();
   const brands = [...new Set(PRODUCTS.flatMap((p) => p.compatibility.map((c) => c.brand)))].sort();
 
@@ -126,6 +151,8 @@ async function seed() {
       promoted: PRODUCTS.filter((p) => p.isPromoted).length,
       vehiculesCount: VEHICULES.length,
       vehiculesDisponibles: VEHICULES.filter((v) => v.disponibilite === 'disponible').length,
+      motosCount: MOTOS.length,
+      motosDisponibles: MOTOS.filter((m) => m.disponibilite === 'disponible').length,
     });
 
   console.log(`📊 Métadonnées créées: ${categories.length} catégories, ${brands.length} marques`);
