@@ -9,6 +9,13 @@ import { test, expect } from '@playwright/test';
  *
  * Pourquoi cookie injection pour le smoke ? Les smoke tests valident le dashboard,
  * pas l'auth. L'injection de cookie bypass le login UI pour des tests plus fiables en CI.
+ *
+ * Phase P0 security fix : GET /api/admin/products est maintenant protégé par requireAdmin().
+ * Le beforeEach du smoke back-office utilise donc emulator-login pour obtenir un vrai UID
+ * cookie. La whitelist meta/admins est seedée côté serveur (Admin SDK) par
+ * scripts/seed-firestore.ts — les Security Rules interdisent toute écriture client.
+ * Pour les pages Server Component (admin-vehicules, admin-motos), injectSessionCookie
+ * (cookie statique) reste suffisant car le middleware vérifie seulement la présence du cookie.
  */
 
 const TEST_EMAIL = process.env.TEST_ADMIN_EMAIL;
@@ -17,7 +24,11 @@ const HAS_AUTH_CREDENTIALS = Boolean(TEST_EMAIL && TEST_PASSWORD);
 
 // --- Helpers ---
 
-/** Injecte un session cookie valide pour bypasser le middleware sans passer par l'UI */
+/** Injecte un session cookie valide pour bypasser le middleware sans passer par l'UI.
+ *  Suffisant pour les pages Server Component (middleware = présence cookie seulement).
+ *  NE PAS utiliser pour les routes API protégées par requireAdmin() — utiliser
+ *  loginViaEmulator() à la place.
+ */
 async function injectSessionCookie(context: import('@playwright/test').BrowserContext) {
   await context.addCookies([
     {
@@ -28,6 +39,36 @@ async function injectSessionCookie(context: import('@playwright/test').BrowserCo
       sameSite: 'Lax',
     },
   ]);
+}
+
+/**
+ * Login complet via l'API emulator-login : obtient un vrai UID cookie Firebase Auth.
+ *
+ * Requis pour les routes API protégées par requireAdmin() (ex: /api/admin/products).
+ * L'appel fetch depuis le browser (credentials:'include') pose le cookie __session=uid
+ * directement dans le jar du contexte navigateur.
+ *
+ * La whitelist meta/admins n'est PAS seedée ici : firestore.rules restreint
+ * /meta/** à isAdmin(), donc toute écriture client/REST non authentifiée est
+ * rejetée (403 PERMISSION_DENIED). Le seed se fait côté serveur via l'Admin SDK
+ * dans scripts/seed-firestore.ts (étape "Seed produits" du workflow CI), seul
+ * chemin qui contourne légitimement les Security Rules en émulateur.
+ */
+async function loginViaEmulator(page: import('@playwright/test').Page) {
+  // Login via emulator-login API depuis le browser (credentials:'include' pose le cookie)
+  await page.goto('/admin/login'); // Initialise le contexte browser sur le bon origin
+  await page.evaluate(
+    async ({ email, password }) => {
+      const res = await fetch('/api/admin/emulator-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error(`emulator-login failed: ${res.status}`);
+    },
+    { email: TEST_EMAIL, password: TEST_PASSWORD }
+  );
 }
 
 /** Login complet via UI Firebase Auth + redirection */
@@ -95,12 +136,13 @@ test.describe('Admin — smoke back-office', () => {
     'Requires TEST_ADMIN_EMAIL + TEST_ADMIN_PASSWORD (Firebase Auth emulator — Phase 4.5)'
   );
 
-  test.beforeEach(async ({ page, context }) => {
-    // Injection du cookie de session → bypass login UI, middleware autorise l'accès
-    await injectSessionCookie(context);
+  test.beforeEach(async ({ page }) => {
+    // Login via émulateur : obtient un vrai UID cookie pour que requireAdmin() passe
+    // (middleware présence + Auth getUser + whitelist meta/admins).
+    await loginViaEmulator(page);
     await page.goto('/admin/dashboard');
-    // Attendre que le dashboard soit chargé (données Firestore visibles)
-    await expect(page.getByText('Produits en catalogue')).toBeVisible({ timeout: 10_000 });
+    // Attendre que le dashboard soit chargé (données Firestore et produits visibles)
+    await expect(page.getByText('Produits en catalogue')).toBeVisible({ timeout: 15_000 });
   });
 
   test('la page /admin charge et affiche les 4 KPIs', async ({ page }) => {

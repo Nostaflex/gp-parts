@@ -7,6 +7,7 @@ import type { Moto } from '@/lib/motos';
 import { getCachedMotos } from '@/lib/data/motos-cache';
 import { FinancementMotoSimulator } from './FinancementMotoSimulator';
 import { MotoGallery } from './MotoGallery';
+import { safeJsonLd } from '@/lib/safe-json-ld';
 
 // Filet ISR : revalidateTag('motos') (Server Actions admin) prime sur
 // mutation ; ce TTL n'est qu'un fallback de fraîcheur.
@@ -110,7 +111,7 @@ export default async function MotoDetailPage({ params }: Props) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(motoJsonLd(m)) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(motoJsonLd(m)) }}
       />
       <CpHeader />
 
