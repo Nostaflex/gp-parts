@@ -12,7 +12,8 @@ import { test, expect } from '@playwright/test';
  *
  * Phase P0 security fix : GET /api/admin/products est maintenant protégé par requireAdmin().
  * Le beforeEach du smoke back-office utilise donc emulator-login pour obtenir un vrai UID
- * cookie et seed meta/admins dans le Firestore émulateur via l'API REST.
+ * cookie. La whitelist meta/admins est seedée côté serveur (Admin SDK) par
+ * scripts/seed-firestore.ts — les Security Rules interdisent toute écriture client.
  * Pour les pages Server Component (admin-vehicules, admin-motos), injectSessionCookie
  * (cookie statique) reste suffisant car le middleware vérifie seulement la présence du cookie.
  */
@@ -42,33 +43,19 @@ async function injectSessionCookie(context: import('@playwright/test').BrowserCo
 
 /**
  * Login complet via l'API emulator-login : obtient un vrai UID cookie Firebase Auth.
- * Seed aussi meta/admins dans le Firestore émulateur pour que requireAdmin() passe
- * la vérification whitelist.
  *
  * Requis pour les routes API protégées par requireAdmin() (ex: /api/admin/products).
  * L'appel fetch depuis le browser (credentials:'include') pose le cookie __session=uid
  * directement dans le jar du contexte navigateur.
+ *
+ * La whitelist meta/admins n'est PAS seedée ici : firestore.rules restreint
+ * /meta/** à isAdmin(), donc toute écriture client/REST non authentifiée est
+ * rejetée (403 PERMISSION_DENIED). Le seed se fait côté serveur via l'Admin SDK
+ * dans scripts/seed-firestore.ts (étape "Seed produits" du workflow CI), seul
+ * chemin qui contourne légitimement les Security Rules en émulateur.
  */
 async function loginViaEmulator(page: import('@playwright/test').Page) {
-  // 1. Seed meta/admins via l'API REST du Firestore émulateur (Node.js context)
-  const firestoreHost = process.env.FIRESTORE_EMULATOR_HOST ?? '127.0.0.1:8080';
-  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? 'demo-gp-parts';
-  await fetch(
-    `http://${firestoreHost}/v1/projects/${projectId}/databases/(default)/documents/meta/admins`,
-    {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fields: {
-          emails: {
-            arrayValue: { values: [{ stringValue: TEST_EMAIL }] },
-          },
-        },
-      }),
-    }
-  );
-
-  // 2. Login via emulator-login API depuis le browser (credentials:'include' pose le cookie)
+  // Login via emulator-login API depuis le browser (credentials:'include' pose le cookie)
   await page.goto('/admin/login'); // Initialise le contexte browser sur le bon origin
   await page.evaluate(
     async ({ email, password }) => {

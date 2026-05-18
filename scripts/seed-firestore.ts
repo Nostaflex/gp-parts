@@ -156,6 +156,19 @@ async function seed() {
     });
 
   console.log(`📊 Métadonnées créées: ${categories.length} catégories, ${brands.length} marques`);
+
+  // 6. Whitelist admin (meta/admins) — requise par requireAdmin() pour les
+  //    routes API protégées (ex: GET /api/admin/products). Écrite ici via
+  //    l'Admin SDK car les Security Rules (firestore.rules: /meta/** =
+  //    isAdmin()) interdisent toute écriture client/REST non authentifiée :
+  //    le seed côté serveur est le seul chemin légitime en émulateur.
+  const adminEmail = process.env.TEST_ADMIN_EMAIL ?? 'admin-test@gp-parts.local';
+  await db
+    .collection('meta')
+    .doc('admins')
+    .set({ emails: [adminEmail] });
+  console.log(`🔐 Whitelist admin créée: meta/admins.emails = [${adminEmail}]`);
+
   console.log('\n🎉 Seed terminé ! Ouvre http://localhost:4000 pour voir les données.\n');
 
   process.exit(0);
