@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdapter } from '@/lib/data';
 import type { OrderStatus } from '@/lib/types';
+import { requireAdmin, AdminError } from '@/lib/admin/auth';
 
 // Transitions autorisées — miroir de STATUS_TRANSITIONS côté client
 // Valider ici empêche un PATCH direct qui bypasse l'UI admin
@@ -15,6 +16,15 @@ const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
 
 export async function PATCH(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
+
+  try {
+    await requireAdmin();
+  } catch (e) {
+    if (e instanceof AdminError)
+      return NextResponse.json({ error: e.message }, { status: e.status });
+    throw e;
+  }
+
   try {
     const { status: newStatus } = (await request.json()) as { status: OrderStatus };
 
