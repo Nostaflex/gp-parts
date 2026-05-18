@@ -3,7 +3,12 @@ import { CpHeader } from '@/components/cp/CpHeader';
 import { CpBridge } from '@/components/cp/CpBridge';
 import { CpFooter } from '@/components/cp/CpFooter';
 import { VenteMotoClient } from './VenteMotoClient';
+import { getCachedMotos } from '@/lib/data/motos-cache';
 import Link from 'next/link';
+
+// Symétrie ISR avec [id]/page.tsx : revalidateTag('motos') prime sur
+// mutation ; ce TTL n'est qu'un fallback de fraîcheur.
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: 'Vente de motos — Occasion & Neuf',
@@ -11,7 +16,9 @@ export const metadata: Metadata = {
     "Achetez une moto d'occasion contrôlée ou neuve à commander en Guadeloupe. Roadster, sport, trail, scooter — toutes cylindrées. Garantie incluse, financement sur mesure.",
 };
 
-export default function VenteMotoPage() {
+export default async function VenteMotoPage() {
+  const motos = await getCachedMotos();
+
   return (
     <>
       <CpHeader darkSectionIds={['moto-hero']} />
@@ -132,7 +139,7 @@ export default function VenteMotoPage() {
       <CpBridge fromColor="#1E0E04" toColor="#F4EDE0" />
 
       {/* ── CATALOGUE + REPRISE (client) ── */}
-      <VenteMotoClient />
+      <VenteMotoClient motos={motos} />
 
       <CpBridge fromColor="#F4EDE0" toColor="#1A0F06" />
       <CpFooter />

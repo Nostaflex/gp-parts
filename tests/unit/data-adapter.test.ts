@@ -205,6 +205,14 @@ describe('StaticAdapter — vehicules/motos/demandes', () => {
     }
   });
 
+  it('chaque moto statique a un updatedAt ISO (régression Phase 4b)', async () => {
+    const motos = await adapter.getMotos();
+    for (const m of motos) {
+      expect(typeof m.updatedAt).toBe('string');
+      expect(Number.isNaN(Date.parse(m.updatedAt))).toBe(false);
+    }
+  });
+
   it('getVehicules/Motos/Demandes : fallback non-bloquant en production (warn, pas throw)', async () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.stubEnv('NODE_ENV', 'production');
