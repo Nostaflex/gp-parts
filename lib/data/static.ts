@@ -82,51 +82,65 @@ export class StaticAdapter implements DataAdapter {
    * Get all products, optionally filtered by various criteria
    */
   async getProducts(filters?: ProductFilters): Promise<Product[]> {
-    return applyClientFilters([...PRODUCTS], filters);
+    // Exclut les produits soft-deleted par défaut (Phase 5 §9.16)
+    const list = filters?.includeDeleted
+      ? [...PRODUCTS]
+      : PRODUCTS.filter((p) => p.deletedAt === null);
+    return applyClientFilters(list, filters);
   }
 
   /**
    * Get a single product by its slug
    */
-  async getProductBySlug(slug: string): Promise<Product | null> {
-    const product = PRODUCTS.find((p) => p.slug === slug);
-    return product || null;
+  async getProductBySlug(
+    slug: string,
+    opts?: { includeDeleted?: boolean }
+  ): Promise<Product | null> {
+    const product = PRODUCTS.find((p) => p.slug === slug) ?? null;
+    if (product?.deletedAt && !opts?.includeDeleted) return null;
+    return product;
   }
 
   /**
    * Get a single product by its ID
    */
-  async getProductById(id: string): Promise<Product | null> {
-    const product = PRODUCTS.find((p) => p.id === id);
-    return product || null;
+  async getProductById(
+    id: string,
+    opts?: { includeDeleted?: boolean }
+  ): Promise<Product | null> {
+    const product = PRODUCTS.find((p) => p.id === id) ?? null;
+    if (product?.deletedAt && !opts?.includeDeleted) return null;
+    return product;
   }
 
   /**
    * Get all products in a specific category
    */
   async getProductsByCategory(category: string): Promise<Product[]> {
-    return PRODUCTS.filter((p) => p.category === category);
+    return PRODUCTS.filter((p) => p.deletedAt === null && p.category === category);
   }
 
   /**
    * Get all products marked as promoted
    */
   async getPromotedProducts(): Promise<Product[]> {
-    return PRODUCTS.filter((p) => p.isPromoted);
+    return PRODUCTS.filter((p) => p.deletedAt === null && p.isPromoted);
   }
 
   /**
    * Get featured products (in stock, limited by count)
    */
   async getFeaturedProducts(limit: number = 4): Promise<Product[]> {
-    return PRODUCTS.filter((p) => p.stock > 0).slice(0, limit);
+    return PRODUCTS.filter((p) => p.deletedAt === null && p.stock > 0).slice(0, limit);
   }
 
   /**
    * Get all unique product categories
    */
   async getCategories(): Promise<string[]> {
-    const categories = new Set(PRODUCTS.map((p) => p.category));
+    const categories = new Set(
+      PRODUCTS.filter((p) => p.deletedAt === null).map((p) => p.category)
+    );
     return Array.from(categories).sort();
   }
 
@@ -135,7 +149,7 @@ export class StaticAdapter implements DataAdapter {
    */
   async getBrands(): Promise<string[]> {
     const brands = new Set<string>();
-    PRODUCTS.forEach((p) => {
+    PRODUCTS.filter((p) => p.deletedAt === null).forEach((p) => {
       p.compatibility.forEach((compat) => {
         brands.add(compat.brand);
       });
