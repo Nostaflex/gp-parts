@@ -1,23 +1,48 @@
 import { z } from 'zod';
 import type { Product } from '@/lib/types';
 
-const vehicleCompatibilitySchema = z.object({
-  brand: z.string().min(1),
-  model: z.string().min(1),
-  yearFrom: z.number().int().min(1900),
-  yearTo: z.number().int().min(1900).optional(),
-});
+export const COMPAT_MAX = 50;
+const currentYear = new Date().getFullYear();
+const PRICE_CAP = 100_000_00; // 1 000 000,00 € en centimes
+const IMAGE_HOST_ALLOW = ['firebasestorage.googleapis.com'];
 
-export const productSchema = z.object({
-  id: z.string().min(1),
-  slug: z.string().min(1),
-  name: z.string().min(1),
-  reference: z.string().min(1),
-  description: z.string(),
-  shortDescription: z.string(),
-  price: z.number().int().nonnegative(),
-  priceOriginal: z.number().int().nonnegative().optional(),
-  images: z.array(z.string()),
+const httpsAllowedHost = z
+  .string()
+  .url()
+  .refine((u) => {
+    try {
+      return IMAGE_HOST_ALLOW.includes(new URL(u).host);
+    } catch {
+      return false;
+    }
+  }, 'host image non autorisé');
+
+const compatibilitySchema = z
+  .object({
+    brand: z.string().min(1).max(60),
+    model: z.string().min(1).max(60),
+    yearFrom: z
+      .number()
+      .int()
+      .min(1900)
+      .max(currentYear + 2),
+    yearTo: z
+      .number()
+      .int()
+      .min(1900)
+      .max(currentYear + 2)
+      .optional(),
+  })
+  .refine((c) => c.yearTo === undefined || c.yearTo >= c.yearFrom, 'yearTo < yearFrom');
+
+const baseShape = {
+  name: z.string().min(1).max(200),
+  reference: z.string().min(1).max(100),
+  description: z.string().min(1).max(5000),
+  shortDescription: z.string().min(1).max(300),
+  price: z.number().int().min(0).max(PRICE_CAP),
+  priceOriginal: z.number().int().min(0).max(PRICE_CAP).optional(),
+  images: z.array(httpsAllowedHost).min(1).max(8),
   category: z.enum([
     'freinage',
     'moteur',
@@ -29,15 +54,25 @@ export const productSchema = z.object({
     'refroidissement',
   ]),
   vehicleType: z.enum(['auto', 'moto']),
-  compatibility: z.array(vehicleCompatibilitySchema),
-  stock: z.number().int().nonnegative(),
+  compatibility: z.array(compatibilitySchema).max(COMPAT_MAX),
+  stock: z.number().int().min(0),
   isPromoted: z.boolean(),
+};
+
+// WRITE: strict → rejette toute clé inconnue ET tout champ server-only (absents du shape)
+export const ProductWriteSchema = z.object(baseShape).strict();
+
+// READ: doc Firestore complet (champs server-side inclus)
+const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+export const ProductSchema = z.object({
+  ...baseShape,
+  id: z.string().min(1).max(80).regex(SLUG_RE),
+  slug: z.string().min(1).max(80).regex(SLUG_RE),
   createdAt: z.string(),
   updatedAt: z.string(),
   deletedAt: z.string().nullable(),
 });
 
 export function parseProduct(data: unknown): Product {
-  // productSchema mirrors Product exactly — Zod infers structurally identical types
-  return productSchema.parse(data);
+  return ProductSchema.parse(data) as Product;
 }
