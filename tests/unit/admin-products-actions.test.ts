@@ -158,6 +158,10 @@ describe('Server Actions products', () => {
     requireAdminMock.mockResolvedValue({ uid: 'u1', email: 'djemil.david@gmail.com' });
     writeAuditLogMock.mockResolvedValue(undefined);
     getSlugQueryMock.mockResolvedValue({ empty: true, docs: [] });
+    // FIX 2: tx.get is now used for both doc refs AND slug queries.
+    // Default: { empty: true, docs: [] } (slug query shape, no conflict).
+    // Tests that need a doc snap override with txGetMock.mockResolvedValue(makeExistingSnap()).
+    txGetMock.mockResolvedValue({ empty: true, docs: [] });
   });
 
   // ─── CREATE ────────────────────────────────────────────────────────────────
@@ -273,7 +277,7 @@ describe('Server Actions products', () => {
 
   // ─── RESTORE ───────────────────────────────────────────────────────────────
 
-  it('restoreProduct : remet deletedAt: null, audit (update=closest valid), revalidate', async () => {
+  it('restoreProduct : remet deletedAt: null, audit action:"restore", revalidate', async () => {
     txGetMock.mockResolvedValue(
       makeExistingSnap({ deletedAt: '2026-05-05T00:00:00.000Z' })
     );
@@ -282,9 +286,9 @@ describe('Server Actions products', () => {
       expect.anything(),
       expect.objectContaining({ deletedAt: null })
     );
-    // audit avec resourceType: 'product' (action 'update' = closest valide pour restore)
+    // audit avec action: 'restore' (FIX 5)
     expect(writeAuditLogMock).toHaveBeenCalledWith(
-      expect.objectContaining({ resourceType: 'product' })
+      expect.objectContaining({ action: 'restore', resourceType: 'product' })
     );
     expect(revalidateTagMock).toHaveBeenCalledWith('products');
     expect(res).toMatchObject({ ok: true });
@@ -325,12 +329,89 @@ describe('Server Actions products', () => {
         deletedAt: '2025-01-01T00:00:00.000Z',
       })
     );
-    if (txUpdateMock.mock.calls.length > 0) {
-      const updateArg = txUpdateMock.mock.calls[0][1];
-      if ('deletedAt' in updateArg) {
-        expect(updateArg.deletedAt).not.toBe('2025-01-01T00:00:00.000Z');
-      }
-    }
+    // Unconditional: the write MUST have happened and deletedAt MUST NOT be a key
+    expect(txUpdateMock).toHaveBeenCalledTimes(1);
+    const updateArg = txUpdateMock.mock.calls[0][1];
+    expect(updateArg).not.toHaveProperty('deletedAt');
+  });
+
+  // ─── FIX 1: productId path-injection guard ─────────────────────────────────
+
+  it('deleteProduct : productId avec "/" → { errors._form }, 0 tx/Firestore call', async () => {
+    const res = await deleteProduct('a/b/c', '2026-05-01T00:00:00.000Z');
+    expect(res).toMatchObject({ errors: { _form: expect.any(Array) } });
+    expect(runTransactionMock).not.toHaveBeenCalled();
+    expect(txGetMock).not.toHaveBeenCalled();
+    expect(txUpdateMock).not.toHaveBeenCalled();
+  });
+
+  it('deleteProduct : productId traversal "../x" → { errors._form }, 0 tx/Firestore call', async () => {
+    const res = await deleteProduct('../x', '2026-05-01T00:00:00.000Z');
+    expect(res).toMatchObject({ errors: { _form: expect.any(Array) } });
+    expect(runTransactionMock).not.toHaveBeenCalled();
+  });
+
+  it('updateProduct : productId avec "/" → { errors._form }, 0 tx/Firestore call', async () => {
+    const res = await updateProduct(
+      null,
+      fd({ ...base, id: 'a/b/c', clientUpdatedAt: '2026-05-01T00:00:00.000Z' })
+    );
+    expect(res).toMatchObject({ errors: { _form: expect.any(Array) } });
+    expect(runTransactionMock).not.toHaveBeenCalled();
+  });
+
+  it('restoreProduct : productId traversal "../x" → { errors._form }, 0 tx/Firestore call', async () => {
+    const res = await restoreProduct('../x', '2026-05-01T00:00:00.000Z');
+    expect(res).toMatchObject({ errors: { _form: expect.any(Array) } });
+    expect(runTransactionMock).not.toHaveBeenCalled();
+  });
+
+  // ─── FIX 3: empty slug guard ───────────────────────────────────────────────
+
+  it('createProduct : nom ponctuation seule "!!!" → { errors.name }, 0 write', async () => {
+    const res = await createProduct(null, fd({ ...base, name: '!!!' }));
+    // Zod: name min(1) passes for '!!!', but slugify produces '' → FIX 3 catches it
+    // Note: if Zod rejects '!!!' first that's also valid (errors object with name field)
+    expect(res).toMatchObject({ errors: expect.any(Object) });
+    expect(txSetMock).not.toHaveBeenCalled();
+  });
+
+  it('createProduct : nom japonais "日本語" → { errors.name } slug vide, 0 write', async () => {
+    const res = await createProduct(null, fd({ ...base, name: '日本語' }));
+    expect(res).toMatchObject({ errors: expect.any(Object) });
+    expect(txSetMock).not.toHaveBeenCalled();
+  });
+
+  // ─── FIX 4+5: audit action:'denied' and action:'restore' ──────────────────
+
+  it('audit denied : writeAuditLog appelé avec action:"denied" (pas la mutation tentée)', async () => {
+    requireAdminMock.mockRejectedValue(
+      Object.assign(new Error('Non authentifié'), { name: 'AdminError', status: 401 })
+    );
+    await expect(deleteProduct('prod-001', '2026-05-01T00:00:00.000Z')).rejects.toMatchObject({ status: 401 });
+    expect(writeAuditLogMock).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'denied', resourceType: 'product', resourceId: 'prod-001' })
+    );
+  });
+
+  it('restoreProduct success : writeAuditLog appelé avec action:"restore", pas de diff fabricated', async () => {
+    txGetMock.mockResolvedValue(makeExistingSnap({ deletedAt: '2026-05-05T00:00:00.000Z' }));
+    const res = await restoreProduct('prod-001', '2026-05-01T00:00:00.000Z');
+    expect(res).toMatchObject({ ok: true });
+    expect(writeAuditLogMock).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'restore', resourceType: 'product', resourceId: 'prod-001' })
+    );
+    // No fabricated before:'non-null' diff
+    const callArg = writeAuditLogMock.mock.calls[0][0];
+    expect(callArg).not.toHaveProperty('diff');
+  });
+
+  // ─── Optional: non-finite priceOriginal rejected ───────────────────────────
+
+  it('createProduct : priceOriginal Infinity → { errors._form }, 0 write', async () => {
+    const res = await createProduct(null, fd({ ...base, priceOriginal: 'Infinity' }));
+    expect(res).toMatchObject({ errors: expect.any(Object) });
+    expect(txSetMock).not.toHaveBeenCalled();
   });
 
   // ─── COMPAT SPARSE-INJECTION ───────────────────────────────────────────────
@@ -354,16 +435,16 @@ describe('Server Actions products', () => {
 
   // ─── AUDIT DENIED ──────────────────────────────────────────────────────────
 
-  it('audit denied : requireAdmin throw → writeAuditLog émis avant rethrow', async () => {
+  it('audit denied : requireAdmin throw → writeAuditLog émis avec action:"denied" avant rethrow', async () => {
     requireAdminMock.mockRejectedValue(
       Object.assign(new Error('Non authentifié'), { name: 'AdminError', status: 401 })
     );
     await expect(createProduct(null, fd(base))).rejects.toMatchObject({ status: 401 });
     // Un enregistrement d'audit best-effort doit avoir été tenté
     expect(writeAuditLogMock).toHaveBeenCalledTimes(1);
-    // L'audit doit utiliser resourceType 'product'
+    // L'audit doit utiliser action:'denied' et resourceType 'product' (FIX 5)
     expect(writeAuditLogMock).toHaveBeenCalledWith(
-      expect.objectContaining({ resourceType: 'product' })
+      expect.objectContaining({ action: 'denied', resourceType: 'product' })
     );
     // 0 écriture Firestore produit
     expect(txSetMock).not.toHaveBeenCalled();

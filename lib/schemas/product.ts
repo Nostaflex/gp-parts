@@ -69,7 +69,7 @@ export const ProductWriteSchema = z.object(baseShape).strict();
 // ET uploads admin (https firebasestorage). L'allowlist host/https est un contrôle
 // d'INPUT (write path), pas un invariant de donnée stockée : l'imposer en lecture
 // ferait throw firebase.ts parseProduct sur tout doc à chemin local (catalogue prod cassé).
-const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+export const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export const ProductSchema = z.object({
   ...baseShape,
   images: z.array(z.string().min(1)).min(1).max(8),

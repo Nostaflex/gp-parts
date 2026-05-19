@@ -5,12 +5,11 @@ import { redirect } from 'next/navigation';
 import { requireAdmin } from '@/lib/admin/auth';
 import { writeAuditLog } from '@/lib/admin/audit';
 import { getAdminFirestore } from '@/lib/firebase-admin';
-import { ProductWriteSchema } from '@/lib/schemas/product';
+import { ProductWriteSchema, SLUG_RE } from '@/lib/schemas/product';
 import { computeDiff } from '@/lib/admin/diff';
 import { slugify } from '@/lib/utils';
 
 import type { FormActionState } from '@/components/admin/FormShell';
-import type { AuditAction } from '@/lib/admin/audit';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -117,22 +116,13 @@ function parseForm(formData: FormData): ParseFormOk | ParseFormError {
   return parsed;
 }
 
-/** Best-effort denied audit — émis AVANT rethrow, ne masque pas l'erreur originale.
- *
- * API CONSTRAINT: AuditAction = 'create' | 'update' | 'delete' — 'denied' absent.
- * Workaround : on utilise l'action correspondante à la mutation tentée, avec
- * resourceId = 'denied:<id|new>' pour distinguer les refus en audit.
- * Limitation reportée dans le commit.
- */
-async function emitDeniedAudit(
-  action: AuditAction,
-  resourceId: string
-): Promise<void> {
+/** Best-effort denied audit — émis AVANT rethrow, ne masque pas l'erreur originale. */
+async function emitDeniedAudit(resourceId: string): Promise<void> {
   await writeAuditLog({
     actor: 'unauthorized',
-    action,
+    action: 'denied',
     resourceType: 'product',
-    resourceId: `denied:${resourceId}`,
+    resourceId,
   }).catch((err) => {
     process.stderr.write(`[audit] denied log failed: ${String(err)}\n`);
   });
@@ -158,7 +148,7 @@ export async function createProduct(
   try {
     session = await requireAdmin();
   } catch (e) {
-    await emitDeniedAudit('create', 'new');
+    await emitDeniedAudit('new');
     throw e;
   }
 
@@ -177,13 +167,19 @@ export async function createProduct(
   // slug dérivé server-side du name
   const slug = slugify(data.name);
 
+  // FIX 3: reject empty slug (punctuation-only / non-latin name)
+  if (!slug) {
+    return { errors: { name: ['Le nom doit contenir au moins une lettre ou un chiffre (slug vide).'] } };
+  }
+
   const db = getAdminFirestore();
 
   // Unicité slug dans la transaction
   let slugConflict = false;
   await db.runTransaction(async (tx) => {
-    // Vérifier unicité slug
-    const existing = await db.collection('products').where('slug', '==', slug).limit(1).get();
+    // FIX 2: unicité slug via tx.get (transactional read, pas hors-tx)
+    const slugQuery = db.collection('products').where('slug', '==', slug).limit(1);
+    const existing = await tx.get(slugQuery);
     if (!existing.empty) {
       slugConflict = true;
       return;
@@ -203,12 +199,14 @@ export async function createProduct(
     return { errors: { _form: ['Slug déjà utilisé. Modifiez le nom du produit.'] } };
   }
 
-  // writeAuditLog POST-commit
+  // FIX 4: writeAuditLog POST-commit — failure goes to stderr, mutation result preserved
   await writeAuditLog({
     actor: session.email,
     action: 'create',
     resourceType: 'product',
     resourceId: slug,
+  }).catch((err) => {
+    process.stderr.write(`[audit] post-commit audit write failed for product ${slug} action create: ${String(err)}\n`);
   });
 
   revalidateProducts(slug);
@@ -226,13 +224,14 @@ export async function updateProduct(
   try {
     session = await requireAdmin();
   } catch (e) {
-    await emitDeniedAudit('update', sanitize(formData.get('id')) || 'unknown');
+    await emitDeniedAudit(sanitize(formData.get('id')) || 'unknown');
     throw e;
   }
 
   const productId = sanitize(formData.get('id'));
-  if (!productId) {
-    return { errors: { _form: ['Identifiant produit manquant.'] } };
+  // FIX 1: validate productId against SLUG_RE before constructing any doc ref
+  if (!productId || !SLUG_RE.test(productId)) {
+    return { errors: { _form: ['Identifiant produit invalide.'] } };
   }
 
   // clientUpdatedAt pour l'optimistic lock (champ hidden du form, PAS parseForm)
@@ -274,13 +273,10 @@ export async function updateProduct(
     const slug = (before.slug as string) || slugify(data.name);
     productSlug = slug;
 
-    // Unicité slug : si le slug change, vérifier l'absence de collision
+    // FIX 2: unicité slug via tx.get (transactional read) si le slug change
     if (slug !== before.slug) {
-      const existing = await db
-        .collection('products')
-        .where('slug', '==', slug)
-        .limit(1)
-        .get();
+      const slugQuery = db.collection('products').where('slug', '==', slug).limit(1);
+      const existing = await tx.get(slugQuery);
       if (!existing.empty) {
         slugConflict = true;
         return;
@@ -311,13 +307,15 @@ export async function updateProduct(
     return { errors: { _form: ['Slug déjà utilisé. Modifiez le nom du produit.'] } };
   }
 
-  // writeAuditLog POST-commit
+  // FIX 4: writeAuditLog POST-commit — failure goes to stderr, mutation result preserved
   await writeAuditLog({
     actor: session.email,
     action: 'update',
     resourceType: 'product',
     resourceId: productId,
     diff: auditDiff,
+  }).catch((err) => {
+    process.stderr.write(`[audit] post-commit audit write failed for product ${productId} action update: ${String(err)}\n`);
   });
 
   revalidateProducts(productSlug);
@@ -335,8 +333,13 @@ export async function deleteProduct(
   try {
     session = await requireAdmin();
   } catch (e) {
-    await emitDeniedAudit('delete', productId);
+    await emitDeniedAudit(productId);
     throw e;
+  }
+
+  // FIX 1: validate productId before constructing any doc ref
+  if (!productId || !SLUG_RE.test(productId)) {
+    return { errors: { _form: ['Identifiant produit invalide.'] } };
   }
 
   const db = getAdminFirestore();
@@ -370,12 +373,14 @@ export async function deleteProduct(
     };
   }
 
-  // writeAuditLog POST-commit
+  // FIX 4: writeAuditLog POST-commit — failure goes to stderr, mutation result preserved
   await writeAuditLog({
     actor: session.email,
     action: 'delete',
     resourceType: 'product',
     resourceId: productId,
+  }).catch((err) => {
+    process.stderr.write(`[audit] post-commit audit write failed for product ${productId} action delete: ${String(err)}\n`);
   });
 
   revalidateProducts(productSlug);
@@ -393,8 +398,13 @@ export async function restoreProduct(
   try {
     session = await requireAdmin();
   } catch (e) {
-    await emitDeniedAudit('update', `restore:${productId}`);
+    await emitDeniedAudit(productId);
     throw e;
+  }
+
+  // FIX 1: validate productId before constructing any doc ref
+  if (!productId || !SLUG_RE.test(productId)) {
+    return { errors: { _form: ['Identifiant produit invalide.'] } };
   }
 
   const db = getAdminFirestore();
@@ -428,16 +438,14 @@ export async function restoreProduct(
     };
   }
 
-  // writeAuditLog POST-commit.
-  // API CONSTRAINT: AuditAction n'inclut pas 'restore' → on utilise 'update'
-  // avec diff pour tracer le changement deletedAt!=null → null.
-  // Reporté dans le commit.
+  // FIX 4+5: writeAuditLog POST-commit with action:'restore' — failure goes to stderr
   await writeAuditLog({
     actor: session.email,
-    action: 'update',
+    action: 'restore',
     resourceType: 'product',
     resourceId: productId,
-    diff: { deletedAt: { before: 'non-null', after: null } },
+  }).catch((err) => {
+    process.stderr.write(`[audit] post-commit audit write failed for product ${productId} action restore: ${String(err)}\n`);
   });
 
   revalidateProducts(productSlug);
