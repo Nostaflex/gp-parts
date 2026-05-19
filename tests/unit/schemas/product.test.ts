@@ -84,3 +84,20 @@ it('ProductSchema (read) accepte un doc complet avec updatedAt+deletedAt', () =>
     }).success
   ).toBe(true);
 });
+it('asymétrie write/read images (spec §2): write strict rejette chemin local, read tolérant accepte', () => {
+  const localImages = ['/images/placeholder-disque.jpg'];
+  // WRITE : input admin → host/https obligatoire
+  expect(ProductWriteSchema.safeParse({ ...validWrite, images: localImages }).success).toBe(false);
+  // READ : doc stocké (seed/legacy chemin local) → toléré, sinon firebase.ts parseProduct throw
+  expect(
+    ProductSchema.safeParse({
+      ...validWrite,
+      images: localImages,
+      id: 'p1',
+      slug: 'plaquettes',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-02T00:00:00.000Z',
+      deletedAt: null,
+    }).success
+  ).toBe(true);
+});

@@ -63,10 +63,16 @@ const baseShape = {
 // WRITE: strict → rejette toute clé inconnue ET tout champ server-only (absents du shape)
 export const ProductWriteSchema = z.object(baseShape).strict();
 
-// READ: doc Firestore complet (champs server-side inclus)
+// READ: doc Firestore complet (champs server-side inclus). TOLÉRANT (spec §2) :
+// `images` override le validateur strict write (httpsAllowedHost) car le read
+// schema parse des docs STOCKÉS — fixtures/legacy à chemins locaux (/images/*.jpg)
+// ET uploads admin (https firebasestorage). L'allowlist host/https est un contrôle
+// d'INPUT (write path), pas un invariant de donnée stockée : l'imposer en lecture
+// ferait throw firebase.ts parseProduct sur tout doc à chemin local (catalogue prod cassé).
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export const ProductSchema = z.object({
   ...baseShape,
+  images: z.array(z.string().min(1)).min(1).max(8),
   id: z.string().min(1).max(80).regex(SLUG_RE),
   slug: z.string().min(1).max(80).regex(SLUG_RE),
   createdAt: z.string(),
