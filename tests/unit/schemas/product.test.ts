@@ -30,7 +30,7 @@ it('REJETTE les champs server-only injectés', () => {
 it('price: rejette négatif, non-entier, > cap 1M€', () => {
   expect(ProductWriteSchema.safeParse({ ...validWrite, price: -1 }).success).toBe(false);
   expect(ProductWriteSchema.safeParse({ ...validWrite, price: 19.99 }).success).toBe(false);
-  expect(ProductWriteSchema.safeParse({ ...validWrite, price: 100_000_01 }).success).toBe(false);
+  expect(ProductWriteSchema.safeParse({ ...validWrite, price: 100_000_001 }).success).toBe(false);
 });
 it('strings: rejette au-dessus des caps', () => {
   expect(ProductWriteSchema.safeParse({ ...validWrite, name: 'a'.repeat(201) }).success).toBe(
@@ -47,6 +47,13 @@ it('images: rejette non-url, host hors allowlist, > 8', () => {
   expect(ProductWriteSchema.safeParse({ ...validWrite, images: ['http://evil/x'] }).success).toBe(
     false
   );
+  // scheme bypass: host autorisé mais http:// (ou ftp://) doit être rejeté
+  expect(
+    ProductWriteSchema.safeParse({
+      ...validWrite,
+      images: ['http://firebasestorage.googleapis.com/x.webp'],
+    }).success
+  ).toBe(false);
   expect(
     ProductWriteSchema.safeParse({
       ...validWrite,

@@ -187,7 +187,7 @@ import type { Product } from '@/lib/types';
 
 export const COMPAT_MAX = 50;
 const currentYear = new Date().getFullYear();
-const PRICE_CAP = 100_000_00; // 1 000 000,00 € en centimes
+const PRICE_CAP = 100_000_000; // 1 000 000,00 € en centimes
 const IMAGE_HOST_ALLOW = ['firebasestorage.googleapis.com'];
 
 const httpsAllowedHost = z
