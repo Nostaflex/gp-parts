@@ -81,6 +81,8 @@ async function seed() {
       stock: validated.stock,
       isPromoted: validated.isPromoted,
       createdAt: validated.createdAt,
+      updatedAt: validated.updatedAt,
+      deletedAt: validated.deletedAt,
     });
     count++;
   }
