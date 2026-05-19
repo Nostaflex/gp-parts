@@ -11,9 +11,9 @@ service cloud.firestore {
           && get(/databases/$(database)/documents/meta/admins).data.emails.hasAny([request.auth.token.email]);
     }
 
-    // Catalogue public en lecture, admin en écriture
+    // Catalogue public en lecture (actifs seulement), admin en écriture + lecture supprimés
     match /products/{doc=**} {
-      allow read;
+      allow read: if resource.data.deletedAt == null || isAdmin();
       allow write: if isAdmin();
     }
 
