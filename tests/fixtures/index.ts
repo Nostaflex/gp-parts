@@ -26,6 +26,8 @@ export const mockProduct: Product = {
   stock: 10,
   isPromoted: false,
   createdAt: '2026-01-15T10:00:00Z',
+  updatedAt: '2026-01-15T12:00:00Z',
+  deletedAt: null,
 };
 
 /**

@@ -22,6 +22,8 @@ const mockProducts: Product[] = [
     stock: 10,
     isPromoted: false,
     createdAt: '2024-01-01',
+    updatedAt: '2024-01-01T02:00:00.000Z',
+    deletedAt: null,
   },
   {
     id: '2',
@@ -38,6 +40,8 @@ const mockProducts: Product[] = [
     stock: 0,
     isPromoted: true,
     createdAt: '2024-02-01',
+    updatedAt: '2024-02-01T02:00:00.000Z',
+    deletedAt: null,
   },
   {
     id: '3',
@@ -54,6 +58,8 @@ const mockProducts: Product[] = [
     stock: 3,
     isPromoted: false,
     createdAt: '2024-03-01',
+    updatedAt: '2024-03-01T02:00:00.000Z',
+    deletedAt: null,
   },
 ];
 
@@ -210,6 +216,15 @@ describe('StaticAdapter — vehicules/motos/demandes', () => {
     for (const m of motos) {
       expect(typeof m.updatedAt).toBe('string');
       expect(Number.isNaN(Date.parse(m.updatedAt))).toBe(false);
+    }
+  });
+
+  it('chaque produit statique a updatedAt ISO + deletedAt null (régression P5)', async () => {
+    const products = await adapter.getProducts();
+    for (const p of products) {
+      expect(typeof p.updatedAt).toBe('string');
+      expect(Number.isNaN(Date.parse(p.updatedAt))).toBe(false);
+      expect(p.deletedAt).toBeNull();
     }
   });
 

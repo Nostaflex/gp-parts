@@ -17,6 +17,8 @@ describe('productSchema', () => {
     stock: 15,
     isPromoted: false,
     createdAt: '2025-01-15T10:00:00Z',
+    updatedAt: '2025-01-15T12:00:00Z',
+    deletedAt: null,
   };
 
   it('parses a valid product', () => {

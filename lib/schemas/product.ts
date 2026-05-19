@@ -33,6 +33,8 @@ export const productSchema = z.object({
   stock: z.number().int().nonnegative(),
   isPromoted: z.boolean(),
   createdAt: z.string(),
+  updatedAt: z.string(),
+  deletedAt: z.string().nullable(),
 });
 
 export function parseProduct(data: unknown): Product {
