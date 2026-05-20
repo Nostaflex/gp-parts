@@ -125,7 +125,7 @@ describe('ProductForm — mode creation (sans initial)', () => {
     expect(screen.getByText('Compatibilité véhicule')).toBeInTheDocument();
   });
 
-  it("rend une ligne compat vide par défaut (Marque/Modèle/Année placeholders)", () => {
+  it('rend une ligne compat vide par défaut (Marque/Modèle/Année placeholders)', () => {
     render(<ProductForm />);
     expect(screen.getByPlaceholderText('Marque')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Modèle')).toBeInTheDocument();

@@ -29,8 +29,12 @@ const {
   // Mock for slug uniqueness query: collection('products').where(...).limit(1).get()
   const getSlugQueryMock = vi.fn().mockResolvedValue({ empty: true, docs: [] });
   const limitMockInner = vi.fn(() => ({ get: getSlugQueryMock }));
-  type WhereMock = ReturnType<typeof vi.fn> & ((...args: unknown[]) => { where: WhereMock; limit: typeof limitMockInner });
-  const whereMockInner: WhereMock = vi.fn(() => ({ where: whereMockInner, limit: limitMockInner })) as WhereMock;
+  type WhereMock = ReturnType<typeof vi.fn> &
+    ((...args: unknown[]) => { where: WhereMock; limit: typeof limitMockInner });
+  const whereMockInner: WhereMock = vi.fn(() => ({
+    where: whereMockInner,
+    limit: limitMockInner,
+  })) as WhereMock;
 
   // docMock: returns a ref with a stable id — used for tx.set(docRef, data) in createProduct
   const docMock = vi.fn(() => ({
@@ -278,9 +282,7 @@ describe('Server Actions products', () => {
   // ─── RESTORE ───────────────────────────────────────────────────────────────
 
   it('restoreProduct : remet deletedAt: null, audit action:"restore", revalidate', async () => {
-    txGetMock.mockResolvedValue(
-      makeExistingSnap({ deletedAt: '2026-05-05T00:00:00.000Z' })
-    );
+    txGetMock.mockResolvedValue(makeExistingSnap({ deletedAt: '2026-05-05T00:00:00.000Z' }));
     const res = await restoreProduct('prod-001', '2026-05-01T00:00:00.000Z');
     expect(txUpdateMock).toHaveBeenCalledWith(
       expect.anything(),
@@ -388,7 +390,9 @@ describe('Server Actions products', () => {
     requireAdminMock.mockRejectedValue(
       Object.assign(new Error('Non authentifié'), { name: 'AdminError', status: 401 })
     );
-    await expect(deleteProduct('prod-001', '2026-05-01T00:00:00.000Z')).rejects.toMatchObject({ status: 401 });
+    await expect(deleteProduct('prod-001', '2026-05-01T00:00:00.000Z')).rejects.toMatchObject({
+      status: 401,
+    });
     expect(writeAuditLogMock).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'denied', resourceType: 'product', resourceId: 'prod-001' })
     );
@@ -399,7 +403,11 @@ describe('Server Actions products', () => {
     const res = await restoreProduct('prod-001', '2026-05-01T00:00:00.000Z');
     expect(res).toMatchObject({ ok: true });
     expect(writeAuditLogMock).toHaveBeenCalledWith(
-      expect.objectContaining({ action: 'restore', resourceType: 'product', resourceId: 'prod-001' })
+      expect.objectContaining({
+        action: 'restore',
+        resourceType: 'product',
+        resourceId: 'prod-001',
+      })
     );
     // No fabricated before:'non-null' diff
     const callArg = writeAuditLogMock.mock.calls[0][0];

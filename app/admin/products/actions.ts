@@ -67,8 +67,7 @@ function parseForm(formData: FormData): ParseFormOk | ParseFormError {
 
   // ── isPromoted ─────────────────────────────────────────────────────────────
   const isPromotedRaw = formData.get('isPromoted');
-  const isPromoted =
-    isPromotedRaw === 'true' || isPromotedRaw === '1' || isPromotedRaw === 'on';
+  const isPromoted = isPromotedRaw === 'true' || isPromotedRaw === '1' || isPromotedRaw === 'on';
 
   // ── compatibility — dense bounded loop ────────────────────────────────────
   // Itère de 0 à 49 et s'arrête au premier trou (brand vide).
@@ -169,7 +168,9 @@ export async function createProduct(
 
   // FIX 3: reject empty slug (punctuation-only / non-latin name)
   if (!slug) {
-    return { errors: { name: ['Le nom doit contenir au moins une lettre ou un chiffre (slug vide).'] } };
+    return {
+      errors: { name: ['Le nom doit contenir au moins une lettre ou un chiffre (slug vide).'] },
+    };
   }
 
   const db = getAdminFirestore();
@@ -206,7 +207,9 @@ export async function createProduct(
     resourceType: 'product',
     resourceId: slug,
   }).catch((err) => {
-    process.stderr.write(`[audit] post-commit audit write failed for product ${slug} action create: ${String(err)}\n`);
+    process.stderr.write(
+      `[audit] post-commit audit write failed for product ${slug} action create: ${String(err)}\n`
+    );
   });
 
   revalidateProducts(slug);
@@ -315,7 +318,9 @@ export async function updateProduct(
     resourceId: productId,
     diff: auditDiff,
   }).catch((err) => {
-    process.stderr.write(`[audit] post-commit audit write failed for product ${productId} action update: ${String(err)}\n`);
+    process.stderr.write(
+      `[audit] post-commit audit write failed for product ${productId} action update: ${String(err)}\n`
+    );
   });
 
   revalidateProducts(productSlug);
@@ -380,7 +385,9 @@ export async function deleteProduct(
     resourceType: 'product',
     resourceId: productId,
   }).catch((err) => {
-    process.stderr.write(`[audit] post-commit audit write failed for product ${productId} action delete: ${String(err)}\n`);
+    process.stderr.write(
+      `[audit] post-commit audit write failed for product ${productId} action delete: ${String(err)}\n`
+    );
   });
 
   revalidateProducts(productSlug);
@@ -445,7 +452,9 @@ export async function restoreProduct(
     resourceType: 'product',
     resourceId: productId,
   }).catch((err) => {
-    process.stderr.write(`[audit] post-commit audit write failed for product ${productId} action restore: ${String(err)}\n`);
+    process.stderr.write(
+      `[audit] post-commit audit write failed for product ${productId} action restore: ${String(err)}\n`
+    );
   });
 
   revalidateProducts(productSlug);

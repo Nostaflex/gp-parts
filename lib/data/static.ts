@@ -104,10 +104,7 @@ export class StaticAdapter implements DataAdapter {
   /**
    * Get a single product by its ID
    */
-  async getProductById(
-    id: string,
-    opts?: { includeDeleted?: boolean }
-  ): Promise<Product | null> {
+  async getProductById(id: string, opts?: { includeDeleted?: boolean }): Promise<Product | null> {
     const product = PRODUCTS.find((p) => p.id === id) ?? null;
     if (product?.deletedAt && !opts?.includeDeleted) return null;
     return product;
@@ -138,9 +135,7 @@ export class StaticAdapter implements DataAdapter {
    * Get all unique product categories
    */
   async getCategories(): Promise<string[]> {
-    const categories = new Set(
-      PRODUCTS.filter((p) => p.deletedAt === null).map((p) => p.category)
-    );
+    const categories = new Set(PRODUCTS.filter((p) => p.deletedAt === null).map((p) => p.category));
     return Array.from(categories).sort();
   }
 

@@ -55,9 +55,7 @@ export class FirebaseAdapter implements DataAdapter {
 
     // Phase 5 §9.16 : exclusion soft-deleted au niveau QUERY (pas post-fetch)
     // Tous les documents produit ont deletedAt présent (null ou ISO string).
-    const deletedAtClause = !filters?.includeDeleted
-      ? [where('deletedAt', '==', null)]
-      : [];
+    const deletedAtClause = !filters?.includeDeleted ? [where('deletedAt', '==', null)] : [];
 
     let products: Product[];
     const skipped = new Set<keyof ProductFilters>();
@@ -106,10 +104,7 @@ export class FirebaseAdapter implements DataAdapter {
     return product;
   }
 
-  async getProductById(
-    id: string,
-    opts?: { includeDeleted?: boolean }
-  ): Promise<Product | null> {
+  async getProductById(id: string, opts?: { includeDeleted?: boolean }): Promise<Product | null> {
     const docRef = doc(db, 'products', id);
     const docSnap = await getDoc(docRef);
     if (!docSnap.exists()) return null;

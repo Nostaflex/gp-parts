@@ -30,10 +30,7 @@ const STORAGE_KEY = 'gpparts-cart';
  * IMPORTANT (§9.19-20) : pas de lecture statique PRODUCTS — sinon un produit
  * supprimé ressusciterait prix/nom depuis localStorage.
  */
-function rehydrateItems(
-  persisted: CartItem[],
-  liveProducts: ActiveCartProduct[]
-): CartItem[] {
+function rehydrateItems(persisted: CartItem[], liveProducts: ActiveCartProduct[]): CartItem[] {
   const byId = new Map(liveProducts.map((p) => [p.id, p]));
   const out: CartItem[] = [];
   for (const stored of persisted) {
