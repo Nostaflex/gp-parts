@@ -13,7 +13,9 @@ service cloud.firestore {
 
     // Catalogue public en lecture (actifs seulement), admin en écriture + lecture supprimés
     match /products/{doc=**} {
-      allow read: if resource.data.deletedAt == null || isAdmin();
+      // .get('deletedAt', null) tolère le champ absent (rétrocompat seed
+       // legacy) — un doc sans deletedAt est traité comme actif/visible.
+       allow read: if resource.data.get('deletedAt', null) == null || isAdmin();
       allow write: if isAdmin();
     }
 
