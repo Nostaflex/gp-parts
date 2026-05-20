@@ -44,6 +44,8 @@ export interface Product {
 
   isPromoted: boolean;
   createdAt: string; // ISO date
+  updatedAt: string; // ISO — optimistic lock + tri admin (Phase 5)
+  deletedAt: string | null; // ISO si soft-deleted, null si actif — TOUJOURS présent (Phase 5)
 }
 
 export interface CartItem {

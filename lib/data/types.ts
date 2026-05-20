@@ -17,6 +17,8 @@ export interface ProductFilters {
   minPrice?: number;
   maxPrice?: number;
   inStock?: boolean;
+  /** Si true, inclut les produits soft-deleted (deletedAt != null). Par défaut false. */
+  includeDeleted?: boolean;
 }
 
 export interface OrderFilters {
@@ -32,8 +34,8 @@ export interface DemandeFilters {
 
 export interface DataAdapter {
   getProducts(filters?: ProductFilters): Promise<Product[]>;
-  getProductBySlug(slug: string): Promise<Product | null>;
-  getProductById(id: string): Promise<Product | null>;
+  getProductBySlug(slug: string, opts?: { includeDeleted?: boolean }): Promise<Product | null>;
+  getProductById(id: string, opts?: { includeDeleted?: boolean }): Promise<Product | null>;
   getProductsByCategory(category: ProductCategory): Promise<Product[]>;
   getPromotedProducts(): Promise<Product[]>;
   getFeaturedProducts(limit?: number): Promise<Product[]>;

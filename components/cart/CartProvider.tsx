@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import type { CartItem, Product } from '@/lib/types';
-import { PRODUCTS } from '@/lib/products';
+import { getActiveProductsForCart, type ActiveCartProduct } from '@/lib/cart/active-products';
 
 interface CartContextType {
   items: CartItem[];
@@ -20,18 +20,23 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 const STORAGE_KEY = 'gpparts-cart';
 
 /**
- * Re-synchronise un CartItem persisté avec la source PRODUCTS :
- * - Produit disparu → item éliminé
- * - Prix / nom / stock mis à jour depuis la source
+ * Re-synchronise un CartItem persisté avec la source ACTIVE (server action) :
+ * - Produit absent (supprimé OU jamais existé) → item éliminé (§9.20)
+ * - deletedAt non-null → exclu d'office côté serveur (getProducts() filtre)
+ * - Stock 0 → item éliminé
+ * - Prix / nom / image / slug mis à jour depuis la source live
  * - Quantité clampée sur le stock courant
- * - Rupture → item éliminé
+ *
+ * IMPORTANT (§9.19-20) : pas de lecture statique PRODUCTS — sinon un produit
+ * supprimé ressusciterait prix/nom depuis localStorage.
  */
-function rehydrateItems(persisted: CartItem[]): CartItem[] {
+function rehydrateItems(persisted: CartItem[], liveProducts: ActiveCartProduct[]): CartItem[] {
+  const byId = new Map(liveProducts.map((p) => [p.id, p]));
   const out: CartItem[] = [];
   for (const stored of persisted) {
-    const live = PRODUCTS.find((p) => p.id === stored.productId);
-    if (!live) continue; // produit retiré du catalogue
-    if (live.stock === 0) continue; // rupture : on retire du panier
+    const live = byId.get(stored.productId);
+    if (!live) continue; // produit retiré ou supprimé
+    if (live.stock === 0) continue; // rupture
     out.push({
       id: live.id,
       productId: live.id,
@@ -40,7 +45,7 @@ function rehydrateItems(persisted: CartItem[]): CartItem[] {
       reference: live.reference,
       price: live.price,
       quantity: Math.min(Math.max(1, stored.quantity), live.stock),
-      image: live.images[0] || '',
+      image: live.image,
       stock: live.stock,
     });
   }
@@ -51,20 +56,42 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isReady, setIsReady] = useState(false);
 
-  // Charge le panier depuis localStorage côté client uniquement (anti-hydratation)
+  // Charge le panier depuis localStorage côté client uniquement (anti-hydratation).
+  // Le rehydrate compare au catalogue ACTIF live (server action) pour éviter
+  // qu'un produit supprimé ne ressuscite prix/nom depuis localStorage (§9.20).
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          setItems(rehydrateItems(parsed as CartItem[]));
+    let cancelled = false;
+    (async () => {
+      let persisted: CartItem[] = [];
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) persisted = parsed as CartItem[];
         }
+      } catch {
+        // Corrupt data — on ignore silencieusement
       }
-    } catch {
-      // Corrupt data — on ignore silencieusement
-    }
-    setIsReady(true);
+
+      if (persisted.length === 0) {
+        if (!cancelled) setIsReady(true);
+        return;
+      }
+
+      try {
+        const liveProducts = await getActiveProductsForCart();
+        if (cancelled) return;
+        setItems(rehydrateItems(persisted, liveProducts));
+      } catch {
+        // Server action failure → ne pas écraser le panier avec faux drops,
+        // garder persisted tel quel (le checkout re-vérifiera le stock).
+        if (!cancelled) setItems(persisted);
+      }
+      if (!cancelled) setIsReady(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Persiste à chaque changement, MAIS seulement après le chargement initial

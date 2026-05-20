@@ -1,15 +1,21 @@
 import { Suspense } from 'react';
 import { CatalogueClient } from './CatalogueClient';
+import { getCachedProducts } from '@/lib/data/products-cache';
 
 export const metadata = {
   title: 'Catalogue',
   description: 'Catalogue complet des pièces détachées auto et moto disponibles en Guadeloupe.',
 };
 
-export default function CataloguePage() {
+// Symétrie ISR avec [slug]/page.tsx : revalidateTag('products') prime sur
+// mutation ; ce TTL n'est qu'un fallback de fraîcheur.
+export const revalidate = 3600;
+
+export default async function CataloguePage() {
+  const products = await getCachedProducts();
   return (
     <Suspense fallback={<CatalogueSkeleton />}>
-      <CatalogueClient />
+      <CatalogueClient products={products} />
     </Suspense>
   );
 }

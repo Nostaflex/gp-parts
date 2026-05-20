@@ -20,7 +20,10 @@ const CATEGORY_IMAGE: Record<string, string> = {
 // Génère une date d'ajout fictive répartie sur les 3 derniers mois
 // pour que le tri "Nouveautés" soit pertinent en démo.
 function p(
-  data: Omit<Product, 'slug' | 'createdAt'> & { brand: string; daysAgo?: number }
+  data: Omit<Product, 'slug' | 'createdAt' | 'updatedAt' | 'deletedAt'> & {
+    brand: string;
+    daysAgo?: number;
+  }
 ): Product {
   const daysAgo = data.daysAgo ?? 30;
   const date = new Date('2026-04-01T00:00:00.000Z');
@@ -30,11 +33,15 @@ function p(
   const images = rest.images.some((img) => img.includes('placeholder'))
     ? [CATEGORY_IMAGE[rest.category] || rest.images[0]]
     : rest.images;
+  // updatedAt = createdAt + 2h (distinct de createdAt, réaliste pour tri admin)
+  const updatedAt = new Date(date.getTime() + 2 * 60 * 60 * 1000).toISOString();
   return {
     ...rest,
     images,
     slug: productSlug(data.name, data.brand),
     createdAt: date.toISOString(),
+    updatedAt,
+    deletedAt: null,
   };
 }
 

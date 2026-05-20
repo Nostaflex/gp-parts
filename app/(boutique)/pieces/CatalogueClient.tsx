@@ -5,9 +5,8 @@ import Link from 'next/link';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { Search, ArrowUpDown, SlidersHorizontal } from 'lucide-react';
 import { ProductCard } from '@/components/products/ProductCard';
-import { PRODUCTS } from '@/lib/products';
 import { CATEGORIES } from '@/lib/categories';
-import type { ProductCategory, VehicleType } from '@/lib/types';
+import type { Product, ProductCategory, VehicleType } from '@/lib/types';
 
 type SortKey = 'relevance' | 'price-asc' | 'price-desc' | 'newest' | 'name-asc';
 
@@ -19,7 +18,7 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: 'name-asc', label: 'Nom (A-Z)' },
 ];
 
-export function CatalogueClient() {
+export function CatalogueClient({ products }: { products: Product[] }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -68,7 +67,7 @@ export function CatalogueClient() {
       .split(/\s+/)
       .map((t) => t.trim())
       .filter(Boolean);
-    const list = PRODUCTS.filter((p) => {
+    const list = products.filter((p) => {
       if (showPromoOnly && !p.isPromoted) return false;
       if (vehicleType !== 'all' && p.vehicleType !== vehicleType) return false;
       if (category !== 'all' && p.category !== category) return false;
@@ -94,7 +93,7 @@ export function CatalogueClient() {
       if (a.stock > 0 !== b.stock > 0) return a.stock > 0 ? -1 : 1;
       return 0;
     });
-  }, [query, vehicleType, category, showPromoOnly, sort]);
+  }, [products, query, vehicleType, category, showPromoOnly, sort]);
 
   const chip = (active: boolean, promo = false) =>
     [

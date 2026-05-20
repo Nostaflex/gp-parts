@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { PRODUCTS } from '@/lib/products';
+import { getAdapter } from '@/lib/data';
 import { CATEGORIES } from '@/lib/categories';
 import { VEHICULES } from '@/lib/vehicules';
 import { MOTOS } from '@/lib/motos';
@@ -7,7 +7,10 @@ import { MOTOS } from '@/lib/motos';
 // URL de base : pilotée par env (production) avec fallback dev
 const BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://gpparts.gp').replace(/\/$/, '');
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Source live products (Phase 5 §9.19) : getProducts() exclut deletedAt
+  const adapter = await getAdapter();
+  const products = await adapter.getProducts();
   const now = new Date();
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -43,7 +46,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  const productRoutes: MetadataRoute.Sitemap = PRODUCTS.map((p) => ({
+  const productRoutes: MetadataRoute.Sitemap = products.map((p) => ({
     url: `${BASE_URL}/pieces/${p.slug}`,
     lastModified: new Date(p.createdAt),
     changeFrequency: 'weekly',

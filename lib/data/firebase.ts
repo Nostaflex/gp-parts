@@ -53,24 +53,37 @@ export class FirebaseAdapter implements DataAdapter {
     // on récupère côté client et on filtre en mémoire.
     // Acceptable pour < 200 produits. Phase 7+ : Algolia pour search avancé.
 
+    // Phase 5 §9.16 : exclusion soft-deleted au niveau QUERY (pas post-fetch)
+    // Tous les documents produit ont deletedAt présent (null ou ISO string).
+    const deletedAtClause = !filters?.includeDeleted ? [where('deletedAt', '==', null)] : [];
+
     let products: Product[];
     const skipped = new Set<keyof ProductFilters>();
 
     if (filters?.category && !filters?.search && !filters?.minPrice && !filters?.maxPrice) {
       // Cas optimisé : filtre simple par catégorie (query Firestore)
-      const q = query(this.productsRef, where('category', '==', filters.category));
+      const q = query(
+        this.productsRef,
+        ...deletedAtClause,
+        where('category', '==', filters.category)
+      );
       const snapshot = await getDocs(q);
       products = snapshot.docs.map((d) => this.docToProduct(d));
       skipped.add('category');
     } else if (filters?.vehicleType && !filters?.search) {
       // Cas optimisé : filtre par type de véhicule
-      const q = query(this.productsRef, where('vehicleType', '==', filters.vehicleType));
+      const q = query(
+        this.productsRef,
+        ...deletedAtClause,
+        where('vehicleType', '==', filters.vehicleType)
+      );
       const snapshot = await getDocs(q);
       products = snapshot.docs.map((d) => this.docToProduct(d));
       skipped.add('vehicleType');
     } else {
-      // Cas général : récupère tout et filtre en mémoire
-      const snapshot = await getDocs(this.productsRef);
+      // Cas général : récupère tout (actifs seulement) et filtre en mémoire
+      const q = query(this.productsRef, ...deletedAtClause);
+      const snapshot = await getDocs(q);
       products = snapshot.docs.map((d) => this.docToProduct(d));
     }
 
@@ -78,35 +91,56 @@ export class FirebaseAdapter implements DataAdapter {
     return applyClientFilters(products, filters, skipped);
   }
 
-  async getProductBySlug(slug: string): Promise<Product | null> {
+  async getProductBySlug(
+    slug: string,
+    opts?: { includeDeleted?: boolean }
+  ): Promise<Product | null> {
     const q = query(this.productsRef, where('slug', '==', slug), firestoreLimit(1));
     const snapshot = await getDocs(q);
     if (snapshot.empty) return null;
-    return this.docToProduct(snapshot.docs[0]);
+    const product = this.docToProduct(snapshot.docs[0]);
+    // Phase 5 §9.17 : by-key null pour soft-deleted (sauf includeDeleted)
+    if (product.deletedAt && !opts?.includeDeleted) return null;
+    return product;
   }
 
-  async getProductById(id: string): Promise<Product | null> {
+  async getProductById(id: string, opts?: { includeDeleted?: boolean }): Promise<Product | null> {
     const docRef = doc(db, 'products', id);
     const docSnap = await getDoc(docRef);
     if (!docSnap.exists()) return null;
-    return this.docToProduct(docSnap);
+    const product = this.docToProduct(docSnap);
+    // Phase 5 §9.17 : by-key null pour soft-deleted (sauf includeDeleted)
+    if (product.deletedAt && !opts?.includeDeleted) return null;
+    return product;
   }
 
   async getProductsByCategory(category: ProductCategory): Promise<Product[]> {
-    const q = query(this.productsRef, where('category', '==', category));
+    // Phase 5 §9.16 : exclut les soft-deleted au niveau query
+    const q = query(
+      this.productsRef,
+      where('deletedAt', '==', null),
+      where('category', '==', category)
+    );
     const snapshot = await getDocs(q);
     return snapshot.docs.map((d) => this.docToProduct(d));
   }
 
   async getPromotedProducts(): Promise<Product[]> {
-    const q = query(this.productsRef, where('isPromoted', '==', true));
+    // Phase 5 §9.16 : exclut les soft-deleted au niveau query
+    const q = query(
+      this.productsRef,
+      where('deletedAt', '==', null),
+      where('isPromoted', '==', true)
+    );
     const snapshot = await getDocs(q);
     return snapshot.docs.map((d) => this.docToProduct(d));
   }
 
   async getFeaturedProducts(limit: number = 4): Promise<Product[]> {
+    // Phase 5 §9.16 : exclut les soft-deleted au niveau query
     const q = query(
       this.productsRef,
+      where('deletedAt', '==', null),
       where('stock', '>', 0),
       orderBy('stock', 'desc'),
       firestoreLimit(limit)
@@ -116,9 +150,11 @@ export class FirebaseAdapter implements DataAdapter {
   }
 
   async getCategories(): Promise<string[]> {
-    // Pour un petit catalogue (< 200 produits), on récupère tous les produits
+    // Pour un petit catalogue (< 200 produits), on récupère tous les produits actifs
     // et on extrait les catégories. Phase 4+ : utiliser un doc metadata/categories.
-    const snapshot = await getDocs(this.productsRef);
+    // Phase 5 §9.16 : exclut les soft-deleted au niveau query
+    const q = query(this.productsRef, where('deletedAt', '==', null));
+    const snapshot = await getDocs(q);
     const categories = new Set(
       snapshot.docs.map((d) => parseProduct({ ...d.data(), id: d.id }).category)
     );
@@ -126,7 +162,9 @@ export class FirebaseAdapter implements DataAdapter {
   }
 
   async getBrands(): Promise<string[]> {
-    const snapshot = await getDocs(this.productsRef);
+    // Phase 5 §9.16 : exclut les soft-deleted au niveau query
+    const q = query(this.productsRef, where('deletedAt', '==', null));
+    const snapshot = await getDocs(q);
     const brands = new Set<string>();
     snapshot.docs.forEach((d) => {
       const product = parseProduct({ ...d.data(), id: d.id });
