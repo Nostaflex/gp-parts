@@ -3,6 +3,13 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
+  // Server Actions : restreindre les origines autorisées (defense-in-depth
+  // CSRF — Phase 5 §9.28). Memory mentionne gp-parts.vercel.app comme prod.
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['gp-parts.vercel.app', '*.vercel.app'],
+    },
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
