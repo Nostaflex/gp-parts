@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 import Link from 'next/link';
 import { CpHeader } from '@/components/cp/CpHeader';
 import { CpFooter } from '@/components/cp/CpFooter';
@@ -109,10 +110,13 @@ export default async function VehiculeDetailPage({ params }: Props) {
 
   const caracEntries = Object.entries(v.caracteristiques).filter(([, val]) => val !== undefined);
 
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
+
   return (
     <>
       <script
         type="application/ld+json"
+        nonce={nonce}
         dangerouslySetInnerHTML={{ __html: safeJsonLd(vehicleJsonLd(v)) }}
       />
       <CpHeader />
