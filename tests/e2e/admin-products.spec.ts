@@ -11,7 +11,7 @@ import { test, expect } from '@playwright/test';
  *   - gating HAS_AUTH_CREDENTIALS : skip hors CI émulateur.
  *
  * Le CI seed les 40 produits de lib/products.ts dans Firestore via
- * scripts/seed-firestore.ts ; PRODUCTS[0] → slug "disque-de-frein-avant-peugeot".
+ * scripts/seed-firestore.ts ; PRODUCTS[0] → id "prod-001" (URL admin = id, pas slug).
  *
  * Sélecteurs réels (vérifiés sur app/admin/(shell)/products/ +
  * components/admin/ProductForm.tsx) :
@@ -60,7 +60,7 @@ test.describe('Admin produits (émulateur)', () => {
   });
 
   test("édition d'un produit seedé pré-remplit le formulaire", async ({ page }) => {
-    await page.goto('/admin/products/disque-de-frein-avant-peugeot');
+    await page.goto('/admin/products/prod-001');
     await expect(page.getByLabel('Nom')).toHaveValue('Disque de frein avant');
   });
 });

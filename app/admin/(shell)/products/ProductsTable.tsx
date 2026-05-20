@@ -68,7 +68,7 @@ const columns: Column<Product>[] = [
     align: 'right',
     render: (p) => (
       <Link
-        href={`/admin/products/${p.slug}`}
+        href={`/admin/products/${p.id}`}
         className="text-body-sm font-semibold"
         style={{ color: 'var(--blue)' }}
       >
