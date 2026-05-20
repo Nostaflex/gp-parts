@@ -6,6 +6,7 @@ import { ChevronRight, Truck, Shield, RefreshCw } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { AddToCartButton } from './AddToCartButton';
 import { getAdapter } from '@/lib/data';
+import { getCachedProducts } from '@/lib/data/products-cache';
 import { formatPrice, getStockStatus, getStockLabel } from '@/lib/utils';
 import { getCategoryLabel } from '@/lib/categories';
 import { safeJsonLd } from '@/lib/safe-json-ld';
@@ -14,7 +15,15 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+// Filet ISR : revalidateTag('products') (Server Actions admin) prime sur
+// mutation ; ce TTL n'est qu'un fallback de fraîcheur.
+export const revalidate = 3600;
+
 export async function generateStaticParams() {
+  // Source DIRECTE (pas unstable_cache) : generateStaticParams s'exécute
+  // hors contexte de requête/render — getCachedProducts() y throw
+  // "Invariant: incrementalCache missing". Le cache invalidable par tag
+  // n'a de sens qu'au rendu de page (contexte requête).
   const adapter = await getAdapter();
   const products = await adapter.getProducts();
   return products.map((p) => ({ slug: p.slug }));
@@ -22,8 +31,8 @@ export async function generateStaticParams() {
 
 export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const params = await props.params;
-  const adapter = await getAdapter();
-  const product = await adapter.getProductBySlug(params.slug);
+  const products = await getCachedProducts();
+  const product = products.find((p) => p.slug === params.slug);
   if (!product) return { title: 'Produit introuvable' };
   return {
     title: `${product.name} — ${product.reference}`,
@@ -33,8 +42,10 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
 
 export default async function ProductPage(props: PageProps) {
   const params = await props.params;
-  const adapter = await getAdapter();
-  const product = await adapter.getProductBySlug(params.slug);
+  const products = await getCachedProducts();
+  const product = products.find((p) => p.slug === params.slug);
+  // Produit supprimé en live entre build (generateStaticParams) et requête :
+  // find() → undefined → notFound() → 404 correct (pas d'erreur 500, ISR géré).
   if (!product) notFound();
 
   const stockStatus = getStockStatus(product.stock);
