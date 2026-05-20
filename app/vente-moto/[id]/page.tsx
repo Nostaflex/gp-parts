@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { headers } from 'next/headers';
 import Link from 'next/link';
 import { CpHeader } from '@/components/cp/CpHeader';
 import { CpFooter } from '@/components/cp/CpFooter';
@@ -91,8 +90,6 @@ export default async function MotoDetailPage({ params }: Props) {
   // find() → undefined → notFound() → 404 correct (pas d'erreur 500, ISR géré).
   if (!m) notFound();
 
-  const nonce = (await headers()).get('x-nonce') ?? undefined;
-
   const contactHref = `/contact?sujet=${encodeURIComponent('Vente moto')}&vehicule=${encodeURIComponent(`${m.marque} ${m.modele}`)}&ref=${encodeURIComponent(m.id)}`;
 
   const dispoLabel =
@@ -114,7 +111,6 @@ export default async function MotoDetailPage({ params }: Props) {
     <>
       <script
         type="application/ld+json"
-        nonce={nonce}
         dangerouslySetInnerHTML={{ __html: safeJsonLd(motoJsonLd(m)) }}
       />
       <CpHeader />

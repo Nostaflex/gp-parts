@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation';
-import { headers } from 'next/headers';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Metadata } from 'next';
@@ -49,8 +48,6 @@ export default async function ProductPage(props: PageProps) {
   // find() → undefined → notFound() → 404 correct (pas d'erreur 500, ISR géré).
   if (!product) notFound();
 
-  const nonce = (await headers()).get('x-nonce') ?? undefined;
-
   const stockStatus = getStockStatus(product.stock);
   const hasPromo = product.priceOriginal && product.priceOriginal > product.price;
 
@@ -73,11 +70,7 @@ export default async function ProductPage(props: PageProps) {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        nonce={nonce}
-        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Breadcrumb */}
