@@ -30,7 +30,11 @@ describe('validateReservation', () => {
   });
 
   it('rejette une date de départ passée', async () => {
-    const res = await validateReservation({ ...base, dateDepart: '2000-01-01', dateRetour: '2000-01-05' });
+    const res = await validateReservation({
+      ...base,
+      dateDepart: '2000-01-01',
+      dateRetour: '2000-01-05',
+    });
     expect(res.success).toBe(false);
     expect(res.errors.dateDepart).toBeDefined();
   });

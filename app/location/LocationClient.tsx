@@ -27,7 +27,6 @@ const field =
   'w-full px-4 py-3 rounded-xl border border-[#E5DDD3] bg-white text-cp-ink placeholder:text-cp-ink/30 text-sm outline-none transition-all focus:border-cp-mango focus:ring-2 focus:ring-cp-mango/10';
 const lbl = 'block text-xs font-semibold text-cp-ink/50 uppercase tracking-wider mb-1.5';
 
-
 function calcNbJours(depart: string, retour: string): number {
   if (!depart || !retour) return 0;
   const d1 = new Date(depart);
