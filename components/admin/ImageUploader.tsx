@@ -45,7 +45,7 @@ export function ImageUploader({
   onChange,
   max = 5,
 }: {
-  folder: 'vehicules' | 'motos' | 'products';
+  folder: 'vehicules' | 'motos' | 'products' | 'location';
   entityId: string;
   value: string[];
   onChange: (urls: string[]) => void;
