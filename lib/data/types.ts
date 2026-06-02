@@ -10,6 +10,7 @@ import type {
 } from '@/lib/types';
 import type { Vehicule } from '@/lib/vehicules';
 import type { Moto } from '@/lib/motos';
+import type { LocationCar } from '@/lib/location-cars';
 
 export interface ProductFilters {
   category?: ProductCategory;
@@ -59,4 +60,6 @@ export interface DataAdapter {
   getVehicules(): Promise<Vehicule[]>;
   getMotos(): Promise<Moto[]>;
   getDemandes(filters?: DemandeFilters): Promise<Demande[]>;
+  getLocationCars(opts?: { includeDeleted?: boolean }): Promise<LocationCar[]>;
+  getLocationCarById(id: string): Promise<LocationCar | null>;
 }

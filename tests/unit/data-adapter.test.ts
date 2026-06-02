@@ -98,6 +98,8 @@ describe('getAdapter', () => {
       getVehicules: async () => [],
       getMotos: async () => [],
       getDemandes: async () => [],
+      getLocationCars: async () => [],
+      getLocationCarById: async () => null,
     };
     setAdapter(mockAdapter);
     const adapter = await getAdapter();
@@ -385,6 +387,8 @@ describe('StaticAdapter — soft-delete exclusion', () => {
       getVehicules: async () => [],
       getMotos: async () => [],
       getDemandes: async () => [],
+      getLocationCars: async () => [],
+      getLocationCarById: async () => null,
     };
     // Sans flag : null pour produit supprimé
     expect(await mockDeletedAdapter.getProductBySlug(deletedProduct.slug)).toBeNull();
@@ -397,6 +401,29 @@ describe('StaticAdapter — soft-delete exclusion', () => {
     expect(
       await mockDeletedAdapter.getProductById(deletedProduct.id, { includeDeleted: true })
     ).not.toBeNull();
+  });
+});
+
+// ─── StaticAdapter — location cars ───────────────────────────────────
+import { LOCATION_CARS } from '@/lib/location-cars';
+
+describe('StaticAdapter — location cars', () => {
+  it('getLocationCars renvoie le seed complet', async () => {
+    const adapter = new StaticAdapter();
+    const cars = await adapter.getLocationCars();
+    expect(cars).toHaveLength(LOCATION_CARS.length);
+    expect(cars[0].id).toBe(LOCATION_CARS[0].id);
+  });
+
+  it('getLocationCarById renvoie la bonne voiture', async () => {
+    const adapter = new StaticAdapter();
+    const car = await adapter.getLocationCarById('clio-v');
+    expect(car?.marque).toBe('Renault');
+  });
+
+  it('getLocationCarById renvoie null si introuvable', async () => {
+    const adapter = new StaticAdapter();
+    expect(await adapter.getLocationCarById('inconnu')).toBeNull();
   });
 });
 

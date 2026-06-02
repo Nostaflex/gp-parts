@@ -8,6 +8,7 @@ import {
   Package,
   Car,
   Bike,
+  CarFront,
   ClipboardList,
   MessageSquare,
   Wrench,
@@ -42,9 +43,10 @@ const SECTIONS: NavSection[] = [
   {
     title: 'Catalogue',
     items: [
-      { href: '/admin/produits', label: 'Pièces', icon: Package, enabled: false },
-      { href: '/admin/vehicules', label: 'Véhicules', icon: Car, enabled: false },
-      { href: '/admin/motos', label: 'Motos', icon: Bike, enabled: false },
+      { href: '/admin/products', label: 'Pièces', icon: Package, enabled: true },
+      { href: '/admin/vehicules', label: 'Véhicules', icon: Car, enabled: true },
+      { href: '/admin/motos', label: 'Motos', icon: Bike, enabled: true },
+      { href: '/admin/location', label: 'Location', icon: CarFront, enabled: true },
     ],
   },
   {
