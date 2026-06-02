@@ -17,7 +17,7 @@ const TTL_MS = 365 * 24 * 60 * 60 * 1000; // 12 mois
 
 export type AuditAction = 'create' | 'update' | 'delete' | 'restore' | 'denied';
 
-export type AuditResourceType = 'product' | 'vehicule' | 'moto' | 'order' | 'demande';
+export type AuditResourceType = 'product' | 'vehicule' | 'moto' | 'order' | 'demande' | 'location-car';
 
 export interface AuditLogEntry {
   timestamp: number; // unix ms
