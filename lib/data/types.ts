@@ -11,6 +11,7 @@ import type {
 import type { Vehicule } from '@/lib/vehicules';
 import type { Moto } from '@/lib/motos';
 import type { LocationCar } from '@/lib/location-cars';
+import type { Reservation, ReservationStatus } from '@/lib/reservations';
 
 export interface ProductFilters {
   category?: ProductCategory;
@@ -62,4 +63,9 @@ export interface DataAdapter {
   getDemandes(filters?: DemandeFilters): Promise<Demande[]>;
   getLocationCars(opts?: { includeDeleted?: boolean }): Promise<LocationCar[]>;
   getLocationCarById(id: string): Promise<LocationCar | null>;
+
+  createReservation(data: Omit<Reservation, 'id'>): Promise<string>;
+  getReservations(filters?: { status?: ReservationStatus; limit?: number }): Promise<Reservation[]>;
+  getReservationById(id: string): Promise<Reservation | null>;
+  updateReservationStatus(id: string, status: ReservationStatus): Promise<void>;
 }

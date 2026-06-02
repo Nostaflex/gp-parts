@@ -7,6 +7,7 @@ import type { Vehicule } from '@/lib/vehicules';
 import type { Moto } from '@/lib/motos';
 import type { LocationCar } from '@/lib/location-cars';
 import type { DataAdapter, ProductFilters, OrderFilters, DemandeFilters } from './types';
+import type { Reservation, ReservationStatus } from '@/lib/reservations';
 import { applyClientFilters } from './filters';
 
 // Fixtures CRM pour le dev local sans émulateur Firebase. En production,
@@ -78,6 +79,9 @@ function warnDevFallback(method: string): void {
 // In-memory store pour les tests et le mode statique
 const ORDERS_STORE: Order[] = [];
 let orderIdCounter = 1;
+
+const RESERVATIONS_STORE: Reservation[] = [];
+let reservationIdCounter = 1;
 
 export class StaticAdapter implements DataAdapter {
   /**
@@ -213,6 +217,36 @@ export class StaticAdapter implements DataAdapter {
   async getLocationCarById(id: string): Promise<LocationCar | null> {
     warnDevFallback('getLocationCarById');
     return LOCATION_CARS.find((c) => c.id === id) ?? null;
+  }
+
+  async createReservation(data: Omit<Reservation, 'id'>): Promise<string> {
+    const id = `static-reservation-${reservationIdCounter++}`;
+    RESERVATIONS_STORE.push({ ...data, id });
+    return id;
+  }
+
+  async getReservations(filters?: {
+    status?: ReservationStatus;
+    limit?: number;
+  }): Promise<Reservation[]> {
+    let res = [...RESERVATIONS_STORE].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    if (filters?.status) res = res.filter((r) => r.status === filters.status);
+    if (filters?.limit) res = res.slice(0, filters.limit);
+    return res;
+  }
+
+  async getReservationById(id: string): Promise<Reservation | null> {
+    return RESERVATIONS_STORE.find((r) => r.id === id) ?? null;
+  }
+
+  async updateReservationStatus(id: string, status: ReservationStatus): Promise<void> {
+    const r = RESERVATIONS_STORE.find((x) => x.id === id);
+    if (r) {
+      r.status = status;
+      r.updatedAt = new Date().toISOString();
+    }
   }
 
   async getDemandes(filters?: DemandeFilters): Promise<Demande[]> {

@@ -23,7 +23,8 @@ export type AuditResourceType =
   | 'moto'
   | 'order'
   | 'demande'
-  | 'location-car';
+  | 'location-car'
+  | 'reservation';
 
 export interface AuditLogEntry {
   timestamp: number; // unix ms

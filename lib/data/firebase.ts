@@ -27,6 +27,8 @@ import type { LocationCar } from '@/lib/location-cars';
 import { parseProduct } from '@/lib/schemas/product';
 import { parseOrder } from '@/lib/schemas/order';
 import { parseLocationCar } from '@/lib/schemas/location-car';
+import { parseReservation } from '@/lib/schemas/reservation';
+import type { Reservation, ReservationStatus } from '@/lib/reservations';
 import type { DataAdapter, ProductFilters, OrderFilters, DemandeFilters } from './types';
 import { applyClientFilters } from './filters';
 
@@ -46,6 +48,7 @@ export class FirebaseAdapter implements DataAdapter {
   private readonly motosRef = collection(db, 'motos');
   private readonly demandesRef = collection(db, 'demandes');
   private readonly locationCarsRef = collection(db, 'location-cars');
+  private readonly reservationsRef = collection(db, 'reservations');
 
   /**
    * Convertit un document Firestore en Product typé.
@@ -275,6 +278,40 @@ export class FirebaseAdapter implements DataAdapter {
     const data = snap.data();
     if (data.deletedAt) return null;
     return parseLocationCar({ ...data, id: snap.id });
+  }
+
+  async createReservation(data: Omit<Reservation, 'id'>): Promise<string> {
+    const docRef = await addDoc(this.reservationsRef, data);
+    return docRef.id;
+  }
+
+  async getReservations(filters?: {
+    status?: ReservationStatus;
+    limit?: number;
+  }): Promise<Reservation[]> {
+    let q = query(this.reservationsRef, orderBy('createdAt', 'desc'));
+    if (filters?.status) {
+      q = query(
+        this.reservationsRef,
+        where('status', '==', filters.status),
+        orderBy('createdAt', 'desc')
+      );
+    }
+    if (filters?.limit) q = query(q, firestoreLimit(filters.limit));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((d) => parseReservation({ ...d.data(), id: d.id }));
+  }
+
+  async getReservationById(id: string): Promise<Reservation | null> {
+    const docRef = doc(db, 'reservations', id);
+    const snap = await getDoc(docRef);
+    if (!snap.exists()) return null;
+    return parseReservation({ ...snap.data(), id: snap.id });
+  }
+
+  async updateReservationStatus(id: string, status: ReservationStatus): Promise<void> {
+    const docRef = doc(db, 'reservations', id);
+    await updateDoc(docRef, { status, updatedAt: new Date().toISOString() });
   }
 
   async getDemandes(filters?: DemandeFilters): Promise<Demande[]> {
