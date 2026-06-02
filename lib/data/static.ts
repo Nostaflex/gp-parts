@@ -1,4 +1,4 @@
-import type { Product, Order, OrderStatus, Demande } from '@/lib/types';
+import type { Product, Order, OrderStatus, PaymentStatus, Demande } from '@/lib/types';
 import { PRODUCTS } from '@/lib/products';
 import { VEHICULES } from '@/lib/vehicules';
 import { MOTOS } from '@/lib/motos';
@@ -175,6 +175,18 @@ export class StaticAdapter implements DataAdapter {
     const order = ORDERS_STORE.find((o) => o.id === id);
     if (order) {
       order.status = status;
+      order.updatedAt = new Date().toISOString();
+    }
+  }
+
+  async updateOrderPayment(
+    id: string,
+    patch: { paymentStatus: PaymentStatus; stripePaymentIntentId?: string }
+  ): Promise<void> {
+    const order = ORDERS_STORE.find((o) => o.id === id);
+    if (order) {
+      order.paymentStatus = patch.paymentStatus;
+      if (patch.stripePaymentIntentId) order.stripePaymentIntentId = patch.stripePaymentIntentId;
       order.updatedAt = new Date().toISOString();
     }
   }

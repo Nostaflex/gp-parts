@@ -3,6 +3,7 @@ import type {
   ProductCategory,
   Order,
   OrderStatus,
+  PaymentStatus,
   Demande,
   DemandeStatus,
   DemandeType,
@@ -46,6 +47,12 @@ export interface DataAdapter {
   getOrders(filters?: OrderFilters): Promise<Order[]>;
   getOrderById(id: string): Promise<Order | null>;
   updateOrderStatus(id: string, status: OrderStatus): Promise<void>;
+  // Paiement (Phase 6) — muté par le webhook Stripe. Orthogonal au statut
+  // logistique (`updateOrderStatus`).
+  updateOrderPayment(
+    id: string,
+    patch: { paymentStatus: PaymentStatus; stripePaymentIntentId?: string }
+  ): Promise<void>;
 
   // Admin CMS v3 — Phase 3+. Lecture seule ici ; les mutations passent par
   // des Server Actions dédiées (requireAdmin + audit log).

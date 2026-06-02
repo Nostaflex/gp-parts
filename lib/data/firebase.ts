@@ -13,7 +13,14 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Product, ProductCategory, Order, OrderStatus, Demande } from '@/lib/types';
+import type {
+  Product,
+  ProductCategory,
+  Order,
+  OrderStatus,
+  PaymentStatus,
+  Demande,
+} from '@/lib/types';
 import type { Vehicule } from '@/lib/vehicules';
 import type { Moto } from '@/lib/motos';
 import { parseProduct } from '@/lib/schemas/product';
@@ -208,6 +215,19 @@ export class FirebaseAdapter implements DataAdapter {
   async updateOrderStatus(id: string, status: OrderStatus): Promise<void> {
     const docRef = doc(db, 'orders', id);
     await updateDoc(docRef, { status, updatedAt: serverTimestamp() });
+  }
+
+  async updateOrderPayment(
+    id: string,
+    patch: { paymentStatus: PaymentStatus; stripePaymentIntentId?: string }
+  ): Promise<void> {
+    const docRef = doc(db, 'orders', id);
+    const update: Record<string, unknown> = {
+      paymentStatus: patch.paymentStatus,
+      updatedAt: serverTimestamp(),
+    };
+    if (patch.stripePaymentIntentId) update.stripePaymentIntentId = patch.stripePaymentIntentId;
+    await updateDoc(docRef, update);
   }
 
   private docToOrder(docSnap: { id: string; data: () => Record<string, unknown> }): Order {

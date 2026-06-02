@@ -116,6 +116,12 @@ export interface OrderItem {
   image: string;
 }
 
+// Paiement (Phase 6). `status` (OrderStatus) reste le cycle logistique ;
+// `paymentStatus` est orthogonal (état du paiement). Optionnels : les
+// commandes legacy écrites avant Phase 6 ne portent pas ces champs.
+export type PaymentMethod = 'card' | 'on_site';
+export type PaymentStatus = 'pending' | 'paid' | 'failed';
+
 export interface Order {
   id: string;
   orderNumber: string;
@@ -126,6 +132,9 @@ export interface Order {
   subtotalInCents: number;
   totalInCents: number;
   acceptsMarketing: boolean;
+  paymentMethod?: PaymentMethod;
+  paymentStatus?: PaymentStatus;
+  stripePaymentIntentId?: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -1,4 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// Mock Stripe : le chemin carte ne doit pas toucher le réseau réel en test.
+vi.mock('@/lib/stripe', () => ({
+  createOrderPaymentIntent: vi.fn(async () => ({
+    clientSecret: 'pi_test_secret_xyz',
+    paymentIntentId: 'pi_test_xyz',
+  })),
+}));
 
 import { validateCheckout } from '../../app/(boutique)/(checkout)/commande/actions';
 
@@ -140,6 +148,38 @@ describe('validateCheckout — sanitization', () => {
     });
     expect(result.success).toBe(false);
     expect(result.errors.firstName).toBeDefined();
+  });
+});
+
+// ─── Paiement (Phase 6) ──────────────────────────────────────────────
+describe('validateCheckout — paiement', () => {
+  it('chemin sur place : succès avec orderNumber, sans clientSecret', async () => {
+    const result = await validateCheckout({ ...validData, paymentMethod: 'on_site' });
+    expect(result.success).toBe(true);
+    expect(result.orderNumber).toMatch(/^GP-/);
+    expect(result.clientSecret).toBeUndefined();
+  });
+
+  it('chemin carte : renvoie clientSecret et orderId', async () => {
+    const result = await validateCheckout({ ...validData, paymentMethod: 'card' });
+    expect(result.success).toBe(true);
+    expect(result.clientSecret).toBe('pi_test_secret_xyz');
+    expect(result.orderId).toBeDefined();
+  });
+
+  it('paymentMethod absent : défaut sur place (rétro-compat)', async () => {
+    const result = await validateCheckout(validData);
+    expect(result.success).toBe(true);
+    expect(result.clientSecret).toBeUndefined();
+  });
+
+  it('rejette un paymentMethod invalide', async () => {
+    const result = await validateCheckout({
+      ...validData,
+      paymentMethod: 'bitcoin' as never,
+    });
+    expect(result.success).toBe(false);
+    expect(result.errors.paymentMethod).toBeDefined();
   });
 });
 

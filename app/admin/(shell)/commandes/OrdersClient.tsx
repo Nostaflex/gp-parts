@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
 import { formatPrice } from '@/lib/utils';
-import type { Order, OrderStatus } from '@/lib/types';
+import type { Order, OrderStatus, PaymentMethod, PaymentStatus } from '@/lib/types';
 
 const IOS = {
   bg: 'var(--bg)',
@@ -78,6 +78,43 @@ function StatusBadge({ status }: { status: OrderStatus }) {
   );
 }
 
+const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
+  card: 'Carte',
+  on_site: 'Sur place',
+};
+
+const PAYMENT_STATUS_CONFIG: Record<PaymentStatus, { label: string; color: string; bg: string }> = {
+  pending: { label: 'À encaisser', color: IOS.orange, bg: 'rgba(255,107,44,0.1)' },
+  paid: { label: 'Payé', color: IOS.green, bg: 'rgba(52,199,89,0.1)' },
+  failed: { label: 'Échec', color: IOS.red, bg: 'rgba(255,59,48,0.1)' },
+};
+
+// Badges paiement — masqués pour les commandes legacy (champs absents).
+function PaymentBadges({ order }: { order: Order }) {
+  if (!order.paymentMethod && !order.paymentStatus) return null;
+  const statusCfg = order.paymentStatus ? PAYMENT_STATUS_CONFIG[order.paymentStatus] : null;
+  return (
+    <>
+      {order.paymentMethod && (
+        <span
+          className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold"
+          style={{ color: IOS.textMuted, background: 'rgba(120,120,128,0.12)' }}
+        >
+          {PAYMENT_METHOD_LABEL[order.paymentMethod]}
+        </span>
+      )}
+      {statusCfg && (
+        <span
+          className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold"
+          style={{ color: statusCfg.color, background: statusCfg.bg }}
+        >
+          {statusCfg.label}
+        </span>
+      )}
+    </>
+  );
+}
+
 function OrderRow({
   order,
   onStatusChange,
@@ -104,11 +141,12 @@ function OrderRow({
         onClick={() => setExpanded((v) => !v)}
       >
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 mb-1">
+          <div className="flex items-center gap-2 flex-wrap mb-1">
             <span className="font-mono text-sm font-semibold" style={{ color: IOS.text }}>
               {order.orderNumber}
             </span>
             <StatusBadge status={order.status} />
+            <PaymentBadges order={order} />
           </div>
           <p className="text-sm truncate" style={{ color: IOS.textMuted }}>
             {order.customer.firstName} {order.customer.lastName} · {order.customer.email}

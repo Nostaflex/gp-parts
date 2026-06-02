@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Check, Truck, Store, AlertCircle } from 'lucide-react';
+import { Check, Truck, Store, AlertCircle, CreditCard, Banknote } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { CardPaymentForm } from '@/components/checkout/CardPaymentForm';
 import { useCart } from '@/components/cart/CartProvider';
 import { useToast } from '@/components/ui/Toast';
 import { formatPrice, cn } from '@/lib/utils';
 import { validateCheckout } from './actions';
 import { DELIVERY_OPTIONS_CONFIG, getDeliveryPrice } from '@/lib/config';
-import type { OrderInfo } from '@/lib/types';
+import type { OrderInfo, PaymentMethod } from '@/lib/types';
 
 // Enrichi avec les icônes Lucide (client-only) — prix depuis config.ts (source unique)
 const DELIVERY_OPTIONS = DELIVERY_OPTIONS_CONFIG.map((opt) => ({
@@ -38,6 +39,10 @@ export default function CheckoutPage() {
   });
   const [errors, setErrors] = useState<Partial<Record<keyof OrderInfo, string>>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
+  // Chemin carte : clientSecret obtenu du serveur → on monte le Payment Element.
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [pendingOrderNumber, setPendingOrderNumber] = useState<string | null>(null);
   // Flag pour éviter la race condition : après une commande validée, clearCart()
   // déclenche un re-render avec items=[] qui ferait rediriger vers /panier.
   const [orderPlaced, setOrderPlaced] = useState(false);
@@ -65,6 +70,32 @@ export default function CheckoutPage() {
     if (!form.acceptsCgv) errs.acceptsCgv = 'Vous devez accepter les CGV';
     setErrors(errs);
     return Object.keys(errs).length === 0;
+  };
+
+  // Finalise une commande validée : stocke le récap, vide le panier, redirige.
+  // setOrderPlaced(true) AVANT clearCart() — anti race condition Bug #3.
+  const completeOrder = (orderNumber: string | undefined) => {
+    try {
+      const maskedEmail = form.email.replace(
+        /^(.{2})(.*)(@.*)$/,
+        (_, start, middle, domain) => start + '*'.repeat(middle.length) + domain
+      );
+      sessionStorage.setItem(
+        'gpparts-last-order',
+        JSON.stringify({
+          orderNumber,
+          items,
+          total,
+          deliveryPrice,
+          email: maskedEmail,
+          deliveryOption: form.deliveryOption,
+        })
+      );
+    } catch {}
+
+    setOrderPlaced(true);
+    clearCart();
+    router.push('/commande/confirmation');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -95,52 +126,29 @@ export default function CheckoutPage() {
         acceptsMarketing: form.acceptsMarketing,
         items,
         subtotalInCents: totalPrice,
+        paymentMethod,
       });
 
       if (!result.success) {
         setSubmitting(false);
         setErrors(result.errors as typeof errors);
-        showToast({
-          type: 'error',
-          message: 'Validation serveur échouée. Vérifiez le formulaire.',
-        });
+        const msg = result.errors._payment ?? 'Validation serveur échouée. Vérifiez le formulaire.';
+        setPaymentError(result.errors._payment ?? null);
+        showToast({ type: 'error', message: msg });
         return;
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      const shouldFail = Math.random() < 0.05;
-      if (shouldFail) {
+      if (paymentMethod === 'card') {
+        // Affiche le Payment Element. La commande est créée 'pending' côté
+        // serveur ; le paiement se confirme ci-dessous via onPaid.
+        setPendingOrderNumber(result.orderNumber ?? null);
+        setClientSecret(result.clientSecret ?? null);
         setSubmitting(false);
-        setPaymentError(
-          'Le paiement simulé a échoué (code mock ERR_DECLINED). Réessayez — 95% des tentatives aboutissent.'
-        );
-        showToast({ type: 'error', message: 'Paiement refusé — réessayez' });
         return;
       }
 
-      try {
-        const maskedEmail = form.email.replace(
-          /^(.{2})(.*)(@.*)$/,
-          (_, start, middle, domain) => start + '*'.repeat(middle.length) + domain
-        );
-        sessionStorage.setItem(
-          'gpparts-last-order',
-          JSON.stringify({
-            orderNumber: result.orderNumber,
-            items,
-            total,
-            deliveryPrice,
-            email: maskedEmail,
-            deliveryOption: form.deliveryOption,
-          })
-        );
-      } catch {}
-
-      // Marquer AVANT clearCart() — anti race condition Bug #3
-      setOrderPlaced(true);
-      clearCart();
-      router.push('/commande/confirmation');
+      // Chemin sur place : commande créée + emails envoyés serveur. Terminé.
+      completeOrder(result.orderNumber);
     } catch {
       setSubmitting(false);
       setPaymentError('Une erreur est survenue. Réessayez.');
@@ -153,7 +161,9 @@ export default function CheckoutPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="cp-title font-black text-cp-ink text-4xl mb-2">FINALISER VOTRE COMMANDE</h1>
-      <p className="text-cp-ink/50 text-sm mb-8">Paiement simulé pour la démo</p>
+      <p className="text-cp-ink/50 text-sm mb-8">
+        Carte bancaire (Stripe) ou paiement au retrait / livraison
+      </p>
 
       <form onSubmit={handleSubmit} className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
@@ -282,6 +292,62 @@ export default function CheckoutPage() {
             </section>
           )}
 
+          {/* Mode de paiement */}
+          <section className="bg-white rounded-2xl border border-[#E5DDD3] p-6">
+            <h2 className="cp-title font-black text-cp-ink text-xl mb-4">Mode de paiement</h2>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {(
+                [
+                  {
+                    id: 'card' as const,
+                    label: 'Carte bancaire',
+                    description: 'Paiement sécurisé en ligne',
+                    icon: CreditCard,
+                  },
+                  {
+                    id: 'on_site' as const,
+                    label: 'Au retrait / livraison',
+                    description: 'Payez sur place à Stéphane',
+                    icon: Banknote,
+                  },
+                ] satisfies {
+                  id: PaymentMethod;
+                  label: string;
+                  description: string;
+                  icon: typeof CreditCard;
+                }[]
+              ).map((opt) => {
+                const Icon = opt.icon;
+                const isSelected = paymentMethod === opt.id;
+                return (
+                  <button
+                    type="button"
+                    key={opt.id}
+                    disabled={!!clientSecret}
+                    onClick={() => setPaymentMethod(opt.id)}
+                    className={cn(
+                      'text-left border-2 rounded-xl p-4 transition-all disabled:opacity-60',
+                      isSelected
+                        ? 'border-cp-mango bg-cp-mango/5'
+                        : 'border-[#E5DDD3] bg-white hover:border-cp-ink/30'
+                    )}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <Icon size={24} strokeWidth={1.5} className="text-cp-mango" />
+                      {isSelected && (
+                        <div className="w-5 h-5 bg-cp-mango rounded-full flex items-center justify-center">
+                          <Check size={12} className="text-white" strokeWidth={3} />
+                        </div>
+                      )}
+                    </div>
+                    <p className="font-semibold text-sm text-cp-ink">{opt.label}</p>
+                    <p className="text-xs text-cp-ink/50 mt-1">{opt.description}</p>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
           {/* Consentements */}
           <section className="bg-white rounded-2xl border border-[#E5DDD3] p-6 space-y-3">
             <label className="flex items-start gap-3 cursor-pointer">
@@ -366,11 +432,27 @@ export default function CheckoutPage() {
             </div>
           )}
 
-          <Button type="submit" variant="primary" size="lg" fullWidth disabled={submitting}>
-            {submitting ? 'Traitement...' : 'Payer (simulation)'}
-          </Button>
-
-          <p className="text-xs text-cp-ink/35 text-center mt-3">Aucun paiement réel — mode démo</p>
+          {clientSecret ? (
+            <CardPaymentForm
+              clientSecret={clientSecret}
+              onPaid={() => completeOrder(pendingOrderNumber ?? undefined)}
+            />
+          ) : (
+            <>
+              <Button type="submit" variant="primary" size="lg" fullWidth disabled={submitting}>
+                {submitting
+                  ? 'Traitement...'
+                  : paymentMethod === 'card'
+                    ? 'Payer par carte'
+                    : 'Valider la commande'}
+              </Button>
+              <p className="text-xs text-cp-ink/35 text-center mt-3">
+                {paymentMethod === 'card'
+                  ? 'Paiement sécurisé par Stripe'
+                  : 'Vous réglez au retrait ou à la livraison'}
+              </p>
+            </>
+          )}
         </aside>
       </form>
     </div>

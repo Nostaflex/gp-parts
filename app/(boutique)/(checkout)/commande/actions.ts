@@ -2,16 +2,19 @@
 
 import { generateOrderNumber } from '@/lib/utils';
 import { getAdapter } from '@/lib/data';
-import { getResend, EMAIL_FROM, EMAIL_ADMIN } from '@/lib/email';
-import { buildOrderConfirmationEmail } from '@/lib/emails/orderConfirmation';
-import { buildOrderNotificationEmail } from '@/lib/emails/orderNotification';
+import { sendOrderEmails } from '@/lib/emails/send';
+import { createOrderPaymentIntent } from '@/lib/stripe';
 import { getDeliveryPrice } from '@/lib/config';
-import type { CartItem, Order } from '@/lib/types';
+import type { CartItem, Order, PaymentMethod } from '@/lib/types';
 
 export interface CheckoutValidationResult {
   success: boolean;
   errors: Record<string, string>;
   orderNumber?: string;
+  // Chemin carte uniquement : le client monte le Payment Element avec
+  // `clientSecret` puis confirme. `orderId` permet de corréler.
+  orderId?: string;
+  clientSecret?: string;
 }
 
 const FIELD_LIMITS = {
@@ -44,8 +47,16 @@ export async function validateCheckout(formData: {
   acceptsMarketing?: boolean;
   items: CartItem[];
   subtotalInCents: number;
+  paymentMethod?: PaymentMethod;
 }): Promise<CheckoutValidationResult> {
   const errors: Record<string, string> = {};
+
+  // Défaut 'on_site' : rétro-compat des appels sans paymentMethod (= comportement
+  // historique, emails immédiats). 'card' déclenche le flow Stripe.
+  const paymentMethod: PaymentMethod = formData.paymentMethod ?? 'on_site';
+  if (paymentMethod !== 'card' && paymentMethod !== 'on_site') {
+    errors.paymentMethod = 'Mode de paiement invalide';
+  }
 
   const firstName = sanitize(formData.firstName);
   const lastName = sanitize(formData.lastName);
@@ -162,40 +173,37 @@ export async function validateCheckout(formData: {
     subtotalInCents: serverSubtotal,
     totalInCents: serverSubtotal + deliveryPriceInCents,
     acceptsMarketing: formData.acceptsMarketing ?? false,
+    paymentMethod,
+    paymentStatus: 'pending',
     createdAt: now,
     updatedAt: now,
   };
 
   const orderId = await adapter.createOrder(orderData);
 
-  // Emails — fire-and-forget (ne bloquent jamais le checkout si Resend échoue)
-  if (process.env.RESEND_API_KEY) {
-    const fullOrder: Order = { ...orderData, id: orderId };
-
-    // 1. Confirmation client
-    const confirmation = buildOrderConfirmationEmail(fullOrder);
-    getResend()
-      .emails.send({
-        from: EMAIL_FROM,
-        to: email,
-        subject: confirmation.subject,
-        html: confirmation.html,
-      })
-      .catch((err) => console.error('[checkout] Email confirmation client échoué:', err));
-
-    // 2. Notification gérant (Stephane) — uniquement si RESEND_ADMIN_EMAIL configurée
-    if (EMAIL_ADMIN) {
-      const notification = buildOrderNotificationEmail(fullOrder);
-      getResend()
-        .emails.send({
-          from: EMAIL_FROM,
-          to: EMAIL_ADMIN,
-          subject: notification.subject,
-          html: notification.html,
-        })
-        .catch((err) => console.error('[checkout] Email notification gérant échoué:', err));
+  // ── Chemin carte ──────────────────────────────────────────────────
+  // La commande est créée 'pending'. On crée le PaymentIntent (montant =
+  // total recalculé serveur) et on renvoie le clientSecret au client.
+  // Les EMAILS ne partent PAS ici : c'est le webhook qui les envoie au
+  // paiement réel (pas de commande fantôme confirmée par mail).
+  if (paymentMethod === 'card') {
+    try {
+      const { clientSecret } = await createOrderPaymentIntent({
+        id: orderId,
+        orderNumber,
+        totalInCents: orderData.totalInCents,
+      });
+      return { success: true, errors: {}, orderNumber, orderId, clientSecret };
+    } catch (err) {
+      console.error('[checkout] Création PaymentIntent échouée:', err);
+      // Commande 'pending' orpheline laissée en place (cleanup déféré, cf. spec).
+      return { success: false, errors: { _payment: 'Paiement indisponible, réessayez.' } };
     }
   }
+
+  // ── Chemin sur place ──────────────────────────────────────────────
+  // Emails immédiats (le webhook ne s'applique qu'au chemin carte).
+  sendOrderEmails({ ...orderData, id: orderId });
 
   return { success: true, errors: {}, orderNumber };
 }

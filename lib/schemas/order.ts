@@ -36,6 +36,12 @@ export const orderSchema = z.object({
   subtotalInCents: z.number().int().nonnegative(),
   totalInCents: z.number().int().nonnegative(),
   acceptsMarketing: z.boolean(),
+  // Paiement (Phase 6). Optionnels en lecture : rétro-compat des commandes
+  // legacy écrites avant Phase 6 (sans ces champs). Les écritures sont
+  // strictes via le type Order (createOrder: Omit<Order, 'id'>).
+  paymentMethod: z.enum(['card', 'on_site']).optional(),
+  paymentStatus: z.enum(['pending', 'paid', 'failed']).optional(),
+  stripePaymentIntentId: z.string().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
