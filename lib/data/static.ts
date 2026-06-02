@@ -2,8 +2,10 @@ import type { Product, Order, OrderStatus, PaymentStatus, Demande } from '@/lib/
 import { PRODUCTS } from '@/lib/products';
 import { VEHICULES } from '@/lib/vehicules';
 import { MOTOS } from '@/lib/motos';
+import { LOCATION_CARS } from '@/lib/location-cars';
 import type { Vehicule } from '@/lib/vehicules';
 import type { Moto } from '@/lib/motos';
+import type { LocationCar } from '@/lib/location-cars';
 import type { DataAdapter, ProductFilters, OrderFilters, DemandeFilters } from './types';
 import { applyClientFilters } from './filters';
 
@@ -201,6 +203,16 @@ export class StaticAdapter implements DataAdapter {
   async getMotos(): Promise<Moto[]> {
     warnDevFallback('getMotos');
     return [...MOTOS];
+  }
+
+  async getLocationCars(): Promise<LocationCar[]> {
+    warnDevFallback('getLocationCars');
+    return [...LOCATION_CARS];
+  }
+
+  async getLocationCarById(id: string): Promise<LocationCar | null> {
+    warnDevFallback('getLocationCarById');
+    return LOCATION_CARS.find((c) => c.id === id) ?? null;
   }
 
   async getDemandes(filters?: DemandeFilters): Promise<Demande[]> {

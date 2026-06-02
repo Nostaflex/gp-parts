@@ -23,8 +23,10 @@ import type {
 } from '@/lib/types';
 import type { Vehicule } from '@/lib/vehicules';
 import type { Moto } from '@/lib/motos';
+import type { LocationCar } from '@/lib/location-cars';
 import { parseProduct } from '@/lib/schemas/product';
 import { parseOrder } from '@/lib/schemas/order';
+import { parseLocationCar } from '@/lib/schemas/location-car';
 import type { DataAdapter, ProductFilters, OrderFilters, DemandeFilters } from './types';
 import { applyClientFilters } from './filters';
 
@@ -43,6 +45,7 @@ export class FirebaseAdapter implements DataAdapter {
   private readonly vehiculesRef = collection(db, 'vehicules');
   private readonly motosRef = collection(db, 'motos');
   private readonly demandesRef = collection(db, 'demandes');
+  private readonly locationCarsRef = collection(db, 'location-cars');
 
   /**
    * Convertit un document Firestore en Product typé.
@@ -255,6 +258,21 @@ export class FirebaseAdapter implements DataAdapter {
   async getMotos(): Promise<Moto[]> {
     const snapshot = await getDocs(this.motosRef);
     return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }) as Moto);
+  }
+
+  async getLocationCars(opts?: { includeDeleted?: boolean }): Promise<LocationCar[]> {
+    const q = opts?.includeDeleted
+      ? query(this.locationCarsRef)
+      : query(this.locationCarsRef, where('deletedAt', '==', null));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((d) => parseLocationCar({ ...d.data(), id: d.id }));
+  }
+
+  async getLocationCarById(id: string): Promise<LocationCar | null> {
+    const docRef = doc(db, 'location-cars', id);
+    const snap = await getDoc(docRef);
+    if (!snap.exists()) return null;
+    return parseLocationCar({ ...snap.data(), id: snap.id });
   }
 
   async getDemandes(filters?: DemandeFilters): Promise<Demande[]> {
