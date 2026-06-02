@@ -272,7 +272,9 @@ export class FirebaseAdapter implements DataAdapter {
     const docRef = doc(db, 'location-cars', id);
     const snap = await getDoc(docRef);
     if (!snap.exists()) return null;
-    return parseLocationCar({ ...snap.data(), id: snap.id });
+    const data = snap.data();
+    if (data.deletedAt) return null;
+    return parseLocationCar({ ...data, id: snap.id });
   }
 
   async getDemandes(filters?: DemandeFilters): Promise<Demande[]> {
