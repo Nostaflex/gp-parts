@@ -53,6 +53,16 @@ export function generateOrderNumber(): string {
 }
 
 /**
+ * Génère une référence de réservation pseudo-unique.
+ * Format : LOC-[timestamp base36]-[random 4 chars]
+ */
+export function generateReservationReference(): string {
+  const timestamp = Date.now().toString(36).toUpperCase();
+  const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `LOC-${timestamp}-${random}`;
+}
+
+/**
  * Concatène des classes conditionnelles (alternative light à clsx).
  */
 export function cn(...classes: (string | boolean | undefined | null)[]): string {
