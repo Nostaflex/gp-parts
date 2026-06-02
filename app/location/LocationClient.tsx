@@ -2,6 +2,8 @@
 
 import { useState, useMemo, useRef } from 'react';
 import { CheckCircle } from 'lucide-react';
+import type { LocationCar } from '@/lib/location-cars';
+import { formatPrice } from '@/lib/utils';
 
 type Categorie = 'Toutes' | 'Citadine' | 'Berline' | 'SUV' | 'Utilitaire';
 type Step = 0 | 1 | 2;
@@ -17,87 +19,6 @@ type ReservationData = {
   permis: string;
   consent: boolean;
 };
-
-const VEHICULES = [
-  {
-    id: 'clio-v',
-    marque: 'Renault',
-    modele: 'Clio V',
-    categorie: 'Citadine' as Categorie,
-    places: 5,
-    transmission: 'Auto',
-    carburant: 'Essence',
-    prixJour: 45,
-    prixSemaine: 270,
-    dispo: true,
-    image: 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=600&q=80&fit=crop',
-  },
-  {
-    id: 'peugeot-308sw',
-    marque: 'Peugeot',
-    modele: '308 SW',
-    categorie: 'Berline' as Categorie,
-    places: 5,
-    transmission: 'Auto',
-    carburant: 'Diesel',
-    prixJour: 65,
-    prixSemaine: 390,
-    dispo: true,
-    image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=600&q=80&fit=crop',
-  },
-  {
-    id: 'citroen-c5',
-    marque: 'Citroën',
-    modele: 'C5 Aircross',
-    categorie: 'SUV' as Categorie,
-    places: 5,
-    transmission: 'Auto',
-    carburant: 'Hybride',
-    prixJour: 80,
-    prixSemaine: 480,
-    dispo: true,
-    image: 'https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?w=600&q=80&fit=crop',
-  },
-  {
-    id: 'toyota-yaris',
-    marque: 'Toyota',
-    modele: 'Yaris Hybride',
-    categorie: 'Citadine' as Categorie,
-    places: 5,
-    transmission: 'Auto',
-    carburant: 'Hybride',
-    prixJour: 52,
-    prixSemaine: 312,
-    dispo: true,
-    image: 'https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=600&q=80&fit=crop',
-  },
-  {
-    id: 'vw-golf',
-    marque: 'Volkswagen',
-    modele: 'Golf VIII',
-    categorie: 'Berline' as Categorie,
-    places: 5,
-    transmission: 'Auto',
-    carburant: 'Essence',
-    prixJour: 72,
-    prixSemaine: 432,
-    dispo: true,
-    image: 'https://images.unsplash.com/photo-1471444928139-48c5bf5173f8?w=600&q=80&fit=crop',
-  },
-  {
-    id: 'renault-trafic',
-    marque: 'Renault',
-    modele: 'Trafic',
-    categorie: 'Utilitaire' as Categorie,
-    places: 9,
-    transmission: 'Manuelle',
-    carburant: 'Diesel',
-    prixJour: 95,
-    prixSemaine: 570,
-    dispo: false,
-    image: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=600&q=80&fit=crop',
-  },
-];
 
 const CATEGORIES: Categorie[] = ['Toutes', 'Citadine', 'Berline', 'SUV', 'Utilitaire'];
 
@@ -117,7 +38,8 @@ function calcNbJours(depart: string, retour: string): number {
   return diff > 0 ? diff : 0;
 }
 
-export function LocationClient() {
+export function LocationClient({ cars }: { cars: LocationCar[] }) {
+  const VEHICULES = cars;
   const [categorie, setCategorie] = useState<Categorie>('Toutes');
   const [dateDepart, setDateDepart] = useState('');
   const [dateRetour, setDateRetour] = useState('');
@@ -142,12 +64,12 @@ export function LocationClient() {
 
   const vehiculesFiltres = useMemo(
     () => VEHICULES.filter((v) => categorie === 'Toutes' || v.categorie === categorie),
-    [categorie]
+    [VEHICULES, categorie]
   );
 
   const vehiculeSelectionne = VEHICULES.find((v) => v.id === selectedId);
   const nbJours = calcNbJours(formData.dateDepart || dateDepart, formData.dateRetour || dateRetour);
-  const prixTotal = vehiculeSelectionne ? vehiculeSelectionne.prixJour * nbJours : 0;
+  const prixTotalEnCents = vehiculeSelectionne ? vehiculeSelectionne.prixJourEnCents * nbJours : 0;
 
   const setForm = <K extends keyof ReservationData>(k: K, v: ReservationData[K]) => {
     setFormData((d) => ({ ...d, [k]: v }));
@@ -244,7 +166,7 @@ export function LocationClient() {
                   : '',
               },
               { k: 'Durée', v: `${nbJours} jour${nbJours > 1 ? 's' : ''}` },
-              { k: 'Total TTC', v: `${prixTotal} €` },
+              { k: 'Total TTC', v: formatPrice(prixTotalEnCents) },
             ].map(({ k, v }) => (
               <div
                 key={k}
@@ -384,9 +306,9 @@ export function LocationClient() {
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <span
-                    className={`absolute top-3 left-3 text-white text-[0.65rem] cp-mono px-3 py-1 rounded-full ${v.dispo ? 'bg-[#7A9B76]/90' : 'bg-[#D4A24C]/90'}`}
+                    className={`absolute top-3 left-3 text-white text-[0.65rem] cp-mono px-3 py-1 rounded-full ${v.disponible ? 'bg-[#7A9B76]/90' : 'bg-[#D4A24C]/90'}`}
                   >
-                    {v.dispo ? 'Disponible' : 'Stock limité'}
+                    {v.disponible ? 'Disponible' : 'Stock limité'}
                   </span>
                   <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-[#1A0F06]/85 to-transparent">
                     <p className="cp-title text-[0.75rem] font-bold text-[#E9C46A] tracking-widest uppercase">
@@ -416,10 +338,10 @@ export function LocationClient() {
                   <div className="flex items-end justify-between pt-4 border-t border-[#F8F5F0]">
                     <div>
                       <p className="cp-title font-black text-cp-mango text-2xl leading-none">
-                        {v.prixJour} €
+                        {formatPrice(v.prixJourEnCents)}
                         <span className="text-sm font-normal text-cp-ink/40">/jour</span>
                       </p>
-                      <p className="text-xs text-cp-ink/35 mt-0.5">{v.prixSemaine} €/semaine</p>
+                      <p className="text-xs text-cp-ink/35 mt-0.5">{formatPrice(v.prixSemaineEnCents)}/semaine</p>
                     </div>
                     <button
                       onClick={() => openReservation(v.id)}
@@ -488,13 +410,13 @@ export function LocationClient() {
                   </p>
                   <div className="flex justify-between text-sm text-cp-cream/60 mb-1">
                     <span>
-                      {nbJours} jour{nbJours > 1 ? 's' : ''} × {vehiculeSelectionne.prixJour} €
+                      {nbJours} jour{nbJours > 1 ? 's' : ''} × {formatPrice(vehiculeSelectionne.prixJourEnCents)}
                     </span>
-                    <span>{vehiculeSelectionne.prixJour * nbJours} €</span>
+                    <span>{formatPrice(vehiculeSelectionne.prixJourEnCents * nbJours)}</span>
                   </div>
                   <div className="flex justify-between font-bold text-cp-cream border-t border-[#E9C46A]/10 pt-2 mt-2">
                     <span>Total TTC</span>
-                    <span className="text-[#E9C46A]">{prixTotal} €</span>
+                    <span className="text-[#E9C46A]">{formatPrice(prixTotalEnCents)}</span>
                   </div>
                 </div>
               )}
@@ -555,7 +477,7 @@ export function LocationClient() {
                           {vehiculeSelectionne.marque} {vehiculeSelectionne.modele}
                         </p>
                         <p className="cp-mono text-[0.65rem] text-cp-ink/40 tracking-wide">
-                          {vehiculeSelectionne.categorie} · {vehiculeSelectionne.prixJour} €/jour
+                          {vehiculeSelectionne.categorie} · {formatPrice(vehiculeSelectionne.prixJourEnCents)}/jour
                         </p>
                       </div>
                     </div>
@@ -592,14 +514,13 @@ export function LocationClient() {
                       <div className="bg-[#F8F5F0] rounded-xl p-4">
                         <div className="flex justify-between text-sm text-cp-ink/60 mb-1">
                           <span>
-                            {nbJours} jour{nbJours > 1 ? 's' : ''} × {vehiculeSelectionne.prixJour}{' '}
-                            €
+                            {nbJours} jour{nbJours > 1 ? 's' : ''} × {formatPrice(vehiculeSelectionne.prixJourEnCents)}
                           </span>
-                          <span>{vehiculeSelectionne.prixJour * nbJours} €</span>
+                          <span>{formatPrice(vehiculeSelectionne.prixJourEnCents * nbJours)}</span>
                         </div>
                         <div className="flex justify-between font-bold text-cp-ink border-t border-[#E5DDD3] pt-2 mt-2">
                           <span className="text-sm">Total TTC</span>
-                          <span className="text-cp-mango">{prixTotal} €</span>
+                          <span className="text-cp-mango">{formatPrice(prixTotalEnCents)}</span>
                         </div>
                       </div>
                     )}
@@ -735,7 +656,7 @@ export function LocationClient() {
                         },
                         { k: 'Durée', v: `${nbJours} jour${nbJours > 1 ? 's' : ''}` },
                         { k: 'Conducteur', v: `${formData.prenom} ${formData.nom}` },
-                        { k: 'Total TTC', v: `${prixTotal} €` },
+                        { k: 'Total TTC', v: formatPrice(prixTotalEnCents) },
                       ].map(({ k, v }) => (
                         <div
                           key={k}

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { CpHeader } from '@/components/cp/CpHeader';
 import { CpBridge } from '@/components/cp/CpBridge';
 import { CpFooter } from '@/components/cp/CpFooter';
+import { getAdapter } from '@/lib/data';
 import { LocationClient } from './LocationClient';
 
 export const metadata: Metadata = {
@@ -12,7 +13,11 @@ export const metadata: Metadata = {
     'Location de voitures Racoon en Guadeloupe. Explore la Guadeloupe en toute liberté. Kilométrage illimité, assurance incluse, disponible dès demain.',
 };
 
-export default function LocationPage() {
+export const dynamic = 'force-dynamic';
+
+export default async function LocationPage() {
+  const adapter = await getAdapter();
+  const cars = (await adapter.getLocationCars()).filter((c) => c.disponible);
   return (
     <>
       <CpHeader darkSectionIds={['loc-hero']} />
@@ -171,7 +176,7 @@ export default function LocationPage() {
       <CpBridge fromColor="#1E0E04" toColor="#F4EDE0" />
 
       {/* ── CLIENT COMPONENT (search + catalogue + form) ── */}
-      <LocationClient />
+      <LocationClient cars={cars} />
 
       <CpBridge fromColor="#F4EDE0" toColor="#1A0F06" />
       <CpFooter />
