@@ -341,7 +341,9 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
                         {formatPrice(v.prixJourEnCents)}
                         <span className="text-sm font-normal text-cp-ink/40">/jour</span>
                       </p>
-                      <p className="text-xs text-cp-ink/35 mt-0.5">{formatPrice(v.prixSemaineEnCents)}/semaine</p>
+                      <p className="text-xs text-cp-ink/35 mt-0.5">
+                        {formatPrice(v.prixSemaineEnCents)}/semaine
+                      </p>
                     </div>
                     <button
                       onClick={() => openReservation(v.id)}
@@ -410,7 +412,8 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
                   </p>
                   <div className="flex justify-between text-sm text-cp-cream/60 mb-1">
                     <span>
-                      {nbJours} jour{nbJours > 1 ? 's' : ''} × {formatPrice(vehiculeSelectionne.prixJourEnCents)}
+                      {nbJours} jour{nbJours > 1 ? 's' : ''} ×{' '}
+                      {formatPrice(vehiculeSelectionne.prixJourEnCents)}
                     </span>
                     <span>{formatPrice(vehiculeSelectionne.prixJourEnCents * nbJours)}</span>
                   </div>
@@ -477,7 +480,8 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
                           {vehiculeSelectionne.marque} {vehiculeSelectionne.modele}
                         </p>
                         <p className="cp-mono text-[0.65rem] text-cp-ink/40 tracking-wide">
-                          {vehiculeSelectionne.categorie} · {formatPrice(vehiculeSelectionne.prixJourEnCents)}/jour
+                          {vehiculeSelectionne.categorie} ·{' '}
+                          {formatPrice(vehiculeSelectionne.prixJourEnCents)}/jour
                         </p>
                       </div>
                     </div>
@@ -514,7 +518,8 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
                       <div className="bg-[#F8F5F0] rounded-xl p-4">
                         <div className="flex justify-between text-sm text-cp-ink/60 mb-1">
                           <span>
-                            {nbJours} jour{nbJours > 1 ? 's' : ''} × {formatPrice(vehiculeSelectionne.prixJourEnCents)}
+                            {nbJours} jour{nbJours > 1 ? 's' : ''} ×{' '}
+                            {formatPrice(vehiculeSelectionne.prixJourEnCents)}
                           </span>
                           <span>{formatPrice(vehiculeSelectionne.prixJourEnCents * nbJours)}</span>
                         </div>

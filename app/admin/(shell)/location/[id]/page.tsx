@@ -11,11 +11,7 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
-export default async function EditLocationCarPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function EditLocationCarPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const adapter = await getAdapter();
   const car = await adapter.getLocationCarById(id);
