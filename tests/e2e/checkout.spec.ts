@@ -1,15 +1,17 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Test e2e — Bug #3 : Flow checkout complet.
- * Vérifie que le checkout aboutit à la page de confirmation
- * avec un numéro de commande, SANS redirection vers /panier.
+ * Test e2e — Bug #3 : Flow checkout complet (chemin « sur place »).
+ * Vérifie que le checkout aboutit à la page de confirmation avec un numéro
+ * de commande, SANS redirection vers /panier (anti-régression Bug #3 :
+ * setOrderPlaced(true) AVANT clearCart()).
  *
- * Note : le checkout a un 5% mock fail rate.
- * On retry le submit jusqu'à ce que ça passe.
+ * Le chemin « sur place » ne touche pas Stripe : testable sans clés.
+ * Le chemin carte (Payment Element) nécessite des clés Stripe test → test
+ * séparé, skippé en l'absence de STRIPE_SECRET_KEY.
  */
 test.describe('Checkout — flow complet', () => {
-  test('panier → checkout → confirmation avec numéro de commande', async ({ page }) => {
+  test('panier → checkout sur place → confirmation avec numéro de commande', async ({ page }) => {
     // 1. Pré-remplir le panier via localStorage pour gagner du temps
     await page.goto('/');
     await page.evaluate(() => {
@@ -61,25 +63,21 @@ test.describe('Checkout — flow complet', () => {
       await cookieRefuse.click();
     }
 
+    // Mode de paiement : "Au retrait / livraison" (pas de Stripe)
+    await page.getByRole('button', { name: /au retrait \/ livraison/i }).click();
+
     // Cocher les CGV
     const cgvCheckbox = page.locator('input[type="checkbox"]').first();
     await cgvCheckbox.check();
 
-    // 5. Soumettre — le bouton "Payer (simulation)"
-    const submitBtn = page.getByRole('button', { name: /payer/i });
+    // 5. Soumettre — bouton "Valider la commande" (chemin sur place)
+    const submitBtn = page.getByRole('button', { name: /valider la commande/i });
     await expect(submitBtn).toBeEnabled();
     await submitBtn.click();
 
-    // 6. Attendre la redirection vers /commande/confirmation
-    // Si le 5% fail rate se déclenche, on retry
-    // Le bug #3 faisait atterrir sur /panier au lieu de /confirmation
-    try {
-      await expect(page).toHaveURL('/commande/confirmation', { timeout: 10_000 });
-    } catch {
-      // Retry une fois si mock payment failed (5% chance)
-      await submitBtn.click();
-      await expect(page).toHaveURL('/commande/confirmation', { timeout: 10_000 });
-    }
+    // 6. Redirection vers /commande/confirmation.
+    // Le bug #3 faisait atterrir sur /panier au lieu de /confirmation.
+    await expect(page).toHaveURL('/commande/confirmation', { timeout: 10_000 });
 
     // 7. La page de confirmation affiche un numéro de commande GP-XXXX
     await expect(page.getByText(/commande confirmée/i)).toBeVisible();
@@ -88,6 +86,54 @@ test.describe('Checkout — flow complet', () => {
     // 8. Les boutons de navigation sont présents
     await expect(page.getByRole('link', { name: /retour à l'accueil/i })).toBeVisible();
     await expect(page.getByRole('link', { name: /continuer mes achats/i })).toBeVisible();
+  });
+
+  // Chemin carte — nécessite des clés Stripe test (publishable + secret).
+  // Skippé en CI/local sans clés. Vérif manuelle : `stripe listen` + carte
+  // test 4242 4242 4242 4242, date future, CVC 123.
+  test('checkout carte → Payment Element monté', async ({ page }) => {
+    test.skip(
+      !process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+      'Clés Stripe test absentes — voir spec Phase 6'
+    );
+
+    await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.setItem(
+        'gpparts-cart',
+        JSON.stringify([
+          {
+            id: 'prod-001-default',
+            productId: 'prod-001',
+            slug: 'disque-de-frein-avant-peugeot',
+            name: 'Disque de frein avant',
+            reference: 'PEU-208-DBF-001',
+            price: 6500,
+            quantity: 1,
+            image: '/images/categories/freinage.svg',
+            stock: 12,
+          },
+        ])
+      );
+    });
+    await page.goto('/commande');
+
+    const fill = async (name: string, value: string) => {
+      const input = page.locator(`input[name="${name}"]`);
+      await input.fill(value);
+      await input.dispatchEvent('change');
+    };
+    await fill('firstName', 'Stéphane');
+    await fill('lastName', 'Dupont');
+    await fill('email', 'stephane@test.gp');
+    await fill('phone', '0590123456');
+    await page.getByRole('button', { name: /retrait en boutique/i }).click();
+    await page.getByRole('button', { name: /carte bancaire/i }).click();
+    await page.locator('input[type="checkbox"]').first().check();
+    await page.getByRole('button', { name: /payer par carte/i }).click();
+
+    // Le Payment Element Stripe est monté dans une iframe.
+    await expect(page.frameLocator('iframe[name^="__privateStripeFrame"]').first()).toBeTruthy();
   });
 
   test('checkout avec panier vide redirige vers /panier', async ({ page }) => {

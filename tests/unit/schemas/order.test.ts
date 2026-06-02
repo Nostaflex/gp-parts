@@ -109,6 +109,57 @@ describe('orderSchema', () => {
   });
 });
 
+describe('orderSchema — champs paiement (Phase 6)', () => {
+  it('parse une commande carte payée avec stripePaymentIntentId', () => {
+    const cardOrder = {
+      ...validOrder,
+      paymentMethod: 'card',
+      paymentStatus: 'paid',
+      stripePaymentIntentId: 'pi_test_123',
+    };
+    const result = orderSchema.parse(cardOrder);
+    expect(result.paymentMethod).toBe('card');
+    expect(result.paymentStatus).toBe('paid');
+    expect(result.stripePaymentIntentId).toBe('pi_test_123');
+  });
+
+  it('parse une commande sur place sans stripePaymentIntentId', () => {
+    const onSiteOrder = {
+      ...validOrder,
+      paymentMethod: 'on_site',
+      paymentStatus: 'pending',
+    };
+    const result = orderSchema.parse(onSiteOrder);
+    expect(result.paymentMethod).toBe('on_site');
+    expect(result.paymentStatus).toBe('pending');
+    expect(result.stripePaymentIntentId).toBeUndefined();
+  });
+
+  it('tolère une commande legacy sans champs paiement (rétro-compat lecture)', () => {
+    const result = orderSchema.parse(validOrder);
+    expect(result.paymentMethod).toBeUndefined();
+    expect(result.paymentStatus).toBeUndefined();
+  });
+
+  it('accepte les 3 valeurs de paymentStatus', () => {
+    for (const paymentStatus of ['pending', 'paid', 'failed']) {
+      expect(() =>
+        orderSchema.parse({ ...validOrder, paymentMethod: 'card', paymentStatus })
+      ).not.toThrow();
+    }
+  });
+
+  it('rejette un paymentMethod invalide', () => {
+    expect(() => orderSchema.parse({ ...validOrder, paymentMethod: 'bitcoin' })).toThrow(ZodError);
+  });
+
+  it('rejette un paymentStatus invalide', () => {
+    expect(() => orderSchema.parse({ ...validOrder, paymentStatus: 'rembourse' })).toThrow(
+      ZodError
+    );
+  });
+});
+
 describe('parseOrder', () => {
   it('returns a typed Order object', () => {
     const result = parseOrder(validOrder);
