@@ -18,12 +18,12 @@ Phase 6 se réduit donc à **remplacer le paiement simulé par deux chemins rée
 
 ## Décisions de cadrage (validées avec l'utilisateur)
 
-| Décision | Choix | Raison |
-|---|---|---|
-| Mode de paiement | **Les deux** : carte en ligne OU sur place | Flexibilité client, courant pour une boutique pièces auto locale |
-| Intégration carte | **Stripe Payment Element** (intégré) | Formulaire carte sur le site, design Volcanic Clarity conservé |
-| Compte Stripe | **Pas encore** → mode **TEST** complet | Découple le dev du business ; passage live = swap des clés |
-| Remboursements in-app | **Hors périmètre v1** | Via dashboard Stripe |
+| Décision              | Choix                                      | Raison                                                           |
+| --------------------- | ------------------------------------------ | ---------------------------------------------------------------- |
+| Mode de paiement      | **Les deux** : carte en ligne OU sur place | Flexibilité client, courant pour une boutique pièces auto locale |
+| Intégration carte     | **Stripe Payment Element** (intégré)       | Formulaire carte sur le site, design Volcanic Clarity conservé   |
+| Compte Stripe         | **Pas encore** → mode **TEST** complet     | Découple le dev du business ; passage live = swap des clés       |
+| Remboursements in-app | **Hors périmètre v1**                      | Via dashboard Stripe                                             |
 
 ## Périmètre
 
@@ -77,6 +77,7 @@ avoir 1-2 s de latence ; l'admin verra `paid` une fois l'event traité).
 ## Admin commandes
 
 Ajout de 2 badges par commande dans `OrdersClient.tsx` :
+
 - `paymentMethod` → « Carte » / « Sur place »
 - `paymentStatus` → « Payé » / « À encaisser » / « Échec »
 
