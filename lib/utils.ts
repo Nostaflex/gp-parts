@@ -44,12 +44,26 @@ export function productSlug(name: string, brand: string): string {
 
 /**
  * Génère un numéro de commande pseudo-unique.
- * Format : GP-[timestamp base36]-[random 4 chars]
+ * Format : GP-[timestamp base36]-[random 6 chars]
  */
 export function generateOrderNumber(): string {
   const timestamp = Date.now().toString(36).toUpperCase();
-  const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+  // 6 chars base36, longueur garantie : substring(2,6) brut peut tomber < 4 chars
+  // (ex Math.random()=0.5 → "i"), ce qui effondrait l'entropie et provoquait des
+  // collisions sur des générations dans la même milliseconde (flake CI 99/100).
+  const random = Math.random().toString(36).slice(2, 8).padEnd(6, '0').toUpperCase();
   return `GP-${timestamp}-${random}`;
+}
+
+/**
+ * Génère une référence de réservation pseudo-unique.
+ * Format : LOC-[timestamp base36]-[random 6 chars]
+ */
+export function generateReservationReference(): string {
+  const timestamp = Date.now().toString(36).toUpperCase();
+  // Même garantie d'entropie que generateOrderNumber (longueur fixe 6 chars).
+  const random = Math.random().toString(36).slice(2, 8).padEnd(6, '0').toUpperCase();
+  return `LOC-${timestamp}-${random}`;
 }
 
 /**

@@ -4,6 +4,7 @@ import { useState, useMemo, useRef } from 'react';
 import { CheckCircle } from 'lucide-react';
 import type { LocationCar } from '@/lib/location-cars';
 import { formatPrice } from '@/lib/utils';
+import { validateReservation } from './actions';
 
 type Categorie = 'Toutes' | 'Citadine' | 'Berline' | 'SUV' | 'Utilitaire';
 type Step = 0 | 1 | 2;
@@ -25,10 +26,6 @@ const CATEGORIES: Categorie[] = ['Toutes', 'Citadine', 'Berline', 'SUV', 'Utilit
 const field =
   'w-full px-4 py-3 rounded-xl border border-[#E5DDD3] bg-white text-cp-ink placeholder:text-cp-ink/30 text-sm outline-none transition-all focus:border-cp-mango focus:ring-2 focus:ring-cp-mango/10';
 const lbl = 'block text-xs font-semibold text-cp-ink/50 uppercase tracking-wider mb-1.5';
-
-function generateRef() {
-  return `LOC-CP-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-}
 
 function calcNbJours(depart: string, retour: string): number {
   if (!depart || !retour) return 0;
@@ -111,10 +108,25 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
     return Object.keys(errs).length === 0;
   };
 
-  const next = () => {
+  const next = async () => {
     if (!validate()) return;
     if (step === 2) {
-      setRef(generateRef());
+      const result = await validateReservation({
+        locationCarId: formData.vehiculeId,
+        dateDepart: formData.dateDepart,
+        dateRetour: formData.dateRetour,
+        prenom: formData.prenom,
+        nom: formData.nom,
+        email: formData.email,
+        telephone: formData.tel,
+        permis: formData.permis,
+        consent: formData.consent,
+      });
+      if (!result.success) {
+        setErrors(result.errors as Partial<Record<keyof ReservationData, string>>);
+        return;
+      }
+      setRef(result.reference!);
       setDone(true);
       return;
     }

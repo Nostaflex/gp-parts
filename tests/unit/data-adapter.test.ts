@@ -100,6 +100,10 @@ describe('getAdapter', () => {
       getDemandes: async () => [],
       getLocationCars: async () => [],
       getLocationCarById: async () => null,
+      createReservation: async () => 'res-mock',
+      getReservations: async () => [],
+      getReservationById: async () => null,
+      updateReservationStatus: async () => {},
     };
     setAdapter(mockAdapter);
     const adapter = await getAdapter();
@@ -389,6 +393,10 @@ describe('StaticAdapter — soft-delete exclusion', () => {
       getDemandes: async () => [],
       getLocationCars: async () => [],
       getLocationCarById: async () => null,
+      createReservation: async () => 'res-mock',
+      getReservations: async () => [],
+      getReservationById: async () => null,
+      updateReservationStatus: async () => {},
     };
     // Sans flag : null pour produit supprimé
     expect(await mockDeletedAdapter.getProductBySlug(deletedProduct.slug)).toBeNull();
@@ -446,5 +454,48 @@ describe('parseProduct integration', () => {
       createdAt: '2025-01-01',
     };
     expect(() => parseProduct(badDoc)).toThrow();
+  });
+});
+
+// ─── StaticAdapter — reservations ────────────────────────────────────
+describe('StaticAdapter — reservations', () => {
+  const baseRes = {
+    reference: 'LOC-X-1',
+    status: 'nouvelle' as const,
+    locationCarId: 'clio-v',
+    carLabel: 'Renault Clio V',
+    dateDepart: '2026-07-01',
+    dateRetour: '2026-07-03',
+    nbJours: 2,
+    prixJourEnCents: 4500,
+    totalEnCents: 9000,
+    customer: { prenom: 'A', nom: 'B', email: 'a@b.fr', telephone: '0690000000', permis: 'X1' },
+    createdAt: '2026-06-02T00:00:00.000Z',
+    updatedAt: '2026-06-02T00:00:00.000Z',
+    expiresAt: 1800000000000,
+  };
+
+  it('createReservation puis getReservationById', async () => {
+    const adapter = new StaticAdapter();
+    const id = await adapter.createReservation(baseRes);
+    const got = await adapter.getReservationById(id);
+    expect(got?.reference).toBe('LOC-X-1');
+    expect(got?.status).toBe('nouvelle');
+  });
+
+  it('updateReservationStatus mute le statut', async () => {
+    const adapter = new StaticAdapter();
+    const id = await adapter.createReservation(baseRes);
+    await adapter.updateReservationStatus(id, 'confirmee');
+    const got = await adapter.getReservationById(id);
+    expect(got?.status).toBe('confirmee');
+  });
+
+  it('getReservations filtre par statut', async () => {
+    const adapter = new StaticAdapter();
+    await adapter.createReservation(baseRes);
+    await adapter.createReservation({ ...baseRes, status: 'annulee' });
+    const annulees = await adapter.getReservations({ status: 'annulee' });
+    expect(annulees.every((r) => r.status === 'annulee')).toBe(true);
   });
 });
