@@ -92,11 +92,11 @@ describe('generateOrderNumber', () => {
   it('contient un timestamp et un random séparés par un tiret', () => {
     const order = generateOrderNumber();
     const parts = order.split('-');
-    // Format: GP-XXXXX-YYYY
+    // Format: GP-XXXXX-YYYYYY (suffixe random fixé à 6 chars)
     expect(parts.length).toBe(3);
     expect(parts[0]).toBe('GP');
     expect(parts[1].length).toBeGreaterThan(0);
-    expect(parts[2].length).toBe(4);
+    expect(parts[2].length).toBe(6);
   });
 
   it('génère des IDs uniques', () => {
