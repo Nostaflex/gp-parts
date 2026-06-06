@@ -1,8 +1,10 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Big_Shoulders, Instrument_Sans, JetBrains_Mono } from 'next/font/google';
 import { CartProvider } from '@/components/cart/CartProvider';
 import { ToastProvider } from '@/components/ui/Toast';
 import { CookieBanner } from '@/components/gdpr/CookieBanner';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { SITE_URL, localBusinessJsonLd, organizationJsonLd, websiteJsonLd } from '@/lib/seo';
 import './globals.css';
 
 const bigShoulders = Big_Shoulders({
@@ -27,13 +29,14 @@ const monoFont = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://car-performance.gp'),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: 'Car Performance — Garage auto & moto Guadeloupe',
     template: '%s | Car Performance',
   },
   description:
     'Réparation, location et vente de véhicules en Guadeloupe. Pièces détachées auto & moto livrées partout en Guadeloupe.',
+  alternates: { canonical: '/' },
   keywords: [
     'garage',
     'Guadeloupe',
@@ -47,6 +50,12 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'fr_FR',
     siteName: 'Car Performance',
+    url: SITE_URL,
+    title: 'Car Performance — Garage auto & moto Guadeloupe',
+    description: 'Réparation, location et vente VO en Guadeloupe.',
+  },
+  twitter: {
+    card: 'summary_large_image',
     title: 'Car Performance — Garage auto & moto Guadeloupe',
     description: 'Réparation, location et vente VO en Guadeloupe.',
   },
@@ -56,6 +65,10 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: '#0D0905',
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
@@ -63,6 +76,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${bigShoulders.variable} ${instrumentSans.variable} ${monoFont.variable}`}
     >
       <body className="min-h-dvh flex flex-col cp-clip">
+        <JsonLd data={[localBusinessJsonLd(), organizationJsonLd(), websiteJsonLd()]} />
         <a href="#main" className="skip-link">
           Aller au contenu principal
         </a>

@@ -15,6 +15,7 @@ export const metadata: Metadata = {
   title: 'Vente de motos — Occasion & Neuf',
   description:
     "Achetez une moto d'occasion contrôlée ou neuve à commander en Guadeloupe. Roadster, sport, trail, scooter — toutes cylindrées. Garantie incluse, financement sur mesure.",
+  alternates: { canonical: '/vente-moto' },
 };
 
 export default async function VenteMotoPage() {

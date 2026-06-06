@@ -4,12 +4,14 @@ import { CpHeader } from '@/components/cp/CpHeader';
 import { CpBridge } from '@/components/cp/CpBridge';
 import { CpFooter } from '@/components/cp/CpFooter';
 import { ContactForm } from './ContactForm';
+import { BUSINESS, ADDRESS_ONE_LINE } from '@/lib/seo';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Contact',
   description:
     'Contactez Car Performance Guadeloupe. Réponse sous 24h. Réparation, location, vente VO — notre équipe est à votre écoute.',
+  alternates: { canonical: '/contact' },
 };
 
 const HORAIRES = [
@@ -162,7 +164,7 @@ export default function ContactPage() {
                     </svg>
                   ),
                   label: 'Adresse',
-                  val: 'ZI de Jarry, 97122 Baie-Mahault, Guadeloupe',
+                  val: ADDRESS_ONE_LINE,
                 },
                 {
                   icon: (
@@ -178,7 +180,7 @@ export default function ContactPage() {
                     </svg>
                   ),
                   label: 'Téléphone',
-                  val: '0590 00 00 00',
+                  val: BUSINESS.phoneDisplay,
                 },
                 {
                   icon: (
@@ -195,7 +197,7 @@ export default function ContactPage() {
                     </svg>
                   ),
                   label: 'Email',
-                  val: 'contact@car-performance.gp',
+                  val: BUSINESS.email,
                 },
               ].map((item) => (
                 <div key={item.label} className="flex gap-3 items-start">

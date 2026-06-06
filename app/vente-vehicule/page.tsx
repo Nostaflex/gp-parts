@@ -15,6 +15,7 @@ export const metadata: Metadata = {
   title: 'Vente de véhicules — Occasion & Neuf',
   description:
     "Achetez un véhicule d'occasion contrôlé ou neuf à commander en Guadeloupe. Garantie incluse, financement sur mesure. Toutes marques.",
+  alternates: { canonical: '/vente-vehicule' },
 };
 
 export default async function VenteVehiculePage() {

@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: 'Mentions légales & Confidentialité',
   description:
     'Mentions légales, CGV, politique de confidentialité et cookies de Car Performance Guadeloupe.',
+  alternates: { canonical: '/mentions-legales' },
 };
 
 export default function MentionsLegalesPage() {

@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: 'Réparation & RDV',
   description:
     'Prenez rendez-vous en ligne pour votre réparation auto ou moto. Réponse sous 1h, devis gratuit, toutes marques en Guadeloupe.',
+  alternates: { canonical: '/reparation' },
 };
 
 const PROMISES = [

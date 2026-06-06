@@ -9,6 +9,7 @@ import { LocationClient } from './LocationClient';
 
 export const metadata: Metadata = {
   title: 'Location de véhicules — Racoon',
+  alternates: { canonical: '/location' },
   description:
     'Location de voitures Racoon en Guadeloupe. Explore la Guadeloupe en toute liberté. Kilométrage illimité, assurance incluse, disponible dès demain.',
 };

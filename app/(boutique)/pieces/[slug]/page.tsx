@@ -9,7 +9,8 @@ import { getAdapter } from '@/lib/data';
 import { getCachedProducts } from '@/lib/data/products-cache';
 import { formatPrice, getStockStatus, getStockLabel } from '@/lib/utils';
 import { getCategoryLabel } from '@/lib/categories';
-import { safeJsonLd } from '@/lib/safe-json-ld';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { absoluteUrl, breadcrumbJsonLd } from '@/lib/seo';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -37,6 +38,12 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
   return {
     title: `${product.name} — ${product.reference}`,
     description: product.description.slice(0, 160),
+    alternates: { canonical: `/pieces/${product.slug}` },
+    openGraph: {
+      title: product.name,
+      description: product.description.slice(0, 160),
+      ...(product.images[0] ? { images: [{ url: product.images[0] }] } : {}),
+    },
   };
 }
 
@@ -52,15 +59,18 @@ export default async function ProductPage(props: PageProps) {
   const hasPromo = product.priceOriginal && product.priceOriginal > product.price;
 
   // JSON-LD Product
+  // NB: pas de `brand` — la marque du véhicule compatible n'est PAS la marque
+  // de la pièce. TODO(données): ajouter un champ marque/fabricant pièce si dispo.
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
     description: product.description,
     sku: product.reference,
-    brand: { '@type': 'Brand', name: product.compatibility[0]?.brand ?? 'GP Parts' },
+    ...(product.images?.length ? { image: product.images } : {}),
     offers: {
       '@type': 'Offer',
+      url: absoluteUrl(`/pieces/${product.slug}`),
       price: (product.price / 100).toFixed(2),
       priceCurrency: 'EUR',
       availability:
@@ -70,7 +80,20 @@ export default async function ProductPage(props: PageProps) {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
+      <JsonLd
+        data={[
+          jsonLd,
+          breadcrumbJsonLd([
+            { name: 'Accueil', path: '/' },
+            { name: 'Catalogue', path: '/pieces' },
+            {
+              name: getCategoryLabel(product.category),
+              path: `/pieces?category=${product.category}`,
+            },
+            { name: product.name, path: `/pieces/${product.slug}` },
+          ]),
+        ]}
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Breadcrumb */}

@@ -5,6 +5,7 @@ import { getCachedProducts } from '@/lib/data/products-cache';
 export const metadata = {
   title: 'Catalogue',
   description: 'Catalogue complet des pièces détachées auto et moto disponibles en Guadeloupe.',
+  alternates: { canonical: '/pieces' },
 };
 
 // Symétrie ISR avec [slug]/page.tsx : revalidateTag('products') prime sur

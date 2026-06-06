@@ -7,7 +7,8 @@ import type { Moto } from '@/lib/motos';
 import { getCachedMotos } from '@/lib/data/motos-cache';
 import { FinancementMotoSimulator } from './FinancementMotoSimulator';
 import { MotoGallery } from './MotoGallery';
-import { safeJsonLd } from '@/lib/safe-json-ld';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { BUSINESS, absoluteUrl, breadcrumbJsonLd } from '@/lib/seo';
 
 // Filet ISR : revalidateTag('motos') (Server Actions admin) prime sur
 // mutation ; ce TTL n'est qu'un fallback de fraîcheur.
@@ -39,6 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${m.marque} ${m.modele} ${m.annee} — ${m.prix.toLocaleString('fr-FR')} €`,
     description: `${m.marque} ${m.modele} ${m.annee}, ${m.km.toLocaleString('fr-FR')} km, ${m.categorie}, permis ${m.caracteristiques.permis ?? '—'}. Moto contrôlée, garantie incluse, financement disponible.`,
+    alternates: { canonical: `/vente-moto/${m.id}` },
     openGraph: {
       title: `${m.marque} ${m.modele} ${m.annee}`,
       description: `${m.km.toLocaleString('fr-FR')} km · ${m.categorie} · ${m.prix.toLocaleString('fr-FR')} €`,
@@ -63,6 +65,7 @@ function motoJsonLd(m: Moto) {
     sku: m.reference,
     offers: {
       '@type': 'Offer',
+      url: absoluteUrl(`/vente-moto/${m.id}`),
       price: m.prix,
       priceCurrency: 'EUR',
       availability:
@@ -75,8 +78,15 @@ function motoJsonLd(m: Moto) {
         m.type === 'neuf' ? 'https://schema.org/NewCondition' : 'https://schema.org/UsedCondition',
       seller: {
         '@type': 'AutoDealer',
-        name: 'Car Performance',
+        name: BUSINESS.name,
         areaServed: 'Guadeloupe',
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: BUSINESS.address.city,
+          postalCode: BUSINESS.address.postalCode,
+          addressRegion: BUSINESS.address.region,
+          addressCountry: BUSINESS.address.country,
+        },
       },
     },
   };
@@ -109,9 +119,15 @@ export default async function MotoDetailPage({ params }: Props) {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLd(motoJsonLd(m)) }}
+      <JsonLd
+        data={[
+          motoJsonLd(m),
+          breadcrumbJsonLd([
+            { name: 'Accueil', path: '/' },
+            { name: 'Vente moto', path: '/vente-moto' },
+            { name: `${m.marque} ${m.modele}`, path: `/vente-moto/${m.id}` },
+          ]),
+        ]}
       />
       <CpHeader />
 
@@ -223,7 +239,7 @@ export default async function MotoDetailPage({ params }: Props) {
                     Je suis intéressé
                   </Link>
                   <a
-                    href="tel:+590590000000"
+                    href={`tel:${BUSINESS.phone}`}
                     className="w-full inline-flex justify-center items-center gap-2 border border-[#E5DDD3] text-cp-ink text-sm font-semibold px-6 py-3 rounded-xl hover:border-cp-red hover:text-cp-mango transition-colors"
                   >
                     Appeler

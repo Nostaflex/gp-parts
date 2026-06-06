@@ -3,9 +3,7 @@ import { getAdapter } from '@/lib/data';
 import { CATEGORIES } from '@/lib/categories';
 import { VEHICULES } from '@/lib/vehicules';
 import { MOTOS } from '@/lib/motos';
-
-// URL de base : pilotée par env (production) avec fallback dev
-const BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://gpparts.gp').replace(/\/$/, '');
+import { SITE_URL as BASE_URL } from '@/lib/seo';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Source live products (Phase 5 §9.19) : getProducts() exclut deletedAt

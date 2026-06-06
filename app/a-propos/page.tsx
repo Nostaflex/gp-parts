@@ -7,7 +7,8 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'À propos',
   description:
-    'Car Performance Guadeloupe. Garage à Pointe-à-Pitre, équipe locale passionnée, conseil technique sur pièces auto et moto.',
+    'Car Performance Guadeloupe. Garage à Baie-Mahault (Jarry), équipe locale passionnée, conseil technique sur pièces auto et moto.',
+  alternates: { canonical: '/a-propos' },
 };
 
 const VALEURS = [
