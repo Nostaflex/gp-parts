@@ -27,7 +27,7 @@ export default async function LocationPage() {
         id="loc-hero"
         data-cp-light="true"
         className="relative pt-20 overflow-hidden"
-        style={{ backgroundColor: '#FBF8F1' }}
+        style={{ backgroundColor: '#FDFCFA' }}
       >
         {/* Orbs décoratifs — wash tropical (vert + orange Racoon) */}
         <div
@@ -55,7 +55,7 @@ export default async function LocationPage() {
           }}
         />
 
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-0 items-end min-h-[75vh] relative z-10">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-end min-h-[75vh] relative z-10">
           {/* Texte */}
           <div className="py-16 md:py-24">
             <nav
@@ -88,7 +88,7 @@ export default async function LocationPage() {
             </p>
             <h1
               className="cp-title font-black leading-none mb-6"
-              style={{ color: '#1A0F06', fontSize: 'clamp(3rem, 7vw, 7rem)' }}
+              style={{ color: '#1A0F06', fontSize: 'clamp(2.5rem, 5.2vw, 5rem)' }}
             >
               EXPLORE LA
               <br />
@@ -154,43 +154,32 @@ export default async function LocationPage() {
             </div>
           </div>
 
-          {/* Image — véhicule Racoon, posée en carte produit blanche (le fond blanc de
-              l'image devient la surface de la carte → plus de rectangle blanc qui jure) */}
-          <div
-            className="hidden md:flex h-full relative items-center justify-center py-12"
-            style={{ minHeight: '450px' }}
-          >
-            <div className="relative w-full overflow-hidden rounded-[1.75rem] bg-white p-6 ring-1 ring-cp-ink/5 shadow-[0_30px_60px_-24px_rgba(26,15,6,0.28)]">
-              {/* halos tropicaux dans les coins — rappel des couleurs du wrap Racoon */}
-              <div
-                aria-hidden="true"
-                className="absolute -top-16 -right-16 w-56 h-56 rounded-full pointer-events-none"
-                style={{
-                  background: 'radial-gradient(circle, rgba(232,114,0,0.20) 0%, transparent 70%)',
-                }}
-              />
-              <div
-                aria-hidden="true"
-                className="absolute -bottom-20 -left-12 w-52 h-52 rounded-full pointer-events-none"
-                style={{
-                  background: 'radial-gradient(circle, rgba(82,200,138,0.20) 0%, transparent 70%)',
-                }}
-              />
-              <Image
-                src="/images/vehicule-racoon.webp"
-                alt="Véhicule Racoon — flotte de location Car Performance Guadeloupe"
-                width={2000}
-                height={1333}
-                priority
-                sizes="(max-width: 1024px) 90vw, 50vw"
-                className="relative z-10 w-full h-auto object-contain"
-              />
-            </div>
+          {/* Image — véhicule Racoon "posé" : son fond blanc se fond dans la section
+              quasi-blanche (pas de carte/rectangle), halo tropical au sol pour l'ancrer */}
+          <div className="hidden md:flex h-full relative items-end justify-center pb-12">
+            <div
+              aria-hidden="true"
+              className="absolute bottom-[16%] left-1/2 -translate-x-1/2 w-[80%] h-40 rounded-[50%] pointer-events-none"
+              style={{
+                background:
+                  'radial-gradient(ellipse at center, rgba(232,114,0,0.22) 0%, rgba(82,200,138,0.14) 45%, transparent 72%)',
+                filter: 'blur(28px)',
+              }}
+            />
+            <Image
+              src="/images/vehicule-racoon.webp"
+              alt="Véhicule Racoon — flotte de location Car Performance Guadeloupe"
+              width={2000}
+              height={1333}
+              priority
+              sizes="(max-width: 1024px) 90vw, 50vw"
+              className="relative z-10 w-full h-auto object-contain"
+            />
           </div>
         </div>
       </section>
 
-      <CpBridge fromColor="#FBF8F1" toColor="#F4EDE0" />
+      <CpBridge fromColor="#FDFCFA" toColor="#F4EDE0" />
 
       {/* ── CLIENT COMPONENT (search + catalogue + form) ── */}
       <LocationClient cars={cars} />

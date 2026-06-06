@@ -12,6 +12,10 @@ import { PRODUCTS } from '../lib/products';
 import { parseProduct } from '../lib/schemas/product';
 import { LOCATION_CARS } from '../lib/location-cars';
 import { parseLocationCar } from '../lib/schemas/location-car';
+import { VEHICULES } from '../lib/vehicules';
+import { parseVehicule } from '../lib/schemas/vehicule';
+import { MOTOS } from '../lib/motos';
+import { parseMoto } from '../lib/schemas/moto';
 
 const serviceAccountPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 
@@ -49,8 +53,25 @@ async function seed() {
     batch.set(ref, { ...validated, deletedAt: null });
   }
 
+  // Véhicules à vendre (getVehicules ne filtre pas deletedAt → pas requis ici).
+  for (const vehicule of VEHICULES) {
+    const validated = parseVehicule(vehicule);
+    const ref = db.collection('vehicules').doc(validated.id);
+    batch.set(ref, validated);
+  }
+
+  // Motos à vendre.
+  for (const moto of MOTOS) {
+    const validated = parseMoto(moto);
+    const ref = db.collection('motos').doc(validated.id);
+    batch.set(ref, validated);
+  }
+
   await batch.commit();
-  console.log(`Done! ${PRODUCTS.length} products + ${LOCATION_CARS.length} location-cars seeded.`);
+  console.log(
+    `Done! ${PRODUCTS.length} products + ${LOCATION_CARS.length} location-cars + ` +
+      `${VEHICULES.length} vehicules + ${MOTOS.length} motos seeded.`
+  );
 }
 
 seed().catch((err) => {
