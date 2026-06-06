@@ -58,7 +58,7 @@ const UNIVERS = [
 ];
 
 const STATS = [
-  { value: '971', unit: '🏝', label: 'Guadeloupe' },
+  { value: '971', unit: '', label: 'Guadeloupe' },
   { value: '24h', unit: '', label: 'délai réponse' },
   { value: '12', unit: 'mois', label: 'garantie pièces' },
   { value: '4.99', unit: '%', label: 'financement TAEG' },
@@ -478,7 +478,7 @@ export default function HomePage() {
             <p className="text-cp-cream/30 text-xs">
               © {new Date().getFullYear()} Car Performance Guadeloupe. Tous droits réservés.
             </p>
-            <p className="cp-mono text-cp-cream/20 text-xs">971 🏝</p>
+            <p className="cp-mono text-cp-cream/20 text-xs">Guadeloupe · 971</p>
           </div>
         </div>
       </footer>

@@ -170,7 +170,7 @@ export default function AProposPage() {
             </div>
             {/* Tag */}
             <div className="absolute top-6 right-6 cp-mono text-xs text-cp-ink/50 bg-cp-cream/80 backdrop-blur-sm px-3 py-1.5 rounded-full">
-              971 🏝
+              Guadeloupe · 971
             </div>
           </div>
         </div>

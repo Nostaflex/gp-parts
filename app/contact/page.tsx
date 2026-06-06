@@ -118,10 +118,10 @@ export default function ContactPage() {
 
           {/* Infos */}
           <div className="flex flex-col gap-6">
-            {/* Carte map placeholder */}
-            <div className="bg-cp-vert/30 border border-cp-vert-l/15 rounded-2xl overflow-hidden h-48 relative flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-10 h-10 rounded-full bg-cp-red flex items-center justify-center mx-auto mb-3">
+            {/* Nous trouver — carte intégrée à venir (revue CSP frame-src) */}
+            <div className="bg-cp-vert/30 border border-cp-vert-l/15 rounded-2xl p-6">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-cp-red flex items-center justify-center flex-shrink-0">
                   <svg
                     width="16"
                     height="16"
@@ -129,20 +129,24 @@ export default function ContactPage() {
                     stroke="white"
                     strokeWidth="2.5"
                     viewBox="0 0 24 24"
+                    aria-hidden="true"
                   >
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
                     <circle cx="12" cy="10" r="3" />
                   </svg>
                 </div>
-                <p className="text-xs text-cp-cream/50 mb-2">ZI de Jarry, Pointe-à-Pitre</p>
-                <a
-                  href="https://maps.google.com/?q=Car+Performance+Guadeloupe"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-cp-vert-l font-semibold hover:underline"
-                >
-                  Ouvrir dans Google Maps →
-                </a>
+                <div>
+                  <p className="text-sm font-semibold text-cp-cream mb-1">Nous trouver</p>
+                  <p className="text-sm text-cp-cream/55 mb-3">{ADDRESS_ONE_LINE}</p>
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(ADDRESS_ONE_LINE)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs text-cp-vert-l font-semibold hover:underline"
+                  >
+                    Itinéraire Google Maps →
+                  </a>
+                </div>
               </div>
             </div>
 
