@@ -137,12 +137,13 @@ export default function ReparationPage() {
               l&apos;heure.
             </p>
             <div className="flex flex-wrap gap-2">
-              {['Toutes marques', 'Réponse &lt; 1h', 'Devis gratuit'].map((pill, i) => (
+              {['Toutes marques', 'Réponse < 1h', 'Devis gratuit'].map((pill) => (
                 <span
-                  key={i}
+                  key={pill}
                   className="cp-mono text-xs text-cp-cream/50 border border-cp-cream/15 px-3 py-1.5 rounded-full"
-                  dangerouslySetInnerHTML={{ __html: pill }}
-                />
+                >
+                  {pill}
+                </span>
               ))}
             </div>
           </div>

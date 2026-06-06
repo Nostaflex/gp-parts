@@ -167,10 +167,10 @@ export default async function LocationPage() {
               }}
             />
             <Image
-              src="/images/vehicule-racoon-cut.png"
+              src="/images/vehicule-racoon-cut.webp"
               alt="Véhicule Racoon — flotte de location Car Performance Guadeloupe"
-              width={2000}
-              height={1333}
+              width={1400}
+              height={933}
               priority
               sizes="(max-width: 1024px) 90vw, 50vw"
               className="relative z-10 w-full h-auto object-contain"

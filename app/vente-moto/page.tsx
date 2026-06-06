@@ -39,7 +39,7 @@ export default async function VenteMotoPage() {
             alt=""
             fill
             priority
-            sizes="100vw"
+            sizes="(max-width: 768px) 0px, 100vw"
             className="object-cover object-[center_55%]"
           />
           {/* Scrim gauche → texte lisible ; la moto émerge à droite */}

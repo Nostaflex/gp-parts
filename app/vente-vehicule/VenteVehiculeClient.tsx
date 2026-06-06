@@ -534,7 +534,7 @@ export function VenteVehiculeClient({ vehicules }: { vehicules: Vehicule[] }) {
               </div>
 
               <a
-                href="/reparation"
+                href={`/contact?sujet=${encodeURIComponent('Financement véhicule')}&financement=1`}
                 className="w-full py-3 rounded-xl bg-cp-ink text-cp-cream text-sm font-semibold hover:bg-cp-red transition-colors text-center block"
               >
                 Je suis intéressé par ce financement

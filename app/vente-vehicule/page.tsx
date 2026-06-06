@@ -39,7 +39,7 @@ export default async function VenteVehiculePage() {
             alt=""
             fill
             priority
-            sizes="100vw"
+            sizes="(max-width: 768px) 0px, 100vw"
             className="object-cover object-[60%_center]"
           />
           {/* Scrim gauche → texte lisible ; la voiture émerge à droite */}

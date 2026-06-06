@@ -7,7 +7,7 @@ import { CpReveal } from '@/components/cp/CpReveal';
 import { CpOpenBadge } from '@/components/cp/CpOpenBadge';
 
 export const metadata: Metadata = {
-  title: 'Accueil',
+  title: 'Garage auto & moto en Guadeloupe',
   description:
     'Car Performance — Garage auto & moto en Guadeloupe. Réparation, location et vente de véhicules.',
 };

@@ -22,6 +22,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'daily',
       priority: 0.8,
     },
+    { url: `${BASE_URL}/reparation`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${BASE_URL}/location`, lastModified: now, changeFrequency: 'daily', priority: 0.8 },
+    {
+      url: `${BASE_URL}/vente-vehicule`,
+      lastModified: now,
+      changeFrequency: 'daily',
+      priority: 0.8,
+    },
+    { url: `${BASE_URL}/vente-moto`, lastModified: now, changeFrequency: 'daily', priority: 0.8 },
+    { url: `${BASE_URL}/a-propos`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${BASE_URL}/contact`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${BASE_URL}/panier`, lastModified: now, changeFrequency: 'monthly', priority: 0.3 },
     {
       url: `${BASE_URL}/mentions-legales`,
@@ -29,14 +40,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'yearly',
       priority: 0.2,
     },
-    { url: `${BASE_URL}/cgv`, lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
-    {
-      url: `${BASE_URL}/confidentialite`,
-      lastModified: now,
-      changeFrequency: 'yearly',
-      priority: 0.2,
-    },
-    { url: `${BASE_URL}/cookies`, lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
+    // NB: /cgv, /confidentialite, /cookies redirigent vers /mentions-legales
+    // → exclus du sitemap (Google warning sur les URLs en redirection).
   ];
 
   const categoryRoutes: MetadataRoute.Sitemap = CATEGORIES.map((cat) => ({

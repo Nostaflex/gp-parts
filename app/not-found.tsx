@@ -1,5 +1,11 @@
+import type { Metadata } from 'next';
 import { Home, Search } from 'lucide-react';
 import { ButtonLink } from '@/components/ui/Button';
+
+export const metadata: Metadata = {
+  title: 'Page introuvable',
+  robots: { index: false, follow: true },
+};
 
 export default function NotFound() {
   return (

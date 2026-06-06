@@ -68,7 +68,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
         <ToastProvider>
           <CartProvider>
-            {children}
+            <main id="main" tabIndex={-1} className="flex-1 flex flex-col">
+              {children}
+            </main>
             <CookieBanner />
           </CartProvider>
         </ToastProvider>
