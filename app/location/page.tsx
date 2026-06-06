@@ -146,7 +146,7 @@ export default async function LocationPage() {
                 Flotte disponible
               </p>
               <p className="cp-title font-black text-xl mt-1" style={{ color: '#1A0F06' }}>
-                12 véhicules
+                {cars.length} véhicule{cars.length > 1 ? 's' : ''}
               </p>
               <p className="text-xs mt-0.5" style={{ color: 'rgba(26,15,6,0.45)' }}>
                 Mise à jour en temps réel
