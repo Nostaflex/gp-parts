@@ -20,6 +20,8 @@ const config: Config = {
         cp: {
           cream: '#F4EDE0',
           ink: '#1A0F06',
+          red: '#D92627', // accent logo Car Performance (CTA principaux)
+          'red-d': '#B81F20', // rouge logo assombri (hover)
           mango: '#E87200',
           vert: '#2A5C45',
           'vert-l': '#52C88A',
@@ -33,6 +35,7 @@ const config: Config = {
           amber: '#1E0E04', // Ambre Cuir
           craft: '#F8F5F0', // Craft Ivoire
           dusk: '#1A1208', // Dusk Tropical
+          tropic: '#FBF8F1', // Tropical Clair (univers location Racoon)
         },
       },
       fontFamily: {

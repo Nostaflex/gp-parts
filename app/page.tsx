@@ -117,7 +117,7 @@ export default function HomePage() {
         <div className="relative max-w-7xl mx-auto w-full">
           <CpReveal>
             <p className="cp-mono text-cp-mango text-sm tracking-widest uppercase mb-6">
-              Garage · Guadeloupe · 971
+              Garage · Guadeloupe 971
             </p>
           </CpReveal>
           <CpReveal delay={1}>
@@ -139,7 +139,7 @@ export default function HomePage() {
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/reparation"
-                className="inline-flex items-center gap-2 bg-cp-mango text-cp-cream font-semibold px-6 py-3 rounded-full hover:bg-cp-mango/90 transition-colors"
+                className="inline-flex items-center gap-2 bg-cp-red text-cp-cream font-semibold px-6 py-3 rounded-full hover:bg-cp-red-d transition-colors"
               >
                 Prendre RDV
                 <svg
@@ -194,8 +194,7 @@ export default function HomePage() {
                   href={u.href}
                   className="group block relative rounded-2xl overflow-hidden border border-cp-ink/10 bg-white/40 hover:bg-white/70 transition-all duration-300 p-8 min-h-[200px]"
                 >
-                  <div className="flex items-start justify-between mb-6">
-                    <span className="cp-mono text-xs text-cp-ink/30">{u.tag}</span>
+                  <div className="flex items-start justify-end mb-6">
                     <svg
                       className="transition-transform duration-300 group-hover:rotate-45 group-hover:translate-x-1 group-hover:-translate-y-1"
                       width="20"
@@ -253,9 +252,6 @@ export default function HomePage() {
       <section id="temoignages" className="py-24 px-6" style={{ backgroundColor: '#1A1208' }}>
         <div className="max-w-7xl mx-auto">
           <CpReveal>
-            <p className="cp-mono text-cp-gold/60 text-xs tracking-widest uppercase mb-3">
-              Ils nous font confiance
-            </p>
             <h2
               className="cp-title text-cp-cream font-black leading-none mb-16"
               style={{ fontSize: 'clamp(2rem, 4vw, 4rem)' }}
@@ -293,9 +289,6 @@ export default function HomePage() {
       <section id="contact" className="py-24 px-6" style={{ backgroundColor: '#0E1F18' }}>
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
           <CpReveal>
-            <p className="cp-mono text-cp-vert-l/60 text-xs tracking-widest uppercase mb-3">
-              Nous trouver
-            </p>
             <h2
               className="cp-title text-cp-cream font-black leading-none mb-8"
               style={{ fontSize: 'clamp(2rem, 4vw, 4rem)' }}
@@ -385,7 +378,7 @@ export default function HomePage() {
               </div>
               <Link
                 href="/contact"
-                className="mt-6 w-full inline-flex justify-center items-center gap-2 bg-cp-mango text-cp-cream font-semibold px-6 py-3 rounded-full hover:bg-cp-mango/90 transition-colors text-sm"
+                className="mt-6 w-full inline-flex justify-center items-center gap-2 bg-cp-red text-cp-cream font-semibold px-6 py-3 rounded-full hover:bg-cp-red-d transition-colors text-sm"
               >
                 Je suis intéressé
               </Link>
