@@ -127,7 +127,7 @@ export default function HomePage() {
             >
               CAR
               <br />
-              <span className="text-cp-mango">PERFORMANCE</span>
+              <span className="text-cp-red">PERFORMANCE</span>
             </h1>
           </CpReveal>
           <CpReveal delay={2}>
@@ -233,7 +233,7 @@ export default function HomePage() {
             <CpReveal key={s.label} delay={(i % 4) as 0 | 1 | 2 | 3}>
               <div className="text-center">
                 <p
-                  className="cp-title text-cp-mango font-black leading-none mb-2"
+                  className="cp-title text-cp-red font-black leading-none mb-2"
                   style={{ fontSize: 'clamp(3rem, 6vw, 6rem)' }}
                 >
                   {s.value}

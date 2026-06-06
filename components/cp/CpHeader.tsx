@@ -95,7 +95,7 @@ export function CpHeader({ darkSectionIds = [] }: CpHeaderProps) {
         {/* CTA desktop */}
         <Link
           href="/contact"
-          className="hidden md:inline-flex items-center gap-2 bg-cp-mango text-cp-cream text-sm font-semibold px-4 py-2 rounded-full hover:bg-cp-mango/90 transition-colors"
+          className="hidden md:inline-flex items-center gap-2 bg-cp-red text-cp-cream text-sm font-semibold px-4 py-2 rounded-full hover:bg-cp-red-d transition-colors"
         >
           Prendre RDV
         </Link>
@@ -137,7 +137,7 @@ export function CpHeader({ darkSectionIds = [] }: CpHeaderProps) {
           <Link
             href="/contact"
             onClick={() => setMenuOpen(false)}
-            className="inline-flex justify-center bg-cp-mango text-cp-cream text-sm font-semibold px-4 py-2 rounded-full"
+            className="inline-flex justify-center bg-cp-red text-cp-cream text-sm font-semibold px-4 py-2 rounded-full"
           >
             Prendre RDV
           </Link>

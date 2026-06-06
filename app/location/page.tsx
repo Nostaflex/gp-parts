@@ -27,7 +27,7 @@ export default async function LocationPage() {
         id="loc-hero"
         data-cp-light="true"
         className="relative pt-20 overflow-hidden"
-        style={{ backgroundColor: '#FDFCFA' }}
+        style={{ backgroundColor: '#F6F2EA' }}
       >
         {/* Orbs décoratifs — wash tropical (vert + orange Racoon) */}
         <div
@@ -167,7 +167,7 @@ export default async function LocationPage() {
               }}
             />
             <Image
-              src="/images/vehicule-racoon.webp"
+              src="/images/vehicule-racoon-cut.png"
               alt="Véhicule Racoon — flotte de location Car Performance Guadeloupe"
               width={2000}
               height={1333}
@@ -179,7 +179,7 @@ export default async function LocationPage() {
         </div>
       </section>
 
-      <CpBridge fromColor="#FDFCFA" toColor="#F4EDE0" />
+      <CpBridge fromColor="#F6F2EA" toColor="#F4EDE0" />
 
       {/* ── CLIENT COMPONENT (search + catalogue + form) ── */}
       <LocationClient cars={cars} />

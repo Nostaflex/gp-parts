@@ -44,7 +44,7 @@ export function VehiculeGallery({ images, alt }: Props) {
               aria-current={activeIdx === idx ? 'true' : undefined}
               className={`relative aspect-[4/3] rounded-lg overflow-hidden bg-[#F8F5F0] border-2 transition-all ${
                 activeIdx === idx
-                  ? 'border-cp-mango'
+                  ? 'border-cp-red'
                   : 'border-[#E5DDD3] hover:border-cp-ink/30 opacity-70 hover:opacity-100'
               }`}
             >

@@ -78,7 +78,7 @@ export default async function VenteMotoPage() {
             >
               VENTE
               <br />
-              <span style={{ color: '#E9C46A' }}>MOTO</span>
+              <span style={{ color: '#D92627' }}>MOTO</span>
             </h1>
             <p
               className="text-base leading-relaxed max-w-md mb-8"

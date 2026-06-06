@@ -18,7 +18,7 @@ const VALEURS = [
       'Devis détaillé avant toute intervention. Pas de surprise, pas de frais cachés. Vous savez exactement ce qui est fait et pourquoi.',
     iconPath: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
     accent: 'text-cp-mango',
-    bg: 'bg-cp-mango/15',
+    bg: 'bg-cp-red/15',
   },
   {
     num: '02',
@@ -347,7 +347,7 @@ export default function AProposPage() {
           <div className="grid grid-cols-2 gap-4">
             {ENGAGEMENTS.map((e) => (
               <div key={e.titre} className="bg-white rounded-xl p-5 border border-[#E5DDD3]">
-                <div className="w-2 h-2 rounded-full bg-cp-mango mb-3" />
+                <div className="w-2 h-2 rounded-full bg-cp-red mb-3" />
                 <p className="font-semibold text-cp-ink text-sm mb-1">{e.titre}</p>
                 <p className="text-cp-ink/50 text-xs leading-relaxed">{e.texte}</p>
               </div>
@@ -382,7 +382,7 @@ export default function AProposPage() {
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               href="/reparation"
-              className="inline-flex items-center gap-2 bg-cp-mango text-white font-semibold text-sm px-6 py-3 rounded-full hover:bg-cp-mango/90 transition-colors"
+              className="inline-flex items-center gap-2 bg-cp-red text-white font-semibold text-sm px-6 py-3 rounded-full hover:bg-cp-red-d transition-colors"
             >
               Prendre RDV
               <svg

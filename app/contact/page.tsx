@@ -119,7 +119,7 @@ export default function ContactPage() {
             {/* Carte map placeholder */}
             <div className="bg-cp-vert/30 border border-cp-vert-l/15 rounded-2xl overflow-hidden h-48 relative flex items-center justify-center">
               <div className="text-center">
-                <div className="w-10 h-10 rounded-full bg-cp-mango flex items-center justify-center mx-auto mb-3">
+                <div className="w-10 h-10 rounded-full bg-cp-red flex items-center justify-center mx-auto mb-3">
                   <svg
                     width="16"
                     height="16"

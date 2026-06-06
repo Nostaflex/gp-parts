@@ -253,7 +253,7 @@ export function LegalTabs() {
               className={`flex-shrink-0 px-5 py-2.5 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                 activeTab === t.id
                   ? 'bg-cp-ink text-cp-cream'
-                  : 'text-cp-ink/50 hover:text-cp-mango hover:bg-cp-mango/5'
+                  : 'text-cp-ink/50 hover:text-cp-mango hover:bg-cp-red/5'
               }`}
             >
               {t.label}

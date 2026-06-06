@@ -218,13 +218,13 @@ export default async function MotoDetailPage({ params }: Props) {
                 <div className="flex flex-col gap-3">
                   <Link
                     href={contactHref}
-                    className="w-full inline-flex justify-center items-center gap-2 bg-cp-ink text-cp-cream text-sm font-semibold px-6 py-3.5 rounded-xl hover:bg-cp-mango transition-colors"
+                    className="w-full inline-flex justify-center items-center gap-2 bg-cp-ink text-cp-cream text-sm font-semibold px-6 py-3.5 rounded-xl hover:bg-cp-red transition-colors"
                   >
                     Je suis intéressé
                   </Link>
                   <a
                     href="tel:+590590000000"
-                    className="w-full inline-flex justify-center items-center gap-2 border border-[#E5DDD3] text-cp-ink text-sm font-semibold px-6 py-3 rounded-xl hover:border-cp-mango hover:text-cp-mango transition-colors"
+                    className="w-full inline-flex justify-center items-center gap-2 border border-[#E5DDD3] text-cp-ink text-sm font-semibold px-6 py-3 rounded-xl hover:border-cp-red hover:text-cp-mango transition-colors"
                   >
                     Appeler
                   </a>
@@ -361,7 +361,7 @@ export default async function MotoDetailPage({ params }: Props) {
             </p>
             <Link
               href={contactHref}
-              className="inline-flex items-center gap-2 bg-cp-mango text-cp-cream font-semibold px-8 py-3.5 rounded-full hover:bg-cp-mango/90 transition-colors"
+              className="inline-flex items-center gap-2 bg-cp-red text-cp-cream font-semibold px-8 py-3.5 rounded-full hover:bg-cp-red-d transition-colors"
             >
               Je suis intéressé →
             </Link>

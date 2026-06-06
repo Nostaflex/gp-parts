@@ -80,7 +80,7 @@ export default async function VenteVehiculePage() {
             >
               VENTE
               <br />
-              <span style={{ color: '#E9C46A' }}>OCCASION</span>
+              <span style={{ color: '#D92627' }}>OCCASION</span>
             </h1>
             <p
               className="text-base leading-relaxed max-w-md mb-8"

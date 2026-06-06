@@ -130,7 +130,7 @@ export default function ReparationPage() {
             >
               RÉSERVEZ
               <br />
-              <span className="text-cp-mango">VOTRE RDV</span>
+              <span className="text-cp-red">VOTRE RDV</span>
             </h1>
             <p className="text-cp-cream/55 text-base leading-relaxed max-w-md mb-8">
               Décrivez votre problème, choisissez votre créneau. Nous vous confirmons par email dans
@@ -182,7 +182,7 @@ export default function ReparationPage() {
               <br />
               RAPIDE,
               <br />
-              <em className="text-cp-mango not-italic">CONFIRMÉ</em>
+              <em className="text-cp-red not-italic">CONFIRMÉ</em>
             </h2>
             <p className="text-cp-ink/60 text-base leading-relaxed mb-10 max-w-md">
               Remplissez le formulaire en 2 minutes. Notre équipe vous rappelle pour confirmer le
