@@ -57,14 +57,8 @@ export const MOTOS: Moto[] = [
     options: ['ABS', 'Selle confort', 'Sabot moteur'],
     prix: 6900,
     mensualite: 109,
-    image: 'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=600&q=80&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1558981852-426c6c22a060?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1591736648534-fbc6bf2c5e51?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1611241443322-b5c0c5e80f1c?w=1200&q=85&fit=crop',
-    ],
+    image: '/images/motos/yamaha-mt07.jpg',
+    images: ['/images/motos/yamaha-mt07.jpg'],
     description:
       'Yamaha MT-07 de 2022, le roadster polyvalent référent. Moteur bicylindre CP2 de 689 cm³, 73 ch, couple généreux et accessible. Position de conduite droite confortable, idéale pour la ville comme pour les sorties week-end en Guadeloupe. Bel état général, entretien suivi, pneus récents. Permis A2 bridable disponible.',
     caracteristiques: {
@@ -94,14 +88,8 @@ export const MOTOS: Moto[] = [
     options: ['ABS', 'Top-case Givi', 'Pare-brise haut'],
     prix: 5800,
     mensualite: 89,
-    image: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=600&q=80&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1591736648534-fbc6bf2c5e51?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1611241443322-b5c0c5e80f1c?w=1200&q=85&fit=crop',
-    ],
+    image: '/images/motos/honda-cb500x.jpg',
+    images: ['/images/motos/honda-cb500x.jpg'],
     description:
       'Honda CB500X de 2021, trail accessible parfait pour découvrir la moto sur les routes de Guadeloupe. Moteur bicylindre 471 cm³ de 47 ch (permis A2), réputé pour sa fiabilité. Position de conduite haute et droite, suspension longue débattement, idéal pour les pistes mixtes. Top-case Givi inclus, pare-brise haut anti-vent.',
     caracteristiques: {
@@ -131,14 +119,8 @@ export const MOTOS: Moto[] = [
     options: ['ABS', 'Quickshifter', 'Échappement Akrapovic'],
     prix: 9500,
     mensualite: 149,
-    image: 'https://images.unsplash.com/photo-1558981852-426c6c22a060?w=600&q=80&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1558981852-426c6c22a060?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1611241443322-b5c0c5e80f1c?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1591736648534-fbc6bf2c5e51?w=1200&q=85&fit=crop',
-    ],
+    image: '/images/motos/kawasaki-z900.jpg',
+    images: ['/images/motos/kawasaki-z900.jpg'],
     description:
       "Kawasaki Z900 de 2023, le roadster japonais nerveux. Moteur 4 cylindres en ligne 948 cm³, 125 ch, sonorité rauque grâce à l'échappement Akrapovic. Quickshifter pour des passages de rapport fluides. Position sportive mais confortable. Faible kilométrage, entretien à jour, idéal pour les amateurs de sensations sur les routes guadeloupéennes.",
     caracteristiques: {
@@ -168,14 +150,8 @@ export const MOTOS: Moto[] = [
     options: ['ABS', 'ASR', 'Démarrage sans clé', 'Top-case 50L'],
     prix: 7900,
     mensualite: 119,
-    image: 'https://images.unsplash.com/photo-1611241443322-b5c0c5e80f1c?w=600&q=80&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1611241443322-b5c0c5e80f1c?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1591736648534-fbc6bf2c5e51?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1558981852-426c6c22a060?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=1200&q=85&fit=crop',
-    ],
+    image: '/images/motos/piaggio-mp3-500.jpg',
+    images: ['/images/motos/piaggio-mp3-500.jpg'],
     description:
       'Piaggio MP3 500 HPE de 2021, le scooter 3 roues iconique. Conduite stable et sécurisante grâce à ses 2 roues avant, parfait pour les trajets urbains et périurbains. Moteur 500 cm³ HPE de 44 ch, accessible avec permis B après 3 ans (équivalence) ou permis moto. Top-case 50L pour les courses, démarrage sans clé.',
     caracteristiques: {
@@ -205,14 +181,8 @@ export const MOTOS: Moto[] = [
     options: ['ABS Pro', 'Cruise control', 'Modes pilotage', 'Valises latérales'],
     prix: 18900,
     mensualite: 289,
-    image: 'https://images.unsplash.com/photo-1591736648534-fbc6bf2c5e51?w=600&q=80&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1591736648534-fbc6bf2c5e51?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1611241443322-b5c0c5e80f1c?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=1200&q=85&fit=crop',
-    ],
+    image: '/images/motos/bmw-r1250gs.jpg',
+    images: ['/images/motos/bmw-r1250gs.jpg'],
     description:
       'BMW R 1250 GS Adventure de 2022, la référence des grands trails. Bicylindre Boxer 1254 cm³ de 136 ch, couple massif à bas régime. Réservoir 30L pour une autonomie record. Valises latérales aluminium incluses. Idéale pour les longs raids, les pistes, et la conduite quotidienne. Modes de pilotage Rain/Road/Dynamic/Enduro/Enduro Pro.',
     caracteristiques: {
@@ -244,14 +214,8 @@ export const MOTOS: Moto[] = [
     options: ['ABS', 'Démarrage Idle Stop', 'Top-case option'],
     prix: 3990,
     mensualite: 65,
-    image: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=600&q=80&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1611241443322-b5c0c5e80f1c?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1591736648534-fbc6bf2c5e51?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1558981852-426c6c22a060?w=1200&q=85&fit=crop',
-    ],
+    image: '/images/motos/honda-pcx-125-neuf.jpg',
+    images: ['/images/motos/honda-pcx-125-neuf.jpg'],
     description:
       'Honda PCX 125 neuve, modèle 2026. Le scooter urbain le plus vendu en Europe, parfait pour la ville en Guadeloupe. Moteur eSP+ injection 125 cm³ très sobre (Idle Stop), accessible avec permis A1, AM ou B après formation. Coffre sous selle généreux, écran LCD, freinage ABS. Disponible en plusieurs coloris.',
     caracteristiques: {
@@ -281,14 +245,8 @@ export const MOTOS: Moto[] = [
     options: ['ABS cornering', 'Quickshifter', 'Cruise control adaptatif', 'Valises latérales'],
     prix: 13500,
     mensualite: 209,
-    image: 'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=600&q=80&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1558981852-426c6c22a060?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1591736648534-fbc6bf2c5e51?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1611241443322-b5c0c5e80f1c?w=1200&q=85&fit=crop',
-    ],
+    image: '/images/motos/yamaha-tracer-9-neuf.jpg',
+    images: ['/images/motos/yamaha-tracer-9-neuf.jpg'],
     description:
       'Yamaha Tracer 9 GT neuve, modèle 2026. La routière sportive ultime : moteur CP3 trois cylindres 890 cm³, 119 ch, technologie embarquée premium (radar cruise adaptatif, ABS cornering, modes de pilotage). Valises latérales rigides incluses, écran TFT 7", chauffage poignées. Confort exceptionnel sur longs trajets.',
     caracteristiques: {

@@ -34,8 +34,12 @@ export const VehiculeSchema = z.object({
   options: z.array(z.string()),
   prix: z.number().int().nonnegative(), // euros entiers (convention Vehicule)
   mensualite: z.number().int().nonnegative(),
-  image: z.string().url(),
-  images: z.array(z.string().url()).min(1).max(5),
+  // accepte une URL absolue (http/https) OU un chemin local racine (/images/...)
+  image: z.string().regex(/^(https?:\/\/|\/)/, 'URL ou chemin local requis'),
+  images: z
+    .array(z.string().regex(/^(https?:\/\/|\/)/, 'URL ou chemin local requis'))
+    .min(1)
+    .max(5),
   description: z.string().min(1),
   caracteristiques: vehiculeCaracteristiquesSchema,
   reference: z.string().min(1),

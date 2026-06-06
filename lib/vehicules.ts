@@ -58,14 +58,8 @@ export const VEHICULES: Vehicule[] = [
     options: ['Climatisation', 'GPS', 'Caméra recul', 'Régulateur adaptatif'],
     prix: 18900,
     mensualite: 289,
-    image: 'https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=600&q=80&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1568844293986-8d0400bd4745?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1542362567-b07e54358753?w=1200&q=85&fit=crop',
-    ],
+    image: '/images/vehicules/peugeot-308sw.jpg',
+    images: ['/images/vehicules/peugeot-308sw.jpg'],
     description:
       'Peugeot 308 SW GT Line de 2021 en excellent état. Break familial polyvalent avec un grand coffre, idéal pour les longs trajets en Guadeloupe. Moteur diesel 1.5 BlueHDi 130 ch BVA8 réactif et économique. Finition GT Line avec sellerie cuir/tissu, sièges chauffants, conduite assistée niveau 2. Entretien complet à jour, distribution faite récemment, contrôle technique vierge.',
     caracteristiques: {
@@ -98,14 +92,8 @@ export const VEHICULES: Vehicule[] = [
     options: ['Clim auto', 'GPS', 'Bluetooth', 'Capteurs recul'],
     prix: 14500,
     mensualite: 219,
-    image: 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=600&q=80&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1200&q=85&fit=crop',
-    ],
+    image: '/images/vehicules/renault-clio.jpg',
+    images: ['/images/vehicules/renault-clio.jpg'],
     description:
       'Renault Clio V Intens de 2022, citadine moderne et économique. Petit kilométrage (28 000 km), parfaite pour la ville et les trajets quotidiens en Guadeloupe. Moteur essence 1.0 TCe 100 ch sobre et silencieux. Finition Intens : écran tactile 7", aide au stationnement avant/arrière, régulateur de vitesse, jantes alliage 16". Première main, carnet d\'entretien complet.',
     caracteristiques: {
@@ -138,14 +126,8 @@ export const VEHICULES: Vehicule[] = [
     options: ['Clim manuelle', 'Bluetooth', 'Apple CarPlay'],
     prix: 11200,
     mensualite: 169,
-    image: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&q=80&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=1200&q=85&fit=crop',
-    ],
+    image: '/images/vehicules/citroen-c3.jpg',
+    images: ['/images/vehicules/citroen-c3.jpg'],
     description:
       'Citroën C3 Shine Pack de 2020, citadine confortable au look distinctif avec son Airbump caractéristique. Moteur PureTech 82 ch fiable et économique. Idéale pour une première voiture ou un usage urbain. Habitacle accueillant avec écran tactile 7", connectivité Apple CarPlay/Android Auto. Bon état général, entretien suivi, prête à rouler.',
     caracteristiques: {
@@ -178,14 +160,8 @@ export const VEHICULES: Vehicule[] = [
     options: ['Carplay', 'Régulateur adaptatif', 'LED matrix', 'Cockpit digital'],
     prix: 24900,
     mensualite: 379,
-    image: 'https://images.unsplash.com/photo-1471444928139-48c5bf5173f8?w=600&q=80&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1471444928139-48c5bf5173f8?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1568844293986-8d0400bd4745?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=85&fit=crop',
-    ],
+    image: '/images/vehicules/vw-golf.jpg',
+    images: ['/images/vehicules/vw-golf.jpg'],
     description:
       'Volkswagen Golf VIII Life de 2023, à peine rodée (15 000 km). La référence des compactes premium : qualité de finition irréprochable, boîte DSG7 fluide, et moteur 2.0 TDI 115 ch sobre et performant. Équipée du cockpit numérique 10.25", régulateur adaptatif, phares LED Matrix. Première main, garantie constructeur encore valable. Idéale pour rouler sereinement.',
     caracteristiques: {
@@ -218,14 +194,8 @@ export const VEHICULES: Vehicule[] = [
     options: ['SUV compact', 'Hybride', 'Caméra recul', 'Capteurs'],
     prix: 16800,
     mensualite: 255,
-    image: 'https://images.unsplash.com/photo-1590362891991-f776e747a588?w=600&q=80&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1590362891991-f776e747a588?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1568844293986-8d0400bd4745?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1542362567-b07e54358753?w=1200&q=85&fit=crop',
-    ],
+    image: '/images/vehicules/toyota-yaris.jpg',
+    images: ['/images/vehicules/toyota-yaris.jpg'],
     description:
       'Toyota Yaris Cross Hybride de 2022, SUV compact au gabarit idéal pour la Guadeloupe. Motorisation full hybride 1.5 116 ch : consommation très basse (3.8 L/100km mixte), démarrage 100% électrique, zéro stress carburant. Position de conduite surélevée, espace généreux malgré le format. Fiabilité légendaire Toyota, parfaite pour les routes vallonnées.',
     caracteristiques: {
@@ -260,14 +230,8 @@ export const VEHICULES: Vehicule[] = [
     options: ['Clim manuelle', 'Bluetooth', 'Radio DAB'],
     prix: 12990,
     mensualite: 199,
-    image: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&q=80&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=1200&q=85&fit=crop',
-    ],
+    image: '/images/vehicules/dacia-sandero-neuf.jpg',
+    images: ['/images/vehicules/dacia-sandero-neuf.jpg'],
     description:
       'Dacia Sandero Essential neuve, modèle 2026. La citadine la plus abordable du marché, parfaite pour démarrer ou comme deuxième véhicule. Moteur essence SCe 65 ch sobre et fiable. Équipement essentiel inclus : climatisation, Bluetooth, radio numérique. Garantie constructeur 3 ans / 100 000 km. Livraison sous 4-6 semaines en Guadeloupe.',
     caracteristiques: {
@@ -300,14 +264,8 @@ export const VEHICULES: Vehicule[] = [
     options: ['i-Cockpit 3D', 'Carplay sans fil', 'Caméra recul', 'Régulateur adaptatif'],
     prix: 22500,
     mensualite: 339,
-    image: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=600&q=80&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=1200&q=85&fit=crop',
-      'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=1200&q=85&fit=crop',
-    ],
+    image: '/images/vehicules/peugeot-208-neuf.jpg',
+    images: ['/images/vehicules/peugeot-208-neuf.jpg'],
     description:
       "Peugeot 208 Allure neuve, modèle 2026. Design distinctif, finition soignée, technologies de pointe avec l'i-Cockpit 3D et la connectivité Apple CarPlay sans fil. Moteur essence PureTech 100 ch boîte EAT8 réactive. Idéal pour la ville et les escapades en Guadeloupe. Garantie constructeur 2 ans + extension possible. Livraison sous 6-8 semaines.",
     caracteristiques: {
