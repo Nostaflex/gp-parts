@@ -7,7 +7,7 @@ import type { VehicleCompatibility } from '@/lib/types';
 const COMPAT_MAX = 50;
 
 const FIELD =
-  'h-11 px-3 rounded-[10px] border bg-[var(--surface)] text-[var(--text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--blue)]';
+  'h-11 px-3 rounded-[10px] border bg-[var(--surface)] text-base text-[var(--text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--blue)]';
 
 const emptyRow = (): VehicleCompatibility => ({ brand: '', model: '', yearFrom: 0 });
 
