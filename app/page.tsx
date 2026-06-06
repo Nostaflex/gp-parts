@@ -47,6 +47,14 @@ const UNIVERS = [
     desc: 'Roadster, sport, trail, scooter — toutes cylindrées, occasion ou neuf.',
     accent: '#C8392E',
   },
+  {
+    id: 'pieces',
+    href: '/pieces',
+    label: 'Pièces détachées',
+    tag: '05',
+    desc: 'Auto & moto, livrées partout en Guadeloupe. Commande en ligne, retrait boutique ou livraison 24-48h.',
+    accent: '#E9C46A',
+  },
 ];
 
 const STATS = [
@@ -194,7 +202,7 @@ export default function HomePage() {
               <CpReveal key={u.id} delay={(i % 4) as 0 | 1 | 2 | 3}>
                 <Link
                   href={u.href}
-                  className="group block relative rounded-2xl overflow-hidden border border-cp-ink/10 bg-white/40 hover:bg-white/70 transition-all duration-300 p-8 min-h-[200px]"
+                  className={`group block relative rounded-2xl overflow-hidden border border-cp-ink/10 bg-white/40 hover:bg-white/70 transition-all duration-300 p-8 min-h-[200px] ${u.id === 'pieces' ? 'md:col-span-2' : ''}`}
                 >
                   <div className="flex items-start justify-end mb-6">
                     <svg
