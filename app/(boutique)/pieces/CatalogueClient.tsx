@@ -6,6 +6,9 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { Search, ArrowUpDown, SlidersHorizontal } from 'lucide-react';
 import { ProductCard } from '@/components/products/ProductCard';
 import { CATEGORIES } from '@/lib/categories';
+import { VIN_FILTER_ENABLED } from '@/lib/config';
+import { isCompatibleWith, type DecodedVehicle } from '@/lib/vin-compat';
+import { VinFilter } from './VinFilter';
 import type { Product, ProductCategory, VehicleType } from '@/lib/types';
 
 type SortKey = 'relevance' | 'price-asc' | 'price-desc' | 'newest' | 'name-asc';
@@ -27,13 +30,15 @@ export function CatalogueClient({ products }: { products: Product[] }) {
   const initialCategory = searchParams.get('category') as ProductCategory | null;
   const initialQuery = searchParams.get('q') ?? '';
   const initialSort = (searchParams.get('sort') as SortKey | null) ?? 'relevance';
-  const showPromoOnly = searchParams.get('promo') === '1';
 
   const [query, setQuery] = useState(initialQuery);
   const [vehicleType, setVehicleType] = useState<VehicleType | 'all'>(initialType ?? 'all');
   const [category, setCategory] = useState<ProductCategory | 'all'>(initialCategory ?? 'all');
   const [sort, setSort] = useState<SortKey>(initialSort);
+  const [promoOnly, setPromoOnly] = useState(searchParams.get('promo') === '1');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Filtre VIN (flag VIN_FILTER_ENABLED) : véhicule décodé → pièces compatibles.
+  const [vinVehicle, setVinVehicle] = useState<DecodedVehicle | null>(null);
 
   // Bug #2 — ref pour distinguer nos propres router.replace des navigations externes
   const lastWrittenQs = useRef<string | null>(null);
@@ -45,11 +50,11 @@ export function CatalogueClient({ products }: { products: Product[] }) {
     if (vehicleType !== 'all') params.set('type', vehicleType);
     if (category !== 'all') params.set('category', category);
     if (sort !== 'relevance') params.set('sort', sort);
-    if (showPromoOnly) params.set('promo', '1');
+    if (promoOnly) params.set('promo', '1');
     const qs = params.toString();
     lastWrittenQs.current = qs;
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  }, [query, vehicleType, category, sort, showPromoOnly, pathname, router]);
+  }, [query, vehicleType, category, sort, promoOnly, pathname, router]);
 
   // URL → Filtres (navigation externe — Bug #2)
   useEffect(() => {
@@ -59,6 +64,7 @@ export function CatalogueClient({ products }: { products: Product[] }) {
     setCategory((searchParams.get('category') as ProductCategory | null) ?? 'all');
     setQuery(searchParams.get('q') ?? '');
     setSort((searchParams.get('sort') as SortKey | null) ?? 'relevance');
+    setPromoOnly(searchParams.get('promo') === '1');
   }, [searchParams]);
 
   const filtered = useMemo(() => {
@@ -68,9 +74,10 @@ export function CatalogueClient({ products }: { products: Product[] }) {
       .map((t) => t.trim())
       .filter(Boolean);
     const list = products.filter((p) => {
-      if (showPromoOnly && !p.isPromoted) return false;
+      if (promoOnly && !p.isPromoted) return false;
       if (vehicleType !== 'all' && p.vehicleType !== vehicleType) return false;
       if (category !== 'all' && p.category !== category) return false;
+      if (vinVehicle && !isCompatibleWith(p, vinVehicle)) return false;
       if (tokens.length > 0) {
         const haystack = [
           p.name,
@@ -93,7 +100,7 @@ export function CatalogueClient({ products }: { products: Product[] }) {
       if (a.stock > 0 !== b.stock > 0) return a.stock > 0 ? -1 : 1;
       return 0;
     });
-  }, [products, query, vehicleType, category, showPromoOnly, sort]);
+  }, [products, query, vehicleType, category, promoOnly, sort, vinVehicle]);
 
   const chip = (active: boolean, promo = false) =>
     [
@@ -121,6 +128,9 @@ export function CatalogueClient({ products }: { products: Product[] }) {
           <li className="text-cp-ink/60 font-medium">Pièces détachées</li>
         </ol>
       </nav>
+
+      {/* Filtre VIN — rendu seulement si le flag est actif (non branché par défaut) */}
+      {VIN_FILTER_ENABLED && <VinFilter onVehicle={setVinVehicle} />}
 
       {/* Recherche */}
       <div className="relative mb-6">
@@ -153,9 +163,13 @@ export function CatalogueClient({ products }: { products: Product[] }) {
           Moto
         </button>
         <div className="flex-1" />
-        <Link href="/pieces?promo=1" className={chip(showPromoOnly, true)}>
+        <button
+          type="button"
+          onClick={() => setPromoOnly((p) => !p)}
+          className={chip(promoOnly, true)}
+        >
           🔥 Promotions
-        </Link>
+        </button>
       </div>
 
       {/* Layout sidebar + grille */}
@@ -194,7 +208,12 @@ export function CatalogueClient({ products }: { products: Product[] }) {
               Disponibilité
             </p>
             <label className="flex items-center gap-2 text-sm text-cp-ink/60 cursor-pointer">
-              <input type="checkbox" className="accent-cp-mango" readOnly checked={showPromoOnly} />
+              <input
+                type="checkbox"
+                className="accent-cp-mango"
+                checked={promoOnly}
+                onChange={(e) => setPromoOnly(e.target.checked)}
+              />
               En promotion uniquement
             </label>
           </div>
@@ -205,6 +224,8 @@ export function CatalogueClient({ products }: { products: Product[] }) {
               setVehicleType('all');
               setQuery('');
               setSort('relevance');
+              setPromoOnly(false);
+              setVinVehicle(null);
             }}
             className="mt-6 w-full py-2.5 rounded-full border border-[#E5DDD3] text-sm text-cp-ink/40 hover:border-cp-mango hover:text-cp-mango transition-colors"
           >
@@ -219,7 +240,7 @@ export function CatalogueClient({ products }: { products: Product[] }) {
             <p className="text-sm text-cp-ink/50" aria-live="polite">
               <strong className="text-cp-ink">{filtered.length}</strong> pièce
               {filtered.length > 1 ? 's' : ''} trouvée{filtered.length > 1 ? 's' : ''}
-              {showPromoOnly && ' en promotion'}
+              {promoOnly && ' en promotion'}
             </p>
             <div className="flex items-center gap-3">
               {/* Mobile filter toggle */}
@@ -323,12 +344,48 @@ export function CatalogueClient({ products }: { products: Product[] }) {
                 ))}
               </div>
             </div>
+            {/* Type de véhicule (parité avec le desktop) */}
+            <div className="mb-6">
+              <p className="text-[0.6875rem] font-semibold text-cp-ink/30 uppercase tracking-widest mb-3">
+                Type de véhicule
+              </p>
+              <div className="flex gap-2">
+                {(['all', 'auto', 'moto'] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setVehicleType(t)}
+                    className={chip(vehicleType === t)}
+                  >
+                    {t === 'all' ? 'Tous' : t === 'auto' ? 'Auto' : 'Moto'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Disponibilité */}
+            <div className="mb-6">
+              <p className="text-[0.6875rem] font-semibold text-cp-ink/30 uppercase tracking-widest mb-3">
+                Disponibilité
+              </p>
+              <label className="flex items-center gap-2 text-sm text-cp-ink/60 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="accent-cp-mango"
+                  checked={promoOnly}
+                  onChange={(e) => setPromoOnly(e.target.checked)}
+                />
+                En promotion uniquement
+              </label>
+            </div>
+
             <button
               onClick={() => {
                 setCategory('all');
                 setVehicleType('all');
                 setQuery('');
                 setSort('relevance');
+                setPromoOnly(false);
+                setVinVehicle(null);
                 setSidebarOpen(false);
               }}
               className="w-full py-2.5 rounded-full border border-[#E5DDD3] text-sm text-cp-ink/40 hover:border-cp-mango hover:text-cp-mango transition-colors"
