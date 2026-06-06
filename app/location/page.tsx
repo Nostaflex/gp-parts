@@ -165,12 +165,16 @@ export default async function LocationPage() {
               <div
                 aria-hidden="true"
                 className="absolute -top-16 -right-16 w-56 h-56 rounded-full pointer-events-none"
-                style={{ background: 'radial-gradient(circle, rgba(232,114,0,0.20) 0%, transparent 70%)' }}
+                style={{
+                  background: 'radial-gradient(circle, rgba(232,114,0,0.20) 0%, transparent 70%)',
+                }}
               />
               <div
                 aria-hidden="true"
                 className="absolute -bottom-20 -left-12 w-52 h-52 rounded-full pointer-events-none"
-                style={{ background: 'radial-gradient(circle, rgba(82,200,138,0.20) 0%, transparent 70%)' }}
+                style={{
+                  background: 'radial-gradient(circle, rgba(82,200,138,0.20) 0%, transparent 70%)',
+                }}
               />
               <Image
                 src="/images/vehicule-racoon.webp"
