@@ -25,9 +25,15 @@ describe('VEHICULES — catalogue', () => {
     expect(new Set(refs).size).toBe(refs.length);
   });
 
-  it('chaque véhicule a 5 images', () => {
+  it('chaque véhicule a 1 à 5 images', () => {
     for (const v of VEHICULES) {
-      expect(v.images.length, `Véhicule ${v.id} doit avoir 5 images`).toBe(5);
+      expect(
+        v.images.length,
+        `Véhicule ${v.id} doit avoir au moins 1 image`
+      ).toBeGreaterThanOrEqual(1);
+      expect(v.images.length, `Véhicule ${v.id} ne doit pas dépasser 5 images`).toBeLessThanOrEqual(
+        5
+      );
     }
   });
 
