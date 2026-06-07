@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useCart } from '@/components/cart/CartProvider';
 
 const NAV_LINKS = [
   { href: '/reparation', label: 'Réparation' },
@@ -23,6 +24,7 @@ export function CpHeader({ darkSectionIds = [] }: CpHeaderProps) {
   const [theme, setTheme] = useState<HeaderTheme>('dark');
   const [menuOpen, setMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
+  const { totalItems, isReady } = useCart();
 
   useEffect(() => {
     if (darkSectionIds.length === 0) return;
@@ -92,31 +94,60 @@ export function CpHeader({ darkSectionIds = [] }: CpHeaderProps) {
           ))}
         </nav>
 
-        {/* CTA desktop */}
-        <Link
-          href="/contact"
-          className="hidden md:inline-flex items-center gap-2 bg-cp-mango text-cp-cream text-sm font-semibold px-4 py-2 rounded-full hover:bg-cp-mango/90 transition-colors"
-        >
-          Prendre RDV
-        </Link>
+        {/* Groupe droite : panier + CTA + burger */}
+        <div className="flex items-center gap-1 md:gap-3">
+          {/* Panier — toujours visible (accès direct au tunnel d'achat) */}
+          <Link
+            href="/panier"
+            aria-label={`Panier${isReady && totalItems > 0 ? ` (${totalItems} article${totalItems > 1 ? 's' : ''})` : ''}`}
+            className="relative p-2 hover:text-cp-mango transition-colors"
+          >
+            <svg
+              width="22"
+              height="22"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle cx="9" cy="21" r="1" />
+              <circle cx="20" cy="21" r="1" />
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+            </svg>
+            {isReady && totalItems > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-cp-red text-cp-cream text-[0.65rem] font-bold flex items-center justify-center">
+                {totalItems > 99 ? '99+' : totalItems}
+              </span>
+            )}
+          </Link>
 
-        {/* Burger mobile */}
-        <button
-          aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen((o) => !o)}
-          className="md:hidden flex flex-col gap-1.5 p-2"
-        >
-          <span
-            className={`block w-6 h-0.5 transition-all ${theme === 'dark' ? 'bg-cp-cream' : 'bg-cp-ink'} ${menuOpen ? 'rotate-45 translate-y-2' : ''}`}
-          />
-          <span
-            className={`block w-6 h-0.5 transition-all ${theme === 'dark' ? 'bg-cp-cream' : 'bg-cp-ink'} ${menuOpen ? 'opacity-0' : ''}`}
-          />
-          <span
-            className={`block w-6 h-0.5 transition-all ${theme === 'dark' ? 'bg-cp-cream' : 'bg-cp-ink'} ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`}
-          />
-        </button>
+          {/* CTA desktop */}
+          <Link
+            href="/contact"
+            className="hidden md:inline-flex items-center gap-2 bg-cp-red text-cp-cream text-sm font-semibold px-4 py-2 rounded-full hover:bg-cp-red-d transition-colors"
+          >
+            Prendre RDV
+          </Link>
+
+          {/* Burger mobile */}
+          <button
+            aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((o) => !o)}
+            className="md:hidden flex flex-col gap-1.5 p-2"
+          >
+            <span
+              className={`block w-6 h-0.5 transition-all ${theme === 'dark' ? 'bg-cp-cream' : 'bg-cp-ink'} ${menuOpen ? 'rotate-45 translate-y-2' : ''}`}
+            />
+            <span
+              className={`block w-6 h-0.5 transition-all ${theme === 'dark' ? 'bg-cp-cream' : 'bg-cp-ink'} ${menuOpen ? 'opacity-0' : ''}`}
+            />
+            <span
+              className={`block w-6 h-0.5 transition-all ${theme === 'dark' ? 'bg-cp-cream' : 'bg-cp-ink'} ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`}
+            />
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}
@@ -137,7 +168,7 @@ export function CpHeader({ darkSectionIds = [] }: CpHeaderProps) {
           <Link
             href="/contact"
             onClick={() => setMenuOpen(false)}
-            className="inline-flex justify-center bg-cp-mango text-cp-cream text-sm font-semibold px-4 py-2 rounded-full"
+            className="inline-flex justify-center bg-cp-red text-cp-cream text-sm font-semibold px-4 py-2 rounded-full"
           >
             Prendre RDV
           </Link>

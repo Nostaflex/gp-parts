@@ -16,7 +16,8 @@ export function AdminShell({ children, modal }: { children: ReactNode; modal?: R
       <AdminSidebar />
       <div className="flex flex-col flex-1 min-w-0">
         <AdminTopBar />
-        <main className="flex-1 min-w-0">{children}</main>
+        {/* div (pas <main>) : le <main id="main"> unique vit dans le root layout */}
+        <div className="flex-1 min-w-0">{children}</div>
       </div>
       {modal}
     </div>

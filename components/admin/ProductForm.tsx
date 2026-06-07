@@ -11,7 +11,7 @@ import { createProduct, updateProduct } from '@/app/admin/products/actions';
 import type { Product, ProductCategory, VehicleType } from '@/lib/types';
 
 const FIELD =
-  'h-11 px-3 rounded-[10px] border bg-[var(--surface)] text-[var(--text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--blue)]';
+  'h-11 px-3 rounded-[10px] border bg-[var(--surface)] text-base text-[var(--text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--blue)]';
 const TEXTAREA = FIELD.replace('h-11', 'py-2');
 const LABEL = 'text-body-sm font-medium text-[var(--text)] mb-1 block';
 
@@ -155,6 +155,7 @@ export function ProductForm({ initial }: { initial?: Product }) {
             id="price"
             name="price"
             type="number"
+            inputMode="decimal"
             step="0.01"
             defaultValue={priceEuros}
             className={FIELD}
@@ -169,6 +170,7 @@ export function ProductForm({ initial }: { initial?: Product }) {
             id="priceOriginal"
             name="priceOriginal"
             type="number"
+            inputMode="decimal"
             step="0.01"
             defaultValue={priceOriginalEuros}
             className={FIELD}
@@ -183,6 +185,7 @@ export function ProductForm({ initial }: { initial?: Product }) {
             id="stock"
             name="stock"
             type="number"
+            inputMode="numeric"
             defaultValue={initial?.stock}
             className={FIELD}
           />

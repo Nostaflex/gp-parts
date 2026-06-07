@@ -82,7 +82,7 @@ export function VenteVehiculeClient({ vehicules }: { vehicules: Vehicule[] }) {
                   <button
                     key={t}
                     onClick={() => setTypeFiltre(t)}
-                    className={`text-xs px-4 py-2 rounded-full border transition-all ${typeFiltre === t ? 'bg-cp-mango border-cp-mango text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/50 hover:border-cp-mango hover:text-cp-mango'}`}
+                    className={`text-xs px-4 py-2 rounded-full border transition-all ${typeFiltre === t ? 'bg-cp-red border-cp-red text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/50 hover:border-cp-red hover:text-cp-mango'}`}
                   >
                     {t}
                   </button>
@@ -98,7 +98,7 @@ export function VenteVehiculeClient({ vehicules }: { vehicules: Vehicule[] }) {
                   <button
                     key={e}
                     onClick={() => setEnergie(e)}
-                    className={`text-xs px-4 py-2 rounded-full border transition-all ${energie === e ? 'bg-cp-ink border-cp-ink text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/50 hover:border-cp-mango hover:text-cp-mango'}`}
+                    className={`text-xs px-4 py-2 rounded-full border transition-all ${energie === e ? 'bg-cp-ink border-cp-ink text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/50 hover:border-cp-red hover:text-cp-mango'}`}
                   >
                     {e}
                   </button>
@@ -114,7 +114,7 @@ export function VenteVehiculeClient({ vehicules }: { vehicules: Vehicule[] }) {
                   <button
                     key={b.val}
                     onClick={() => setBudget(b.val)}
-                    className={`text-xs px-4 py-2 rounded-full border transition-all ${budget === b.val ? 'bg-cp-ink border-cp-ink text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/50 hover:border-cp-mango hover:text-cp-mango'}`}
+                    className={`text-xs px-4 py-2 rounded-full border transition-all ${budget === b.val ? 'bg-cp-ink border-cp-ink text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/50 hover:border-cp-red hover:text-cp-mango'}`}
                   >
                     {b.label}
                   </button>
@@ -150,7 +150,7 @@ export function VenteVehiculeClient({ vehicules }: { vehicules: Vehicule[] }) {
                 <Link
                   key={v.id}
                   href={`/vente-vehicule/${v.id}`}
-                  className="group bg-white rounded-2xl border border-[#E5DDD3] overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_60px_rgba(26,15,6,0.10)] hover:border-cp-mango/40 focus:outline-none focus:ring-2 focus:ring-cp-mango/50"
+                  className="group bg-white rounded-2xl border border-[#E5DDD3] overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_60px_rgba(26,15,6,0.10)] hover:border-cp-red/40 focus:outline-none focus:ring-2 focus:ring-cp-mango/50"
                 >
                   {/* Image */}
                   <div className="relative h-48 overflow-hidden bg-[#F8F5F0]">
@@ -168,7 +168,7 @@ export function VenteVehiculeClient({ vehicules }: { vehicules: Vehicule[] }) {
                     </div>
                     <span
                       className={`absolute top-3 left-3 text-white cp-mono text-[0.6rem] px-2.5 py-1 rounded-full tracking-widest uppercase ${
-                        v.type === 'neuf' ? 'bg-cp-mango/90' : 'bg-cp-ink/80'
+                        v.type === 'neuf' ? 'bg-cp-red/90' : 'bg-cp-ink/80'
                       }`}
                     >
                       {v.type === 'neuf' ? 'Neuf' : 'Occasion'}
@@ -219,7 +219,7 @@ export function VenteVehiculeClient({ vehicules }: { vehicules: Vehicule[] }) {
                         </p>
                         <p className="text-xs text-cp-ink/35 mt-0.5">ou {v.mensualite} €/mois</p>
                       </div>
-                      <span className="px-4 py-2 rounded-xl bg-cp-ink text-cp-cream text-xs font-semibold group-hover:bg-cp-mango transition-colors">
+                      <span className="px-4 py-2 rounded-xl bg-cp-ink text-cp-cream text-xs font-semibold group-hover:bg-cp-red transition-colors">
                         Voir le véhicule →
                       </span>
                     </div>
@@ -277,7 +277,7 @@ export function VenteVehiculeClient({ vehicules }: { vehicules: Vehicule[] }) {
 
               <a
                 href={`/contact?sujet=${encodeURIComponent('Vente véhicule')}&reprise=1`}
-                className="inline-flex items-center gap-2 bg-cp-ink text-cp-cream text-sm font-semibold px-6 py-3.5 rounded-xl hover:bg-cp-mango transition-colors"
+                className="inline-flex items-center gap-2 bg-cp-ink text-cp-cream text-sm font-semibold px-6 py-3.5 rounded-xl hover:bg-cp-red transition-colors"
               >
                 Demander une estimation gratuite →
               </a>
@@ -509,7 +509,7 @@ export function VenteVehiculeClient({ vehicules }: { vehicules: Vehicule[] }) {
                     <button
                       key={d}
                       onClick={() => setSimDuree(d)}
-                      className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${simDuree === d ? 'bg-cp-ink text-cp-cream' : 'border border-[#E5DDD3] text-cp-ink/50 hover:border-cp-mango hover:text-cp-mango'}`}
+                      className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${simDuree === d ? 'bg-cp-ink text-cp-cream' : 'border border-[#E5DDD3] text-cp-ink/50 hover:border-cp-red hover:text-cp-mango'}`}
                     >
                       {d}
                     </button>
@@ -534,8 +534,8 @@ export function VenteVehiculeClient({ vehicules }: { vehicules: Vehicule[] }) {
               </div>
 
               <a
-                href="/reparation"
-                className="w-full py-3 rounded-xl bg-cp-ink text-cp-cream text-sm font-semibold hover:bg-cp-mango transition-colors text-center block"
+                href={`/contact?sujet=${encodeURIComponent('Financement véhicule')}&financement=1`}
+                className="w-full py-3 rounded-xl bg-cp-ink text-cp-cream text-sm font-semibold hover:bg-cp-red transition-colors text-center block"
               >
                 Je suis intéressé par ce financement
               </a>

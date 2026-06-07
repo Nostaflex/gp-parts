@@ -84,7 +84,7 @@ export function CpFooter() {
           <p className="text-cp-cream/30 text-xs">
             © {new Date().getFullYear()} Car Performance Guadeloupe. Tous droits réservés.
           </p>
-          <p className="cp-mono text-cp-cream/20 text-xs">971 🏝</p>
+          <p className="cp-mono text-cp-cream/20 text-xs">Guadeloupe · 971</p>
         </div>
       </div>
     </footer>

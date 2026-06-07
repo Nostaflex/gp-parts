@@ -3,6 +3,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle, Upload, X } from 'lucide-react';
+import { submitContact } from './actions';
+
+const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 Mo
 
 type Sujet =
   | 'Renseignement'
@@ -40,6 +43,9 @@ export function ContactForm() {
   const searchParams = useSearchParams();
   const [done, setDone] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [emailed, setEmailed] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const fileRef = useRef<HTMLInputElement>(null);
   const [data, setData] = useState<FormData>({
@@ -96,7 +102,14 @@ export function ContactForm() {
 
   const addFiles = (fl: FileList | null) => {
     if (!fl) return;
-    set('files', [...data.files, ...Array.from(fl)].slice(0, 5));
+    const incoming = Array.from(fl);
+    const ok = incoming.filter((f) => f.size <= MAX_FILE_BYTES);
+    const tooBig = incoming.length - ok.length;
+    setData((d) => ({ ...d, files: [...d.files, ...ok].slice(0, 5) }));
+    setErrors((e) => ({
+      ...e,
+      files: tooBig ? 'Fichier(s) trop volumineux (max 5 Mo) ignoré(s).' : undefined,
+    }));
   };
 
   const validate = (): boolean => {
@@ -110,8 +123,25 @@ export function ContactForm() {
     return Object.keys(errs).length === 0;
   };
 
-  const submit = () => {
+  const submit = async () => {
     if (!validate()) return;
+    setSubmitting(true);
+    setSubmitError(null);
+    const res = await submitContact({
+      prenom: data.prenom,
+      nom: data.nom,
+      email: data.email,
+      tel: data.tel,
+      sujet: data.sujet,
+      message: data.message,
+      filesCount: data.files.length,
+    });
+    setSubmitting(false);
+    if (!res.ok) {
+      setSubmitError(res.error);
+      return;
+    }
+    setEmailed(res.emailed);
     setDone(true);
   };
 
@@ -128,9 +158,18 @@ export function ContactForm() {
           Message envoyé
         </p>
         <h3 className="cp-title font-black text-cp-cream text-3xl mb-3">ON VOUS RÉPOND !</h3>
-        <p className="text-cp-cream/45 text-sm leading-relaxed mb-6 max-w-sm">
+        <p className="text-cp-cream/45 text-sm leading-relaxed mb-2 max-w-sm">
           Votre message a bien été reçu. Notre équipe vous répond dans la journée, souvent bien
           moins.
+        </p>
+        <p className="text-cp-cream/35 text-xs leading-relaxed mb-6 max-w-sm">
+          {emailed ? (
+            <>
+              Un accusé a été envoyé à <strong>{data.email}</strong>.
+            </>
+          ) : (
+            <>Nous vous répondons par email ou téléphone.</>
+          )}
         </p>
         <button
           onClick={() => {
@@ -316,6 +355,7 @@ export function ContactForm() {
               ))}
             </div>
           )}
+          {err('files')}
         </div>
 
         {/* Consentement */}
@@ -340,10 +380,16 @@ export function ContactForm() {
         <button
           type="button"
           onClick={submit}
-          className="w-full py-3.5 rounded-xl bg-cp-vert-l text-[#0E1F18] text-sm font-bold hover:bg-cp-vert-l/90 transition-colors"
+          disabled={submitting}
+          className="w-full py-3.5 rounded-xl bg-cp-vert-l text-[#0E1F18] text-sm font-bold hover:bg-cp-vert-l/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          Je suis intéressé
+          {submitting ? 'Envoi…' : 'Envoyer le message'}
         </button>
+        {submitError && (
+          <p role="alert" className="text-sm text-red-400 text-center">
+            {submitError}
+          </p>
+        )}
       </div>
     </div>
   );

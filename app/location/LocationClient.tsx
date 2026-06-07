@@ -24,7 +24,7 @@ type ReservationData = {
 const CATEGORIES: Categorie[] = ['Toutes', 'Citadine', 'Berline', 'SUV', 'Utilitaire'];
 
 const field =
-  'w-full px-4 py-3 rounded-xl border border-[#E5DDD3] bg-white text-cp-ink placeholder:text-cp-ink/30 text-sm outline-none transition-all focus:border-cp-mango focus:ring-2 focus:ring-cp-mango/10';
+  'w-full px-4 py-3 rounded-xl border border-[#E5DDD3] bg-white text-cp-ink placeholder:text-cp-ink/30 text-sm outline-none transition-all focus:border-cp-red focus:ring-2 focus:ring-cp-mango/10';
 const lbl = 'block text-xs font-semibold text-cp-ink/50 uppercase tracking-wider mb-1.5';
 
 function calcNbJours(depart: string, retour: string): number {
@@ -287,7 +287,7 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
                 <button
                   key={c}
                   onClick={() => setCategorie(c)}
-                  className={`text-xs px-3 py-1.5 rounded-full border transition-all ${categorie === c ? 'bg-cp-ink border-cp-ink text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/50 hover:border-cp-mango hover:text-cp-mango'}`}
+                  className={`text-xs px-3 py-1.5 rounded-full border transition-all ${categorie === c ? 'bg-cp-ink border-cp-ink text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/50 hover:border-cp-red hover:text-cp-mango'}`}
                 >
                   {c}
                 </button>
@@ -295,7 +295,7 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
               {categorie !== 'Toutes' && (
                 <button
                   onClick={() => setCategorie('Toutes')}
-                  className="text-xs px-3 py-1.5 rounded-full border border-[#E5DDD3] text-cp-ink/40 hover:border-cp-mango hover:text-cp-mango transition-all"
+                  className="text-xs px-3 py-1.5 rounded-full border border-[#E5DDD3] text-cp-ink/40 hover:border-cp-red hover:text-cp-mango transition-all"
                 >
                   Tout
                 </button>
@@ -359,7 +359,7 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
                     </div>
                     <button
                       onClick={() => openReservation(v.id)}
-                      className="px-4 py-2 rounded-xl bg-cp-mango/10 border border-cp-mango/20 text-cp-mango text-sm font-semibold hover:bg-cp-mango/20 hover:border-cp-mango/40 transition-all"
+                      className="px-4 py-2 rounded-xl bg-cp-red/10 border border-cp-red/20 text-cp-mango text-sm font-semibold hover:bg-cp-red/20 hover:border-cp-red/40 transition-all"
                     >
                       Réserver
                     </button>
@@ -755,7 +755,7 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
                   <button
                     type="button"
                     onClick={next}
-                    className="flex-1 py-3 rounded-xl bg-cp-ink text-cp-cream text-sm font-semibold hover:bg-cp-mango transition-colors flex items-center justify-center gap-2"
+                    className="flex-1 py-3 rounded-xl bg-cp-ink text-cp-cream text-sm font-semibold hover:bg-cp-red transition-colors flex items-center justify-center gap-2"
                   >
                     {step === 2 ? 'Confirmer la réservation' : 'Continuer'}
                     {step < 2 && (

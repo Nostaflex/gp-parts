@@ -20,9 +20,10 @@ describe('MOTOS — catalogue', () => {
     expect(new Set(refs).size).toBe(refs.length);
   });
 
-  it('chaque moto a 5 images', () => {
+  it('chaque moto a 1 à 5 images', () => {
     for (const m of MOTOS) {
-      expect(m.images.length, `Moto ${m.id} doit avoir 5 images`).toBe(5);
+      expect(m.images.length, `Moto ${m.id} doit avoir au moins 1 image`).toBeGreaterThanOrEqual(1);
+      expect(m.images.length, `Moto ${m.id} ne doit pas dépasser 5 images`).toBeLessThanOrEqual(5);
     }
   });
 

@@ -10,7 +10,7 @@ import { createLocationCar, updateLocationCar } from '@/app/admin/location/actio
 import type { LocationCar } from '@/lib/location-cars';
 
 const FIELD =
-  'h-11 px-3 rounded-[10px] border bg-[var(--surface)] text-[var(--text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--blue)]';
+  'h-11 px-3 rounded-[10px] border bg-[var(--surface)] text-base text-[var(--text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--blue)]';
 const LABEL = 'text-body-sm font-medium text-[var(--text)] mb-1 block';
 
 // centimes → euros pour pré-remplir le champ (édition)

@@ -48,6 +48,12 @@ export const ORDER_PREFIX = 'GP';
 export const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '590000000000';
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
 
+// --- Feature flags ---
+// Filtre catalogue par VIN (décodage NHTSA → pièces compatibles).
+// Développé mais NON branché par défaut : activer NEXT_PUBLIC_VIN_FILTER=1
+// pour l'afficher (le temps de valider la couverture sur de vrais VIN locaux).
+export const VIN_FILTER_ENABLED = process.env.NEXT_PUBLIC_VIN_FILTER === '1';
+
 // --- localStorage keys ---
 export const STORAGE_KEYS = {
   cart: 'gpparts-cart',

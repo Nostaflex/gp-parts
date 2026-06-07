@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { CheckCircle } from 'lucide-react';
+import { submitRdv } from './actions';
 
 type Step = 0 | 1 | 2 | 3;
 
@@ -65,17 +66,16 @@ const MARQUES = [
 const STEP_LABELS = ['Vos coordonnées', 'Votre véhicule', 'La prestation', 'Date & créneau'];
 
 const field =
-  'w-full px-4 py-3 rounded-xl border border-[#E5DDD3] bg-white text-cp-ink placeholder:text-cp-ink/30 text-sm outline-none transition-all focus:border-cp-mango focus:ring-2 focus:ring-cp-mango/10';
+  'w-full px-4 py-3 rounded-xl border border-[#E5DDD3] bg-white text-cp-ink placeholder:text-cp-ink/30 text-sm outline-none transition-all focus:border-cp-red focus:ring-2 focus:ring-cp-mango/10';
 const label = 'block text-xs font-semibold text-cp-ink/50 uppercase tracking-wider mb-1.5';
-
-function generateRef() {
-  return `RDV-CP-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
-}
 
 export function RdvForm() {
   const [step, setStep] = useState<Step>(0);
   const [done, setDone] = useState(false);
   const [ref, setRef] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [emailed, setEmailed] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [data, setData] = useState<FormData>({
     prenom: '',
@@ -130,8 +130,17 @@ export function RdvForm() {
     setStep((s) => (s + 1) as Step);
   };
 
-  const submit = () => {
-    setRef(generateRef());
+  const submit = async () => {
+    setSubmitting(true);
+    setSubmitError(null);
+    const res = await submitRdv(data);
+    setSubmitting(false);
+    if (!res.ok) {
+      setSubmitError(res.error);
+      return;
+    }
+    setRef(res.ref);
+    setEmailed(res.emailed);
     setDone(true);
   };
 
@@ -157,7 +166,15 @@ export function RdvForm() {
           <p className="cp-mono font-medium text-cp-ink text-lg tracking-wider">{ref}</p>
         </div>
         <p className="text-xs text-cp-ink/40">
-          Un email de confirmation a été envoyé à <strong>{data.email}</strong>
+          {emailed ? (
+            <>
+              Un email de confirmation a été envoyé à <strong>{data.email}</strong>.
+            </>
+          ) : (
+            <>
+              Nous vous recontactons sous 1h (jours ouvrés) au <strong>{data.tel}</strong>.
+            </>
+          )}
         </p>
         <button
           onClick={() => {
@@ -375,7 +392,7 @@ export function RdvForm() {
                     key={t}
                     type="button"
                     onClick={() => set('type', t)}
-                    className={`px-4 py-2 rounded-full border text-sm font-medium transition-all ${data.type === t ? 'bg-cp-ink border-cp-ink text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/60 hover:border-cp-mango hover:text-cp-mango'}`}
+                    className={`px-4 py-2 rounded-full border text-sm font-medium transition-all ${data.type === t ? 'bg-cp-ink border-cp-ink text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/60 hover:border-cp-red hover:text-cp-mango'}`}
                   >
                     {t}
                   </button>
@@ -425,7 +442,7 @@ export function RdvForm() {
                     key={c}
                     type="button"
                     onClick={() => set('creneau', c)}
-                    className={`py-2.5 px-4 rounded-xl border text-sm font-medium transition-all ${data.creneau === c ? 'bg-cp-ink border-cp-ink text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/60 hover:border-cp-mango hover:text-cp-mango'}`}
+                    className={`py-2.5 px-4 rounded-xl border text-sm font-medium transition-all ${data.creneau === c ? 'bg-cp-ink border-cp-ink text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/60 hover:border-cp-red hover:text-cp-mango'}`}
                   >
                     {c}
                   </button>
@@ -461,7 +478,7 @@ export function RdvForm() {
             <button
               type="button"
               onClick={() => setStep((s) => (s - 1) as Step)}
-              className="flex-1 py-3 rounded-xl border border-[#E5DDD3] text-sm font-medium text-cp-ink/60 hover:border-cp-mango hover:text-cp-mango transition-colors"
+              className="flex-1 py-3 rounded-xl border border-[#E5DDD3] text-sm font-medium text-cp-ink/60 hover:border-cp-red hover:text-cp-mango transition-colors"
             >
               Retour
             </button>
@@ -469,9 +486,10 @@ export function RdvForm() {
           <button
             type="button"
             onClick={next}
-            className="flex-1 py-3 rounded-xl bg-cp-ink text-cp-cream text-sm font-semibold hover:bg-cp-mango transition-colors flex items-center justify-center gap-2"
+            disabled={submitting}
+            className="flex-1 py-3 rounded-xl bg-cp-ink text-cp-cream text-sm font-semibold hover:bg-cp-red transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {step === 3 ? 'Envoyer ma demande' : 'Continuer'}
+            {step === 3 ? (submitting ? 'Envoi…' : 'Envoyer ma demande') : 'Continuer'}
             {step < 3 && (
               <svg
                 width="14"
@@ -487,6 +505,11 @@ export function RdvForm() {
             )}
           </button>
         </div>
+        {submitError && (
+          <p role="alert" className="text-sm text-red-600 mt-3 text-center">
+            {submitError}
+          </p>
+        )}
       </div>
     </div>
   );

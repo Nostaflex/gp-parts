@@ -7,7 +7,8 @@ import type { Vehicule } from '@/lib/vehicules';
 import { getCachedVehicules } from '@/lib/data/vehicules-cache';
 import { FinancementSimulator } from './FinancementSimulator';
 import { VehiculeGallery } from './VehiculeGallery';
-import { safeJsonLd } from '@/lib/safe-json-ld';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { BUSINESS, absoluteUrl, breadcrumbJsonLd } from '@/lib/seo';
 
 // Filet ISR : revalidateTag('vehicules') (Server Actions admin) prime sur
 // mutation ; ce TTL n'est qu'un fallback de fraîcheur.
@@ -38,7 +39,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
   return {
     title: `${v.marque} ${v.modele} ${v.annee} — ${v.prix.toLocaleString('fr-FR')} €`,
-    description: `${v.marque} ${v.modele} ${v.annee}, ${v.km.toLocaleString('fr-FR')} km, ${v.energie} ${v.transmission}. Véhicule d'occasion contrôlé, garantie 12 mois incluse, financement disponible. Disponible à Pointe-à-Pitre.`,
+    description: `${v.marque} ${v.modele} ${v.annee}, ${v.km.toLocaleString('fr-FR')} km, ${v.energie} ${v.transmission}. Véhicule d'occasion contrôlé, garantie 12 mois incluse, financement disponible. Disponible à ${BUSINESS.address.city}.`,
+    alternates: { canonical: `/vente-vehicule/${v.id}` },
     openGraph: {
       title: `${v.marque} ${v.modele} ${v.annee}`,
       description: `${v.km.toLocaleString('fr-FR')} km · ${v.energie} · ${v.prix.toLocaleString('fr-FR')} €`,
@@ -50,7 +52,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 function vehicleJsonLd(v: Vehicule) {
   return {
     '@context': 'https://schema.org',
-    '@type': 'Vehicle',
+    '@type': 'Car',
     name: `${v.marque} ${v.modele}`,
     brand: { '@type': 'Brand', name: v.marque },
     model: v.modele,
@@ -66,6 +68,7 @@ function vehicleJsonLd(v: Vehicule) {
     sku: v.reference,
     offers: {
       '@type': 'Offer',
+      url: absoluteUrl(`/vente-vehicule/${v.id}`),
       price: v.prix,
       priceCurrency: 'EUR',
       availability:
@@ -77,8 +80,15 @@ function vehicleJsonLd(v: Vehicule) {
       itemCondition: 'https://schema.org/UsedCondition',
       seller: {
         '@type': 'AutoDealer',
-        name: 'Car Performance',
+        name: BUSINESS.name,
         areaServed: 'Guadeloupe',
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: BUSINESS.address.city,
+          postalCode: BUSINESS.address.postalCode,
+          addressRegion: BUSINESS.address.region,
+          addressCountry: BUSINESS.address.country,
+        },
       },
     },
   };
@@ -111,9 +121,15 @@ export default async function VehiculeDetailPage({ params }: Props) {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLd(vehicleJsonLd(v)) }}
+      <JsonLd
+        data={[
+          vehicleJsonLd(v),
+          breadcrumbJsonLd([
+            { name: 'Accueil', path: '/' },
+            { name: 'Vente véhicule', path: '/vente-vehicule' },
+            { name: `${v.marque} ${v.modele}`, path: `/vente-vehicule/${v.id}` },
+          ]),
+        ]}
       />
       <CpHeader />
 
@@ -222,13 +238,13 @@ export default async function VehiculeDetailPage({ params }: Props) {
                 <div className="flex flex-col gap-3">
                   <Link
                     href={contactHref}
-                    className="w-full inline-flex justify-center items-center gap-2 bg-cp-ink text-cp-cream text-sm font-semibold px-6 py-3.5 rounded-xl hover:bg-cp-mango transition-colors"
+                    className="w-full inline-flex justify-center items-center gap-2 bg-cp-ink text-cp-cream text-sm font-semibold px-6 py-3.5 rounded-xl hover:bg-cp-red transition-colors"
                   >
                     Je suis intéressé
                   </Link>
                   <a
-                    href="tel:+590590000000"
-                    className="w-full inline-flex justify-center items-center gap-2 border border-[#E5DDD3] text-cp-ink text-sm font-semibold px-6 py-3 rounded-xl hover:border-cp-mango hover:text-cp-mango transition-colors"
+                    href={`tel:${BUSINESS.phone}`}
+                    className="w-full inline-flex justify-center items-center gap-2 border border-[#E5DDD3] text-cp-ink text-sm font-semibold px-6 py-3 rounded-xl hover:border-cp-red hover:text-cp-mango transition-colors"
                   >
                     <svg
                       width="14"
@@ -377,7 +393,7 @@ export default async function VehiculeDetailPage({ params }: Props) {
             </p>
             <Link
               href={contactHref}
-              className="inline-flex items-center gap-2 bg-cp-mango text-cp-cream font-semibold px-8 py-3.5 rounded-full hover:bg-cp-mango/90 transition-colors"
+              className="inline-flex items-center gap-2 bg-cp-red text-cp-cream font-semibold px-8 py-3.5 rounded-full hover:bg-cp-red-d transition-colors"
             >
               Je suis intéressé →
             </Link>

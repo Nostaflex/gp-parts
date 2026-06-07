@@ -10,7 +10,7 @@ import { createVehicule, updateVehicule } from '@/app/admin/vehicules/actions';
 import type { Vehicule } from '@/lib/vehicules';
 
 const FIELD =
-  'h-11 px-3 rounded-[10px] border bg-[var(--surface)] text-[var(--text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--blue)]';
+  'h-11 px-3 rounded-[10px] border bg-[var(--surface)] text-base text-[var(--text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--blue)]';
 const TEXTAREA = FIELD.replace('h-11', 'py-2');
 const LABEL = 'text-body-sm font-medium text-[var(--text)] mb-1 block';
 

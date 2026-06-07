@@ -149,7 +149,7 @@ export function FinancementSimulator({ prix, marque, modele, vehiculeId }: Props
             key={o.titre}
             className="flex items-start gap-2 p-3 rounded-lg border border-[#E5DDD3] bg-white"
           >
-            <div className="w-1.5 h-1.5 rounded-full bg-cp-mango mt-1.5 flex-shrink-0" />
+            <div className="w-1.5 h-1.5 rounded-full bg-cp-red mt-1.5 flex-shrink-0" />
             <div>
               <p className="text-xs font-semibold text-cp-ink">{o.titre}</p>
               <p className="text-[0.65rem] text-cp-ink/50 leading-relaxed">{o.desc}</p>
@@ -161,7 +161,7 @@ export function FinancementSimulator({ prix, marque, modele, vehiculeId }: Props
       {/* CTA */}
       <Link
         href={contactHref}
-        className="w-full inline-flex justify-center items-center gap-2 bg-cp-ink text-cp-cream text-sm font-semibold px-6 py-3.5 rounded-xl hover:bg-cp-mango transition-colors"
+        className="w-full inline-flex justify-center items-center gap-2 bg-cp-ink text-cp-cream text-sm font-semibold px-6 py-3.5 rounded-xl hover:bg-cp-red transition-colors"
       >
         Demander un dossier de financement →
       </Link>

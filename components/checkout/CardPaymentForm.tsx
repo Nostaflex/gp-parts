@@ -79,7 +79,8 @@ function PaymentInner({ onPaid }: { onPaid: () => void }) {
       </Button>
 
       <p className="text-xs text-cp-ink/35 text-center">
-        Paiement sécurisé Stripe — mode test (carte 4242 4242 4242 4242)
+        Paiement sécurisé par Stripe
+        {process.env.NODE_ENV !== 'production' && ' — mode test (carte 4242 4242 4242 4242)'}
       </p>
     </div>
   );

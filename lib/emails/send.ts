@@ -3,6 +3,7 @@ import { buildOrderConfirmationEmail } from '@/lib/emails/orderConfirmation';
 import { buildOrderNotificationEmail } from '@/lib/emails/orderNotification';
 import { buildReservationConfirmationEmail } from '@/lib/emails/reservationConfirmation';
 import { buildReservationNotificationEmail } from '@/lib/emails/reservationNotification';
+import { buildLeadNotificationEmail, buildLeadAckEmail, type Lead } from '@/lib/emails/lead';
 import type { Order } from '@/lib/types';
 import type { Reservation } from '@/lib/reservations';
 
@@ -71,4 +72,42 @@ export function sendReservationEmails(reservation: Reservation): void {
       })
       .catch((err) => console.error('[emails] Notif réservation gérant échouée:', err));
   }
+}
+
+/**
+ * Emails de lead (RDV réparation / contact). Contrairement aux autres,
+ * on AWAIT la notification gérant : c'est le lead à ne jamais perdre, et
+ * l'UI a besoin de savoir si l'envoi a réellement eu lieu (pas de fausse
+ * confirmation). Retourne `emailed` = un email a bien été envoyé.
+ * Silencieux (emailed=false) si `RESEND_API_KEY` absente (dev/test).
+ */
+export async function sendLeadEmails(lead: Lead): Promise<{ emailed: boolean }> {
+  if (!process.env.RESEND_API_KEY) return { emailed: false };
+
+  let emailed = false;
+
+  // 1. Notification gérant (critique) — awaited.
+  if (EMAIL_ADMIN) {
+    const notification = buildLeadNotificationEmail(lead);
+    try {
+      await getResend().emails.send({
+        from: EMAIL_FROM,
+        to: EMAIL_ADMIN,
+        replyTo: lead.email,
+        subject: notification.subject,
+        html: notification.html,
+      });
+      emailed = true;
+    } catch (err) {
+      console.error('[emails] Notif lead gérant échouée:', err);
+    }
+  }
+
+  // 2. Accusé client — fire-and-forget (non bloquant).
+  const ack = buildLeadAckEmail(lead);
+  getResend()
+    .emails.send({ from: EMAIL_FROM, to: lead.email, subject: ack.subject, html: ack.html })
+    .catch((err) => console.error('[emails] Accusé lead client échoué:', err));
+
+  return { emailed };
 }

@@ -5,6 +5,7 @@ import { CpFooter } from '@/components/cp/CpFooter';
 import { VenteMotoClient } from './VenteMotoClient';
 import { getCachedMotos } from '@/lib/data/motos-cache';
 import Link from 'next/link';
+import Image from 'next/image';
 
 // Symétrie ISR avec [id]/page.tsx : revalidateTag('motos') prime sur
 // mutation ; ce TTL n'est qu'un fallback de fraîcheur.
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
   title: 'Vente de motos — Occasion & Neuf',
   description:
     "Achetez une moto d'occasion contrôlée ou neuve à commander en Guadeloupe. Roadster, sport, trail, scooter — toutes cylindrées. Garantie incluse, financement sur mesure.",
+  alternates: { canonical: '/vente-moto' },
 };
 
 export default async function VenteMotoPage() {
@@ -29,18 +31,46 @@ export default async function VenteMotoPage() {
         className="relative pt-20 overflow-hidden"
         style={{ backgroundColor: '#1E0E04' }}
       >
-        <div
-          aria-hidden="true"
-          className="absolute pointer-events-none rounded-full"
-          style={{
-            width: '600px',
-            height: '600px',
-            top: '50%',
-            left: '72%',
-            transform: 'translate(-50%, -50%)',
-            background: 'radial-gradient(circle, rgba(184,130,11,0.12) 0%, transparent 70%)',
-          }}
-        />
+        {/* Fond plein cadre — vraie photo moto (Yamaha Tracer 9, bord de mer),
+            étalonnée chaud/sombre + dégradés multi-bords pour fondre dans le
+            #1E0E04 sans rectangle. Masqué en mobile (lisibilité du texte). */}
+        <div aria-hidden="true" className="absolute inset-0 hidden md:block">
+          <Image
+            src="/images/hero-vente-moto.webp"
+            alt=""
+            fill
+            priority
+            sizes="(max-width: 768px) 0px, 100vw"
+            className="object-cover object-[center_55%]"
+          />
+          {/* Scrim gauche → texte lisible ; la moto émerge à droite */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(to right, #1E0E04 0%, rgba(30,14,4,0.82) 32%, rgba(30,14,4,0.12) 68%, rgba(30,14,4,0) 100%)',
+            }}
+          />
+          {/* Fondu haut + bas vers la couleur de section (zéro arête) */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(to bottom, #1E0E04 0%, transparent 22%, transparent 68%, #1E0E04 100%)',
+            }}
+          />
+          {/* Halo chaud discret bas-droite — remplace l'aplat jaune qui jurait */}
+          <div
+            className="absolute pointer-events-none rounded-full"
+            style={{
+              width: '520px',
+              height: '520px',
+              bottom: '-10%',
+              right: '3%',
+              background: 'radial-gradient(circle, rgba(217,38,39,0.10) 0%, transparent 70%)',
+            }}
+          />
+        </div>
 
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-0 items-end min-h-[75vh] relative z-10">
           <div className="py-16 md:py-24">
@@ -78,7 +108,7 @@ export default async function VenteMotoPage() {
             >
               VENTE
               <br />
-              <span style={{ color: '#E9C46A' }}>MOTO</span>
+              <span style={{ color: '#D92627' }}>MOTO</span>
             </h1>
             <p
               className="text-base leading-relaxed max-w-md mb-8"
@@ -110,29 +140,7 @@ export default async function VenteMotoPage() {
             </div>
           </div>
 
-          <div
-            className="hidden md:block h-full relative overflow-hidden"
-            style={{ minHeight: '500px' }}
-          >
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage:
-                  "url('https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=900&q=80&fit=crop')",
-                filter: 'brightness(0.7) saturate(0.9)',
-              }}
-            />
-            <div
-              className="absolute inset-0"
-              style={{
-                background: 'linear-gradient(to right, rgba(28,14,4,0.65) 0%, transparent 50%)',
-              }}
-            />
-            <div
-              className="absolute bottom-0 left-0 right-0 h-2/5"
-              style={{ background: 'linear-gradient(to top, #1E0E04 0%, transparent 100%)' }}
-            />
-          </div>
+          {/* Colonne droite laissée vide : la moto vit dans le fond plein cadre */}
         </div>
       </section>
 

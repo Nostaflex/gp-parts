@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: 'Réparation & RDV',
   description:
     'Prenez rendez-vous en ligne pour votre réparation auto ou moto. Réponse sous 1h, devis gratuit, toutes marques en Guadeloupe.',
+  alternates: { canonical: '/reparation' },
 };
 
 const PROMISES = [
@@ -130,19 +131,20 @@ export default function ReparationPage() {
             >
               RÉSERVEZ
               <br />
-              <span className="text-cp-mango">VOTRE RDV</span>
+              <span className="text-cp-red">VOTRE RDV</span>
             </h1>
             <p className="text-cp-cream/55 text-base leading-relaxed max-w-md mb-8">
               Décrivez votre problème, choisissez votre créneau. Nous vous confirmons par email dans
               l&apos;heure.
             </p>
             <div className="flex flex-wrap gap-2">
-              {['Toutes marques', 'Réponse &lt; 1h', 'Devis gratuit'].map((pill, i) => (
+              {['Toutes marques', 'Réponse < 1h', 'Devis gratuit'].map((pill) => (
                 <span
-                  key={i}
+                  key={pill}
                   className="cp-mono text-xs text-cp-cream/50 border border-cp-cream/15 px-3 py-1.5 rounded-full"
-                  dangerouslySetInnerHTML={{ __html: pill }}
-                />
+                >
+                  {pill}
+                </span>
               ))}
             </div>
           </div>
@@ -182,7 +184,7 @@ export default function ReparationPage() {
               <br />
               RAPIDE,
               <br />
-              <em className="text-cp-mango not-italic">CONFIRMÉ</em>
+              <em className="text-cp-red not-italic">CONFIRMÉ</em>
             </h2>
             <p className="text-cp-ink/60 text-base leading-relaxed mb-10 max-w-md">
               Remplissez le formulaire en 2 minutes. Notre équipe vous rappelle pour confirmer le

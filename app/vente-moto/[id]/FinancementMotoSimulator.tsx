@@ -133,7 +133,7 @@ export function FinancementMotoSimulator({ prix, marque, modele, motoId }: Props
 
       <Link
         href={contactHref}
-        className="w-full inline-flex justify-center items-center gap-2 bg-cp-ink text-cp-cream text-sm font-semibold px-6 py-3.5 rounded-xl hover:bg-cp-mango transition-colors"
+        className="w-full inline-flex justify-center items-center gap-2 bg-cp-ink text-cp-cream text-sm font-semibold px-6 py-3.5 rounded-xl hover:bg-cp-red transition-colors"
       >
         Demander un dossier de financement →
       </Link>

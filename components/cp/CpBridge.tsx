@@ -13,11 +13,11 @@ export function CpBridge({ fromColor, toColor, accentColor = '#E87200' }: Bridge
     <div
       aria-hidden="true"
       style={{
-        height: '180px',
-        marginTop: '-90px',
-        marginBottom: '-90px',
+        height: '128px',
+        marginTop: '-64px',
+        marginBottom: '-64px',
         position: 'relative',
-        zIndex: 10,
+        zIndex: 5,
         overflow: 'visible',
       }}
     >

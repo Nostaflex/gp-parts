@@ -8,8 +8,9 @@ test.describe('Home page — smoke', () => {
   test('charge et affiche le hero avec lien Pièces', async ({ page }) => {
     await page.goto('/');
 
-    // Title is "Accueil" (template not applied to root route in Next.js 14 prod build)
-    await expect(page).toHaveTitle(/Accueil|Car Performance/i);
+    // Titre home = "Garage auto & moto en Guadeloupe" (le template parent
+    // "| Car Performance" n'est pas appliqué à la route racine en prod build).
+    await expect(page).toHaveTitle(/Garage|Car Performance/i);
 
     // La navbar CP expose un lien vers /pieces
     await expect(page.locator('a[href="/pieces"]').first()).toBeVisible({ timeout: 10_000 });

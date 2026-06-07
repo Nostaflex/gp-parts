@@ -68,6 +68,21 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Parc de location: lecture publique (actifs seulement), admin en écriture.
+    // .get('deletedAt', null) tolère le champ absent (même contrat que products).
+    match /location-cars/{doc=**} {
+      allow read: if resource.data.get('deletedAt', null) == null || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Réservations: création publique (formulaire location), lecture/update admin,
+    // jamais hard delete (cohérent avec orders/demandes).
+    match /reservations/{doc} {
+      allow create;
+      allow read, update: if isAdmin();
+      allow delete: if false;
+    }
+
     // Default deny
     match /{document=**} {
       allow read, write: if false;

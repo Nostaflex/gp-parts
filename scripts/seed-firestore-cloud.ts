@@ -10,6 +10,12 @@ import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { PRODUCTS } from '../lib/products';
 import { parseProduct } from '../lib/schemas/product';
+import { LOCATION_CARS } from '../lib/location-cars';
+import { parseLocationCar } from '../lib/schemas/location-car';
+import { VEHICULES } from '../lib/vehicules';
+import { parseVehicule } from '../lib/schemas/vehicule';
+import { MOTOS } from '../lib/motos';
+import { parseMoto } from '../lib/schemas/moto';
 
 const serviceAccountPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 
@@ -38,8 +44,34 @@ async function seed() {
     batch.set(ref, validated);
   }
 
+  // Parc de location. deletedAt: null est REQUIS — la lecture filtre
+  // where('deletedAt','==',null), un doc sans ce champ ne serait jamais retourné.
+  // updatedAt reste une string (le schéma de lecture l'exige).
+  for (const car of LOCATION_CARS) {
+    const validated = parseLocationCar(car);
+    const ref = db.collection('location-cars').doc(validated.id);
+    batch.set(ref, { ...validated, deletedAt: null });
+  }
+
+  // Véhicules à vendre (getVehicules ne filtre pas deletedAt → pas requis ici).
+  for (const vehicule of VEHICULES) {
+    const validated = parseVehicule(vehicule);
+    const ref = db.collection('vehicules').doc(validated.id);
+    batch.set(ref, validated);
+  }
+
+  // Motos à vendre.
+  for (const moto of MOTOS) {
+    const validated = parseMoto(moto);
+    const ref = db.collection('motos').doc(validated.id);
+    batch.set(ref, validated);
+  }
+
   await batch.commit();
-  console.log(`Done! ${PRODUCTS.length} products seeded.`);
+  console.log(
+    `Done! ${PRODUCTS.length} products + ${LOCATION_CARS.length} location-cars + ` +
+      `${VEHICULES.length} vehicules + ${MOTOS.length} motos seeded.`
+  );
 }
 
 seed().catch((err) => {
