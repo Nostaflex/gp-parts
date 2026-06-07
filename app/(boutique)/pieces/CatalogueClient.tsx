@@ -273,11 +273,31 @@ export function CatalogueClient({ products }: { products: Product[] }) {
           {filtered.length === 0 ? (
             <div className="bg-white rounded-2xl border border-[#E5DDD3] p-16 text-center">
               <Search size={48} strokeWidth={1.25} className="mx-auto text-cp-ink/10 mb-4" />
-              <h2 className="cp-title font-black text-2xl text-cp-ink mb-2">Aucun résultat</h2>
-              <p className="text-sm text-cp-ink/50 max-w-xs mx-auto">
-                Aucune pièce ne correspond à votre recherche. Ajustez les filtres ou élargissez
-                votre recherche.
-              </p>
+              {promoOnly ? (
+                <>
+                  <h2 className="cp-title font-black text-2xl text-cp-ink mb-2">
+                    Aucune promotion en ce moment
+                  </h2>
+                  <p className="text-sm text-cp-ink/50 max-w-xs mx-auto mb-4">
+                    Pas d&apos;offre en cours. Revenez bientôt, ou parcourez tout le catalogue.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setPromoOnly(false)}
+                    className="text-sm font-semibold text-cp-mango hover:underline"
+                  >
+                    Voir tout le catalogue
+                  </button>
+                </>
+              ) : (
+                <>
+                  <h2 className="cp-title font-black text-2xl text-cp-ink mb-2">Aucun résultat</h2>
+                  <p className="text-sm text-cp-ink/50 max-w-xs mx-auto">
+                    Aucune pièce ne correspond à votre recherche. Ajustez les filtres ou élargissez
+                    votre recherche.
+                  </p>
+                </>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
