@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { CpHeader } from '@/components/cp/CpHeader';
 import { CpBridge } from '@/components/cp/CpBridge';
+import { CpLogo } from '@/components/cp/CpLogo';
+import { CpUniversStrip } from '@/components/cp/CpUniversStrip';
 import { CpReveal } from '@/components/cp/CpReveal';
 
 export default function PiecesLayout({ children }: { children: ReactNode }) {
@@ -117,20 +118,16 @@ export default function PiecesLayout({ children }: { children: ReactNode }) {
       </div>
 
       {/* Bridge craft → cinema */}
-      <CpBridge fromColor="#F8F5F0" toColor="#0D0905" />
+      <CpBridge fromColor="#F8F5F0" toColor="#1A0F06" />
+
+      <CpUniversStrip current="pieces" tone="dark" />
 
       {/* Footer CP */}
       <footer className="py-16 px-6" style={{ backgroundColor: '#1A0F06' }}>
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
             <div>
-              <Image
-                src="/images/logo-carperformance.svg"
-                alt="Car Performance"
-                width={180}
-                height={60}
-                className="h-14 w-auto mb-3"
-              />
+              <CpLogo tone="dark" size="footer" className="mb-4" />
               <p className="text-cp-cream/40 text-sm leading-relaxed">
                 Votre garage de confiance en Guadeloupe — passion, conseil technique, pièces de
                 qualité.

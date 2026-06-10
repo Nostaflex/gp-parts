@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { CpHeader } from '@/components/cp/CpHeader';
 import { CpBridge } from '@/components/cp/CpBridge';
 import { CpFooter } from '@/components/cp/CpFooter';
+import { CpUniversStrip } from '@/components/cp/CpUniversStrip';
 import { getAdapter } from '@/lib/data';
 import { LocationClient } from './LocationClient';
 
@@ -185,6 +186,7 @@ export default async function LocationPage() {
       {/* ── CLIENT COMPONENT (search + catalogue + form) ── */}
       <LocationClient cars={cars} />
 
+      <CpUniversStrip current="location" />
       <CpBridge fromColor="#F4EDE0" toColor="#1A0F06" />
       <CpFooter />
     </>

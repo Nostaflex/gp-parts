@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { CpHeader } from '@/components/cp/CpHeader';
 import { CpBridge } from '@/components/cp/CpBridge';
 import { CpFooter } from '@/components/cp/CpFooter';
+import { CpUniversStrip } from '@/components/cp/CpUniversStrip';
 import { VenteVehiculeClient } from './VenteVehiculeClient';
 import { getCachedVehicules } from '@/lib/data/vehicules-cache';
 import Link from 'next/link';
@@ -176,6 +177,7 @@ export default async function VenteVehiculePage() {
 
       {/* Bridge financement → footer */}
       <CpBridge fromColor="#2C1A08" toColor="#1A0F06" />
+      <CpUniversStrip current="vente-vehicule" tone="dark" />
       <CpFooter />
     </>
   );
