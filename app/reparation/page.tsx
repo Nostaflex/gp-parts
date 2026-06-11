@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { CpHeader } from '@/components/cp/CpHeader';
 import { CpBridge } from '@/components/cp/CpBridge';
 import { CpFooter } from '@/components/cp/CpFooter';
+import { CpUniversStrip } from '@/components/cp/CpUniversStrip';
 import { RdvForm } from './RdvForm';
 import Link from 'next/link';
 
@@ -210,6 +211,7 @@ export default function ReparationPage() {
         </div>
       </section>
 
+      <CpUniversStrip current="reparation" />
       <CpBridge fromColor="#F4EDE0" toColor="#1A0F06" />
       <CpFooter />
     </>

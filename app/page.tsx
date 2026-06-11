@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { CpHeader } from '@/components/cp/CpHeader';
 import { CpBridge } from '@/components/cp/CpBridge';
+import { CpLogo } from '@/components/cp/CpLogo';
 import { CpReveal } from '@/components/cp/CpReveal';
 import { CpOpenBadge } from '@/components/cp/CpOpenBadge';
 import { BUSINESS, ADDRESS_ONE_LINE } from '@/lib/seo';
@@ -22,6 +23,7 @@ const UNIVERS = [
     tag: '01',
     desc: 'Mécanique, carrosserie, entretien. Devis gratuit, prise en charge rapide.',
     accent: '#E87200',
+    img: 'https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=900&q=80&fit=crop',
   },
   {
     id: 'location',
@@ -30,6 +32,7 @@ const UNIVERS = [
     tag: '02',
     desc: 'Véhicules de remplacement Racoon disponibles pendant votre réparation.',
     accent: '#52C88A',
+    img: '/images/location/toyota-yaris.jpg',
   },
   {
     id: 'vente-vehicule',
@@ -38,6 +41,7 @@ const UNIVERS = [
     tag: '03',
     desc: "Véhicules d'occasion ou neufs, contrôlés et garantis par nos soins.",
     accent: '#2A5C45',
+    img: '/images/hero-vente-vehicule.webp',
   },
   {
     id: 'vente-moto',
@@ -46,6 +50,7 @@ const UNIVERS = [
     tag: '04',
     desc: 'Roadster, sport, trail, scooter — toutes cylindrées, occasion ou neuf.',
     accent: '#C8392E',
+    img: '/images/hero-vente-moto.webp',
   },
   {
     id: 'pieces',
@@ -54,6 +59,7 @@ const UNIVERS = [
     tag: '05',
     desc: 'Auto & moto, livrées partout en Guadeloupe. Commande en ligne, retrait boutique ou livraison 24-48h.',
     accent: '#E9C46A',
+    img: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=900&q=80&fit=crop',
   },
 ];
 
@@ -99,7 +105,27 @@ export default function HomePage() {
         className="relative min-h-dvh flex flex-col justify-center px-6 pt-24 pb-16 overflow-hidden"
         style={{ backgroundColor: '#0D0905' }}
       >
+        {/* Photo de fond + voiles — le texte reste sur zone sombre garantie */}
         <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
+          <Image
+            src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1920&q=70&fit=crop"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center opacity-45"
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(to right, #0D0905 0%, rgba(13,9,5,0.82) 45%, rgba(13,9,5,0.45) 100%)',
+            }}
+          />
+          <div
+            className="absolute inset-x-0 bottom-0 h-48"
+            style={{ background: 'linear-gradient(to top, #0D0905, transparent)' }}
+          />
           <div
             className="absolute rounded-full animate-cp-orb"
             style={{
@@ -133,7 +159,7 @@ export default function HomePage() {
           <CpReveal delay={1}>
             <h1
               className="cp-title font-black leading-none mb-8 text-cp-cream"
-              style={{ fontSize: 'clamp(3.5rem, 9vw, 9rem)' }}
+              style={{ fontSize: 'clamp(2rem, 10.5vw, 9rem)' }}
             >
               CAR
               <br />
@@ -149,7 +175,7 @@ export default function HomePage() {
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/reparation"
-                className="inline-flex items-center gap-2 bg-cp-red text-cp-cream font-semibold px-6 py-3 rounded-full hover:bg-cp-red-d transition-colors"
+                className="inline-flex items-center gap-2 bg-cp-red text-cp-cream font-semibold px-6 py-3 rounded-full hover:bg-cp-red-d active:scale-[0.98] transition-[background-color,transform]"
               >
                 Prendre RDV
                 <svg
@@ -166,7 +192,7 @@ export default function HomePage() {
               </Link>
               <Link
                 href="/vente-vehicule"
-                className="inline-flex items-center gap-2 border border-cp-cream/30 text-cp-cream font-semibold px-6 py-3 rounded-full hover:bg-cp-cream/10 transition-colors"
+                className="inline-flex items-center gap-2 border border-cp-cream/30 text-cp-cream font-semibold px-6 py-3 rounded-full hover:bg-cp-cream/10 active:scale-[0.98] transition-[background-color,transform]"
               >
                 Voir les véhicules
               </Link>
@@ -202,9 +228,29 @@ export default function HomePage() {
               <CpReveal key={u.id} delay={(i % 4) as 0 | 1 | 2 | 3}>
                 <Link
                   href={u.href}
-                  className={`group block relative rounded-2xl overflow-hidden border border-cp-ink/10 bg-white/40 hover:bg-white/70 transition-all duration-300 p-8 min-h-[200px] ${u.id === 'pieces' ? 'md:col-span-2' : ''}`}
+                  className={`group flex flex-col relative rounded-2xl overflow-hidden p-8 min-h-[260px] md:min-h-[300px] ${u.id === 'pieces' ? 'md:col-span-2' : ''}`}
                 >
-                  <div className="flex items-start justify-end mb-6">
+                  {/* Photo univers + voile ink — zoom lent au survol */}
+                  <Image
+                    src={u.img}
+                    alt=""
+                    fill
+                    sizes="(min-width: 768px) 50vw, 100vw"
+                    className="object-cover transition-transform duration-700 ease-cp-out group-hover:scale-105"
+                  />
+                  <div
+                    aria-hidden="true"
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        'linear-gradient(to top, rgba(26,15,6,0.92) 0%, rgba(26,15,6,0.45) 55%, rgba(26,15,6,0.18) 100%)',
+                    }}
+                  />
+
+                  <div className="relative flex items-start justify-between">
+                    <span className="cp-mono text-xs tracking-widest" style={{ color: u.accent }}>
+                      {u.tag}
+                    </span>
                     <svg
                       className="transition-transform duration-300 group-hover:rotate-45 group-hover:translate-x-1 group-hover:-translate-y-1"
                       width="20"
@@ -219,10 +265,14 @@ export default function HomePage() {
                       <path d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
                   </div>
-                  <h3 className="cp-title text-cp-ink font-black text-4xl leading-none mb-3">
-                    {u.label.toUpperCase()}
-                  </h3>
-                  <p className="text-cp-ink/60 text-sm leading-relaxed max-w-xs">{u.desc}</p>
+
+                  <div className="relative mt-auto pt-16">
+                    <h3 className="cp-title text-cp-cream font-black text-4xl leading-none mb-3">
+                      {u.label.toUpperCase()}
+                    </h3>
+                    <p className="text-cp-cream/75 text-sm leading-relaxed max-w-md">{u.desc}</p>
+                  </div>
+
                   <div
                     className="absolute bottom-0 left-0 h-1 w-0 group-hover:w-full transition-all duration-500 rounded-b-2xl"
                     style={{ backgroundColor: u.accent }}
@@ -404,13 +454,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
             <div>
-              <Image
-                src="/images/logo-carperformance.svg"
-                alt="Car Performance"
-                width={180}
-                height={60}
-                className="h-14 w-auto mb-3"
-              />
+              <CpLogo tone="dark" size="footer" className="mb-4" />
               <p className="text-cp-cream/40 text-sm leading-relaxed">
                 Votre garage de confiance en Guadeloupe — passion, conseil technique, pièces de
                 qualité.

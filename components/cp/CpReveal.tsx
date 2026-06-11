@@ -17,18 +17,31 @@ export function CpReveal({ children, delay = 0, className = '' }: CpRevealProps)
     const el = ref.current;
     if (!el) return;
 
+    const reveal = () => {
+      el.classList.add('visible');
+      obs.disconnect();
+      window.removeEventListener('scroll', onScroll);
+    };
+
     const obs = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          el.classList.add('visible');
-          obs.disconnect();
-        }
+        if (entry.isIntersecting) reveal();
       },
       { threshold: 0.15 }
     );
 
+    // Filet de sécurité : un saut instantané (ancre, touche Fin) ne franchit
+    // aucun seuil IO — l'élément resterait invisible sans ce check.
+    const onScroll = () => {
+      if (el.getBoundingClientRect().top < window.innerHeight) reveal();
+    };
+
     obs.observe(el);
-    return () => obs.disconnect();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      obs.disconnect();
+      window.removeEventListener('scroll', onScroll);
+    };
   }, []);
 
   return (

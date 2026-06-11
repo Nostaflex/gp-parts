@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useCart } from '@/components/cart/CartProvider';
+import { CpLogo } from '@/components/cp/CpLogo';
 
 const NAV_LINKS = [
   { href: '/reparation', label: 'Réparation' },
@@ -25,6 +26,9 @@ export function CpHeader({ darkSectionIds = [] }: CpHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const { totalItems, isReady } = useCart();
+  const pathname = usePathname();
+
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   useEffect(() => {
     if (darkSectionIds.length === 0) return;
@@ -70,25 +74,25 @@ export function CpHeader({ darkSectionIds = [] }: CpHeaderProps) {
         <Link
           href="/"
           aria-label="Car Performance — accueil"
-          className="flex items-center hover:opacity-80 transition-opacity"
+          className="flex items-center hover:opacity-85 transition-opacity"
         >
-          <Image
-            src="/images/logo-carperformance.svg"
-            alt="Car Performance"
-            width={140}
-            height={48}
-            priority
-            className="h-12 w-auto"
-          />
+          <CpLogo tone={theme} size="nav" />
         </Link>
 
         {/* Desktop nav */}
         <nav
-          className="hidden md:flex items-center gap-6 text-sm font-medium"
+          className="hidden lg:flex items-center gap-6 text-sm font-medium"
           aria-label="Navigation principale"
         >
           {NAV_LINKS.map((l) => (
-            <Link key={l.href} href={l.href} className="hover:text-cp-mango transition-colors">
+            <Link
+              key={l.href}
+              href={l.href}
+              aria-current={isActive(l.href) ? 'page' : undefined}
+              className={`relative hover:text-cp-mango transition-colors after:absolute after:-bottom-1.5 after:left-0 after:h-0.5 after:bg-cp-mango after:rounded-full after:transition-all after:duration-300 ${
+                isActive(l.href) ? 'text-cp-mango after:w-full' : 'after:w-0'
+              }`}
+            >
               {l.label}
             </Link>
           ))}
@@ -125,7 +129,7 @@ export function CpHeader({ darkSectionIds = [] }: CpHeaderProps) {
           {/* CTA desktop */}
           <Link
             href="/contact"
-            className="hidden md:inline-flex items-center gap-2 bg-cp-red text-cp-cream text-sm font-semibold px-4 py-2 rounded-full hover:bg-cp-red-d transition-colors"
+            className="hidden lg:inline-flex items-center gap-2 bg-cp-red text-cp-cream text-sm font-semibold px-4 py-2 rounded-full hover:bg-cp-red-d active:scale-[0.98] transition-[background-color,transform]"
           >
             Prendre RDV
           </Link>
@@ -135,7 +139,7 @@ export function CpHeader({ darkSectionIds = [] }: CpHeaderProps) {
             aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((o) => !o)}
-            className="md:hidden flex flex-col gap-1.5 p-2"
+            className="lg:hidden flex flex-col gap-1.5 p-2"
           >
             <span
               className={`block w-6 h-0.5 transition-all ${theme === 'dark' ? 'bg-cp-cream' : 'bg-cp-ink'} ${menuOpen ? 'rotate-45 translate-y-2' : ''}`}
@@ -153,14 +157,17 @@ export function CpHeader({ darkSectionIds = [] }: CpHeaderProps) {
       {/* Mobile menu */}
       {menuOpen && (
         <div
-          className={`md:hidden border-t px-6 py-4 flex flex-col gap-4 ${theme === 'dark' ? 'bg-u-cinema border-white/10' : 'bg-u-craft border-cp-ink/10'}`}
+          className={`lg:hidden border-t px-6 py-4 flex flex-col gap-4 animate-slide-up ${theme === 'dark' ? 'bg-u-cinema border-white/10' : 'bg-u-craft border-cp-ink/10'}`}
         >
           {NAV_LINKS.map((l) => (
             <Link
               key={l.href}
               href={l.href}
               onClick={() => setMenuOpen(false)}
-              className="text-sm font-medium hover:text-cp-mango transition-colors"
+              aria-current={isActive(l.href) ? 'page' : undefined}
+              className={`text-sm font-medium hover:text-cp-mango transition-colors ${
+                isActive(l.href) ? 'text-cp-mango' : ''
+              }`}
             >
               {l.label}
             </Link>

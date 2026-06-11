@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { CpHeader } from '@/components/cp/CpHeader';
 import { CpBridge } from '@/components/cp/CpBridge';
 import { CpFooter } from '@/components/cp/CpFooter';
+import { CpUniversStrip } from '@/components/cp/CpUniversStrip';
 import { VenteMotoClient } from './VenteMotoClient';
 import { getCachedMotos } from '@/lib/data/motos-cache';
 import Link from 'next/link';
@@ -149,6 +150,7 @@ export default async function VenteMotoPage() {
       {/* ── CATALOGUE + REPRISE (client) ── */}
       <VenteMotoClient motos={motos} />
 
+      <CpUniversStrip current="vente-moto" />
       <CpBridge fromColor="#F4EDE0" toColor="#1A0F06" />
       <CpFooter />
     </>
