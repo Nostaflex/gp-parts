@@ -3,7 +3,10 @@
 import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/admin/auth';
 import { writeAuditLog } from '@/lib/admin/audit';
-import { getAdapter } from '@/lib/data';
+import {
+  getReservationByIdAdmin,
+  updateReservationStatusAdmin,
+} from '@/lib/admin/reservations-server';
 import type { ReservationStatus } from '@/lib/reservations';
 
 import type { FormActionState } from '@/components/admin/FormShell';
@@ -22,8 +25,7 @@ export async function updateReservationStatus(
 ): Promise<FormActionState> {
   const session = await requireAdmin();
 
-  const adapter = await getAdapter();
-  const current = await adapter.getReservationById(id);
+  const current = await getReservationByIdAdmin(id);
   if (!current) {
     return { errors: { _form: ['Réservation introuvable.'] } };
   }
@@ -31,7 +33,7 @@ export async function updateReservationStatus(
     return { errors: { _form: [`Transition ${current.status} → ${status} non autorisée.`] } };
   }
 
-  await adapter.updateReservationStatus(id, status);
+  await updateReservationStatusAdmin(id, status);
 
   await writeAuditLog({
     actor: session.email,

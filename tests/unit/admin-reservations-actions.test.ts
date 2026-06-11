@@ -15,11 +15,9 @@ vi.mock('@/lib/admin/auth', () => ({
 }));
 vi.mock('@/lib/admin/audit', () => ({ writeAuditLog: writeAuditLogMock }));
 vi.mock('next/cache', () => ({ revalidatePath: revalidatePathMock }));
-vi.mock('@/lib/data', () => ({
-  getAdapter: vi.fn(async () => ({
-    getReservationById: getByIdMock,
-    updateReservationStatus: updateStatusMock,
-  })),
+vi.mock('@/lib/admin/reservations-server', () => ({
+  getReservationByIdAdmin: getByIdMock,
+  updateReservationStatusAdmin: updateStatusMock,
 }));
 
 import { updateReservationStatus } from '@/app/admin/reservations/actions';
