@@ -290,6 +290,8 @@ export function MotoForm({ initial }: { initial?: Moto }) {
           onChange={setImages}
           max={5}
         />
+        <FieldError name="image" />
+        <FieldError name="images" />
       </div>
 
       <SubmitButton>{isEdit ? 'Enregistrer' : 'Créer la moto'}</SubmitButton>

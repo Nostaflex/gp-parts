@@ -220,6 +220,8 @@ export function ProductForm({ initial }: { initial?: Product }) {
           onChange={setImages}
           max={5}
         />
+        <FieldError name="image" />
+        <FieldError name="images" />
       </div>
 
       <SubmitButton>{isEdit ? 'Enregistrer' : 'Créer le produit'}</SubmitButton>
