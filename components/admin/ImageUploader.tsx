@@ -24,7 +24,11 @@ const COMPRESSION = {
   maxWidthOrHeight: 2000,
   initialQuality: 0.85,
   fileType: 'image/webp' as const,
-  useWebWorker: true,
+  // Thread principal (pas de web worker) : le worker blob: de
+  // browser-image-compression est bloqué par le CSP (pas de worker-src blob:)
+  // → la compression ne résout jamais et le spinner reste figé à 0%. Sur un
+  // upload admin ponctuel (1 image), le coût main-thread est négligeable.
+  useWebWorker: false,
 };
 
 type Slot = { url: string; uploading: boolean; progress: number; error?: string };
