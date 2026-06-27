@@ -40,13 +40,7 @@ Réutilise le type `Demande` existant (`lib/types.ts`) — **inchangé sauf** :
 
 ```ts
 // AVANT : 'contact' | 'vehicule' | 'moto' | 'piece' | 'financement'
-export type DemandeType =
-  | 'contact'
-  | 'vehicule'
-  | 'moto'
-  | 'piece'
-  | 'financement'
-  | 'reparation'; // ← ajouté
+export type DemandeType = 'contact' | 'vehicule' | 'moto' | 'piece' | 'financement' | 'reparation'; // ← ajouté
 ```
 
 `Demande` : `{ id, type, status, nom, email, telephone, message, resourceRef?,
@@ -85,7 +79,7 @@ Inversion de la robustesse actuelle : **le lead est sauvé avant tout**.
   5. si `createDemande` échoue → tenter l'email ; si tout échoue → erreur.
 - **`app/reparation/actions.ts` (`submitRdv`)** : `type: 'reparation'`,
   `message` = détails RDV aplatis (`Véhicule: … · Prestation: … · Date: … ·
-  Créneau: … · Description: …`). Même ordre persist→email.
+Créneau: … · Description: …`). Même ordre persist→email.
 
 > `ContactInput` gagne un champ optionnel `ref?: string` (déjà présent dans
 > l'URL `?ref=`, à propager depuis `ContactForm`). `financement` est dérivé du
@@ -98,7 +92,7 @@ Miroir de `lib/admin/reservations-server.ts` :
 - `getDemandesAdmin(opts?: { type?: DemandeType; status?: DemandeStatus; limit?: number }): Promise<Demande[]>` — `getAdminFirestore`, tri `createdAt desc`.
 - Server action `updateDemandeStatus(id, status)` : `requireAdmin` →
   `update({ status, updatedAt })` → `writeAuditLog({ resourceType: 'demande',
-  action: 'update' })` (diff PII-masqué, déjà géré) → `revalidatePath('/admin/demandes')`.
+action: 'update' })` (diff PII-masqué, déjà géré) → `revalidatePath('/admin/demandes')`.
 - Server action `saveDemandeNote(id, note)` : `requireAdmin` →
   `update({ notes, updatedAt })` → audit → revalidate.
 

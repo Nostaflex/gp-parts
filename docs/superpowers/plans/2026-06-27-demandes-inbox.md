@@ -23,10 +23,12 @@
 ### Task 1: `DemandeType` +reparation + `createDemande` (adapter)
 
 **Files:**
+
 - Modify: `lib/types.ts`, `lib/data/types.ts`, `lib/data/static.ts`, `lib/data/firebase.ts`
 - Test: `tests/unit/create-demande.test.ts`, mise à jour `tests/unit/data-adapter.test.ts`
 
 **Interfaces:**
+
 - Produces: `DataAdapter.createDemande(data: Omit<Demande, 'id'>): Promise<string>` ; `DemandeType` inclut `'reparation'`.
 
 - [ ] **Step 1: Write the failing test**
@@ -126,6 +128,7 @@ git commit -m "feat(demandes): DemandeType +reparation + createDemande (adapter)
 ### Task 2: Règle Firestore `demandes`
 
 **Files:**
+
 - Modify: `firestore.rules`
 
 - [ ] **Step 1: Ajouter la règle**
@@ -161,10 +164,12 @@ git commit -m "feat(demandes): règle Firestore demandes (create public, read/up
 ### Task 3: Helper de mapping `demandeTypeFromSujet`
 
 **Files:**
+
 - Create: `lib/demandes.ts`
 - Test: `tests/unit/demande-type-from-sujet.test.ts`
 
 **Interfaces:**
+
 - Produces: `demandeTypeFromSujet(sujet: string): DemandeType`.
 
 - [ ] **Step 1: Write the failing test**
@@ -239,10 +244,12 @@ git commit -m "feat(demandes): helper demandeTypeFromSujet + demandeExpiry"
 ### Task 4: Persister `submitContact` (+ propager `ref`)
 
 **Files:**
+
 - Modify: `app/contact/actions.ts`, `app/contact/ContactForm.tsx`
 - Test: `tests/unit/submit-contact-persist.test.ts`
 
 **Interfaces:**
+
 - Consumes: `createDemande` (Task 1), `demandeTypeFromSujet`/`demandeExpiry` (Task 3), `getAdapter`.
 
 - [ ] **Step 1: Write the failing test**
@@ -430,10 +437,12 @@ git commit -m "feat(demandes): submitContact persiste la demande (+ ref) avant e
 ### Task 5: Persister `submitRdv` (type reparation)
 
 **Files:**
+
 - Modify: `app/reparation/actions.ts`
 - Test: `tests/unit/submit-rdv-persist.test.ts`
 
 **Interfaces:**
+
 - Consumes: `createDemande` (Task 1), `demandeExpiry` (Task 3), `getAdapter`.
 
 - [ ] **Step 1: Write the failing test**
@@ -469,7 +478,7 @@ describe('submitRdv persiste', () => {
     vi.clearAllMocks();
   });
 
-  it("crée une demande type reparation avec détails aplatis", async () => {
+  it('crée une demande type reparation avec détails aplatis', async () => {
     const res = await submitRdv(base);
     expect(createDemande).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'reparation', status: 'nouvelle', nom: 'Marie Test' })
@@ -508,54 +517,54 @@ Dans `submitRdv`, après la construction de `const lead: Lead = {…}` (et avant
 `try { sendLeadEmails }`), insérer :
 
 ```ts
-  const now = Date.now();
-  const nowIso = new Date(now).toISOString();
-  const vehiculeStr = [input.marque, input.modele, input.annee, input.immat]
-    .map((s) => s?.trim())
-    .filter(Boolean)
-    .join(' ');
-  const messageFull = [
-    `Véhicule : ${vehiculeStr || '—'}`,
-    `Prestation : ${input.type}`,
-    `Date : ${input.date} · Créneau : ${input.creneau}`,
-    '',
-    input.description.trim(),
-  ].join('\n');
+const now = Date.now();
+const nowIso = new Date(now).toISOString();
+const vehiculeStr = [input.marque, input.modele, input.annee, input.immat]
+  .map((s) => s?.trim())
+  .filter(Boolean)
+  .join(' ');
+const messageFull = [
+  `Véhicule : ${vehiculeStr || '—'}`,
+  `Prestation : ${input.type}`,
+  `Date : ${input.date} · Créneau : ${input.creneau}`,
+  '',
+  input.description.trim(),
+].join('\n');
 
-  let persisted = false;
-  try {
-    const adapter = await getAdapter();
-    await adapter.createDemande({
-      type: 'reparation',
-      status: 'nouvelle',
-      nom: `${input.prenom.trim()} ${input.nom.trim()}`,
-      email: input.email.trim(),
-      telephone: input.tel.trim(),
-      message: messageFull,
-      createdAt: nowIso,
-      updatedAt: nowIso,
-      expiresAt: demandeExpiry(now),
-    });
-    persisted = true;
-  } catch (err) {
-    console.error('[submitRdv] persistance échouée:', err);
-  }
+let persisted = false;
+try {
+  const adapter = await getAdapter();
+  await adapter.createDemande({
+    type: 'reparation',
+    status: 'nouvelle',
+    nom: `${input.prenom.trim()} ${input.nom.trim()}`,
+    email: input.email.trim(),
+    telephone: input.tel.trim(),
+    message: messageFull,
+    createdAt: nowIso,
+    updatedAt: nowIso,
+    expiresAt: demandeExpiry(now),
+  });
+  persisted = true;
+} catch (err) {
+  console.error('[submitRdv] persistance échouée:', err);
+}
 ```
 
 Puis remplacer le bloc final `try { sendLeadEmails } catch { return error }` par
 une version best-effort :
 
 ```ts
-  let emailed = false;
-  try {
-    ({ emailed } = await sendLeadEmails(lead));
-  } catch (err) {
-    console.error('[submitRdv] échec envoi email (best-effort):', err);
-  }
-  if (!persisted && !emailed) {
-    return { ok: false, error: 'Envoi impossible pour le moment. Réessayez ou appelez-nous.' };
-  }
-  return { ok: true, ref, emailed };
+let emailed = false;
+try {
+  ({ emailed } = await sendLeadEmails(lead));
+} catch (err) {
+  console.error('[submitRdv] échec envoi email (best-effort):', err);
+}
+if (!persisted && !emailed) {
+  return { ok: false, error: 'Envoi impossible pour le moment. Réessayez ou appelez-nous.' };
+}
+return { ok: true, ref, emailed };
 ```
 
 - [ ] **Step 4: Run test + typecheck**
@@ -575,11 +584,13 @@ git commit -m "feat(demandes): submitRdv persiste (type reparation, détails apl
 ### Task 6: Lecture & gestion BO — `lib/admin/demandes-server.ts`
 
 **Files:**
+
 - Create: `lib/admin/demandes-server.ts`
 - Create: `app/admin/(shell)/demandes/actions.ts`
 - Test: `tests/unit/demandes-admin.test.ts`
 
 **Interfaces:**
+
 - Consumes: `getAdminFirestore`, `requireAdmin`, `writeAuditLog`.
 - Produces: `getDemandesAdmin(opts?)`, server actions `updateDemandeStatus(id, status)`, `saveDemandeNote(id, note)`.
 
@@ -590,7 +601,9 @@ git commit -m "feat(demandes): submitRdv persiste (type reparation, détails apl
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const updateMock = vi.fn(async () => undefined);
-vi.mock('@/lib/admin/auth', () => ({ requireAdmin: vi.fn(async () => ({ uid: 'u', email: 'a@b.gp' })) }));
+vi.mock('@/lib/admin/auth', () => ({
+  requireAdmin: vi.fn(async () => ({ uid: 'u', email: 'a@b.gp' })),
+}));
 vi.mock('@/lib/admin/audit', () => ({ writeAuditLog: vi.fn(async () => undefined) }));
 vi.mock('@/lib/firebase-admin', () => ({
   getAdminFirestore: vi.fn(() => ({ collection: () => ({ doc: () => ({ update: updateMock }) }) })),
@@ -609,15 +622,15 @@ describe('actions demandes admin', () => {
   it('updateDemandeStatus : auth + update + audit', async () => {
     await updateDemandeStatus('dem-1', 'en_cours');
     expect(requireAdmin).toHaveBeenCalled();
-    expect(updateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ status: 'en_cours' })
-    );
+    expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({ status: 'en_cours' }));
     expect(writeAuditLog).toHaveBeenCalled();
   });
 
   it('saveDemandeNote : update notes', async () => {
     await saveDemandeNote('dem-1', 'rappeler après 17h');
-    expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({ notes: 'rappeler après 17h' }));
+    expect(updateMock).toHaveBeenCalledWith(
+      expect.objectContaining({ notes: 'rappeler après 17h' })
+    );
   });
 });
 ```
@@ -712,11 +725,13 @@ git commit -m "feat(demandes): lecture admin + actions statut/notes (Admin SDK +
 ### Task 7: Page BO `/admin/demandes` + client + activation nav
 
 **Files:**
+
 - Create: `app/admin/(shell)/demandes/page.tsx`, `components/admin/DemandesClient.tsx`
 - Modify: `components/admin/AdminSidebar.tsx`
 - Test: `tests/unit/demandes-client.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `getDemandesAdmin` (Task 6), `updateDemandeStatus`/`saveDemandeNote` (Task 6), `requireAdmin`.
 
 - [ ] **Step 1: Write the failing test**
@@ -944,6 +959,7 @@ git commit -m "feat(demandes): page BO /admin/demandes + client + activation nav
 ### Task 8: TTL + suite complète
 
 **Files:**
+
 - Modify: `scripts/setup-ttl-policies.ts` (étendre à `demandes` si absent)
 - Create: `tests/e2e/demandes-admin.spec.ts`
 
@@ -971,10 +987,12 @@ test('la route /admin/demandes répond (pas de 500)', async ({ page }) => {
 - [ ] **Step 3: Suite complète + build**
 
 Run:
+
 ```bash
 npx vitest run
 npm run build
 ```
+
 Expected: tous les unitaires verts (dont les nouveaux fichiers demandes), build vert.
 
 - [ ] **Step 4: Commit**
@@ -989,6 +1007,7 @@ git commit -m "feat(demandes): TTL demandes + E2E smoke"
 ## Self-Review
 
 **Spec coverage :**
+
 - `DemandeType` +reparation + `createDemande` → Task 1. ✓
 - Règle Firestore `demandes` → Task 2. ✓
 - Mapping sujet→type → Task 3. ✓
