@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { isPathVisible } from '@/lib/feature-flags';
+import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
 import { CpReveal } from '@/components/cp/CpReveal';
 
 type UniversId = 'reparation' | 'location' | 'vente-vehicule' | 'vente-moto' | 'pieces';
@@ -22,8 +24,9 @@ type CpUniversStripProps = {
  * Bandeau de maillage interne « Explorez nos autres univers » — affiché
  * au-dessus du footer des pages univers pour croiser les parcours.
  */
-export function CpUniversStrip({ current, tone = 'light' }: CpUniversStripProps) {
-  const others = UNIVERS.filter((u) => u.id !== current);
+export async function CpUniversStrip({ current, tone = 'light' }: CpUniversStripProps) {
+  const flags = await getCachedFeatureFlags();
+  const others = UNIVERS.filter((u) => u.id !== current && isPathVisible(u.href, flags));
   const isDark = tone === 'dark';
 
   return (
