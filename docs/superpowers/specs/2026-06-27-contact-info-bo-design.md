@@ -20,11 +20,11 @@ sur le JSON-LD SEO** (`AutoRepair`/`LocalBusiness`), sans redéploiement.
 
 **Éditable depuis le BO :** `phone` (E.164) + `phoneDisplay` (lisible),
 `email`, `whatsappNumber`, `address` (rue / CP / ville / région), `hours`
-(ouverture/fermeture semaine + samedi).
+(ouverture/fermeture semaine + samedi), `geo` (GPS lat/lng), `social`
+(Facebook / Instagram / Google Business → alimentent `sameAs` du JSON-LD).
 
-**Hors périmètre (restent en dur comme défauts) :** `name`, `geo` (GPS),
-`sameAs` (réseaux sociaux), `priceRange`. Non demandés (YAGNI). Pourront être
-ajoutés plus tard sur le même socle.
+**Hors périmètre (restent en dur comme défauts) :** `name`, `priceRange`.
+Non demandés (YAGNI).
 
 ## Non-objectifs
 
@@ -56,13 +56,20 @@ ajoutés plus tard sur le même socle.
     saturdayOpen: string,  // "08:00"
     saturdayClose: string, // "13:00"
   },
+  geo: { lat: number, lng: number },  // GPS du garage (JSON-LD + maps)
+  social: {                           // URLs, vides par défaut
+    facebook: string,
+    instagram: string,
+    google: string,                   // fiche Google Business
+  },
   updatedAt: number,
   updatedBy: string,       // email admin
 }
 ```
 
 > `country` (FR) et le dimanche (fermé) restent implicites/constants — pas
-> d'intérêt à les éditer.
+> d'intérêt à les éditer. Les 3 liens `social` non vides alimentent le tableau
+> `sameAs` du JSON-LD.
 
 ### 2. Module cœur — `lib/contact-info.ts`
 
@@ -79,11 +86,14 @@ export function whatsappUrl(ci: ContactInfo): string;        // "https://wa.me/<
 export function openingHoursSpec(ci: ContactInfo): {         // forme schema.org
   days: string[]; opens: string; closes: string;
 }[];
+export function sameAs(ci: ContactInfo): string[];           // social non-vides → JSON-LD sameAs
 ```
 
 Validation : `ContactInfoSchema` (Zod) — `email` format email, `phone` commence
-par `+`, `whatsappNumber` numérique, champs requis non vides. Utilisé par
-l'action BO ; en lecture, `normalizeContactInfo` merge sur les défauts (tolérant).
+par `+`, `whatsappNumber` numérique, `geo.lat`/`geo.lng` nombres finis, liens
+`social` = URL valide **ou vide** (optionnels), champs adresse/horaires requis
+non vides. Utilisé par l'action BO ; en lecture, `normalizeContactInfo` merge
+sur les défauts (tolérant).
 
 ### 3. Lecture cachée — `lib/data/contact-info-cache.ts`
 
@@ -112,7 +122,8 @@ désormais la valeur fusionnée :
 
 - **`lib/seo.ts`** : `localBusinessJsonLd`, `organizationJsonLd`, `websiteJsonLd`
   prennent un paramètre `contactInfo: ContactInfo` (au lieu d'importer
-  `BUSINESS`). `geo`/`priceRange`/`name` viennent toujours des constantes.
+  `BUSINESS`). `geo` et `sameAs` viennent de `ci` ; `priceRange`/`name`
+  restent des constantes.
 - **`app/layout.tsx`** : lit `getCachedContactInfo()` → passe aux fonctions
   JSON-LD du `<JsonLd>`.
 - **Pages serveur** (`app/page.tsx`, `app/contact/page.tsx`,
@@ -131,7 +142,8 @@ La page Paramètres existante (qui porte déjà « Visibilité des sections »)
 reçoit une **2e carte « Coordonnées »** :
 - Server component : lit `meta/contactInfo` via `getAdminFirestore` (+ défauts).
 - `ContactInfoForm` (client) : champs tél / phoneDisplay / email / WhatsApp /
-  adresse (×4) / horaires (×4), design iOS Clarity.
+  adresse (×4) / horaires (×4) / GPS (lat, lng) / réseaux (Facebook, Instagram,
+  Google Business), design iOS Clarity.
 - Server action `updateContactInfo(prev, formData)` :
   `requireAdmin` → `ContactInfoSchema.safeParse` (erreurs renvoyées au form) →
   `set('meta/contactInfo', { ...data, updatedAt, updatedBy }, { merge: true })`
@@ -161,12 +173,15 @@ NAP (Name/Address/Phone) cohérent partout, SEO local à jour sans redéploiemen
 
 ## Stratégie de test
 
-- **Unit** : `DEFAULT_CONTACT_INFO` = valeurs `BUSINESS` ; `normalizeContactInfo`
-  (merge partiel, null → défauts) ; helpers `addressOneLine` / `whatsappUrl` /
-  `openingHoursSpec` ; `ContactInfoSchema` (rejette email/tel invalides).
+- **Unit** : `DEFAULT_CONTACT_INFO` = valeurs `BUSINESS` (geo inclus, social
+  vides) ; `normalizeContactInfo` (merge partiel, null → défauts) ; helpers
+  `addressOneLine` / `whatsappUrl` / `openingHoursSpec` / `sameAs` (filtre les
+  liens vides) ; `ContactInfoSchema` (rejette email/tel/geo/URL sociale invalides,
+  accepte social vide).
 - **Adapter** : `StaticAdapter.getContactInfo` → défauts.
 - **JSON-LD** : `localBusinessJsonLd(ci)` reflète les champs de `ci`
-  (telephone/email/address/openingHours).
+  (telephone/email/address/openingHours/geo + `sameAs` quand des liens sociaux
+  sont fournis).
 - **Action** : `updateContactInfo` refuse sans admin ; écrit le doc ; rejette
   un payload invalide (erreurs au form) ; appelle `revalidateTag('contact-info')`.
 - **Formulaire** : `ContactInfoForm` rend les valeurs initiales dans les champs.
@@ -185,5 +200,5 @@ NAP (Name/Address/Phone) cohérent partout, SEO local à jour sans redéploiemen
 - **Casse potentiellement** : tests existants sur le JSON-LD (signatures
   changées) et sur les pages consommatrices → à mettre à jour.
 - **Doit préserver** : le NAP identique partout (front + JSON-LD) ; les défauts
-  garantissent zéro régression si Firestore vide ; aucune fuite des champs non
-  édités (geo/réseaux/priceRange inchangés) ; design systems non mixés.
+  garantissent zéro régression si Firestore vide ; les champs non édités
+  (`name`/`priceRange`) restent constants ; design systems non mixés.
