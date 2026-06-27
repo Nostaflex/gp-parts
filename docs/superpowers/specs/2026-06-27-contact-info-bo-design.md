@@ -74,19 +74,24 @@ Non demandés (YAGNI).
 ### 2. Module cœur — `lib/contact-info.ts`
 
 ```ts
-export type ContactInfo = { /* champs ci-dessus, sans updatedAt/updatedBy */ };
+export type ContactInfo = {
+  /* champs ci-dessus, sans updatedAt/updatedBy */
+};
 
 export const DEFAULT_CONTACT_INFO: ContactInfo; // = valeurs actuelles de BUSINESS + WHATSAPP_NUMBER
 
 export function normalizeContactInfo(raw: Partial<ContactInfo> | null | undefined): ContactInfo;
 
 // Helpers dérivés (consommés par l'UI + le JSON-LD) :
-export function addressOneLine(ci: ContactInfo): string;     // "rue, CP ville, région"
-export function whatsappUrl(ci: ContactInfo): string;        // "https://wa.me/<num>"
-export function openingHoursSpec(ci: ContactInfo): {         // forme schema.org
-  days: string[]; opens: string; closes: string;
+export function addressOneLine(ci: ContactInfo): string; // "rue, CP ville, région"
+export function whatsappUrl(ci: ContactInfo): string; // "https://wa.me/<num>"
+export function openingHoursSpec(ci: ContactInfo): {
+  // forme schema.org
+  days: string[];
+  opens: string;
+  closes: string;
 }[];
-export function sameAs(ci: ContactInfo): string[];           // social non-vides → JSON-LD sameAs
+export function sameAs(ci: ContactInfo): string[]; // social non-vides → JSON-LD sameAs
 ```
 
 Validation : `ContactInfoSchema` (Zod) — `email` format email, `phone` commence
@@ -109,6 +114,7 @@ export const getCachedContactInfo = unstable_cache(
 ```
 
 `DataAdapter.getContactInfo(): Promise<ContactInfo>` :
+
 - `StaticAdapter` → `DEFAULT_CONTACT_INFO`.
 - `FirebaseAdapter` → lit `meta/contactInfo`, `normalizeContactInfo(snap.data())`,
   **fail-open** sur les défauts en cas d'erreur (le root layout l'await sur
@@ -140,6 +146,7 @@ désormais la valeur fusionnée :
 
 La page Paramètres existante (qui porte déjà « Visibilité des sections »)
 reçoit une **2e carte « Coordonnées »** :
+
 - Server component : lit `meta/contactInfo` via `getAdminFirestore` (+ défauts).
 - `ContactInfoForm` (client) : champs tél / phoneDisplay / email / WhatsApp /
   adresse (×4) / horaires (×4) / GPS (lat, lng) / réseaux (Facebook, Instagram,

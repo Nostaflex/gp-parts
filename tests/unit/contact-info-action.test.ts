@@ -56,7 +56,7 @@ describe('updateContactInfo', () => {
     expect(res).toEqual({ ok: true, message: expect.any(String) });
   });
 
-  it('payload invalide → erreurs, pas d\'écriture', async () => {
+  it("payload invalide → erreurs, pas d'écriture", async () => {
     const res = await updateContactInfo(null, fd({ ...valid, email: 'pasunemail' }));
     expect(setMock).not.toHaveBeenCalled();
     expect(res).toHaveProperty('errors');

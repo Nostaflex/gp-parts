@@ -28,7 +28,12 @@ const contact = {
     city: 'Baie-Mahault',
     region: 'Guadeloupe',
   },
-  hours: { weekdayOpen: '07:30', weekdayClose: '17:30', saturdayOpen: '08:00', saturdayClose: '13:00' },
+  hours: {
+    weekdayOpen: '07:30',
+    weekdayClose: '17:30',
+    saturdayOpen: '08:00',
+    saturdayClose: '13:00',
+  },
   geo: { lat: 16.2415, lng: -61.5611 },
   social: { facebook: '', instagram: '', google: '' },
   updatedAt: Date.now(),

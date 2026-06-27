@@ -23,10 +23,12 @@
 ### Task 1: Module cœur `lib/contact-info.ts`
 
 **Files:**
+
 - Create: `lib/contact-info.ts`
 - Test: `tests/unit/contact-info.test.ts`
 
 **Interfaces:**
+
 - Consumes: `BUSINESS` (`@/lib/seo`), `WHATSAPP_NUMBER` (`@/lib/config`).
 - Produces:
   - `type ContactInfo`
@@ -108,14 +110,24 @@ describe('contact-info', () => {
       email: 'contact@car.gp',
       whatsappNumber: '590690112233',
       address: { street: 'R', postalCode: '97110', city: 'P', region: 'Guadeloupe' },
-      hours: { weekdayOpen: '07:30', weekdayClose: '17:30', saturdayOpen: '08:00', saturdayClose: '13:00' },
+      hours: {
+        weekdayOpen: '07:30',
+        weekdayClose: '17:30',
+        saturdayOpen: '08:00',
+        saturdayClose: '13:00',
+      },
       geo: { lat: 16.2, lng: -61.5 },
       social: { facebook: '', instagram: '', google: '' },
     };
     expect(ContactInfoSchema.safeParse(base).success).toBe(true);
     expect(ContactInfoSchema.safeParse({ ...base, email: 'pasunemail' }).success).toBe(false);
     expect(ContactInfoSchema.safeParse({ ...base, phone: '0690' }).success).toBe(false);
-    expect(ContactInfoSchema.safeParse({ ...base, social: { facebook: 'pasurl', instagram: '', google: '' } }).success).toBe(false);
+    expect(
+      ContactInfoSchema.safeParse({
+        ...base,
+        social: { facebook: 'pasurl', instagram: '', google: '' },
+      }).success
+    ).toBe(false);
   });
 });
 ```
@@ -169,9 +181,7 @@ export const DEFAULT_CONTACT_INFO: ContactInfo = {
 
 const isStr = (v: unknown): v is string => typeof v === 'string';
 
-export function normalizeContactInfo(
-  raw: Partial<ContactInfo> | null | undefined
-): ContactInfo {
+export function normalizeContactInfo(raw: Partial<ContactInfo> | null | undefined): ContactInfo {
   const d = DEFAULT_CONTACT_INFO;
   const s = raw ?? {};
   return {
@@ -272,11 +282,13 @@ git commit -m "feat(contact): module cœur contact-info (type + défauts + helpe
 ### Task 2: Adapter `getContactInfo` + lecture cachée
 
 **Files:**
+
 - Modify: `lib/data/types.ts`, `lib/data/static.ts`, `lib/data/firebase.ts`
 - Create: `lib/data/contact-info-cache.ts`
 - Test: `tests/unit/contact-info-adapter.test.ts`, mise à jour `tests/unit/data-adapter.test.ts`
 
 **Interfaces:**
+
 - Consumes: `ContactInfo`, `DEFAULT_CONTACT_INFO`, `normalizeContactInfo` (Task 1).
 - Produces: `DataAdapter.getContactInfo(): Promise<ContactInfo>`, `getCachedContactInfo()`.
 
@@ -398,6 +410,7 @@ git commit -m "feat(contact): adapter getContactInfo + lecture cachée (fail-ope
 ### Task 3: Règle Firestore — lecture publique `meta/contactInfo`
 
 **Files:**
+
 - Modify: `firestore.rules`
 
 - [ ] **Step 1: Ajouter la règle**
@@ -432,10 +445,12 @@ git commit -m "feat(contact): règle Firestore lecture publique meta/contactInfo
 ### Task 4: Refactor JSON-LD (`lib/seo.ts`) pour prendre `ContactInfo`
 
 **Files:**
+
 - Modify: `lib/seo.ts`
 - Test: `tests/unit/contact-info-jsonld.test.ts`
 
 **Interfaces:**
+
 - Consumes: `ContactInfo`, `addressOneLine`, `openingHoursSpec`, `sameAs` (Task 1).
 - Produces: `localBusinessJsonLd(ci: ContactInfo)`, `organizationJsonLd(ci: ContactInfo)` (signatures changées). `websiteJsonLd()` inchangée.
 
@@ -563,9 +578,11 @@ git commit -m "feat(contact): JSON-LD paramétré par ContactInfo"
 ### Task 5: Câbler les consommateurs (layout + 4 pages)
 
 **Files:**
+
 - Modify: `app/layout.tsx`, `app/page.tsx`, `app/contact/page.tsx`, `app/vente-vehicule/[id]/page.tsx`, `app/vente-moto/[id]/page.tsx`
 
 **Interfaces:**
+
 - Consumes: `getCachedContactInfo` (Task 2), helpers `addressOneLine`/`whatsappUrl` (Task 1), `localBusinessJsonLd`/`organizationJsonLd` (Task 4).
 
 - [ ] **Step 1 : `app/layout.tsx`**
@@ -577,19 +594,15 @@ Ajouter l'import et lire les coordonnées (le layout est déjà `async`) :
 import { getCachedContactInfo } from '@/lib/data/contact-info-cache';
 
 // dans RootLayout, après `const featureFlags = await getCachedFeatureFlags();` :
-  const contactInfo = await getCachedContactInfo();
+const contactInfo = await getCachedContactInfo();
 ```
 
 Remplacer la ligne `<JsonLd … />` par :
 
 ```tsx
-        <JsonLd
-          data={[
-            localBusinessJsonLd(contactInfo),
-            organizationJsonLd(contactInfo),
-            websiteJsonLd(),
-          ]}
-        />
+<JsonLd
+  data={[localBusinessJsonLd(contactInfo), organizationJsonLd(contactInfo), websiteJsonLd()]}
+/>
 ```
 
 - [ ] **Step 2 : `app/page.tsx`**
@@ -604,10 +617,11 @@ import { addressOneLine, whatsappUrl } from '@/lib/contact-info';
 Dans `HomePage` (déjà `async`), après la lecture des flags, ajouter :
 
 ```ts
-  const ci = await getCachedContactInfo();
+const ci = await getCachedContactInfo();
 ```
 
 Puis remplacer les usages :
+
 - `tel:${BUSINESS.phone}` → `tel:${ci.phone}`
 - `BUSINESS.phoneDisplay` → `ci.phoneDisplay`
 - `WHATSAPP_URL` → `whatsappUrl(ci)`
@@ -667,10 +681,12 @@ git commit -m "feat(contact): consommateurs (layout JSON-LD + home + contact + f
 ### Task 6: Server Action `updateContactInfo` + type d'audit
 
 **Files:**
+
 - Modify: `lib/admin/audit.ts`, `app/admin/(shell)/parametres/actions.ts`
 - Test: `tests/unit/contact-info-action.test.ts`
 
 **Interfaces:**
+
 - Consumes: `requireAdmin`, `writeAuditLog`, `getAdminFirestore`, `ContactInfoSchema` (Task 1), `FormActionState`.
 - Produces: `updateContactInfo(prev, formData): Promise<FormActionState>`.
 
@@ -736,7 +752,7 @@ describe('updateContactInfo', () => {
     expect(res).toEqual({ ok: true, message: expect.any(String) });
   });
 
-  it('payload invalide → erreurs, pas d\'écriture', async () => {
+  it("payload invalide → erreurs, pas d'écriture", async () => {
     const res = await updateContactInfo(null, fd({ ...valid, email: 'pasunemail' }));
     expect(setMock).not.toHaveBeenCalled();
     expect(res).toHaveProperty('errors');
@@ -841,11 +857,13 @@ git commit -m "feat(contact): server action updateContactInfo + type audit conta
 ### Task 7: Formulaire + 2e carte sur `/admin/parametres`
 
 **Files:**
+
 - Create: `components/admin/ContactInfoForm.tsx`
 - Modify: `app/admin/(shell)/parametres/page.tsx`
 - Test: `tests/unit/contact-info-form.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `updateContactInfo` (Task 6), `ContactInfo`/`DEFAULT_CONTACT_INFO`/`normalizeContactInfo` (Task 1), `getAdminFirestore`.
 
 - [ ] **Step 1: Write the failing test**
@@ -889,25 +907,26 @@ import { updateContactInfo } from '@/app/admin/(shell)/parametres/actions';
 import type { ContactInfo } from '@/lib/contact-info';
 import type { FormActionState } from '@/components/admin/FormShell';
 
-const FIELDS: { name: string; label: string; value: (c: ContactInfo) => string; type?: string }[] = [
-  { name: 'phone', label: 'Téléphone (E.164, +590…)', value: (c) => c.phone },
-  { name: 'phoneDisplay', label: 'Téléphone affiché', value: (c) => c.phoneDisplay },
-  { name: 'email', label: 'Email', value: (c) => c.email, type: 'email' },
-  { name: 'whatsappNumber', label: 'WhatsApp (sans +)', value: (c) => c.whatsappNumber },
-  { name: 'street', label: 'Rue', value: (c) => c.address.street },
-  { name: 'postalCode', label: 'Code postal', value: (c) => c.address.postalCode },
-  { name: 'city', label: 'Ville', value: (c) => c.address.city },
-  { name: 'region', label: 'Région', value: (c) => c.address.region },
-  { name: 'weekdayOpen', label: 'Ouverture semaine', value: (c) => c.hours.weekdayOpen },
-  { name: 'weekdayClose', label: 'Fermeture semaine', value: (c) => c.hours.weekdayClose },
-  { name: 'saturdayOpen', label: 'Ouverture samedi', value: (c) => c.hours.saturdayOpen },
-  { name: 'saturdayClose', label: 'Fermeture samedi', value: (c) => c.hours.saturdayClose },
-  { name: 'lat', label: 'GPS latitude', value: (c) => String(c.geo.lat) },
-  { name: 'lng', label: 'GPS longitude', value: (c) => String(c.geo.lng) },
-  { name: 'facebook', label: 'Facebook (URL)', value: (c) => c.social.facebook },
-  { name: 'instagram', label: 'Instagram (URL)', value: (c) => c.social.instagram },
-  { name: 'google', label: 'Google Business (URL)', value: (c) => c.social.google },
-];
+const FIELDS: { name: string; label: string; value: (c: ContactInfo) => string; type?: string }[] =
+  [
+    { name: 'phone', label: 'Téléphone (E.164, +590…)', value: (c) => c.phone },
+    { name: 'phoneDisplay', label: 'Téléphone affiché', value: (c) => c.phoneDisplay },
+    { name: 'email', label: 'Email', value: (c) => c.email, type: 'email' },
+    { name: 'whatsappNumber', label: 'WhatsApp (sans +)', value: (c) => c.whatsappNumber },
+    { name: 'street', label: 'Rue', value: (c) => c.address.street },
+    { name: 'postalCode', label: 'Code postal', value: (c) => c.address.postalCode },
+    { name: 'city', label: 'Ville', value: (c) => c.address.city },
+    { name: 'region', label: 'Région', value: (c) => c.address.region },
+    { name: 'weekdayOpen', label: 'Ouverture semaine', value: (c) => c.hours.weekdayOpen },
+    { name: 'weekdayClose', label: 'Fermeture semaine', value: (c) => c.hours.weekdayClose },
+    { name: 'saturdayOpen', label: 'Ouverture samedi', value: (c) => c.hours.saturdayOpen },
+    { name: 'saturdayClose', label: 'Fermeture samedi', value: (c) => c.hours.saturdayClose },
+    { name: 'lat', label: 'GPS latitude', value: (c) => String(c.geo.lat) },
+    { name: 'lng', label: 'GPS longitude', value: (c) => String(c.geo.lng) },
+    { name: 'facebook', label: 'Facebook (URL)', value: (c) => c.social.facebook },
+    { name: 'instagram', label: 'Instagram (URL)', value: (c) => c.social.instagram },
+    { name: 'google', label: 'Google Business (URL)', value: (c) => c.social.google },
+  ];
 
 export function ContactInfoForm({ initial }: { initial: ContactInfo }) {
   const [state, formAction, pending] = useActionState<FormActionState, FormData>(
@@ -922,7 +941,11 @@ export function ContactInfoForm({ initial }: { initial: ContactInfo }) {
       style={{ background: 'var(--surface)', border: '1px solid rgba(198, 198, 200, 0.5)' }}
     >
       {FIELDS.map((f) => (
-        <label key={f.name} className="flex flex-col gap-1 text-body-sm" style={{ color: 'var(--text)' }}>
+        <label
+          key={f.name}
+          className="flex flex-col gap-1 text-body-sm"
+          style={{ color: 'var(--text)' }}
+        >
           <span>{f.label}</span>
           <input
             name={f.name}
@@ -942,9 +965,15 @@ export function ContactInfoForm({ initial }: { initial: ContactInfo }) {
       >
         {pending ? 'Enregistrement…' : 'Enregistrer'}
       </button>
-      {state?.ok && <p role="status" style={{ color: 'var(--green)' }}>{state.message}</p>}
+      {state?.ok && (
+        <p role="status" style={{ color: 'var(--green)' }}>
+          {state.message}
+        </p>
+      )}
       {state && 'errors' in state && state.errors && (
-        <p role="alert" style={{ color: 'var(--red)' }}>Vérifiez les champs (format tél/email/URL).</p>
+        <p role="alert" style={{ color: 'var(--red)' }}>
+          Vérifiez les champs (format tél/email/URL).
+        </p>
       )}
     </form>
   );
@@ -962,10 +991,10 @@ import { ContactInfoForm } from '@/components/admin/ContactInfoForm';
 Dans `ParametresPage`, après la lecture des flags, lire les coordonnées :
 
 ```tsx
-  const ciSnap = await getAdminFirestore().doc('meta/contactInfo').get();
-  const contactInfo: ContactInfo = normalizeContactInfo(
-    ciSnap.exists ? (ciSnap.data() as Partial<ContactInfo>) : null
-  );
+const ciSnap = await getAdminFirestore().doc('meta/contactInfo').get();
+const contactInfo: ContactInfo = normalizeContactInfo(
+  ciSnap.exists ? (ciSnap.data() as Partial<ContactInfo>) : null
+);
 ```
 
 Et ajouter, après le bloc de la carte « Visibilité des sections » :
@@ -1002,6 +1031,7 @@ git commit -m "feat(contact): page BO Coordonnées (2e carte Paramètres) + form
 ### Task 8: Seed script + suite complète
 
 **Files:**
+
 - Create: `scripts/seed-contact-info.ts`
 
 - [ ] **Step 1: Créer le script de seed (optionnel, pour poser les vraies valeurs)**
@@ -1032,8 +1062,18 @@ const contact = {
   phoneDisplay: '0690 00 00 00',
   email: 'contact@car-performance.gp',
   whatsappNumber: '590690000000',
-  address: { street: 'Zone industrielle de Jarry', postalCode: '97122', city: 'Baie-Mahault', region: 'Guadeloupe' },
-  hours: { weekdayOpen: '07:30', weekdayClose: '17:30', saturdayOpen: '08:00', saturdayClose: '13:00' },
+  address: {
+    street: 'Zone industrielle de Jarry',
+    postalCode: '97122',
+    city: 'Baie-Mahault',
+    region: 'Guadeloupe',
+  },
+  hours: {
+    weekdayOpen: '07:30',
+    weekdayClose: '17:30',
+    saturdayOpen: '08:00',
+    saturdayClose: '13:00',
+  },
   geo: { lat: 16.2415, lng: -61.5611 },
   social: { facebook: '', instagram: '', google: '' },
   updatedAt: Date.now(),
@@ -1044,17 +1084,25 @@ initializeApp({ credential: cert(JSON.parse(readFileSync(resolve(saPath), 'utf-8
 getFirestore()
   .doc('meta/contactInfo')
   .set(contact, { merge: true })
-  .then(() => { console.log('✓ meta/contactInfo posé'); process.exit(0); })
-  .catch((e) => { console.error('seed-contact-info failed:', e); process.exit(1); });
+  .then(() => {
+    console.log('✓ meta/contactInfo posé');
+    process.exit(0);
+  })
+  .catch((e) => {
+    console.error('seed-contact-info failed:', e);
+    process.exit(1);
+  });
 ```
 
 - [ ] **Step 2: Lancer la suite complète + build**
 
 Run:
+
 ```bash
 npx vitest run
 npm run build
 ```
+
 Expected: tous les unitaires verts (dont les 5 nouveaux fichiers contact-info), build vert.
 
 - [ ] **Step 3: Commit**
@@ -1069,6 +1117,7 @@ git commit -m "feat(contact): script de seed meta/contactInfo"
 ## Self-Review
 
 **Spec coverage :**
+
 - Data model `meta/contactInfo` (+ geo + social) → Task 1 (type/défauts) + Task 6 (écriture) + Task 8 (seed). ✓
 - Helpers addressOneLine/whatsappUrl/openingHoursSpec/sameAs + Zod → Task 1. ✓
 - `getCachedContactInfo` (tag) + adapter fail-open → Task 2. ✓

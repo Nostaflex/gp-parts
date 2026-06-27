@@ -42,7 +42,9 @@ type DeepPartial<T> = {
   [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K];
 };
 
-export function normalizeContactInfo(raw: DeepPartial<ContactInfo> | null | undefined): ContactInfo {
+export function normalizeContactInfo(
+  raw: DeepPartial<ContactInfo> | null | undefined
+): ContactInfo {
   const d = DEFAULT_CONTACT_INFO;
   const s = raw ?? {};
   return {
