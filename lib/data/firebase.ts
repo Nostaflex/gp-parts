@@ -336,7 +336,15 @@ export class FirebaseAdapter implements DataAdapter {
   }
 
   async getFeatureFlags(): Promise<FeatureFlags> {
-    const snap = await getDoc(doc(db, 'meta', 'featureFlags'));
-    return normalizeFeatureFlags(snap.exists() ? (snap.data() as Partial<FeatureFlags>) : null);
+    // Fail-open : une lecture des flags qui échoue (rule non déployée, réseau,
+    // permission) ne doit JAMAIS casser le site — le root layout await ce
+    // résultat sur chaque page. On retombe sur les défauts (tout visible).
+    try {
+      const snap = await getDoc(doc(db, 'meta', 'featureFlags'));
+      return normalizeFeatureFlags(snap.exists() ? (snap.data() as Partial<FeatureFlags>) : null);
+    } catch (err) {
+      console.error('[feature-flags] lecture meta/featureFlags échouée, défauts appliqués:', err);
+      return normalizeFeatureFlags(null);
+    }
   }
 }
