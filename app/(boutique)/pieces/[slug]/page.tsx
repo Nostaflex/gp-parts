@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/Badge';
 import { AddToCartButton } from './AddToCartButton';
 import { getAdapter } from '@/lib/data';
 import { getCachedProducts } from '@/lib/data/products-cache';
+import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
 import { formatPrice, getStockStatus, getStockLabel } from '@/lib/utils';
 import { getCategoryLabel } from '@/lib/categories';
 import { JsonLd } from '@/components/seo/JsonLd';
@@ -48,6 +49,8 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
 }
 
 export default async function ProductPage(props: PageProps) {
+  const flags = await getCachedFeatureFlags();
+  if (!flags.pieces) notFound();
   const params = await props.params;
   const products = await getCachedProducts();
   const product = products.find((p) => p.slug === params.slug);

@@ -5,7 +5,9 @@ import { CpHeader } from '@/components/cp/CpHeader';
 import { CpBridge } from '@/components/cp/CpBridge';
 import { CpFooter } from '@/components/cp/CpFooter';
 import { CpUniversStrip } from '@/components/cp/CpUniversStrip';
+import { notFound } from 'next/navigation';
 import { getAdapter } from '@/lib/data';
+import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
 import { LocationClient } from './LocationClient';
 
 export const metadata: Metadata = {
@@ -18,6 +20,8 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function LocationPage() {
+  const flags = await getCachedFeatureFlags();
+  if (!flags.location) notFound();
   const adapter = await getAdapter();
   const cars = (await adapter.getLocationCars()).filter((c) => c.disponible);
   return (

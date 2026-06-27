@@ -8,6 +8,8 @@ import { CpReveal } from '@/components/cp/CpReveal';
 import { CpOpenBadge } from '@/components/cp/CpOpenBadge';
 import { BUSINESS, ADDRESS_ONE_LINE } from '@/lib/seo';
 import { WHATSAPP_URL } from '@/lib/config';
+import { isPathVisible } from '@/lib/feature-flags';
+import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
 
 export const metadata: Metadata = {
   title: 'Garage auto & moto en Guadeloupe',
@@ -94,7 +96,13 @@ const HORAIRES = [
   { jour: 'Dimanche', horaire: 'Fermé' },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const flags = await getCachedFeatureFlags();
+  const univers = UNIVERS.filter((u) => isPathVisible(u.href, flags));
+  const servicesLinks = ['/reparation', '/location', '/vente-vehicule', '/vente-moto'].filter(
+    (href) => isPathVisible(href, flags)
+  );
+
   return (
     <>
       <CpHeader darkSectionIds={['hero', 'stats', 'temoignages', 'contact', 'footer-section']} />
@@ -173,23 +181,25 @@ export default function HomePage() {
           </CpReveal>
           <CpReveal delay={3}>
             <div className="flex flex-wrap gap-4">
-              <Link
-                href="/reparation"
-                className="inline-flex items-center gap-2 bg-cp-red text-cp-cream font-semibold px-6 py-3 rounded-full hover:bg-cp-red-d active:scale-[0.98] transition-[background-color,transform]"
-              >
-                Prendre RDV
-                <svg
-                  width="16"
-                  height="16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
+              {flags.reparation && (
+                <Link
+                  href="/reparation"
+                  className="inline-flex items-center gap-2 bg-cp-red text-cp-cream font-semibold px-6 py-3 rounded-full hover:bg-cp-red-d active:scale-[0.98] transition-[background-color,transform]"
                 >
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </Link>
+                  Prendre RDV
+                  <svg
+                    width="16"
+                    height="16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              )}
               <Link
                 href="/vente-vehicule"
                 className="inline-flex items-center gap-2 border border-cp-cream/30 text-cp-cream font-semibold px-6 py-3 rounded-full hover:bg-cp-cream/10 active:scale-[0.98] transition-[background-color,transform]"
@@ -224,7 +234,7 @@ export default function HomePage() {
           </CpReveal>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {UNIVERS.map((u, i) => (
+            {univers.map((u, i) => (
               <CpReveal key={u.id} delay={(i % 4) as 0 | 1 | 2 | 3}>
                 <Link
                   href={u.href}
@@ -463,7 +473,7 @@ export default function HomePage() {
             <div>
               <p className="text-cp-cream/30 text-xs uppercase tracking-widest mb-4">Services</p>
               <div className="flex flex-col gap-2">
-                {['/reparation', '/location', '/vente-vehicule', '/vente-moto'].map((href) => (
+                {servicesLinks.map((href) => (
                   <Link
                     key={href}
                     href={href}
@@ -474,27 +484,29 @@ export default function HomePage() {
                 ))}
               </div>
             </div>
-            <div>
-              <p className="text-cp-cream/30 text-xs uppercase tracking-widest mb-4">
-                Boutique pièces
-              </p>
-              <div className="flex flex-col gap-2">
-                {[
-                  { href: '/pieces', label: 'Catalogue' },
-                  { href: '/pieces?type=auto', label: 'Auto' },
-                  { href: '/pieces?type=moto', label: 'Moto' },
-                  { href: '/pieces?promo=1', label: 'Promotions' },
-                ].map((l) => (
-                  <Link
-                    key={l.href}
-                    href={l.href}
-                    className="text-cp-cream/60 text-sm hover:text-cp-mango transition-colors"
-                  >
-                    {l.label}
-                  </Link>
-                ))}
+            {flags.pieces && (
+              <div>
+                <p className="text-cp-cream/30 text-xs uppercase tracking-widest mb-4">
+                  Boutique pièces
+                </p>
+                <div className="flex flex-col gap-2">
+                  {[
+                    { href: '/pieces', label: 'Catalogue' },
+                    { href: '/pieces?type=auto', label: 'Auto' },
+                    { href: '/pieces?type=moto', label: 'Moto' },
+                    { href: '/pieces?promo=1', label: 'Promotions' },
+                  ].map((l) => (
+                    <Link
+                      key={l.href}
+                      href={l.href}
+                      className="text-cp-cream/60 text-sm hover:text-cp-mango transition-colors"
+                    >
+                      {l.label}
+                    </Link>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
             <div>
               <p className="text-cp-cream/30 text-xs uppercase tracking-widest mb-4">
                 Informations

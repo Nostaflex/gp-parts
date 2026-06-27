@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { isPathVisible } from '@/lib/feature-flags';
 import { useCart } from '@/components/cart/CartProvider';
+import { useFeatureFlags } from '@/components/cp/FeatureFlagsProvider';
 import { CpLogo } from '@/components/cp/CpLogo';
 
 const NAV_LINKS = [
@@ -27,6 +29,8 @@ export function CpHeader({ darkSectionIds = [] }: CpHeaderProps) {
   const headerRef = useRef<HTMLElement>(null);
   const { totalItems, isReady } = useCart();
   const pathname = usePathname();
+  const flags = useFeatureFlags();
+  const navLinks = NAV_LINKS.filter((l) => isPathVisible(l.href, flags));
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
@@ -84,7 +88,7 @@ export function CpHeader({ darkSectionIds = [] }: CpHeaderProps) {
           className="hidden lg:flex items-center gap-6 text-sm font-medium"
           aria-label="Navigation principale"
         >
-          {NAV_LINKS.map((l) => (
+          {navLinks.map((l) => (
             <Link
               key={l.href}
               href={l.href}
@@ -159,7 +163,7 @@ export function CpHeader({ darkSectionIds = [] }: CpHeaderProps) {
         <div
           className={`lg:hidden border-t px-6 py-4 flex flex-col gap-4 animate-slide-up ${theme === 'dark' ? 'bg-u-cinema border-white/10' : 'bg-u-craft border-cp-ink/10'}`}
         >
-          {NAV_LINKS.map((l) => (
+          {navLinks.map((l) => (
             <Link
               key={l.href}
               href={l.href}

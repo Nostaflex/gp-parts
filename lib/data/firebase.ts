@@ -30,6 +30,8 @@ import { parseLocationCar } from '@/lib/schemas/location-car';
 import { parseReservation } from '@/lib/schemas/reservation';
 import type { Reservation, ReservationStatus } from '@/lib/reservations';
 import type { DataAdapter, ProductFilters, OrderFilters, DemandeFilters } from './types';
+import { normalizeFeatureFlags } from '@/lib/feature-flags';
+import type { FeatureFlags } from '@/lib/feature-flags';
 import { applyClientFilters } from './filters';
 
 /**
@@ -331,5 +333,18 @@ export class FirebaseAdapter implements DataAdapter {
     }
     const snapshot = await getDocs(q);
     return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }) as Demande);
+  }
+
+  async getFeatureFlags(): Promise<FeatureFlags> {
+    // Fail-open : une lecture des flags qui échoue (rule non déployée, réseau,
+    // permission) ne doit JAMAIS casser le site — le root layout await ce
+    // résultat sur chaque page. On retombe sur les défauts (tout visible).
+    try {
+      const snap = await getDoc(doc(db, 'meta', 'featureFlags'));
+      return normalizeFeatureFlags(snap.exists() ? (snap.data() as Partial<FeatureFlags>) : null);
+    } catch (err) {
+      console.error('[feature-flags] lecture meta/featureFlags échouée, défauts appliqués:', err);
+      return normalizeFeatureFlags(null);
+    }
   }
 }

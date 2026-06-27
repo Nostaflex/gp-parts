@@ -5,6 +5,7 @@ import { CpHeader } from '@/components/cp/CpHeader';
 import { CpFooter } from '@/components/cp/CpFooter';
 import type { Moto } from '@/lib/motos';
 import { getCachedMotos } from '@/lib/data/motos-cache';
+import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
 import { FinancementMotoSimulator } from './FinancementMotoSimulator';
 import { MotoGallery } from './MotoGallery';
 import { JsonLd } from '@/components/seo/JsonLd';
@@ -93,6 +94,8 @@ function motoJsonLd(m: Moto) {
 }
 
 export default async function MotoDetailPage({ params }: Props) {
+  const flags = await getCachedFeatureFlags();
+  if (!flags.venteMoto) notFound();
   const { id } = await params;
   const motos = await getCachedMotos();
   const m = motos.find((moto) => moto.id === id);

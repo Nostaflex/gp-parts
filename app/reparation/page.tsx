@@ -4,6 +4,8 @@ import { CpBridge } from '@/components/cp/CpBridge';
 import { CpFooter } from '@/components/cp/CpFooter';
 import { CpUniversStrip } from '@/components/cp/CpUniversStrip';
 import { RdvForm } from './RdvForm';
+import { notFound } from 'next/navigation';
+import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
@@ -88,7 +90,9 @@ const PROMISES = [
   },
 ];
 
-export default function ReparationPage() {
+export default async function ReparationPage() {
+  const flags = await getCachedFeatureFlags();
+  if (!flags.reparation) notFound();
   return (
     <>
       <CpHeader darkSectionIds={['rep-hero']} />
