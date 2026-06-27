@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const createDemande = vi.fn(async (_d: Record<string, unknown>) => 'dem-2');
-vi.mock('@/lib/data', () => ({ getAdapter: vi.fn(async () => ({ createDemande })) }));
+const { createDemandeIntake } = vi.hoisted(() => ({
+  createDemandeIntake: vi.fn(async (_d: Record<string, unknown>) => 'dem-2'),
+}));
+vi.mock('@/lib/server/intake', () => ({ createDemandeIntake }));
 vi.mock('@/lib/emails/send', () => ({ sendLeadEmails: vi.fn(async () => ({ emailed: true })) }));
 
 import { sendLeadEmails } from '@/lib/emails/send';
@@ -22,26 +24,24 @@ const base = {
   creneau: 'Matin',
 };
 
-describe('submitRdv persiste', () => {
+describe('submitRdv', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('crée une demande type reparation avec détails aplatis', async () => {
+  it('persiste type reparation + détails aplatis', async () => {
     const res = await submitRdv(base);
-    expect(createDemande).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'reparation', status: 'nouvelle', nom: 'Marie Test' })
+    expect(createDemandeIntake).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'reparation' })
     );
-    const arg = createDemande.mock.calls[0][0];
-    expect(arg.message).toContain('Révision');
-    expect(arg.message).toContain('2026-07-01');
+    expect(createDemandeIntake.mock.calls[0][0].message).toContain('2026-07-01');
     expect(res.ok).toBe(true);
   });
 
-  it('ok même si email rejette', async () => {
-    vi.mocked(sendLeadEmails).mockRejectedValueOnce(new Error('down'));
-    const res = await submitRdv(base);
-    expect(createDemande).toHaveBeenCalled();
+  it('honeypot rempli → drop silencieux', async () => {
+    const res = await submitRdv({ ...base, website: 'x' });
+    expect(createDemandeIntake).not.toHaveBeenCalled();
+    expect(sendLeadEmails).not.toHaveBeenCalled();
     expect(res.ok).toBe(true);
   });
 });

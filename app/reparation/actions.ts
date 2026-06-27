@@ -1,6 +1,6 @@
 'use server';
 
-import { getAdapter } from '@/lib/data';
+import { createDemandeIntake } from '@/lib/server/intake';
 import { sendLeadEmails } from '@/lib/emails/send';
 import { demandeExpiry } from '@/lib/demandes';
 import type { Lead } from '@/lib/emails/lead';
@@ -18,6 +18,7 @@ export type RdvInput = {
   description: string;
   date: string;
   creneau: string;
+  website?: string;
 };
 
 export type LeadResult = { ok: true; ref: string; emailed: boolean } | { ok: false; error: string };
@@ -31,6 +32,10 @@ function genRef(prefix: string): string {
 
 /** Server action : persiste + notifie une demande de RDV réparation. */
 export async function submitRdv(input: RdvInput): Promise<LeadResult> {
+  // Honeypot : un humain ne remplit jamais ce champ → drop silencieux.
+  if (input.website && input.website.trim() !== '') {
+    return { ok: true, ref: genRef('RDV-CP'), emailed: false };
+  }
   // Validation serveur (défense en profondeur — le client valide déjà).
   if (!input.prenom?.trim() || !input.nom?.trim())
     return { ok: false, error: 'Nom et prénom requis.' };
@@ -73,8 +78,7 @@ export async function submitRdv(input: RdvInput): Promise<LeadResult> {
 
   let persisted = false;
   try {
-    const adapter = await getAdapter();
-    await adapter.createDemande({
+    await createDemandeIntake({
       type: 'reparation',
       status: 'nouvelle',
       nom: `${input.prenom.trim()} ${input.nom.trim()}`,
