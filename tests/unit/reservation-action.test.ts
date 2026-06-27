@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 
 vi.mock('@/lib/emails/send', () => ({ sendReservationEmails: vi.fn() }));
+vi.mock('@/lib/server/intake', () => ({ createReservationIntake: vi.fn(async () => 'res-test') }));
 
 import { validateReservation } from '../../app/location/actions';
 
