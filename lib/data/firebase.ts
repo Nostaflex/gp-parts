@@ -337,6 +337,11 @@ export class FirebaseAdapter implements DataAdapter {
     return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }) as Demande);
   }
 
+  async createDemande(data: Omit<Demande, 'id'>): Promise<string> {
+    const docRef = await addDoc(this.demandesRef, data);
+    return docRef.id;
+  }
+
   async getFeatureFlags(): Promise<FeatureFlags> {
     // Fail-open : une lecture des flags qui échoue (rule non déployée, réseau,
     // permission) ne doit JAMAIS casser le site — le root layout await ce

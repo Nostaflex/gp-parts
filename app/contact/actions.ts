@@ -1,6 +1,8 @@
 'use server';
 
+import { getAdapter } from '@/lib/data';
 import { sendLeadEmails } from '@/lib/emails/send';
+import { demandeTypeFromSujet, demandeExpiry } from '@/lib/demandes';
 import type { Lead } from '@/lib/emails/lead';
 
 export type ContactInput = {
@@ -11,6 +13,7 @@ export type ContactInput = {
   sujet: string;
   message: string;
   filesCount?: number;
+  ref?: string;
 };
 
 export type ContactResult =
@@ -23,7 +26,7 @@ function genRef(prefix: string): string {
   return `${prefix}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 }
 
-/** Server action : enregistre + notifie un message de contact. */
+/** Server action : persiste + notifie un message de contact. */
 export async function submitContact(input: ContactInput): Promise<ContactResult> {
   if (!input.prenom?.trim() || !input.nom?.trim())
     return { ok: false, error: 'Nom et prénom requis.' };
@@ -33,11 +36,35 @@ export async function submitContact(input: ContactInput): Promise<ContactResult>
 
   const ref = genRef('MSG-CP');
   // TODO(upload): transmettre réellement les pièces jointes (storage + liens).
-  // Pour l'instant on signale leur présence au gérant pour qu'il les demande.
   const filesNote = input.filesCount
     ? `\n\n[${input.filesCount} fichier(s) joint(s) par le client — à récupérer auprès de lui]`
     : '';
+  const now = Date.now();
+  const nowIso = new Date(now).toISOString();
+  const messageFull = `${input.message.trim()}\n\nSujet : ${input.sujet}${filesNote}`;
 
+  // 1) Persister d'abord (le lead ne doit jamais être perdu).
+  let persisted = false;
+  try {
+    const adapter = await getAdapter();
+    await adapter.createDemande({
+      type: demandeTypeFromSujet(input.sujet),
+      status: 'nouvelle',
+      nom: `${input.prenom.trim()} ${input.nom.trim()}`,
+      email: input.email.trim(),
+      telephone: input.tel?.trim() ?? '',
+      message: messageFull,
+      ...(input.ref ? { resourceRef: input.ref } : {}),
+      createdAt: nowIso,
+      updatedAt: nowIso,
+      expiresAt: demandeExpiry(now),
+    });
+    persisted = true;
+  } catch (err) {
+    console.error('[submitContact] persistance échouée:', err);
+  }
+
+  // 2) Notifier par email (best-effort).
   const lead: Lead = {
     kind: 'contact',
     ref,
@@ -48,12 +75,15 @@ export async function submitContact(input: ContactInput): Promise<ContactResult>
     sujet: input.sujet,
     message: input.message.trim() + filesNote,
   };
-
+  let emailed = false;
   try {
-    const { emailed } = await sendLeadEmails(lead);
-    return { ok: true, ref, emailed };
+    ({ emailed } = await sendLeadEmails(lead));
   } catch (err) {
-    console.error('[submitContact] échec envoi:', err);
+    console.error('[submitContact] échec envoi email (best-effort):', err);
+  }
+
+  if (!persisted && !emailed) {
     return { ok: false, error: 'Envoi impossible pour le moment. Réessayez ou appelez-nous.' };
   }
+  return { ok: true, ref, emailed };
 }

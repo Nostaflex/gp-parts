@@ -63,6 +63,7 @@ export interface DataAdapter {
   getVehicules(): Promise<Vehicule[]>;
   getMotos(): Promise<Moto[]>;
   getDemandes(filters?: DemandeFilters): Promise<Demande[]>;
+  createDemande(data: Omit<Demande, 'id'>): Promise<string>;
   getLocationCars(opts?: { includeDeleted?: boolean }): Promise<LocationCar[]>;
   getLocationCarById(id: string): Promise<LocationCar | null>;
 

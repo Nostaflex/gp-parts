@@ -1,6 +1,8 @@
 'use server';
 
+import { getAdapter } from '@/lib/data';
 import { sendLeadEmails } from '@/lib/emails/send';
+import { demandeExpiry } from '@/lib/demandes';
 import type { Lead } from '@/lib/emails/lead';
 
 export type RdvInput = {
@@ -27,7 +29,7 @@ function genRef(prefix: string): string {
   return `${prefix}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 }
 
-/** Server action : enregistre + notifie une demande de RDV réparation. */
+/** Server action : persiste + notifie une demande de RDV réparation. */
 export async function submitRdv(input: RdvInput): Promise<LeadResult> {
   // Validation serveur (défense en profondeur — le client valide déjà).
   if (!input.prenom?.trim() || !input.nom?.trim())
@@ -39,6 +41,11 @@ export async function submitRdv(input: RdvInput): Promise<LeadResult> {
   if (!input.date || !input.creneau) return { ok: false, error: 'Date et créneau requis.' };
 
   const ref = genRef('RDV-CP');
+  const vehiculeStr = [input.marque, input.modele, input.annee, input.immat]
+    .map((s) => s?.trim())
+    .filter(Boolean)
+    .join(' ');
+
   const lead: Lead = {
     kind: 'rdv',
     ref,
@@ -46,22 +53,53 @@ export async function submitRdv(input: RdvInput): Promise<LeadResult> {
     nom: input.nom.trim(),
     email: input.email.trim(),
     tel: input.tel.trim(),
-    vehicule: [input.marque, input.modele, input.annee, input.immat]
-      .map((s) => s?.trim())
-      .filter(Boolean)
-      .join(' '),
+    vehicule: vehiculeStr,
     prestation: input.type,
     date: input.date,
     creneau: input.creneau,
     message: input.description.trim(),
   };
 
+  // 1) Persister d'abord (le lead ne doit jamais être perdu).
+  const now = Date.now();
+  const nowIso = new Date(now).toISOString();
+  const messageFull = [
+    `Véhicule : ${vehiculeStr || '—'}`,
+    `Prestation : ${input.type}`,
+    `Date : ${input.date} · Créneau : ${input.creneau}`,
+    '',
+    input.description.trim(),
+  ].join('\n');
+
+  let persisted = false;
   try {
-    const { emailed } = await sendLeadEmails(lead);
-    return { ok: true, ref, emailed };
+    const adapter = await getAdapter();
+    await adapter.createDemande({
+      type: 'reparation',
+      status: 'nouvelle',
+      nom: `${input.prenom.trim()} ${input.nom.trim()}`,
+      email: input.email.trim(),
+      telephone: input.tel.trim(),
+      message: messageFull,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+      expiresAt: demandeExpiry(now),
+    });
+    persisted = true;
   } catch (err) {
-    console.error('[submitRdv] échec envoi:', err);
-    // Le lead n'est pas perdu côté UX : on renvoie une erreur claire.
+    console.error('[submitRdv] persistance échouée:', err);
+  }
+
+  // 2) Notifier par email (best-effort).
+  let emailed = false;
+  try {
+    ({ emailed } = await sendLeadEmails(lead));
+  } catch (err) {
+    console.error('[submitRdv] échec envoi email (best-effort):', err);
+  }
+
+  if (!persisted && !emailed) {
     return { ok: false, error: 'Envoi impossible pour le moment. Réessayez ou appelez-nous.' };
   }
+  return { ok: true, ref, emailed };
 }

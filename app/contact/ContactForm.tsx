@@ -135,6 +135,7 @@ export function ContactForm() {
       sujet: data.sujet,
       message: data.message,
       filesCount: data.files.length,
+      ref: searchParams.get('ref') ?? undefined,
     });
     setSubmitting(false);
     if (!res.ok) {

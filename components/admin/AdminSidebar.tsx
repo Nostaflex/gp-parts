@@ -56,7 +56,7 @@ const SECTIONS: NavSection[] = [
     items: [
       { href: '/admin/commandes', label: 'Commandes', icon: ClipboardList, enabled: true },
       { href: '/admin/reservations', label: 'Réservations', icon: CalendarCheck, enabled: true },
-      { href: '/admin/demandes', label: 'Demandes', icon: MessageSquare, enabled: false },
+      { href: '/admin/demandes', label: 'Demandes', icon: MessageSquare, enabled: true },
     ],
   },
   {
