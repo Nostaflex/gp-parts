@@ -38,7 +38,11 @@ export const DEFAULT_CONTACT_INFO: ContactInfo = {
 
 const isStr = (v: unknown): v is string => typeof v === 'string';
 
-export function normalizeContactInfo(raw: Partial<ContactInfo> | null | undefined): ContactInfo {
+type DeepPartial<T> = {
+  [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K];
+};
+
+export function normalizeContactInfo(raw: DeepPartial<ContactInfo> | null | undefined): ContactInfo {
   const d = DEFAULT_CONTACT_INFO;
   const s = raw ?? {};
   return {

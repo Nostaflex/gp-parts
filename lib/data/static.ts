@@ -10,6 +10,8 @@ import type { DataAdapter, ProductFilters, OrderFilters, DemandeFilters } from '
 import type { Reservation, ReservationStatus } from '@/lib/reservations';
 import { DEFAULT_FEATURE_FLAGS } from '@/lib/feature-flags';
 import type { FeatureFlags } from '@/lib/feature-flags';
+import { DEFAULT_CONTACT_INFO } from '@/lib/contact-info';
+import type { ContactInfo } from '@/lib/contact-info';
 import { applyClientFilters } from './filters';
 
 // Fixtures CRM pour le dev local sans émulateur Firebase. En production,
@@ -264,5 +266,9 @@ export class StaticAdapter implements DataAdapter {
 
   async getFeatureFlags(): Promise<FeatureFlags> {
     return { ...DEFAULT_FEATURE_FLAGS };
+  }
+
+  async getContactInfo(): Promise<ContactInfo> {
+    return { ...DEFAULT_CONTACT_INFO };
   }
 }
