@@ -1,6 +1,8 @@
 import { Suspense } from 'react';
-import { CatalogueClient } from './CatalogueClient';
+import { notFound } from 'next/navigation';
 import { getCachedProducts } from '@/lib/data/products-cache';
+import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
+import { CatalogueClient } from './CatalogueClient';
 
 export const metadata = {
   title: 'Catalogue',
@@ -13,6 +15,8 @@ export const metadata = {
 export const revalidate = 3600;
 
 export default async function CataloguePage() {
+  const flags = await getCachedFeatureFlags();
+  if (!flags.pieces) notFound();
   const products = await getCachedProducts();
   return (
     <Suspense fallback={<CatalogueSkeleton />}>
