@@ -11,7 +11,9 @@ import type { Vehicule } from '@/lib/vehicules';
 export const getCachedVehicules = unstable_cache(
   async (): Promise<Vehicule[]> => {
     const adapter = await getAdapter();
-    return adapter.getVehicules();
+    // Les véhicules « vendus » (soft-delete admin) sont retirés du site public :
+    // l'admin les voit toujours via getVehicules(), pas les visiteurs.
+    return (await adapter.getVehicules()).filter((v) => v.disponibilite !== 'vendu');
   },
   ['vehicules-public'],
   { tags: ['vehicules'] }
