@@ -264,6 +264,13 @@ export class StaticAdapter implements DataAdapter {
     return demandes;
   }
 
+  async createDemande(data: Omit<Demande, 'id'>): Promise<string> {
+    warnDevFallback('createDemande');
+    // Pas de persistance locale : on renvoie un id factice.
+    void data;
+    return `dem-dev-${Date.now()}`;
+  }
+
   async getFeatureFlags(): Promise<FeatureFlags> {
     return { ...DEFAULT_FEATURE_FLAGS };
   }
