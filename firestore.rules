@@ -84,6 +84,14 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Demandes (leads formulaires contact + RDV réparation) : création publique,
+    // lecture/update admin, jamais hard delete (soft via status 'deleted').
+    match /demandes/{doc} {
+      allow create;
+      allow read, update: if isAdmin();
+      allow delete: if false;
+    }
+
     // Réservations: création publique (formulaire location), lecture/update admin,
     // jamais hard delete (cohérent avec orders/demandes).
     match /reservations/{doc} {
