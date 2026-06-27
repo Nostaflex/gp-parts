@@ -2,6 +2,7 @@
 
 import { generateReservationReference } from '@/lib/utils';
 import { getAdapter } from '@/lib/data';
+import { createReservationIntake } from '@/lib/server/intake';
 import { sendReservationEmails } from '@/lib/emails/send';
 import type { Reservation } from '@/lib/reservations';
 
@@ -30,7 +31,12 @@ export async function validateReservation(input: {
   telephone: string;
   permis: string;
   consent: boolean;
+  website?: string;
 }): Promise<ReservationValidationResult> {
+  // Honeypot : un humain ne remplit jamais ce champ → succès factice, rien créé.
+  if (input.website && input.website.trim() !== '') {
+    return { success: true, errors: {} };
+  }
   const errors: Record<string, string> = {};
 
   const prenom = sanitize(input.prenom);
@@ -95,7 +101,7 @@ export async function validateReservation(input: {
     expiresAt: Date.now() + TTL_MS,
   };
 
-  const id = await adapter.createReservation(data);
+  const id = await createReservationIntake(data);
   sendReservationEmails({ ...data, id });
 
   return { success: true, errors: {}, reference };
