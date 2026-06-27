@@ -23,6 +23,13 @@ const nextConfig = {
     return [
       { source: '/vente-vo', destination: '/vente-vehicule', permanent: true },
       { source: '/vente-vo/:id', destination: '/vente-vehicule/:id', permanent: true },
+      // Domaine canonique : apex → www (évite le duplicate content SEO).
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'car-performance.biz' }],
+        destination: 'https://www.car-performance.biz/:path*',
+        permanent: true,
+      },
     ];
   },
   // Security headers
