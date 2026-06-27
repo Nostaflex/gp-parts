@@ -56,6 +56,15 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Feature flags de sections : lecture publique (rendu storefront non
+    // authentifié), écriture admin seulement. Plus spécifique que
+    // /meta/{doc=**} ci-dessous ; les règles Firestore sont en OR, donc cette
+    // règle accorde la lecture publique sans toucher le reste de meta/.
+    match /meta/featureFlags {
+      allow read;
+      allow write: if isAdmin();
+    }
+
     // Meta (whitelist admins + config): admin only
     // Note: meta/admins contient PII (emails admins), pas lecture publique
     match /meta/{doc=**} {
