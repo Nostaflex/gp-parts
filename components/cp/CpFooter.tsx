@@ -1,7 +1,17 @@
 import Link from 'next/link';
+import { isPathVisible } from '@/lib/feature-flags';
+import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
 import { CpLogo } from '@/components/cp/CpLogo';
 
-export function CpFooter() {
+export async function CpFooter() {
+  const flags = await getCachedFeatureFlags();
+  const services = [
+    { href: '/reparation', label: 'Réparation' },
+    { href: '/location', label: 'Location' },
+    { href: '/vente-vehicule', label: 'Vente véhicule' },
+    { href: '/vente-moto', label: 'Vente moto' },
+  ].filter((l) => isPathVisible(l.href, flags));
+
   return (
     <footer className="py-16 px-6" style={{ backgroundColor: '#1A0F06' }}>
       <div className="max-w-7xl mx-auto">
@@ -16,12 +26,7 @@ export function CpFooter() {
           <div>
             <p className="text-cp-cream/30 text-xs uppercase tracking-widest mb-4">Services</p>
             <div className="flex flex-col gap-2">
-              {[
-                { href: '/reparation', label: 'Réparation' },
-                { href: '/location', label: 'Location' },
-                { href: '/vente-vehicule', label: 'Vente véhicule' },
-                { href: '/vente-moto', label: 'Vente moto' },
-              ].map((l) => (
+              {services.map((l) => (
                 <Link
                   key={l.href}
                   href={l.href}
@@ -32,27 +37,29 @@ export function CpFooter() {
               ))}
             </div>
           </div>
-          <div>
-            <p className="text-cp-cream/30 text-xs uppercase tracking-widest mb-4">
-              Boutique pièces
-            </p>
-            <div className="flex flex-col gap-2">
-              {[
-                { href: '/pieces', label: 'Catalogue' },
-                { href: '/pieces?type=auto', label: 'Auto' },
-                { href: '/pieces?type=moto', label: 'Moto' },
-                { href: '/pieces?promo=1', label: 'Promotions' },
-              ].map((l) => (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  className="text-cp-cream/60 text-sm hover:text-cp-mango transition-colors"
-                >
-                  {l.label}
-                </Link>
-              ))}
+          {flags.pieces && (
+            <div>
+              <p className="text-cp-cream/30 text-xs uppercase tracking-widest mb-4">
+                Boutique pièces
+              </p>
+              <div className="flex flex-col gap-2">
+                {[
+                  { href: '/pieces', label: 'Catalogue' },
+                  { href: '/pieces?type=auto', label: 'Auto' },
+                  { href: '/pieces?type=moto', label: 'Moto' },
+                  { href: '/pieces?promo=1', label: 'Promotions' },
+                ].map((l) => (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    className="text-cp-cream/60 text-sm hover:text-cp-mango transition-colors"
+                  >
+                    {l.label}
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
           <div>
             <p className="text-cp-cream/30 text-xs uppercase tracking-widest mb-4">Informations</p>
             <div className="flex flex-col gap-2">
