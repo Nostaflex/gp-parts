@@ -1,11 +1,41 @@
 'use client';
 
 import Link from 'next/link';
+import { useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { DataTable, type Column } from '@/components/admin/DataTable';
 import { StatusBadge, type BadgeTone } from '@/components/admin/StatusBadge';
+import { deleteVehicule } from '@/app/admin/vehicules/actions';
 
 import type { Vehicule, Disponibilite } from '@/lib/vehicules';
+
+/** Bouton de suppression (soft-delete → « vendu », retiré du site public). */
+function DeleteVehiculeButton({ id, disabled }: { id: string; disabled: boolean }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+
+  const onDelete = () => {
+    if (disabled || pending) return;
+    if (!window.confirm('Retirer ce véhicule du site ? (il sera marqué comme vendu)')) return;
+    startTransition(async () => {
+      await deleteVehicule(id);
+      router.refresh();
+    });
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={onDelete}
+      disabled={disabled || pending}
+      className="text-body-sm font-semibold ml-4 disabled:opacity-40"
+      style={{ color: 'var(--red)' }}
+    >
+      {pending ? '…' : 'Supprimer'}
+    </button>
+  );
+}
 
 const DISPO: Record<Disponibilite, { tone: BadgeTone; label: string }> = {
   disponible: { tone: 'success', label: 'Disponible' },
@@ -52,13 +82,16 @@ const columns: Column<Vehicule>[] = [
     header: '',
     align: 'right',
     render: (v) => (
-      <Link
-        href={`/admin/vehicules/${v.id}`}
-        className="text-body-sm font-semibold"
-        style={{ color: 'var(--blue)' }}
-      >
-        Éditer
-      </Link>
+      <>
+        <Link
+          href={`/admin/vehicules/${v.id}`}
+          className="text-body-sm font-semibold"
+          style={{ color: 'var(--blue)' }}
+        >
+          Éditer
+        </Link>
+        <DeleteVehiculeButton id={v.id} disabled={v.disponibilite === 'vendu'} />
+      </>
     ),
   },
 ];
