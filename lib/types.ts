@@ -143,7 +143,13 @@ export interface Order {
 // Créées publiquement via le formulaire de contact, traitées en back-office.
 // PII client : jamais loggée dans audit_log (cf. lib/admin/audit.ts).
 
-export type DemandeType = 'contact' | 'vehicule' | 'moto' | 'piece' | 'financement';
+export type DemandeType =
+  | 'contact'
+  | 'vehicule'
+  | 'moto'
+  | 'piece'
+  | 'financement'
+  | 'reparation';
 
 export type DemandeStatus = 'nouvelle' | 'en_cours' | 'traitee' | 'deleted';
 
