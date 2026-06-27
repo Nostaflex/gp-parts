@@ -44,6 +44,7 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
   const formSectionRef = useRef<HTMLElement>(null);
   const [showForm, setShowForm] = useState(false);
   const [step, setStep] = useState<Step>(0);
+  const [website, setWebsite] = useState(''); // honeypot anti-spam
   const [done, setDone] = useState(false);
   const [ref, setRef] = useState('');
   const [errors, setErrors] = useState<Partial<Record<keyof ReservationData, string>>>({});
@@ -121,6 +122,7 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
         telephone: formData.tel,
         permis: formData.permis,
         consent: formData.consent,
+        website,
       });
       if (!result.success) {
         setErrors(result.errors as Partial<Record<keyof ReservationData, string>>);
@@ -636,6 +638,23 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
                       />
                       {err('permis')}
                     </div>
+                    {/* Honeypot anti-spam : invisible pour un humain, rempli par les bots. */}
+                    <input
+                      type="text"
+                      name="website"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      aria-hidden="true"
+                      value={website}
+                      onChange={(e) => setWebsite(e.target.value)}
+                      style={{
+                        position: 'absolute',
+                        left: '-9999px',
+                        width: '1px',
+                        height: '1px',
+                        opacity: 0,
+                      }}
+                    />
                   </div>
                 )}
 

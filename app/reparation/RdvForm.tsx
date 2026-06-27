@@ -71,6 +71,7 @@ const label = 'block text-xs font-semibold text-cp-ink/50 uppercase tracking-wid
 
 export function RdvForm() {
   const [step, setStep] = useState<Step>(0);
+  const [website, setWebsite] = useState(''); // honeypot anti-spam
   const [done, setDone] = useState(false);
   const [ref, setRef] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -133,7 +134,7 @@ export function RdvForm() {
   const submit = async () => {
     setSubmitting(true);
     setSubmitError(null);
-    const res = await submitRdv(data);
+    const res = await submitRdv({ ...data, website });
     setSubmitting(false);
     if (!res.ok) {
       setSubmitError(res.error);
@@ -471,6 +472,18 @@ export function RdvForm() {
             </div>
           </div>
         )}
+
+        {/* Honeypot anti-spam : invisible pour un humain, rempli par les bots. */}
+        <input
+          type="text"
+          name="website"
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          value={website}
+          onChange={(e) => setWebsite(e.target.value)}
+          style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }}
+        />
 
         {/* Navigation */}
         <div className="flex gap-3 mt-8">

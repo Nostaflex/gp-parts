@@ -91,18 +91,19 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Demandes (leads formulaires contact + RDV réparation) : création publique,
-    // lecture/update admin, jamais hard delete (soft via status 'deleted').
+    // Demandes (leads formulaires contact + RDV réparation) : écriture
+    // EXCLUSIVEMENT via Admin SDK (server actions, après validation + honeypot).
+    // create:if false bloque toute écriture client directe (anti-spam).
     match /demandes/{doc} {
-      allow create;
+      allow create: if false;
       allow read, update: if isAdmin();
       allow delete: if false;
     }
 
-    // Réservations: création publique (formulaire location), lecture/update admin,
-    // jamais hard delete (cohérent avec orders/demandes).
+    // Réservations: écriture EXCLUSIVEMENT via Admin SDK (server action location,
+    // après validation + honeypot). create:if false bloque l'écriture directe.
     match /reservations/{doc} {
-      allow create;
+      allow create: if false;
       allow read, update: if isAdmin();
       allow delete: if false;
     }

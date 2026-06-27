@@ -41,6 +41,7 @@ const lbl = 'block text-xs font-semibold text-cp-vert-l/70 uppercase tracking-wi
 
 export function ContactForm() {
   const searchParams = useSearchParams();
+  const [website, setWebsite] = useState(''); // honeypot anti-spam
   const [done, setDone] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -136,6 +137,7 @@ export function ContactForm() {
       message: data.message,
       filesCount: data.files.length,
       ref: searchParams.get('ref') ?? undefined,
+      website,
     });
     setSubmitting(false);
     if (!res.ok) {
@@ -377,6 +379,18 @@ export function ContactForm() {
           </label>
         </div>
         {err('consent')}
+
+        {/* Honeypot anti-spam : invisible pour un humain, rempli par les bots. */}
+        <input
+          type="text"
+          name="website"
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          value={website}
+          onChange={(e) => setWebsite(e.target.value)}
+          style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }}
+        />
 
         <button
           type="button"
