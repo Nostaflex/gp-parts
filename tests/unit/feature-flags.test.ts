@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  DEFAULT_FEATURE_FLAGS,
-  normalizeFeatureFlags,
-  isPathVisible,
-} from '@/lib/feature-flags';
+import { DEFAULT_FEATURE_FLAGS, normalizeFeatureFlags, isPathVisible } from '@/lib/feature-flags';
 
 describe('feature-flags', () => {
   it('défaut = toutes sections visibles', () => {

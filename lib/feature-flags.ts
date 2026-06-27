@@ -19,9 +19,7 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
 };
 
 /** Merge un doc Firestore (partiel/inconnu) sur les défauts, clés connues only. */
-export function normalizeFeatureFlags(
-  raw: Partial<FeatureFlags> | null | undefined
-): FeatureFlags {
+export function normalizeFeatureFlags(raw: Partial<FeatureFlags> | null | undefined): FeatureFlags {
   const src = raw ?? {};
   return {
     pieces: typeof src.pieces === 'boolean' ? src.pieces : DEFAULT_FEATURE_FLAGS.pieces,

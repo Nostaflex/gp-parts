@@ -22,10 +22,12 @@
 ### Task 1: Module cœur `lib/feature-flags.ts` (types, défauts, helper de visibilité)
 
 **Files:**
+
 - Create: `lib/feature-flags.ts`
 - Test: `tests/unit/feature-flags.test.ts`
 
 **Interfaces:**
+
 - Produces:
   - `type FeatureFlags = { pieces: boolean; location: boolean; venteMoto: boolean; reparation: boolean }`
   - `const DEFAULT_FEATURE_FLAGS: FeatureFlags` (tout `true`)
@@ -37,11 +39,7 @@
 ```ts
 // tests/unit/feature-flags.test.ts
 import { describe, it, expect } from 'vitest';
-import {
-  DEFAULT_FEATURE_FLAGS,
-  normalizeFeatureFlags,
-  isPathVisible,
-} from '@/lib/feature-flags';
+import { DEFAULT_FEATURE_FLAGS, normalizeFeatureFlags, isPathVisible } from '@/lib/feature-flags';
 
 describe('feature-flags', () => {
   it('défaut = toutes sections visibles', () => {
@@ -127,9 +125,7 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
 };
 
 /** Merge un doc Firestore (partiel/inconnu) sur les défauts, clés connues only. */
-export function normalizeFeatureFlags(
-  raw: Partial<FeatureFlags> | null | undefined
-): FeatureFlags {
+export function normalizeFeatureFlags(raw: Partial<FeatureFlags> | null | undefined): FeatureFlags {
   const src = raw ?? {};
   return {
     pieces: typeof src.pieces === 'boolean' ? src.pieces : DEFAULT_FEATURE_FLAGS.pieces,
@@ -152,10 +148,7 @@ const SECTION_FLAG_BY_PREFIX: { prefix: string; flag: keyof FeatureFlags }[] = [
 /** Un lien/route est-il visible selon les flags ? (gère query + sous-routes) */
 export function isPathVisible(href: string, flags: FeatureFlags): boolean {
   const match = SECTION_FLAG_BY_PREFIX.find(
-    (s) =>
-      href === s.prefix ||
-      href.startsWith(`${s.prefix}/`) ||
-      href.startsWith(`${s.prefix}?`)
+    (s) => href === s.prefix || href.startsWith(`${s.prefix}/`) || href.startsWith(`${s.prefix}?`)
   );
   return match ? flags[match.flag] : true;
 }
@@ -178,6 +171,7 @@ git commit -m "feat(flags): module cœur feature-flags (types + défauts + isPat
 ### Task 2: Adapter `getFeatureFlags` + lecture cachée
 
 **Files:**
+
 - Modify: `lib/data/types.ts` (ajouter méthode à `DataAdapter`)
 - Modify: `lib/data/static.ts` (impl `StaticAdapter`)
 - Modify: `lib/data/firebase.ts` (impl `FirebaseAdapter`)
@@ -185,6 +179,7 @@ git commit -m "feat(flags): module cœur feature-flags (types + défauts + isPat
 - Test: `tests/unit/feature-flags-adapter.test.ts`
 
 **Interfaces:**
+
 - Consumes: `FeatureFlags`, `normalizeFeatureFlags`, `DEFAULT_FEATURE_FLAGS` (Task 1).
 - Produces:
   - `DataAdapter.getFeatureFlags(): Promise<FeatureFlags>`
@@ -289,6 +284,7 @@ git commit -m "feat(flags): adapter getFeatureFlags + lecture cachée par tag"
 ### Task 3: Règle Firestore — lecture publique de `meta/featureFlags`
 
 **Files:**
+
 - Modify: `firestore.rules`
 
 **Contexte (important) :** la règle existante `match /meta/{doc=**} { allow read, write: if isAdmin(); }` rend tout `meta/` **admin-only**. Le storefront lit les flags **non authentifié** → il faut une règle spécifique en lecture publique. Les règles Firestore sont en OR : ajouter une règle plus spécifique qui autorise la lecture suffit.
@@ -326,11 +322,13 @@ git commit -m "feat(flags): règle Firestore lecture publique meta/featureFlags"
 ### Task 4: Context provider client + câblage root layout
 
 **Files:**
+
 - Create: `components/cp/FeatureFlagsProvider.tsx`
 - Modify: `app/layout.tsx`
 - Test: `tests/unit/feature-flags-provider.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `FeatureFlags`, `DEFAULT_FEATURE_FLAGS` (Task 1), `getCachedFeatureFlags` (Task 2).
 - Produces:
   - `<FeatureFlagsProvider value={FeatureFlags}>` (client)
@@ -418,16 +416,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 Dans le JSX, envelopper l'arbre existant (à l'intérieur de `<body>`, autour de `<ToastProvider>`), inchangé sinon :
 
 ```tsx
-        <FeatureFlagsProvider value={featureFlags}>
-          <ToastProvider>
-            <CartProvider>
-              <main id="main" tabIndex={-1} className="flex-1 flex flex-col">
-                {children}
-              </main>
-              <CookieBanner />
-            </CartProvider>
-          </ToastProvider>
-        </FeatureFlagsProvider>
+<FeatureFlagsProvider value={featureFlags}>
+  <ToastProvider>
+    <CartProvider>
+      <main id="main" tabIndex={-1} className="flex-1 flex flex-col">
+        {children}
+      </main>
+      <CookieBanner />
+    </CartProvider>
+  </ToastProvider>
+</FeatureFlagsProvider>
 ```
 
 (Le `<JsonLd>` et le `<a className="skip-link">` restent avant `<FeatureFlagsProvider>`.)
@@ -449,10 +447,12 @@ git commit -m "feat(flags): context provider + lecture flags dans le root layout
 ### Task 5: Filtrage de la nav (`CpHeader`)
 
 **Files:**
+
 - Modify: `components/cp/CpHeader.tsx`
 - Test: `tests/unit/cp-header-flags.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `useFeatureFlags` (Task 4), `isPathVisible` (Task 1).
 
 - [ ] **Step 1: Write the failing test**
@@ -504,8 +504,8 @@ import { isPathVisible } from '@/lib/feature-flags';
 import { useFeatureFlags } from '@/components/cp/FeatureFlagsProvider';
 
 // dans le composant, avant le return, dériver la liste filtrée :
-  const flags = useFeatureFlags();
-  const navLinks = NAV_LINKS.filter((l) => isPathVisible(l.href, flags));
+const flags = useFeatureFlags();
+const navLinks = NAV_LINKS.filter((l) => isPathVisible(l.href, flags));
 ```
 
 Puis remplacer les deux `NAV_LINKS.map((l) => …)` (desktop L~87 et mobile L~162) par `navLinks.map((l) => …)`. Ne pas toucher au reste (logo, panier, contact).
@@ -527,10 +527,12 @@ git commit -m "feat(flags): filtrage des liens nav du header selon les flags"
 ### Task 6: Filtrage de la home (`CpUniversStrip`)
 
 **Files:**
+
 - Modify: `components/cp/CpUniversStrip.tsx`
 - Test: `tests/unit/cp-univers-strip-flags.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `getCachedFeatureFlags` (Task 2), `isPathVisible` (Task 1).
 - Note : `CpUniversStrip` est un **server component** → on le rend `async` et il lit les flags directement. Le test mocke le module cache.
 
@@ -606,10 +608,12 @@ git commit -m "feat(flags): filtrage des tuiles d'univers de la home"
 ### Task 7: Filtrage du footer (`CpFooter`)
 
 **Files:**
+
 - Modify: `components/cp/CpFooter.tsx`
 - Test: `tests/unit/cp-footer-flags.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `getCachedFeatureFlags` (Task 2), `isPathVisible` (Task 1).
 - Note : server component → `async`. Le footer a deux groupes de liens sections (groupe « nav » L~20-23 + groupe « Pièces » L~41-44).
 
@@ -673,7 +677,7 @@ export async function CpFooter() {
 }
 ```
 
-Appliquer `.filter((l) => isPathVisible(l.href, flags))` aux deux tableaux de liens de section (le groupe nav réparation/location/vente-*/  et le groupe « Pièces » catalogue/auto/moto/promo). Ne pas filtrer le groupe support (à-propos/contact/mentions/cgv).
+Appliquer `.filter((l) => isPathVisible(l.href, flags))` aux deux tableaux de liens de section (le groupe nav réparation/location/vente-\*/ et le groupe « Pièces » catalogue/auto/moto/promo). Ne pas filtrer le groupe support (à-propos/contact/mentions/cgv).
 
 - [ ] **Step 4: Run test to verify it passes**
 
@@ -692,6 +696,7 @@ git commit -m "feat(flags): filtrage des liens sections du footer"
 ### Task 8: Gardes de routes (`notFound()`) sur les 4 sections
 
 **Files:**
+
 - Modify: `app/(boutique)/pieces/page.tsx`
 - Modify: `app/(boutique)/pieces/[slug]/page.tsx`
 - Modify: `app/location/page.tsx`
@@ -701,6 +706,7 @@ git commit -m "feat(flags): filtrage des liens sections du footer"
 - Test: `tests/unit/section-route-guards.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `getCachedFeatureFlags` (Task 2), `notFound` (next/navigation).
 
 - [ ] **Step 1: Write the failing test**
@@ -765,11 +771,12 @@ import { notFound } from 'next/navigation';
 import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
 
 // première instruction du composant (rendre async s'il ne l'est pas déjà) :
-  const flags = await getCachedFeatureFlags();
-  if (!flags.reparation) notFound();
+const flags = await getCachedFeatureFlags();
+if (!flags.reparation) notFound();
 ```
 
 Mapping flag par fichier :
+
 - `app/(boutique)/pieces/page.tsx` et `app/(boutique)/pieces/[slug]/page.tsx` → `if (!flags.pieces) notFound();`
 - `app/location/page.tsx` → `if (!flags.location) notFound();`
 - `app/vente-moto/page.tsx` et `app/vente-moto/[id]/page.tsx` → `if (!flags.venteMoto) notFound();`
@@ -794,10 +801,12 @@ git commit -m "feat(flags): garde notFound() sur les routes des sections flaggé
 ### Task 9: Filtrage du sitemap
 
 **Files:**
+
 - Modify: `app/sitemap.ts`
 - Test: `tests/unit/sitemap-flags.test.ts`
 
 **Interfaces:**
+
 - Consumes: `getCachedFeatureFlags` (Task 2), `isPathVisible` (Task 1).
 
 - [ ] **Step 1: Write the failing test**
@@ -851,15 +860,16 @@ import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
 import { isPathVisible } from '@/lib/feature-flags';
 
 // au début de la fonction, après avoir construit `now` :
-  const flags = await getCachedFeatureFlags();
-  const visible = (url: string) => isPathVisible(url.replace(BASE_URL, ''), flags);
+const flags = await getCachedFeatureFlags();
+const visible = (url: string) => isPathVisible(url.replace(BASE_URL, ''), flags);
 
 // filtrer les routes statiques avant de les retourner :
-  // au lieu de retourner directement [...staticRoutes, ...dynamic], filtrer chaque
-  // tableau avec `visible(entry.url)`.
+// au lieu de retourner directement [...staticRoutes, ...dynamic], filtrer chaque
+// tableau avec `visible(entry.url)`.
 ```
 
 Appliquer concrètement :
+
 - Filtrer `staticRoutes` : `staticRoutes.filter((r) => visible(r.url))`.
 - Pour les entrées dynamiques produits (`/pieces/[slug]`) : ne les générer que si `flags.pieces` (sinon `[]`).
 - Pour les entrées dynamiques motos (`/vente-moto/[id]`) : ne les générer que si `flags.venteMoto`.
@@ -883,11 +893,13 @@ git commit -m "feat(flags): exclure les sections OFF du sitemap"
 ### Task 10: Server Action `toggleFeatureFlags` + type d'audit
 
 **Files:**
+
 - Modify: `lib/admin/audit.ts` (ajouter `'feature-flags'` à `AuditResourceType`)
 - Create: `app/admin/(shell)/parametres/actions.ts`
 - Test: `tests/unit/feature-flags-action.test.ts`
 
 **Interfaces:**
+
 - Consumes: `requireAdmin` (`lib/admin/auth`), `writeAuditLog` (`lib/admin/audit`), `getAdminFirestore` (`lib/firebase-admin`), `FormActionState` (`components/admin/FormShell`).
 - Produces: `toggleFeatureFlags(prev: FormActionState, formData: FormData): Promise<FormActionState>`.
 
@@ -963,7 +975,7 @@ Dans `lib/admin/audit.ts`, ajouter `'feature-flags'` au union `AuditResourceType
 // L20-ish : ajouter la valeur à l'union existante
 export type AuditResourceType =
   // …valeurs existantes…
-  | 'feature-flags';
+  'feature-flags';
 ```
 
 Créer `app/admin/(shell)/parametres/actions.ts` :
@@ -992,10 +1004,9 @@ export async function toggleFeatureFlags(
   };
 
   const db = getAdminFirestore();
-  await db.doc('meta/featureFlags').set(
-    { ...flags, updatedAt: Date.now(), updatedBy: session.email },
-    { merge: true }
-  );
+  await db
+    .doc('meta/featureFlags')
+    .set({ ...flags, updatedAt: Date.now(), updatedBy: session.email }, { merge: true });
 
   await writeAuditLog({
     actor: session.email,
@@ -1029,12 +1040,14 @@ git commit -m "feat(flags): server action toggleFeatureFlags + type audit featur
 ### Task 11: Page BO `/admin/parametres` + formulaire + entrée de nav
 
 **Files:**
+
 - Create: `app/admin/(shell)/parametres/page.tsx`
 - Create: `components/admin/FeatureFlagsForm.tsx`
 - Modify: `components/admin/AdminSidebar.tsx` (ajouter l'entrée « Paramètres »)
 - Test: `tests/unit/feature-flags-form.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `toggleFeatureFlags` (Task 10), `getAdminFirestore` (`lib/firebase-admin`), `normalizeFeatureFlags`/`FeatureFlags` (Task 1), `requireAdmin`.
 
 - [ ] **Step 1: Write the failing test (formulaire)**
@@ -1046,7 +1059,7 @@ import { render, screen } from '@testing-library/react';
 import { FeatureFlagsForm } from '@/components/admin/FeatureFlagsForm';
 
 describe('FeatureFlagsForm', () => {
-  it('rend un interrupteur par section avec l\'état initial', () => {
+  it("rend un interrupteur par section avec l'état initial", () => {
     render(
       <FeatureFlagsForm
         initial={{ pieces: false, location: true, venteMoto: false, reparation: true }}
@@ -1167,10 +1180,12 @@ git commit -m "feat(flags): page BO Paramètres + formulaire toggles + entrée s
 ### Task 12: Script de seed + E2E + suite complète
 
 **Files:**
+
 - Create: `scripts/seed-feature-flags.ts`
 - Create: `tests/e2e/section-feature-flags.spec.ts`
 
 **Interfaces:**
+
 - Consumes: pattern `scripts/seed-admin-whitelist.ts`.
 
 - [ ] **Step 1: Créer le script de seed**
@@ -1254,11 +1269,13 @@ test('toutes les sections visibles par défaut (StaticAdapter)', async ({ page }
 - [ ] **Step 3: Lancer la suite complète + build**
 
 Run:
+
 ```bash
 npx vitest run
 npm run build
 npx playwright test tests/e2e/section-feature-flags.spec.ts
 ```
+
 Expected: tous les unitaires verts (dont les 7 nouveaux fichiers), build vert, E2E vert.
 
 - [ ] **Step 4: Commit**
@@ -1273,6 +1290,7 @@ git commit -m "feat(flags): script de seed meta/featureFlags + E2E non-régressi
 ## Self-Review
 
 **Spec coverage :**
+
 - Data model `meta/featureFlags` → Task 2 (firebase) + Task 10/11 (écriture) + Task 12 (seed). ✓
 - `DEFAULT_FEATURE_FLAGS` → Task 1. ✓
 - `getCachedFeatureFlags` (tag) → Task 2. ✓

@@ -25,7 +25,8 @@ if (!projectId) {
   process.exit(1);
 }
 
-const bool = (v: string | undefined, def: boolean) => (v == null ? def : v.toLowerCase() === 'true');
+const bool = (v: string | undefined, def: boolean) =>
+  v == null ? def : v.toLowerCase() === 'true';
 
 const flags = {
   pieces: bool(process.env.FLAGS_PIECES, true),

@@ -8,7 +8,7 @@ GP Parts comporte plusieurs sections publiques (Pièces, Location, Vente
 véhicule, Vente moto, Réparation). Pour un **lancement progressif**, on veut
 pouvoir activer / désactiver chaque section depuis le back-office, sans
 redéploiement, et de façon **réellement étanche** (« vraie porte fermée » :
-section invisible *et* inaccessible tant qu'elle n'est pas activée).
+section invisible _et_ inaccessible tant qu'elle n'est pas activée).
 
 Cas d'usage immédiat : lancer le site avec **uniquement Vente véhicule**
 visible, puis rallumer les autres sections au fur et à mesure que Stéphane
@@ -16,14 +16,14 @@ est prêt.
 
 ### Sections concernées
 
-| Section | Flaggable ? | Routes |
-|---|---|---|
-| Vente véhicule | ❌ toujours visible (cœur du lancement) | `/vente-vehicule`, `/vente-vehicule/[id]` |
-| Contact / À propos / légales | ❌ toujours visibles (support) | `/contact`, `/a-propos`, … |
-| **Pièces** | ✅ | `/pieces`, `/pieces/[slug]` |
-| **Location** | ✅ | `/location` |
-| **Vente moto** | ✅ | `/vente-moto`, `/vente-moto/[id]` |
-| **Réparation** | ✅ | `/reparation` |
+| Section                      | Flaggable ?                             | Routes                                    |
+| ---------------------------- | --------------------------------------- | ----------------------------------------- |
+| Vente véhicule               | ❌ toujours visible (cœur du lancement) | `/vente-vehicule`, `/vente-vehicule/[id]` |
+| Contact / À propos / légales | ❌ toujours visibles (support)          | `/contact`, `/a-propos`, …                |
+| **Pièces**                   | ✅                                      | `/pieces`, `/pieces/[slug]`               |
+| **Location**                 | ✅                                      | `/location`                               |
+| **Vente moto**               | ✅                                      | `/vente-moto`, `/vente-moto/[id]`         |
+| **Réparation**               | ✅                                      | `/reparation`                             |
 
 ## Non-objectifs (YAGNI)
 
@@ -154,7 +154,7 @@ Posé soit via un script `scripts/seed-feature-flags.ts` (pattern
 
 - **Touche** : `lib/config.ts`, `lib/data/{types,static,firebase}.ts`,
   nouveau `lib/data/feature-flags-cache.ts`, `components/cp/{CpHeader,
-  CpUniversStrip,CpFooter}.tsx`, layout storefront, `app/sitemap.ts`,
+CpUniversStrip,CpFooter}.tsx`, layout storefront, `app/sitemap.ts`,
   `page.tsx` des 4 sections (+ sous-routes), nouvelle page
   `app/admin/(shell)/parametres/` + action, `firestore.rules` (lecture
   publique `meta/featureFlags`, écriture admin), Firestore `meta/featureFlags`.
