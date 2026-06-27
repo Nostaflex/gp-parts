@@ -1,6 +1,6 @@
 'use server';
 
-import { getAdapter } from '@/lib/data';
+import { createDemandeIntake } from '@/lib/server/intake';
 import { sendLeadEmails } from '@/lib/emails/send';
 import { demandeTypeFromSujet, demandeExpiry } from '@/lib/demandes';
 import type { Lead } from '@/lib/emails/lead';
@@ -14,6 +14,7 @@ export type ContactInput = {
   message: string;
   filesCount?: number;
   ref?: string;
+  website?: string;
 };
 
 export type ContactResult =
@@ -28,6 +29,10 @@ function genRef(prefix: string): string {
 
 /** Server action : persiste + notifie un message de contact. */
 export async function submitContact(input: ContactInput): Promise<ContactResult> {
+  // Honeypot : un humain ne remplit jamais ce champ → drop silencieux.
+  if (input.website && input.website.trim() !== '') {
+    return { ok: true, ref: genRef('MSG-CP'), emailed: false };
+  }
   if (!input.prenom?.trim() || !input.nom?.trim())
     return { ok: false, error: 'Nom et prénom requis.' };
   if (!EMAIL_RE.test(input.email ?? '')) return { ok: false, error: 'Email invalide.' };
@@ -46,8 +51,7 @@ export async function submitContact(input: ContactInput): Promise<ContactResult>
   // 1) Persister d'abord (le lead ne doit jamais être perdu).
   let persisted = false;
   try {
-    const adapter = await getAdapter();
-    await adapter.createDemande({
+    await createDemandeIntake({
       type: demandeTypeFromSujet(input.sujet),
       status: 'nouvelle',
       nom: `${input.prenom.trim()} ${input.nom.trim()}`,

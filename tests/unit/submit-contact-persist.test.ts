@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const createDemande = vi.fn(async () => 'dem-1');
-vi.mock('@/lib/data', () => ({ getAdapter: vi.fn(async () => ({ createDemande })) }));
+const { createDemandeIntake } = vi.hoisted(() => ({
+  createDemandeIntake: vi.fn(async () => 'dem-1'),
+}));
+vi.mock('@/lib/server/intake', () => ({ createDemandeIntake }));
 vi.mock('@/lib/emails/send', () => ({ sendLeadEmails: vi.fn(async () => ({ emailed: true })) }));
 
 import { sendLeadEmails } from '@/lib/emails/send';
@@ -17,36 +19,35 @@ const base = {
   ref: 'peugeot-308sw',
 };
 
-describe('submitContact persiste', () => {
+describe('submitContact', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('crée une demande au bon type + resourceRef puis email', async () => {
+  it('persiste via intake au bon type + ref, puis email', async () => {
     const res = await submitContact(base);
-    expect(createDemande).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: 'vehicule',
-        status: 'nouvelle',
-        nom: 'Jean Test',
-        email: 'jean@test.gp',
-        resourceRef: 'peugeot-308sw',
-      })
+    expect(createDemandeIntake).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'vehicule', resourceRef: 'peugeot-308sw' })
     );
     expect(sendLeadEmails).toHaveBeenCalled();
     expect(res.ok).toBe(true);
   });
 
-  it('email best-effort : ok même si sendLeadEmails rejette', async () => {
-    vi.mocked(sendLeadEmails).mockRejectedValueOnce(new Error('smtp down'));
-    const res = await submitContact(base);
-    expect(createDemande).toHaveBeenCalled();
+  it('ok même si email rejette', async () => {
+    vi.mocked(sendLeadEmails).mockRejectedValueOnce(new Error('down'));
+    expect((await submitContact(base)).ok).toBe(true);
+  });
+
+  it('honeypot rempli → drop silencieux (ni intake ni email)', async () => {
+    const res = await submitContact({ ...base, website: 'http://spam.ru' });
+    expect(createDemandeIntake).not.toHaveBeenCalled();
+    expect(sendLeadEmails).not.toHaveBeenCalled();
     expect(res.ok).toBe(true);
   });
 
   it('validation échoue → pas de création', async () => {
     const res = await submitContact({ ...base, email: 'pasemail' });
-    expect(createDemande).not.toHaveBeenCalled();
+    expect(createDemandeIntake).not.toHaveBeenCalled();
     expect(res.ok).toBe(false);
   });
 });
