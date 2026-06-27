@@ -11,7 +11,9 @@ import type { Moto } from '@/lib/motos';
 export const getCachedMotos = unstable_cache(
   async (): Promise<Moto[]> => {
     const adapter = await getAdapter();
-    return adapter.getMotos();
+    // Les motos « vendues » (soft-delete admin) sont retirées du site public :
+    // l'admin les voit toujours via getMotos(), pas les visiteurs.
+    return (await adapter.getMotos()).filter((m) => m.disponibilite !== 'vendu');
   },
   ['motos-public'],
   { tags: ['motos'] }
