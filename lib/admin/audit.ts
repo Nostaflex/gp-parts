@@ -24,7 +24,8 @@ export type AuditResourceType =
   | 'order'
   | 'demande'
   | 'location-car'
-  | 'reservation';
+  | 'reservation'
+  | 'feature-flags';
 
 export interface AuditLogEntry {
   timestamp: number; // unix ms
