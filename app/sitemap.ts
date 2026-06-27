@@ -4,12 +4,17 @@ import { CATEGORIES } from '@/lib/categories';
 import { VEHICULES } from '@/lib/vehicules';
 import { MOTOS } from '@/lib/motos';
 import { SITE_URL as BASE_URL } from '@/lib/seo';
+import { isPathVisible } from '@/lib/feature-flags';
+import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Source live products (Phase 5 §9.19) : getProducts() exclut deletedAt
   const adapter = await getAdapter();
   const products = await adapter.getProducts();
   const now = new Date();
+  // Sections désactivées (BO) → exclues du sitemap (désindexation propre).
+  const flags = await getCachedFeatureFlags();
+  const visible = (url: string) => isPathVisible(url.replace(BASE_URL, ''), flags);
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${BASE_URL}/`, lastModified: now, changeFrequency: 'weekly', priority: 1 },
@@ -70,5 +75,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...vehiculeRoutes, ...motoRoutes];
+  return [
+    ...staticRoutes,
+    ...categoryRoutes,
+    ...productRoutes,
+    ...vehiculeRoutes,
+    ...motoRoutes,
+  ].filter((r) => visible(r.url));
 }
