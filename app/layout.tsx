@@ -6,6 +6,7 @@ import { CookieBanner } from '@/components/gdpr/CookieBanner';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { FeatureFlagsProvider } from '@/components/cp/FeatureFlagsProvider';
 import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
+import { getCachedContactInfo } from '@/lib/data/contact-info-cache';
 import { SITE_URL, localBusinessJsonLd, organizationJsonLd, websiteJsonLd } from '@/lib/seo';
 import './globals.css';
 
@@ -73,6 +74,7 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const featureFlags = await getCachedFeatureFlags();
+  const contactInfo = await getCachedContactInfo();
 
   return (
     <html
@@ -80,7 +82,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={`${bigShoulders.variable} ${instrumentSans.variable} ${monoFont.variable}`}
     >
       <body className="min-h-dvh flex flex-col cp-clip">
-        <JsonLd data={[localBusinessJsonLd(), organizationJsonLd(), websiteJsonLd()]} />
+        <JsonLd
+          data={[
+            localBusinessJsonLd(contactInfo),
+            organizationJsonLd(contactInfo),
+            websiteJsonLd(),
+          ]}
+        />
         <a href="#main" className="skip-link">
           Aller au contenu principal
         </a>
