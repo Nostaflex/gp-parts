@@ -82,9 +82,25 @@ export function FormShell({
 
   const fieldErrors = state && 'errors' in state ? state.errors : {};
 
+  // Erreurs globales (`_form`) — ex: conflit optimistic lock « modifié
+  // entre-temps ». Sans ce bandeau, ces messages n'étaient affichés nulle
+  // part : l'admin recevait un toast vague sans la cause réelle.
+  const formErrors = fieldErrors._form ?? [];
+
   return (
     <FieldErrorsContext.Provider value={fieldErrors}>
       <form action={formAction} className="flex flex-col gap-4">
+        {formErrors.length > 0 && (
+          <div
+            role="alert"
+            className="rounded-[10px] px-3 py-2 text-body-sm"
+            style={{ background: 'rgba(255, 59, 48, 0.1)', color: '#C0271F' }}
+          >
+            {formErrors.map((msg, i) => (
+              <p key={i}>{msg}</p>
+            ))}
+          </div>
+        )}
         {children}
       </form>
     </FieldErrorsContext.Provider>

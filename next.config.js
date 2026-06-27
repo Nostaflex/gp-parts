@@ -45,9 +45,13 @@ const nextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline'",
               "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: blob: https://images.unsplash.com https://firebasestorage.googleapis.com https://res.cloudinary.com",
+              "img-src 'self' data: blob: https://images.unsplash.com https://firebasestorage.googleapis.com https://*.firebasestorage.app https://res.cloudinary.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com",
+              // connect-src DOIT lister Firebase Storage : sans ça, l'upload
+              // resumable (ImageUploader → uploadBytesResumable) est bloqué par
+              // le CSP → spinner figé. Bucket = *.firebasestorage.app, API =
+              // firebasestorage.googleapis.com / storage.googleapis.com.
+              "connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://firebasestorage.googleapis.com https://storage.googleapis.com https://*.firebasestorage.app https://*.firebaseio.com wss://*.firebaseio.com",
               "frame-ancestors 'self'",
             ].join('; '),
           },

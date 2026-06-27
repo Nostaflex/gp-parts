@@ -307,6 +307,8 @@ export function VehiculeForm({ initial }: { initial?: Vehicule }) {
           onChange={setImages}
           max={5}
         />
+        <FieldError name="image" />
+        <FieldError name="images" />
       </div>
 
       <SubmitButton>{isEdit ? 'Enregistrer' : 'Créer le véhicule'}</SubmitButton>
