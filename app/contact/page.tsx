@@ -4,7 +4,8 @@ import { CpHeader } from '@/components/cp/CpHeader';
 import { CpBridge } from '@/components/cp/CpBridge';
 import { CpFooter } from '@/components/cp/CpFooter';
 import { ContactForm } from './ContactForm';
-import { BUSINESS, ADDRESS_ONE_LINE } from '@/lib/seo';
+import { addressOneLine } from '@/lib/contact-info';
+import { getCachedContactInfo } from '@/lib/data/contact-info-cache';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
@@ -29,7 +30,8 @@ function getTodayIndex() {
   return d === 0 ? 6 : d - 1;
 }
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const ci = await getCachedContactInfo();
   const todayIdx = getTodayIndex();
 
   return (
@@ -137,9 +139,9 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-cp-cream mb-1">Nous trouver</p>
-                  <p className="text-sm text-cp-cream/55 mb-3">{ADDRESS_ONE_LINE}</p>
+                  <p className="text-sm text-cp-cream/55 mb-3">{addressOneLine(ci)}</p>
                   <a
-                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(ADDRESS_ONE_LINE)}`}
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addressOneLine(ci))}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-xs text-cp-vert-l font-semibold hover:underline"
@@ -168,7 +170,7 @@ export default function ContactPage() {
                     </svg>
                   ),
                   label: 'Adresse',
-                  val: ADDRESS_ONE_LINE,
+                  val: addressOneLine(ci),
                 },
                 {
                   icon: (
@@ -184,7 +186,7 @@ export default function ContactPage() {
                     </svg>
                   ),
                   label: 'Téléphone',
-                  val: BUSINESS.phoneDisplay,
+                  val: ci.phoneDisplay,
                 },
                 {
                   icon: (
@@ -201,7 +203,7 @@ export default function ContactPage() {
                     </svg>
                   ),
                   label: 'Email',
-                  val: BUSINESS.email,
+                  val: ci.email,
                 },
               ].map((item) => (
                 <div key={item.label} className="flex gap-3 items-start">

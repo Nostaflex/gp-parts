@@ -5,6 +5,8 @@ import { CpHeader } from '@/components/cp/CpHeader';
 import { CpFooter } from '@/components/cp/CpFooter';
 import type { Vehicule } from '@/lib/vehicules';
 import { getCachedVehicules } from '@/lib/data/vehicules-cache';
+import { getCachedContactInfo } from '@/lib/data/contact-info-cache';
+import type { ContactInfo } from '@/lib/contact-info';
 import { FinancementSimulator } from './FinancementSimulator';
 import { VehiculeGallery } from './VehiculeGallery';
 import { JsonLd } from '@/components/seo/JsonLd';
@@ -37,9 +39,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!v) {
     return { title: 'Véhicule introuvable' };
   }
+  const ci = await getCachedContactInfo();
   return {
     title: `${v.marque} ${v.modele} ${v.annee} — ${v.prix.toLocaleString('fr-FR')} €`,
-    description: `${v.marque} ${v.modele} ${v.annee}, ${v.km.toLocaleString('fr-FR')} km, ${v.energie} ${v.transmission}. Véhicule d'occasion contrôlé, garantie 12 mois incluse, financement disponible. Disponible à ${BUSINESS.address.city}.`,
+    description: `${v.marque} ${v.modele} ${v.annee}, ${v.km.toLocaleString('fr-FR')} km, ${v.energie} ${v.transmission}. Véhicule d'occasion contrôlé, garantie 12 mois incluse, financement disponible. Disponible à ${ci.address.city}.`,
     alternates: { canonical: `/vente-vehicule/${v.id}` },
     openGraph: {
       title: `${v.marque} ${v.modele} ${v.annee}`,
@@ -49,7 +52,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-function vehicleJsonLd(v: Vehicule) {
+function vehicleJsonLd(v: Vehicule, ci: ContactInfo) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Car',
@@ -84,9 +87,9 @@ function vehicleJsonLd(v: Vehicule) {
         areaServed: 'Guadeloupe',
         address: {
           '@type': 'PostalAddress',
-          addressLocality: BUSINESS.address.city,
-          postalCode: BUSINESS.address.postalCode,
-          addressRegion: BUSINESS.address.region,
+          addressLocality: ci.address.city,
+          postalCode: ci.address.postalCode,
+          addressRegion: ci.address.region,
           addressCountry: BUSINESS.address.country,
         },
       },
@@ -102,6 +105,7 @@ export default async function VehiculeDetailPage({ params }: Props) {
   // find() → undefined → notFound() → 404 correct (pas d'erreur 500, ISR géré).
   if (!v) notFound();
 
+  const ci = await getCachedContactInfo();
   const contactHref = `/contact?sujet=${encodeURIComponent('Vente véhicule')}&vehicule=${encodeURIComponent(`${v.marque} ${v.modele}`)}&ref=${encodeURIComponent(v.id)}`;
 
   const dispoLabel =
@@ -123,7 +127,7 @@ export default async function VehiculeDetailPage({ params }: Props) {
     <>
       <JsonLd
         data={[
-          vehicleJsonLd(v),
+          vehicleJsonLd(v, ci),
           breadcrumbJsonLd([
             { name: 'Accueil', path: '/' },
             { name: 'Vente véhicule', path: '/vente-vehicule' },
@@ -243,7 +247,7 @@ export default async function VehiculeDetailPage({ params }: Props) {
                     Je suis intéressé
                   </Link>
                   <a
-                    href={`tel:${BUSINESS.phone}`}
+                    href={`tel:${ci.phone}`}
                     className="w-full inline-flex justify-center items-center gap-2 border border-[#E5DDD3] text-cp-ink text-sm font-semibold px-6 py-3 rounded-xl hover:border-cp-red hover:text-cp-mango transition-colors"
                   >
                     <svg
