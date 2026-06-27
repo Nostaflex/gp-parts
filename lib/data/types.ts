@@ -12,6 +12,7 @@ import type { Vehicule } from '@/lib/vehicules';
 import type { Moto } from '@/lib/motos';
 import type { LocationCar } from '@/lib/location-cars';
 import type { Reservation, ReservationStatus } from '@/lib/reservations';
+import type { FeatureFlags } from '@/lib/feature-flags';
 
 export interface ProductFilters {
   category?: ProductCategory;
@@ -68,4 +69,8 @@ export interface DataAdapter {
   getReservations(filters?: { status?: ReservationStatus; limit?: number }): Promise<Reservation[]>;
   getReservationById(id: string): Promise<Reservation | null>;
   updateReservationStatus(id: string, status: ReservationStatus): Promise<void>;
+
+  // Feature flags de sections (visibilité storefront). Écriture via Server
+  // Action toggleFeatureFlags (Admin SDK), pas via l'adapter.
+  getFeatureFlags(): Promise<FeatureFlags>;
 }

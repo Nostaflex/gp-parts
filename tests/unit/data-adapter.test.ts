@@ -104,6 +104,12 @@ describe('getAdapter', () => {
       getReservations: async () => [],
       getReservationById: async () => null,
       updateReservationStatus: async () => {},
+      getFeatureFlags: async () => ({
+        pieces: true,
+        location: true,
+        venteMoto: true,
+        reparation: true,
+      }),
     };
     setAdapter(mockAdapter);
     const adapter = await getAdapter();
@@ -397,6 +403,12 @@ describe('StaticAdapter — soft-delete exclusion', () => {
       getReservations: async () => [],
       getReservationById: async () => null,
       updateReservationStatus: async () => {},
+      getFeatureFlags: async () => ({
+        pieces: true,
+        location: true,
+        venteMoto: true,
+        reparation: true,
+      }),
     };
     // Sans flag : null pour produit supprimé
     expect(await mockDeletedAdapter.getProductBySlug(deletedProduct.slug)).toBeNull();

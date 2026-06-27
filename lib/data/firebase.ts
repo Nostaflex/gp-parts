@@ -30,6 +30,8 @@ import { parseLocationCar } from '@/lib/schemas/location-car';
 import { parseReservation } from '@/lib/schemas/reservation';
 import type { Reservation, ReservationStatus } from '@/lib/reservations';
 import type { DataAdapter, ProductFilters, OrderFilters, DemandeFilters } from './types';
+import { normalizeFeatureFlags } from '@/lib/feature-flags';
+import type { FeatureFlags } from '@/lib/feature-flags';
 import { applyClientFilters } from './filters';
 
 /**
@@ -331,5 +333,10 @@ export class FirebaseAdapter implements DataAdapter {
     }
     const snapshot = await getDocs(q);
     return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }) as Demande);
+  }
+
+  async getFeatureFlags(): Promise<FeatureFlags> {
+    const snap = await getDoc(doc(db, 'meta', 'featureFlags'));
+    return normalizeFeatureFlags(snap.exists() ? (snap.data() as Partial<FeatureFlags>) : null);
   }
 }

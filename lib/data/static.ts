@@ -8,6 +8,8 @@ import type { Moto } from '@/lib/motos';
 import type { LocationCar } from '@/lib/location-cars';
 import type { DataAdapter, ProductFilters, OrderFilters, DemandeFilters } from './types';
 import type { Reservation, ReservationStatus } from '@/lib/reservations';
+import { DEFAULT_FEATURE_FLAGS } from '@/lib/feature-flags';
+import type { FeatureFlags } from '@/lib/feature-flags';
 import { applyClientFilters } from './filters';
 
 // Fixtures CRM pour le dev local sans émulateur Firebase. En production,
@@ -258,5 +260,9 @@ export class StaticAdapter implements DataAdapter {
     if (filters?.type) demandes = demandes.filter((d) => d.type === filters.type);
     if (filters?.limit) demandes = demandes.slice(0, filters.limit);
     return demandes;
+  }
+
+  async getFeatureFlags(): Promise<FeatureFlags> {
+    return { ...DEFAULT_FEATURE_FLAGS };
   }
 }
