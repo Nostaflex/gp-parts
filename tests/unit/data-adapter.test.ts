@@ -111,6 +111,21 @@ describe('getAdapter', () => {
         venteMoto: true,
         reparation: true,
       }),
+      getContactInfo: async () => ({
+        phone: '+590690112233',
+        phoneDisplay: '0690 11 22 33',
+        email: 'c@c.gp',
+        whatsappNumber: '590690112233',
+        address: { street: 'R', postalCode: '97110', city: 'P', region: 'Guadeloupe' },
+        hours: {
+          weekdayOpen: '07:30',
+          weekdayClose: '17:30',
+          saturdayOpen: '08:00',
+          saturdayClose: '13:00',
+        },
+        geo: { lat: 16.2, lng: -61.5 },
+        social: { facebook: '', instagram: '', google: '' },
+      }),
     };
     setAdapter(mockAdapter);
     const adapter = await getAdapter();
@@ -410,6 +425,21 @@ describe('StaticAdapter — soft-delete exclusion', () => {
         location: true,
         venteMoto: true,
         reparation: true,
+      }),
+      getContactInfo: async () => ({
+        phone: '+590690112233',
+        phoneDisplay: '0690 11 22 33',
+        email: 'c@c.gp',
+        whatsappNumber: '590690112233',
+        address: { street: 'R', postalCode: '97110', city: 'P', region: 'Guadeloupe' },
+        hours: {
+          weekdayOpen: '07:30',
+          weekdayClose: '17:30',
+          saturdayOpen: '08:00',
+          saturdayClose: '13:00',
+        },
+        geo: { lat: 16.2, lng: -61.5 },
+        social: { facebook: '', instagram: '', google: '' },
       }),
     };
     // Sans flag : null pour produit supprimé

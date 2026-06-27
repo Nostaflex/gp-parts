@@ -32,6 +32,8 @@ import type { Reservation, ReservationStatus } from '@/lib/reservations';
 import type { DataAdapter, ProductFilters, OrderFilters, DemandeFilters } from './types';
 import { normalizeFeatureFlags } from '@/lib/feature-flags';
 import type { FeatureFlags } from '@/lib/feature-flags';
+import { normalizeContactInfo } from '@/lib/contact-info';
+import type { ContactInfo } from '@/lib/contact-info';
 import { applyClientFilters } from './filters';
 
 /**
@@ -350,6 +352,17 @@ export class FirebaseAdapter implements DataAdapter {
     } catch (err) {
       console.error('[feature-flags] lecture meta/featureFlags échouée, défauts appliqués:', err);
       return normalizeFeatureFlags(null);
+    }
+  }
+
+  async getContactInfo(): Promise<ContactInfo> {
+    // Fail-open : ne jamais casser le site si la lecture échoue.
+    try {
+      const snap = await getDoc(doc(db, 'meta', 'contactInfo'));
+      return normalizeContactInfo(snap.exists() ? (snap.data() as Partial<ContactInfo>) : null);
+    } catch (err) {
+      console.error('[contact-info] lecture meta/contactInfo échouée, défauts appliqués:', err);
+      return normalizeContactInfo(null);
     }
   }
 }

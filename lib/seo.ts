@@ -3,6 +3,10 @@
 //
 // ⚠️ Les valeurs marquées TODO(Stéphane) sont des placeholders : à remplacer
 //    par les vraies infos avant la mise en production publique.
+//
+// Import TYPE-ONLY de ContactInfo : contact-info importe BUSINESS d'ici à
+// l'eval ; n'importer ici que le type (effacé au runtime) évite un cycle.
+import type { ContactInfo } from '@/lib/contact-info';
 
 // --- URL canonique du site ---
 // TODO(Stéphane): définir le vrai domaine via NEXT_PUBLIC_SITE_URL (Vercel +
@@ -52,17 +56,14 @@ export const BUSINESS = {
 /** Adresse formatée sur une ligne (réutilisable dans l'UI). */
 export const ADDRESS_ONE_LINE = `${BUSINESS.address.street}, ${BUSINESS.address.postalCode} ${BUSINESS.address.city}, ${BUSINESS.address.region}`;
 
-const postalAddress = {
-  '@type': 'PostalAddress',
-  streetAddress: BUSINESS.address.street,
-  postalCode: BUSINESS.address.postalCode,
-  addressLocality: BUSINESS.address.city,
-  addressRegion: BUSINESS.address.region,
-  addressCountry: BUSINESS.address.country,
-};
+/** Liens réseaux non vides d'un ContactInfo (pour `sameAs` JSON-LD). */
+function contactSameAs(ci: ContactInfo): string[] {
+  return [ci.social.facebook, ci.social.instagram, ci.social.google].filter((u) => u.length > 0);
+}
 
 /** JSON-LD AutoRepair (LocalBusiness) — le levier #1 du SEO local. */
-export function localBusinessJsonLd() {
+export function localBusinessJsonLd(ci: ContactInfo) {
+  const social = contactSameAs(ci);
   return {
     '@context': 'https://schema.org',
     '@type': 'AutoRepair',
@@ -71,24 +72,40 @@ export function localBusinessJsonLd() {
     url: SITE_URL,
     image: absoluteUrl('/opengraph-image.png'),
     logo: absoluteUrl('/images/logo-carperformance.svg'),
-    telephone: BUSINESS.phone,
-    email: BUSINESS.email,
+    telephone: ci.phone,
+    email: ci.email,
     priceRange: BUSINESS.priceRange,
-    address: postalAddress,
-    geo: { '@type': 'GeoCoordinates', latitude: BUSINESS.geo.lat, longitude: BUSINESS.geo.lng },
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: ci.address.street,
+      postalCode: ci.address.postalCode,
+      addressLocality: ci.address.city,
+      addressRegion: ci.address.region,
+      addressCountry: BUSINESS.address.country,
+    },
+    geo: { '@type': 'GeoCoordinates', latitude: ci.geo.lat, longitude: ci.geo.lng },
     areaServed: { '@type': 'AdministrativeArea', name: 'Guadeloupe' },
-    openingHoursSpecification: BUSINESS.openingHours.map((h) => ({
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: h.days,
-      opens: h.opens,
-      closes: h.closes,
-    })),
-    ...(BUSINESS.sameAs.length ? { sameAs: BUSINESS.sameAs } : {}),
+    openingHoursSpecification: [
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        opens: ci.hours.weekdayOpen,
+        closes: ci.hours.weekdayClose,
+      },
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Saturday'],
+        opens: ci.hours.saturdayOpen,
+        closes: ci.hours.saturdayClose,
+      },
+    ],
+    ...(social.length ? { sameAs: social } : {}),
   };
 }
 
 /** JSON-LD Organization — alimente le knowledge panel. */
-export function organizationJsonLd() {
+export function organizationJsonLd(ci: ContactInfo) {
+  const social = contactSameAs(ci);
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -96,7 +113,7 @@ export function organizationJsonLd() {
     name: BUSINESS.name,
     url: SITE_URL,
     logo: absoluteUrl('/images/logo-carperformance.svg'),
-    ...(BUSINESS.sameAs.length ? { sameAs: BUSINESS.sameAs } : {}),
+    ...(social.length ? { sameAs: social } : {}),
   };
 }
 

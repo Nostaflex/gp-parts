@@ -6,6 +6,8 @@ import { CpFooter } from '@/components/cp/CpFooter';
 import type { Moto } from '@/lib/motos';
 import { getCachedMotos } from '@/lib/data/motos-cache';
 import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
+import { getCachedContactInfo } from '@/lib/data/contact-info-cache';
+import type { ContactInfo } from '@/lib/contact-info';
 import { FinancementMotoSimulator } from './FinancementMotoSimulator';
 import { MotoGallery } from './MotoGallery';
 import { JsonLd } from '@/components/seo/JsonLd';
@@ -50,7 +52,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-function motoJsonLd(m: Moto) {
+function motoJsonLd(m: Moto, ci: ContactInfo) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Motorcycle',
@@ -83,9 +85,9 @@ function motoJsonLd(m: Moto) {
         areaServed: 'Guadeloupe',
         address: {
           '@type': 'PostalAddress',
-          addressLocality: BUSINESS.address.city,
-          postalCode: BUSINESS.address.postalCode,
-          addressRegion: BUSINESS.address.region,
+          addressLocality: ci.address.city,
+          postalCode: ci.address.postalCode,
+          addressRegion: ci.address.region,
           addressCountry: BUSINESS.address.country,
         },
       },
@@ -97,6 +99,7 @@ export default async function MotoDetailPage({ params }: Props) {
   const flags = await getCachedFeatureFlags();
   if (!flags.venteMoto) notFound();
   const { id } = await params;
+  const ci = await getCachedContactInfo();
   const motos = await getCachedMotos();
   const m = motos.find((moto) => moto.id === id);
   // Moto supprimée en live entre build (generateStaticParams) et requête :
@@ -124,7 +127,7 @@ export default async function MotoDetailPage({ params }: Props) {
     <>
       <JsonLd
         data={[
-          motoJsonLd(m),
+          motoJsonLd(m, ci),
           breadcrumbJsonLd([
             { name: 'Accueil', path: '/' },
             { name: 'Vente moto', path: '/vente-moto' },
@@ -242,7 +245,7 @@ export default async function MotoDetailPage({ params }: Props) {
                     Je suis intéressé
                   </Link>
                   <a
-                    href={`tel:${BUSINESS.phone}`}
+                    href={`tel:${ci.phone}`}
                     className="w-full inline-flex justify-center items-center gap-2 border border-[#E5DDD3] text-cp-ink text-sm font-semibold px-6 py-3 rounded-xl hover:border-cp-red hover:text-cp-mango transition-colors"
                   >
                     Appeler

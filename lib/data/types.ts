@@ -13,6 +13,7 @@ import type { Moto } from '@/lib/motos';
 import type { LocationCar } from '@/lib/location-cars';
 import type { Reservation, ReservationStatus } from '@/lib/reservations';
 import type { FeatureFlags } from '@/lib/feature-flags';
+import type { ContactInfo } from '@/lib/contact-info';
 
 export interface ProductFilters {
   category?: ProductCategory;
@@ -74,4 +75,8 @@ export interface DataAdapter {
   // Feature flags de sections (visibilité storefront). Écriture via Server
   // Action toggleFeatureFlags (Admin SDK), pas via l'adapter.
   getFeatureFlags(): Promise<FeatureFlags>;
+
+  // Coordonnées de contact (configurables au BO). Écriture via Server Action
+  // updateContactInfo (Admin SDK).
+  getContactInfo(): Promise<ContactInfo>;
 }
