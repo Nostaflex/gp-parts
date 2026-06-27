@@ -58,6 +58,7 @@ export async function createReservationIntake(data: Omit<Reservation, 'id'>): Pr
 ```
 
 Consommateurs (remplacent `getAdapter().create*`) :
+
 - `app/contact/actions.ts` (`submitContact`) → `createDemandeIntake`.
 - `app/reparation/actions.ts` (`submitRdv`) → `createDemandeIntake`.
 - `app/location/actions.ts` (`validateReservation`) → `createReservationIntake`.

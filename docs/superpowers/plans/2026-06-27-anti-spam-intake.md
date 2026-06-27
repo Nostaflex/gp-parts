@@ -21,10 +21,12 @@
 ### Task 1: Module `lib/server/intake.ts`
 
 **Files:**
+
 - Create: `lib/server/intake.ts`
 - Test: `tests/unit/intake.test.ts`
 
 **Interfaces:**
+
 - Produces: `createDemandeIntake(data: Omit<Demande,'id'>): Promise<string>`, `createReservationIntake(data: Omit<Reservation,'id'>): Promise<string>`.
 
 - [ ] **Step 1: Write the failing test**
@@ -103,10 +105,12 @@ git commit -m "feat(anti-spam): module intake (écritures Admin SDK)"
 ### Task 2: `submitContact` → intake + honeypot
 
 **Files:**
+
 - Modify: `app/contact/actions.ts`
 - Test: `tests/unit/submit-contact-persist.test.ts` (mise à jour)
 
 **Interfaces:**
+
 - Consumes: `createDemandeIntake` (Task 1).
 
 - [ ] **Step 1: Mettre à jour le test (rouge)**
@@ -176,6 +180,7 @@ Expected: FAIL (intake non utilisé / honeypot non géré).
 - [ ] **Step 3: Implémenter**
 
 Dans `app/contact/actions.ts` :
+
 - ajouter `website?: string;` au type `ContactInput`,
 - remplacer l'import `getAdapter` par `import { createDemandeIntake } from '@/lib/server/intake';`,
 - en **première instruction** de `submitContact`, le drop honeypot,
@@ -199,30 +204,30 @@ export type ContactInput = {
 };
 
 // dans submitContact, TOUT EN HAUT (avant la validation) :
-  // Honeypot : un humain ne remplit jamais ce champ → drop silencieux.
-  if (input.website && input.website.trim() !== '') {
-    return { ok: true, ref: genRef('MSG-CP'), emailed: false };
-  }
+// Honeypot : un humain ne remplit jamais ce champ → drop silencieux.
+if (input.website && input.website.trim() !== '') {
+  return { ok: true, ref: genRef('MSG-CP'), emailed: false };
+}
 
 // remplacer le bloc persistance :
-  let persisted = false;
-  try {
-    await createDemandeIntake({
-      type: demandeTypeFromSujet(input.sujet),
-      status: 'nouvelle',
-      nom: `${input.prenom.trim()} ${input.nom.trim()}`,
-      email: input.email.trim(),
-      telephone: input.tel?.trim() ?? '',
-      message: messageFull,
-      ...(input.ref ? { resourceRef: input.ref } : {}),
-      createdAt: nowIso,
-      updatedAt: nowIso,
-      expiresAt: demandeExpiry(now),
-    });
-    persisted = true;
-  } catch (err) {
-    console.error('[submitContact] persistance échouée:', err);
-  }
+let persisted = false;
+try {
+  await createDemandeIntake({
+    type: demandeTypeFromSujet(input.sujet),
+    status: 'nouvelle',
+    nom: `${input.prenom.trim()} ${input.nom.trim()}`,
+    email: input.email.trim(),
+    telephone: input.tel?.trim() ?? '',
+    message: messageFull,
+    ...(input.ref ? { resourceRef: input.ref } : {}),
+    createdAt: nowIso,
+    updatedAt: nowIso,
+    expiresAt: demandeExpiry(now),
+  });
+  persisted = true;
+} catch (err) {
+  console.error('[submitContact] persistance échouée:', err);
+}
 ```
 
 (Le reste — email best-effort, return — inchangé.)
@@ -244,10 +249,12 @@ git commit -m "feat(anti-spam): submitContact via intake + honeypot"
 ### Task 3: `submitRdv` → intake + honeypot
 
 **Files:**
+
 - Modify: `app/reparation/actions.ts`
 - Test: `tests/unit/submit-rdv-persist.test.ts` (mise à jour)
 
 **Interfaces:**
+
 - Consumes: `createDemandeIntake` (Task 1).
 
 - [ ] **Step 1: Mettre à jour le test (rouge)**
@@ -310,6 +317,7 @@ Expected: FAIL.
 - [ ] **Step 3: Implémenter**
 
 Dans `app/reparation/actions.ts` :
+
 - ajouter `website?: string;` à `RdvInput`,
 - remplacer `import { getAdapter } from '@/lib/data';` par `import { createDemandeIntake } from '@/lib/server/intake';`,
 - drop honeypot en première instruction,
@@ -322,28 +330,28 @@ import { createDemandeIntake } from '@/lib/server/intake';
 // RdvInput : ajouter `website?: string;`
 
 // dans submitRdv, TOUT EN HAUT :
-  if (input.website && input.website.trim() !== '') {
-    return { ok: true, ref: genRef('RDV-CP'), emailed: false };
-  }
+if (input.website && input.website.trim() !== '') {
+  return { ok: true, ref: genRef('RDV-CP'), emailed: false };
+}
 
 // remplacer la persistance :
-  let persisted = false;
-  try {
-    await createDemandeIntake({
-      type: 'reparation',
-      status: 'nouvelle',
-      nom: `${input.prenom.trim()} ${input.nom.trim()}`,
-      email: input.email.trim(),
-      telephone: input.tel.trim(),
-      message: messageFull,
-      createdAt: nowIso,
-      updatedAt: nowIso,
-      expiresAt: demandeExpiry(now),
-    });
-    persisted = true;
-  } catch (err) {
-    console.error('[submitRdv] persistance échouée:', err);
-  }
+let persisted = false;
+try {
+  await createDemandeIntake({
+    type: 'reparation',
+    status: 'nouvelle',
+    nom: `${input.prenom.trim()} ${input.nom.trim()}`,
+    email: input.email.trim(),
+    telephone: input.tel.trim(),
+    message: messageFull,
+    createdAt: nowIso,
+    updatedAt: nowIso,
+    expiresAt: demandeExpiry(now),
+  });
+  persisted = true;
+} catch (err) {
+  console.error('[submitRdv] persistance échouée:', err);
+}
 ```
 
 (Reste inchangé.)
@@ -365,10 +373,12 @@ git commit -m "feat(anti-spam): submitRdv via intake + honeypot"
 ### Task 4: `validateReservation` → intake + honeypot
 
 **Files:**
+
 - Modify: `app/location/actions.ts`
 - Test: `tests/unit/reservation-intake.test.ts`
 
 **Interfaces:**
+
 - Consumes: `createReservationIntake` (Task 1).
 
 - [ ] **Step 1: Write the failing test**
@@ -425,6 +435,7 @@ Expected: FAIL — `website` non géré / `createReservationIntake` introuvable.
 - [ ] **Step 3: Implémenter**
 
 Dans `app/location/actions.ts` :
+
 - ajouter `website?: string;` à l'objet `input` de `validateReservation`,
 - importer `import { createReservationIntake } from '@/lib/server/intake';`,
 - drop honeypot en tête de la fonction (renvoyer une réponse `ok`-like conforme
@@ -441,13 +452,13 @@ import { createReservationIntake } from '@/lib/server/intake';
 // signature input : ajouter `website?: string;`
 
 // première instruction de validateReservation :
-  if (input.website && input.website.trim() !== '') {
-    // Honeypot : réponse succès factice, aucune création.
-    return { ok: true, reservationId: 'dropped' } as ReservationValidationResult;
-  }
+if (input.website && input.website.trim() !== '') {
+  // Honeypot : réponse succès factice, aucune création.
+  return { ok: true, reservationId: 'dropped' } as ReservationValidationResult;
+}
 
 // remplacer la création :
-  const id = await createReservationIntake(data);
+const id = await createReservationIntake(data);
 ```
 
 > Adapter la forme de la réponse honeypot au type `ReservationValidationResult`
@@ -470,20 +481,25 @@ git commit -m "feat(anti-spam): validateReservation via intake + honeypot"
 ### Task 5: Champ honeypot dans les 3 formulaires
 
 **Files:**
+
 - Modify: `app/contact/ContactForm.tsx`, `app/reparation/RdvForm.tsx`, `app/location/LocationClient.tsx`
 
 **Interfaces:**
+
 - Consumes: les champs `website?` ajoutés aux inputs (Tasks 2/3/4).
 
 - [ ] **Step 1: Ajouter le honeypot + le state**
 
 Dans **chaque** formulaire :
+
 1. ajouter un state `const [website, setWebsite] = useState('');` (ou un champ
    `website` dans l'objet `data` existant),
 2. rendre le champ piège **avant** le bouton submit :
 
 ```tsx
-{/* Honeypot anti-spam : invisible pour un humain, rempli par les bots. */}
+{
+  /* Honeypot anti-spam : invisible pour un humain, rempli par les bots. */
+}
 <input
   type="text"
   name="website"
@@ -493,7 +509,7 @@ Dans **chaque** formulaire :
   value={website}
   onChange={(e) => setWebsite(e.target.value)}
   style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }}
-/>
+/>;
 ```
 
 3. passer `website` à l'appel du server action :
@@ -526,6 +542,7 @@ git commit -m "feat(anti-spam): champ honeypot invisible dans les 3 formulaires"
 ### Task 6: Règles Firestore `create: if false`
 
 **Files:**
+
 - Modify: `firestore.rules`
 
 - [ ] **Step 1: Fermer la création client**
@@ -540,6 +557,7 @@ Dans `firestore.rules`, dans les blocs `demandes` et `reservations`, remplacer
       allow delete: if false;
     }
 ```
+
 ```
     match /reservations/{doc} {
       allow create: if false;
@@ -571,10 +589,12 @@ git commit -m "feat(anti-spam): demandes/reservations create:if false (Admin SDK
 - [ ] **Step 1: Suite + build**
 
 Run:
+
 ```bash
 npx vitest run
 npm run build
 ```
+
 Expected: tous les unitaires verts (dont intake + honeypot), build vert.
 
 - [ ] **Step 2: Commit (si ajustements)**
@@ -590,6 +610,7 @@ git add -A && git commit -m "test(anti-spam): suite complète verte"
 ## Self-Review
 
 **Spec coverage :**
+
 - Module intake Admin SDK → Task 1. ✓
 - submitContact/submitRdv/validateReservation → intake → Tasks 2/3/4. ✓
 - Honeypot drop silencieux (3 actions) → Tasks 2/3/4. ✓
