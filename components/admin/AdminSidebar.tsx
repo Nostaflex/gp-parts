@@ -15,6 +15,7 @@ import {
   Wrench,
   Megaphone,
   ScrollText,
+  SlidersHorizontal,
   Menu,
   X,
 } from 'lucide-react';
@@ -67,7 +68,10 @@ const SECTIONS: NavSection[] = [
   },
   {
     title: 'Système',
-    items: [{ href: '/admin/audit', label: 'Journal audit', icon: ScrollText, enabled: false }],
+    items: [
+      { href: '/admin/parametres', label: 'Paramètres', icon: SlidersHorizontal, enabled: true },
+      { href: '/admin/audit', label: 'Journal audit', icon: ScrollText, enabled: false },
+    ],
   },
 ];
 
