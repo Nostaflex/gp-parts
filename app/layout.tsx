@@ -4,6 +4,8 @@ import { CartProvider } from '@/components/cart/CartProvider';
 import { ToastProvider } from '@/components/ui/Toast';
 import { CookieBanner } from '@/components/gdpr/CookieBanner';
 import { JsonLd } from '@/components/seo/JsonLd';
+import { FeatureFlagsProvider } from '@/components/cp/FeatureFlagsProvider';
+import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
 import { SITE_URL, localBusinessJsonLd, organizationJsonLd, websiteJsonLd } from '@/lib/seo';
 import './globals.css';
 
@@ -69,7 +71,9 @@ export const viewport: Viewport = {
   themeColor: '#0D0905',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const featureFlags = await getCachedFeatureFlags();
+
   return (
     <html
       lang="fr"
@@ -80,14 +84,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <a href="#main" className="skip-link">
           Aller au contenu principal
         </a>
-        <ToastProvider>
-          <CartProvider>
-            <main id="main" tabIndex={-1} className="flex-1 flex flex-col">
-              {children}
-            </main>
-            <CookieBanner />
-          </CartProvider>
-        </ToastProvider>
+        <FeatureFlagsProvider value={featureFlags}>
+          <ToastProvider>
+            <CartProvider>
+              <main id="main" tabIndex={-1} className="flex-1 flex flex-col">
+                {children}
+              </main>
+              <CookieBanner />
+            </CartProvider>
+          </ToastProvider>
+        </FeatureFlagsProvider>
       </body>
     </html>
   );
