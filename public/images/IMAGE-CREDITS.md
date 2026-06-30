@@ -19,6 +19,15 @@ Licences CC : garder cette attribution tant que ces images sont en ligne.
 - `toyota-yaris.jpg` — auteur & licence : voir page source — [source](https://commons.wikimedia.org/wiki/File:Toyota_Yaris_Cross_Hybrid_%28XP210%29_1X7A1846.jpg)
 - `dacia-sandero-neuf.jpg` — auteur & licence : voir page source — [source](https://commons.wikimedia.org/wiki/File:2023_Dacia_Sandero_III_DSC_6012.jpg)
 - `peugeot-208-neuf.jpg` — auteur & licence : voir page source — [source](https://commons.wikimedia.org/wiki/File:Peugeot_208_PureTech_130_EAT8_Allure_GT-Line_%28II%29_%E2%80%93_f_17102021.jpg)
+## landing — vente véhicule (montage premium)
+`hero-vente-vehicule.webp` — photomontage 2×2 (4 photos Wikimedia recadrées + color-grade warm-dark) :
+- BMW M4 CS — **MrWalkr**, CC BY-SA 4.0 — [source](https://commons.wikimedia.org/wiki/File:2018_BMW_M4_CS_Black.jpg)
+- Mercedes-AMG GT 63 S — Tokumeigakarinoaoshima, **CC0** (domaine public) — [source](https://commons.wikimedia.org/wiki/File:The_frontview_of_Mercedes-AMG_GT_63_S_4MATIC%2B_(X290).jpg)
+- Audi RS6 Avant — **Alexander Migl**, CC BY-SA 4.0 — [source](https://commons.wikimedia.org/wiki/File:Audi_RS6_Avant_C8_1X7A0305.jpg)
+- Porsche 992 GT3 Touring — **Alexander Migl**, CC BY-SA 4.0 — [source](https://commons.wikimedia.org/wiki/File:Porsche_992_GT3_with_touring_package_1X7A6142.jpg)
+
+> CC BY-SA 4.0 → garder l'attribution tant que l'image est en ligne ; le montage dérivé est partagé sous la même licence.
+
 ## motos
 - `yamaha-mt07.jpg` — auteur & licence : voir page source — [source](https://commons.wikimedia.org/wiki/File:Yamaha_MT-07_2025_EICMA_2024.jpg)
 - `honda-cb500x.jpg` — auteur & licence : voir page source — [source](https://commons.wikimedia.org/wiki/File:Honda_CB500X_2024-05-23.jpg)
