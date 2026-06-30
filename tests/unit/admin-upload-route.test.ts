@@ -169,7 +169,7 @@ describe('POST /api/admin/upload — success (authenticated)', () => {
     await POST(reqWith({ file: webp(), folder: 'motos', entityId: 'moto-1', index: '1' }));
 
     expect(saveMock).toHaveBeenCalledTimes(1);
-    const [buf, opts] = saveMock.mock.calls[0] as [Buffer, Record<string, unknown>];
+    const [buf, opts] = saveMock.mock.calls[0] as unknown as [Buffer, Record<string, unknown>];
     expect(Buffer.isBuffer(buf)).toBe(true);
     expect(opts.contentType).toBe('image/webp');
     const meta = opts.metadata as { metadata?: { firebaseStorageDownloadTokens?: string } };
