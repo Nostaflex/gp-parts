@@ -1,11 +1,8 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import imageCompression from 'browser-image-compression';
 import { Upload, X, Loader2 } from 'lucide-react';
-
-import app from '@/lib/firebase';
 
 const IOS = {
   surface: 'var(--surface)',
@@ -34,13 +31,50 @@ const COMPRESSION = {
 type Slot = { url: string; uploading: boolean; progress: number; error?: string };
 
 /**
+ * POST le blob compressé à /api/admin/upload (Admin SDK, gardé par le cookie
+ * __session) et renvoie l'URL de download. Remplace l'upload SDK client, qui
+ * exigeait `auth.currentUser` non-null (règle Storage) — null sur mobile quand
+ * Safari iOS évince IndexedDB → `storage/unauthorized`. XHR pour la progression.
+ */
+function postUpload(fd: FormData, onProgress: (pct: number) => void): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/admin/upload');
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+    };
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          resolve(JSON.parse(xhr.responseText).url as string);
+        } catch {
+          reject(new Error('réponse serveur invalide'));
+        }
+      } else {
+        let msg = `HTTP ${xhr.status}`;
+        if (xhr.status === 401 || xhr.status === 403) msg = 'session expirée — reconnecte-toi';
+        else {
+          try {
+            msg = (JSON.parse(xhr.responseText).error as string) || msg;
+          } catch {
+            /* garde HTTP <code> */
+          }
+        }
+        reject(new Error(msg));
+      }
+    };
+    xhr.onerror = () => reject(new Error('réseau indisponible'));
+    xhr.send(fd);
+  });
+}
+
+/**
  * Upload photos — compression navigateur (WebP ≤2000px, q0.85) puis upload
- * direct Firebase Storage resumable (spec §9). Path final déterministe
+ * serveur via /api/admin/upload (Admin SDK). Path final déterministe
  * `{folder}/{entityId}/photo-{i}.webp` (pas d'orphelins — risque §12).
  *
  * Émet `onChange(urls)` à chaque changement. Stocke ces URLs dans le doc
- * Firestore au save du form parent. Resumable = reprise auto si Safari
- * met l'onglet en arrière-plan.
+ * Firestore au save du form parent.
  */
 export function ImageUploader({
   folder,
@@ -67,7 +101,6 @@ export function ImageUploader({
 
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
-    const storage = getStorage(app);
     const room = max - slots.length;
     const picked = Array.from(files).slice(0, room);
 
@@ -92,26 +125,16 @@ export function ImageUploader({
 
       try {
         const compressed = await imageCompression(file, COMPRESSION);
-        const path = `${folder}/${entityId}/photo-${slotIndex + 1}.webp`;
-        const task = uploadBytesResumable(ref(storage, path), compressed, {
-          contentType: 'image/webp',
-        });
+        const fd = new FormData();
+        fd.append('file', compressed, `photo-${slotIndex + 1}.webp`);
+        fd.append('folder', folder);
+        fd.append('entityId', entityId);
+        fd.append('index', String(slotIndex + 1));
 
-        await new Promise<void>((resolve, reject) => {
-          task.on(
-            'state_changed',
-            (snap) => {
-              const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-              setSlots((prev) =>
-                prev.map((s, i) => (i === slotIndex ? { ...s, progress: pct } : s))
-              );
-            },
-            reject,
-            resolve
-          );
-        });
+        const url = await postUpload(fd, (pct) =>
+          setSlots((prev) => prev.map((s, i) => (i === slotIndex ? { ...s, progress: pct } : s)))
+        );
 
-        const url = await getDownloadURL(task.snapshot.ref);
         setSlots((prev) => {
           const next = prev.map((s, i) =>
             i === slotIndex ? { url, uploading: false, progress: 100 } : s
@@ -119,11 +142,14 @@ export function ImageUploader({
           onChange(next.filter((s) => !s.uploading && !s.error).map((s) => s.url));
           return next;
         });
-      } catch {
+      } catch (err) {
+        // Surface le vrai motif (session expirée, format, réseau…) — l'ancien
+        // `catch {}` masquait tout en "échec upload" → debug impossible en prod.
+        const reason = err instanceof Error ? err.message : 'échec upload';
         setSlots((prev) =>
           prev.map((s, i) =>
             i === slotIndex
-              ? { url: '', uploading: false, progress: 0, error: `${file.name}: échec upload` }
+              ? { url: '', uploading: false, progress: 0, error: `${file.name}: ${reason}` }
               : s
           )
         );

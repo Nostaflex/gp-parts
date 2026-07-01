@@ -19,6 +19,14 @@ Licences CC : garder cette attribution tant que ces images sont en ligne.
 - `toyota-yaris.jpg` — auteur & licence : voir page source — [source](https://commons.wikimedia.org/wiki/File:Toyota_Yaris_Cross_Hybrid_%28XP210%29_1X7A1846.jpg)
 - `dacia-sandero-neuf.jpg` — auteur & licence : voir page source — [source](https://commons.wikimedia.org/wiki/File:2023_Dacia_Sandero_III_DSC_6012.jpg)
 - `peugeot-208-neuf.jpg` — auteur & licence : voir page source — [source](https://commons.wikimedia.org/wiki/File:Peugeot_208_PureTech_130_EAT8_Allure_GT-Line_%28II%29_%E2%80%93_f_17102021.jpg)
+## landing — vente véhicule (compo cinéma)
+`hero-vente-vehicule.webp` — composition cinéma de 3 photos studio/nuit recadrées + grade braise volcanique (héros Audi R8 à droite, Mercedes + BMW à gauche) :
+- Audi R8 (rouge) — Unsplash, Blake Meyer — [source](https://images.unsplash.com/photo-1502161254066-6c74afbf07aa)
+- Mercedes-AMG GT (rouge) — Unsplash — [source](https://images.unsplash.com/photo-1755031434875-6c6d2fddd622)
+- BMW M (rouge) — Unsplash, Amir Hosseini — [source](https://images.unsplash.com/photo-1653047256226-5abbfa82f1d7)
+
+> Licence Unsplash : usage commercial libre, attribution non requise (créditée ici par courtoisie).
+
 ## motos
 - `yamaha-mt07.jpg` — auteur & licence : voir page source — [source](https://commons.wikimedia.org/wiki/File:Yamaha_MT-07_2025_EICMA_2024.jpg)
 - `honda-cb500x.jpg` — auteur & licence : voir page source — [source](https://commons.wikimedia.org/wiki/File:Honda_CB500X_2024-05-23.jpg)
