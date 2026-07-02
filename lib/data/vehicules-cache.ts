@@ -11,9 +11,10 @@ import type { Vehicule } from '@/lib/vehicules';
 export const getCachedVehicules = unstable_cache(
   async (): Promise<Vehicule[]> => {
     const adapter = await getAdapter();
-    // Les véhicules « vendus » (soft-delete admin) sont retirés du site public :
-    // l'admin les voit toujours via getVehicules(), pas les visiteurs.
-    return (await adapter.getVehicules()).filter((v) => v.disponibilite !== 'vendu');
+    // Les véhicules « vendus » restent affichés publiquement (grisés + bandeau
+    // VENDU, non-cliquables) — la présentation gère le tri/état. Seul un hard
+    // delete les retirerait. La page détail 404 quand même sur un vendu.
+    return adapter.getVehicules();
   },
   ['vehicules-public'],
   { tags: ['vehicules'] }
