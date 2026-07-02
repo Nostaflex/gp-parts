@@ -17,8 +17,8 @@
  */
 
 import { useState, useMemo } from 'react';
-import { VEHICULES, type Vehicule } from '@/lib/vehicules';
-import { MOTOS, type Moto } from '@/lib/motos';
+import type { Vehicule } from '@/lib/vehicules';
+import type { Moto } from '@/lib/motos';
 
 const IOS = {
   bg: 'var(--bg)',
@@ -36,15 +36,17 @@ const TITRE_MAX_CHARS = 70;
 
 type Item = { kind: 'vehicule'; data: Vehicule } | { kind: 'moto'; data: Moto };
 
-function asItems(): Item[] {
+function asItems(vehicules: Vehicule[], motos: Moto[]): Item[] {
   return [
-    ...VEHICULES.map((v): Item => ({ kind: 'vehicule', data: v })),
-    ...MOTOS.map((m): Item => ({ kind: 'moto', data: m })),
+    ...vehicules.map((v): Item => ({ kind: 'vehicule', data: v })),
+    ...motos.map((m): Item => ({ kind: 'moto', data: m })),
   ];
 }
 
-export function LeboncoinExportClient() {
-  const items = useMemo(asItems, []);
+type Props = { vehicules: Vehicule[]; motos: Moto[] };
+
+export function LeboncoinExportClient({ vehicules, motos }: Props) {
+  const items = useMemo(() => asItems(vehicules, motos), [vehicules, motos]);
   const [selectedId, setSelectedId] = useState<string>(items[0]?.data.id ?? '');
   const [copiedTitle, setCopiedTitle] = useState(false);
   const [copiedDesc, setCopiedDesc] = useState(false);
