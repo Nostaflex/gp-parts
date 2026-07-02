@@ -4,7 +4,7 @@ import type Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe';
 import { handleStripeEvent } from '@/lib/stripe-webhook';
 import { sendOrderEmails } from '@/lib/emails/send';
-import { getAdapter } from '@/lib/data';
+import { getOrderByIdAdmin, updateOrderPaymentAdmin } from '@/lib/admin/orders-server';
 
 // Le webhook reçoit le corps brut (signature calculée dessus). Pas de cache,
 // pas de pré-parsing du body par Next.
@@ -40,10 +40,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const adapter = await getAdapter();
     await handleStripeEvent(event, {
-      getOrderById: (id) => adapter.getOrderById(id),
-      updateOrderPayment: (id, patch) => adapter.updateOrderPayment(id, patch),
+      getOrderById: getOrderByIdAdmin,
+      updateOrderPayment: updateOrderPaymentAdmin,
       sendOrderEmails,
     });
   } catch (err) {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdapter } from '@/lib/data';
+import { getOrdersAdmin } from '@/lib/admin/orders-server';
 import type { OrderStatus } from '@/lib/types';
 import { requireAdmin, AdminError } from '@/lib/admin/auth';
 
@@ -23,8 +23,7 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(Math.max(1, isNaN(limitParam) ? DEFAULT_LIMIT : limitParam), MAX_LIMIT);
     const status = searchParams.get('status') as OrderStatus | null;
 
-    const adapter = await getAdapter();
-    const orders = await adapter.getOrders({ limit, status: status ?? undefined });
+    const orders = await getOrdersAdmin({ limit, status: status ?? undefined });
     return NextResponse.json(orders);
   } catch (err) {
     console.error('[api/admin/orders] GET error:', err);
