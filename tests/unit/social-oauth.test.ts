@@ -7,7 +7,9 @@ function jsonRes(body: unknown) {
   return { ok: true, json: async () => body } as Response;
 }
 
-beforeEach(() => vi.unstubAllGlobals());
+beforeEach(() => {
+  vi.unstubAllGlobals();
+});
 
 describe('buildAuthUrl', () => {
   it('inclut client_id, redirect_uri, state, scope', async () => {

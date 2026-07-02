@@ -21,7 +21,7 @@ export async function GET(request: Request) {
   const state = searchParams.get('state');
   // `Cookie` étant un header interdit sur Request (Fetch), on lit via
   // next/headers (comme requireAdmin), pas via request.headers.
-  const cookieState = cookies().get('social_oauth_state')?.value;
+  const cookieState = (await cookies()).get('social_oauth_state')?.value;
 
   if (!code || !state || !cookieState || state !== cookieState) {
     return NextResponse.redirect(new URL(`${DEST}?error=state`, origin));

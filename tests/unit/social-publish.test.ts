@@ -17,7 +17,9 @@ const conn: SocialConnection = {
 function jsonRes(body: unknown) {
   return { ok: true, json: async () => body } as Response;
 }
-beforeEach(() => vi.unstubAllGlobals());
+beforeEach(() => {
+  vi.unstubAllGlobals();
+});
 
 describe('publishPost', () => {
   it('IG carrousel : enfants → parent CAROUSEL → media_publish', async () => {
