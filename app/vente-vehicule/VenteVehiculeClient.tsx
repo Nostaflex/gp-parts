@@ -36,19 +36,21 @@ export function VenteVehiculeClient({ vehicules }: { vehicules: Vehicule[] }) {
     return Math.round(m);
   }, [simPrix, simApport, simDuree]);
 
-  const vehiculesFiltres = useMemo(
-    () =>
-      vehicules.filter((v) => {
-        const matchType =
-          typeFiltre === 'Tous' ||
-          (typeFiltre === 'Occasion' && v.type === 'occasion') ||
-          (typeFiltre === 'Neuf' && v.type === 'neuf');
-        const matchEnergie = energie === 'Toutes' || v.energie === energie;
-        const matchBudget = v.prix <= budget;
-        return matchType && matchEnergie && matchBudget;
-      }),
-    [vehicules, typeFiltre, energie, budget]
-  );
+  const vehiculesFiltres = useMemo(() => {
+    const filtered = vehicules.filter((v) => {
+      const matchType =
+        typeFiltre === 'Tous' ||
+        (typeFiltre === 'Occasion' && v.type === 'occasion') ||
+        (typeFiltre === 'Neuf' && v.type === 'neuf');
+      const matchEnergie = energie === 'Toutes' || v.energie === energie;
+      const matchBudget = v.prix <= budget;
+      return matchType && matchEnergie && matchBudget;
+    });
+    // Vendus repoussés en fin de grille — tri stable, ordre préservé par groupe.
+    return filtered.sort(
+      (a, b) => Number(a.disponibilite === 'vendu') - Number(b.disponibilite === 'vendu')
+    );
+  }, [vehicules, typeFiltre, energie, budget]);
 
   return (
     <>
@@ -146,86 +148,25 @@ export function VenteVehiculeClient({ vehicules }: { vehicules: Vehicule[] }) {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {vehiculesFiltres.map((v) => (
-                <Link
-                  key={v.id}
-                  href={`/vente-vehicule/${v.id}`}
-                  className="group bg-white rounded-2xl border border-[#E5DDD3] overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_60px_rgba(26,15,6,0.10)] hover:border-cp-red/40 focus:outline-none focus:ring-2 focus:ring-cp-mango/50"
-                >
-                  {/* Image */}
-                  <div className="relative h-48 overflow-hidden bg-[#F8F5F0]">
-                    <Image
-                      src={v.image}
-                      alt={`${v.marque} ${v.modele}`}
-                      fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-[#1A0F06]/80 to-transparent">
-                      <p className="cp-title text-[0.75rem] font-bold text-[#E9C46A] tracking-widest uppercase">
-                        {v.marque}
-                      </p>
-                    </div>
-                    <span
-                      className={`absolute top-3 left-3 text-white cp-mono text-[0.6rem] px-2.5 py-1 rounded-full tracking-widest uppercase ${
-                        v.type === 'neuf' ? 'bg-cp-red/90' : 'bg-cp-ink/80'
-                      }`}
-                    >
-                      {v.type === 'neuf' ? 'Neuf' : 'Occasion'}
-                    </span>
-                    <span className="absolute top-3 right-3 bg-[#52C88A]/90 text-white cp-mono text-[0.6rem] px-2.5 py-1 rounded-full tracking-wide">
-                      ✓ {v.type === 'neuf' ? 'Garantie 3 ans' : 'Contrôlé'}
-                    </span>
-                  </div>
-
-                  {/* Body */}
-                  <div className="p-5">
-                    <p className="cp-title font-black text-cp-ink text-xl mb-1">{v.modele}</p>
-                    <p className="cp-mono text-[0.65rem] text-cp-ink/40 tracking-wide mb-3">
-                      {v.annee} · {v.km.toLocaleString('fr-FR')} KM · {v.energie.toUpperCase()} ·{' '}
-                      {v.transmission}
-                    </p>
-
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {v.options.slice(0, 3).map((o) => (
-                        <span
-                          key={o}
-                          className="cp-mono text-[0.6rem] text-cp-ink/40 tracking-wide"
-                        >
-                          {o}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* Garantie */}
-                    <div className="flex items-center gap-1.5 mb-4 text-xs text-[#2A5C45] font-semibold">
-                      <svg
-                        width="12"
-                        height="12"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                      </svg>
-                      GARANTIE 12 MOIS INCLUSE
-                    </div>
-
-                    <div className="flex items-end justify-between pt-4 border-t border-[#F8F5F0]">
-                      <div>
-                        <p className="cp-title font-black text-cp-ink text-2xl leading-none">
-                          {v.prix.toLocaleString('fr-FR')} €
-                        </p>
-                        <p className="text-xs text-cp-ink/35 mt-0.5">ou {v.mensualite} €/mois</p>
-                      </div>
-                      <span className="px-4 py-2 rounded-xl bg-cp-ink text-cp-cream text-xs font-semibold group-hover:bg-cp-red transition-colors">
-                        Voir le véhicule →
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
+              {vehiculesFiltres.map((v) =>
+                v.disponibilite === 'vendu' ? (
+                  <article
+                    key={v.id}
+                    aria-label={`${v.marque} ${v.modele} — vendu`}
+                    className="bg-white rounded-2xl border border-[#E5DDD3] overflow-hidden cursor-default"
+                  >
+                    <VehiculeCardBody v={v} vendu />
+                  </article>
+                ) : (
+                  <Link
+                    key={v.id}
+                    href={`/vente-vehicule/${v.id}`}
+                    className="group bg-white rounded-2xl border border-[#E5DDD3] overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_60px_rgba(26,15,6,0.10)] hover:border-cp-red/40 focus:outline-none focus:ring-2 focus:ring-cp-mango/50"
+                  >
+                    <VehiculeCardBody v={v} />
+                  </Link>
+                )
+              )}
             </div>
           )}
         </div>
@@ -546,6 +487,104 @@ export function VenteVehiculeClient({ vehicules }: { vehicules: Vehicule[] }) {
           </div>
         </div>
       </section>
+    </>
+  );
+}
+
+/**
+ * Corps de carte véhicule (image + infos), partagé entre la carte cliquable
+ * (disponible/réservé, enveloppée dans un <Link>) et la carte vendue
+ * (enveloppée dans un <article> non-interactif). En mode `vendu` : image
+ * grisée, bandeau « VENDU » en travers, et le CTA devient un label statique.
+ */
+function VehiculeCardBody({ v, vendu = false }: { v: Vehicule; vendu?: boolean }) {
+  return (
+    <>
+      {/* Image */}
+      <div className="relative h-48 overflow-hidden bg-[#F8F5F0]">
+        <Image
+          src={v.image}
+          alt={`${v.marque} ${v.modele}`}
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className={`object-cover transition-transform duration-500 ${
+            vendu ? 'grayscale opacity-70' : 'group-hover:scale-105'
+          }`}
+        />
+        <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-[#1A0F06]/80 to-transparent">
+          <p className="cp-title text-[0.75rem] font-bold text-[#E9C46A] tracking-widest uppercase">
+            {v.marque}
+          </p>
+        </div>
+        <span
+          className={`absolute top-3 left-3 text-white cp-mono text-[0.6rem] px-2.5 py-1 rounded-full tracking-widest uppercase ${
+            v.type === 'neuf' ? 'bg-cp-red/90' : 'bg-cp-ink/80'
+          }`}
+        >
+          {v.type === 'neuf' ? 'Neuf' : 'Occasion'}
+        </span>
+        {vendu ? (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <span className="bg-cp-red text-cp-cream cp-title font-black text-lg tracking-[0.35em] px-8 py-1.5 -rotate-6 shadow-lg">
+              VENDU
+            </span>
+          </div>
+        ) : (
+          <span className="absolute top-3 right-3 bg-[#52C88A]/90 text-white cp-mono text-[0.6rem] px-2.5 py-1 rounded-full tracking-wide">
+            ✓ {v.type === 'neuf' ? 'Garantie 3 ans' : 'Contrôlé'}
+          </span>
+        )}
+      </div>
+
+      {/* Body */}
+      <div className="p-5">
+        <p className="cp-title font-black text-cp-ink text-xl mb-1">{v.modele}</p>
+        <p className="cp-mono text-[0.65rem] text-cp-ink/40 tracking-wide mb-3">
+          {v.annee} · {v.km.toLocaleString('fr-FR')} KM · {v.energie.toUpperCase()} ·{' '}
+          {v.transmission}
+        </p>
+
+        <div className="flex flex-wrap gap-2 mb-3">
+          {v.options.slice(0, 3).map((o) => (
+            <span key={o} className="cp-mono text-[0.6rem] text-cp-ink/40 tracking-wide">
+              {o}
+            </span>
+          ))}
+        </div>
+
+        {/* Garantie */}
+        <div className="flex items-center gap-1.5 mb-4 text-xs text-[#2A5C45] font-semibold">
+          <svg
+            width="12"
+            height="12"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          GARANTIE 12 MOIS INCLUSE
+        </div>
+
+        <div className="flex items-end justify-between pt-4 border-t border-[#F8F5F0]">
+          <div>
+            <p className="cp-title font-black text-cp-ink text-2xl leading-none">
+              {v.prix.toLocaleString('fr-FR')} €
+            </p>
+            <p className="text-xs text-cp-ink/35 mt-0.5">ou {v.mensualite} €/mois</p>
+          </div>
+          {vendu ? (
+            <span className="px-4 py-2 rounded-xl bg-[#E5DDD3] text-cp-ink/50 text-xs font-semibold">
+              Vendu
+            </span>
+          ) : (
+            <span className="px-4 py-2 rounded-xl bg-cp-ink text-cp-cream text-xs font-semibold group-hover:bg-cp-red transition-colors">
+              Voir le véhicule →
+            </span>
+          )}
+        </div>
+      </div>
     </>
   );
 }

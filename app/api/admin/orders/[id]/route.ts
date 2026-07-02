@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdapter } from '@/lib/data';
+import { getOrderByIdAdmin, updateOrderStatusAdmin } from '@/lib/admin/orders-server';
 import type { OrderStatus } from '@/lib/types';
 import { requireAdmin, AdminError } from '@/lib/admin/auth';
 
@@ -32,8 +32,7 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
       return NextResponse.json({ error: 'Statut invalide' }, { status: 400 });
     }
 
-    const adapter = await getAdapter();
-    const order = await adapter.getOrderById(params.id);
+    const order = await getOrderByIdAdmin(params.id);
 
     if (!order) {
       return NextResponse.json({ error: 'Commande introuvable' }, { status: 404 });
@@ -47,7 +46,7 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
       );
     }
 
-    await adapter.updateOrderStatus(params.id, newStatus);
+    await updateOrderStatusAdmin(params.id, newStatus);
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('[api/admin/orders/[id]] PATCH error:', err);
