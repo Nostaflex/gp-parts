@@ -65,7 +65,21 @@ const internalChange = useRef(false);
 // ❌ FORBIDDEN — removing this flag causes infinite re-renders
 ```
 
-### Bug #3 — Race condition on checkout
+### Bug #3 — Learnings prod (2026-06/07) — NEVER REINTRODUCE
+
+- **Routes admin : JAMAIS le SDK client Firebase** — les rules `isAdmin`
+  rejettent le client non-authentifié ; toute route serveur admin passe par
+  le **Firebase Admin SDK** (cause du bug orders/paiement prod, fixé #41).
+- **CSP nonce + ISR/SSG incompatibles** (Next 15) : le combo casse
+  l'hydratation. Choisir : `force-dynamic`, SRI, ou `unsafe-inline`.
+- **CSP sans `unsafe-eval` tue l'hydratation en `next dev`** → toujours
+  vérifier en `build` + `start`, jamais conclure depuis le dev server.
+- **« KO Node 24 » = mythe réfuté** : `npm ci` règle le problème.
+- **Husky non-exécutable** après clone : `chmod +x .husky/*`.
+- **Stripe** : montant recalculé serveur (jamais confiance au client),
+  webhook idempotent — invariants, pas des options.
+
+### Bug #4 — Race condition on checkout
 
 ```tsx
 // ✅ setOrderPlaced(true) BEFORE clearCart()
@@ -133,12 +147,13 @@ import type { Product } from '@/lib/types'; // 5. Types (always last)
 
 ## Architecture Decisions (ADRs)
 
-| ADR | Decision                                                               | Status       |
-| --- | ---------------------------------------------------------------------- | ------------ |
-| 001 | Firebase Firestore (plan Spark, free)                                  | Decided      |
-| 002 | Data Adapter pattern: StaticAdapter now → FirebaseAdapter in Phase 3-4 | Implementing |
-| 003 | Vercel Hobby (free), auto-deploy from `main`                           | Active       |
-| 004 | Basic Auth middleware (v1) → Firebase Auth in Phase 4                  | v1 active    |
+| ADR | Decision                                                       | Status  |
+| --- | -------------------------------------------------------------- | ------- |
+| 001 | Firebase Firestore (plan Spark, free)                          | Decided |
+| 002 | Data Adapter pattern — FirebaseAdapter livré (Phase 3)         | Active  |
+| 003 | Vercel Hobby (free), auto-deploy from `main`                   | Active  |
+| 004 | Firebase Auth (login) — a remplacé le Basic Auth v1 en Phase 4 | Active  |
+| 005 | main protégée : PR + CI obligatoires                           | Active  |
 
 **Never call Firebase directly from components or pages — always go through the Data Adapter interface.**
 
@@ -153,24 +168,22 @@ import type { Product } from '@/lib/types'; // 5. Types (always last)
 | 3 — Firebase              | Firestore emulator, FirebaseAdapter, Data Adapter pattern, audit qualité (10 fixes + 36 tests) | #5 #6 #7       | ✅ Done |
 | 4 — Firebase Cloud + Auth | Firebase Auth login, Zod validation, SSR fix, seeder cloud, Auth emulator                      | #8 (PR)        | ✅ Done |
 
-## Current Roadmap Phase: Phase 4.5 — Solde dette technique
+## Phases 5-6 + prod (état réel, mis à jour 2026-07-11)
 
-Phase 4 est terminée (Firebase Auth + Zod + seeder cloud).
-Phase 4.5 solde la dette avant Phase 5. Ne pas passer à Phase 5 avant.
+| Phase / chantier         | Scope                                                                            | PR(s) | Status  |
+| ------------------------ | -------------------------------------------------------------------------------- | ----- | ------- |
+| 5 — Admin CRUD           | CRUD produits admin, **soft-delete 4 couches** (UI, adapter, rules, seed)        | #24   | ✅ Done |
+| 6 — Stripe               | Checkout Stripe, **webhook idempotent**, montant TOUJOURS recalculé côté serveur | #25   | ✅ Done |
+| Réservations `/location` | Zod + adapter + emails + admin                                                   | #27   | ✅ Done |
+| Feature flags            | Back-office `meta/featureFlags`                                                  | #30   | ✅ Done |
+| Fix orders prod          | Routes admin passées au **Firebase Admin SDK** (SDK client non-auth vs rules)    | #41   | ✅ Done |
+| Audit UI/UX + SEO        | 53 findings, lots A-C livrés                                                     | #31+  | Partiel |
 
-Phase 4.5 scope :
+**Reste ouvert** : preuve Stripe test-mode e2e · IG/FB (app Meta bloquée) ·
+révoquer le VERCEL_TOKEN exposé · lots D (lourd) / E (polish) de l'audit.
 
-- [ ] **Design system admin** — réécrire `AdminDashboardClient.tsx` en iOS Clarity pur (`var(--*)`) — supprimer tous les tokens Volcanic Clarity du back-office
-- [ ] **Auth SSR** — implémenter session cookie Firebase (`/api/sessionLogin`) + vérification middleware pour protéger `/admin/*` côté serveur (Phase 4 = guard client-side uniquement)
-- [ ] **E2E admin** — valider les tests Playwright avec l'émulateur Auth connecté (port 9099)
-- [ ] **Seed validation** — `parseProduct()` avant chaque `batch.set()` dans le seeder cloud
-- [ ] **WHATSAPP_NUMBER** — remplacer le placeholder `590XXXXXXXXX` dans `lib/config.ts`
-
-Phase 5 (après 4.5 verte) :
-
-- Emails transactionnels (Resend)
-- Gestion commandes Firestore (CRUD admin)
-- Statuts commandes + notifications
+**main est PROTÉGÉE : PR + CI obligatoires — jamais de push direct.**
+Avant tout merge : skill projet `phase-transition` (23 bugs réels encodés).
 
 ---
 
