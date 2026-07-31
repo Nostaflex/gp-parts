@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef } from 'react';
 import { CheckCircle } from 'lucide-react';
 import type { LocationCar } from '@/lib/location-cars';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, localDateISO } from '@/lib/utils';
 import { validateReservation } from './actions';
 
 type Categorie = 'Toutes' | 'Citadine' | 'Berline' | 'SUV' | 'Utilitaire';
@@ -236,7 +236,7 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
                 <input
                   type="date"
                   className={field}
-                  min={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
+                  min={localDateISO(1)}
                   value={dateDepart}
                   onChange={(e) => setDateDepart(e.target.value)}
                 />
@@ -248,9 +248,7 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
                 <input
                   type="date"
                   className={field}
-                  min={
-                    dateDepart || new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0]
-                  }
+                  min={dateDepart || localDateISO(2)}
                   value={dateRetour}
                   onChange={(e) => setDateRetour(e.target.value)}
                 />
@@ -506,7 +504,7 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
                         <input
                           type="date"
                           className={field}
-                          min={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
+                          min={localDateISO(1)}
                           value={formData.dateDepart}
                           onChange={(e) => setForm('dateDepart', e.target.value)}
                         />
@@ -517,10 +515,7 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
                         <input
                           type="date"
                           className={field}
-                          min={
-                            formData.dateDepart ||
-                            new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0]
-                          }
+                          min={formData.dateDepart || localDateISO(2)}
                           value={formData.dateRetour}
                           onChange={(e) => setForm('dateRetour', e.target.value)}
                         />
