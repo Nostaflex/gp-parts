@@ -36,7 +36,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const vehicules = await getCachedVehicules();
   const v = vehicules.find((veh) => veh.id === id);
-  if (!v) {
+  // Un véhicule vendu reste affiché (grisé) dans la liste mais sa fiche est 404.
+  if (!v || v.disponibilite === 'vendu') {
     return { title: 'Véhicule introuvable' };
   }
   const ci = await getCachedContactInfo();
@@ -101,9 +102,10 @@ export default async function VehiculeDetailPage({ params }: Props) {
   const { id } = await params;
   const vehicules = await getCachedVehicules();
   const v = vehicules.find((veh) => veh.id === id);
-  // Véhicule supprimé en live entre build (generateStaticParams) et requête :
-  // find() → undefined → notFound() → 404 correct (pas d'erreur 500, ISR géré).
-  if (!v) notFound();
+  // find() undefined (supprimé entre build et requête) OU véhicule vendu :
+  // 404. Les vendus restent visibles grisés dans la liste, mais leur fiche
+  // n'est plus accessible (« sans interaction possible »).
+  if (!v || v.disponibilite === 'vendu') notFound();
 
   const ci = await getCachedContactInfo();
   const contactHref = `/contact?sujet=${encodeURIComponent('Vente véhicule')}&vehicule=${encodeURIComponent(`${v.marque} ${v.modele}`)}&ref=${encodeURIComponent(v.id)}`;

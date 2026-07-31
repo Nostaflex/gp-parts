@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+
+import { getAdapter } from '@/lib/data';
+
 import { LeboncoinExportClient } from './LeboncoinExportClient';
 
 export const metadata: Metadata = {
@@ -6,6 +9,13 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function LeboncoinPage() {
-  return <LeboncoinExportClient />;
+// Inventaire réel (Firestore) — jamais le seed statique figé. force-dynamic +
+// getAdapter() : même chemin que /admin/vehicules et /admin/motos.
+export const dynamic = 'force-dynamic';
+
+export default async function LeboncoinPage() {
+  const adapter = await getAdapter();
+  const [vehicules, motos] = await Promise.all([adapter.getVehicules(), adapter.getMotos()]);
+
+  return <LeboncoinExportClient vehicules={vehicules} motos={motos} />;
 }

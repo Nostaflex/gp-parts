@@ -35,10 +35,15 @@ vi.mock('@/lib/admin/auth', async () => {
 vi.mock('@/lib/data', () => ({
   getAdapter: vi.fn(async () => ({
     getProducts: getProductsMock,
-    getOrders: getOrdersMock,
-    getOrderById: getOrderByIdMock,
-    updateOrderStatus: updateOrderStatusMock,
   })),
+}));
+
+// Les routes /api/admin/orders* lisent/écrivent via l'Admin SDK (orders-server),
+// pas via l'adapter client (sinon permission-denied côté serveur).
+vi.mock('@/lib/admin/orders-server', () => ({
+  getOrdersAdmin: getOrdersMock,
+  getOrderByIdAdmin: getOrderByIdMock,
+  updateOrderStatusAdmin: updateOrderStatusMock,
 }));
 
 // Keep NextResponse.json working but capture responses for assertions.
