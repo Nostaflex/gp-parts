@@ -92,6 +92,7 @@ export function LocationCarForm({ initial }: { initial?: LocationCar }) {
             id="places"
             name="places"
             type="number"
+            inputMode="numeric"
             defaultValue={initial?.places ?? 5}
             className={FIELD}
           />
@@ -140,6 +141,7 @@ export function LocationCarForm({ initial }: { initial?: LocationCar }) {
             id="prixJour"
             name="prixJour"
             type="number"
+            inputMode="decimal"
             step="0.01"
             defaultValue={toEuros(initial?.prixJourEnCents)}
             className={FIELD}
@@ -154,6 +156,7 @@ export function LocationCarForm({ initial }: { initial?: LocationCar }) {
             id="prixSemaine"
             name="prixSemaine"
             type="number"
+            inputMode="decimal"
             step="0.01"
             defaultValue={toEuros(initial?.prixSemaineEnCents)}
             className={FIELD}

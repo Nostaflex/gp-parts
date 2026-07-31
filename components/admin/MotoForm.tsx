@@ -88,6 +88,7 @@ export function MotoForm({ initial }: { initial?: Moto }) {
             id="annee"
             name="annee"
             type="number"
+            inputMode="numeric"
             defaultValue={initial?.annee}
             className={FIELD}
           />
@@ -97,7 +98,14 @@ export function MotoForm({ initial }: { initial?: Moto }) {
           <label className={LABEL} htmlFor="km">
             Kilométrage
           </label>
-          <input id="km" name="km" type="number" defaultValue={initial?.km} className={FIELD} />
+          <input
+            id="km"
+            name="km"
+            type="number"
+            inputMode="numeric"
+            defaultValue={initial?.km}
+            className={FIELD}
+          />
           <FieldError name="km" />
         </div>
         <div>
@@ -146,6 +154,7 @@ export function MotoForm({ initial }: { initial?: Moto }) {
             id="prix"
             name="prix"
             type="number"
+            inputMode="numeric"
             defaultValue={initial?.prix}
             className={FIELD}
           />
@@ -159,6 +168,7 @@ export function MotoForm({ initial }: { initial?: Moto }) {
             id="mensualite"
             name="mensualite"
             type="number"
+            inputMode="numeric"
             defaultValue={initial?.mensualite}
             className={FIELD}
           />
@@ -274,6 +284,7 @@ export function MotoForm({ initial }: { initial?: Moto }) {
         <input
           name="car_proprietaires"
           type="number"
+          inputMode="numeric"
           aria-label="Nombre de propriétaires"
           placeholder="Propriétaires"
           defaultValue={initial?.caracteristiques.proprietaires}
