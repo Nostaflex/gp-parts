@@ -3,7 +3,9 @@
 import { generateReservationReference } from '@/lib/utils';
 import { getAdapter } from '@/lib/data';
 import { createReservationIntake } from '@/lib/server/intake';
+import { getBusyRangesForCar, getUnavailableCarIds } from '@/lib/server/availability';
 import { sendReservationEmails } from '@/lib/emails/send';
+import { rangesOverlap } from '@/lib/reservations';
 import type { Reservation } from '@/lib/reservations';
 
 export interface ReservationValidationResult {
@@ -80,6 +82,14 @@ export async function validateReservation(input: {
   if (!car) return { success: false, errors: { _form: 'Voiture introuvable.' } };
   if (!car.disponible) return { success: false, errors: { _form: 'Voiture indisponible.' } };
 
+  const busy = await getBusyRangesForCar(car.id);
+  if (busy.some((r) => rangesOverlap(dateDepart, dateRetour, r.dateDepart, r.dateRetour))) {
+    return {
+      success: false,
+      errors: { _form: 'Ce véhicule est déjà réservé sur ces dates. Choisissez d’autres dates.' },
+    };
+  }
+
   const nbJours = Math.max(1, Math.ceil((retMs - depMs) / DAY_MS));
   const totalEnCents = nbJours * car.prixJourEnCents;
   const now = new Date().toISOString();
@@ -105,4 +115,16 @@ export async function validateReservation(input: {
   sendReservationEmails({ ...data, id });
 
   return { success: true, errors: {}, reference };
+}
+
+// Pré-filtre UI : IDs des voitures indisponibles sur la plage demandée.
+export async function checkDispo(
+  dateDepart: string,
+  dateRetour: string
+): Promise<{ unavailableIds: string[] }> {
+  const dateRe = /^\d{4}-\d{2}-\d{2}$/;
+  const dep = sanitize(dateDepart);
+  const ret = sanitize(dateRetour);
+  if (!dateRe.test(dep) || !dateRe.test(ret) || ret < dep) return { unavailableIds: [] };
+  return { unavailableIds: await getUnavailableCarIds(dep, ret) };
 }

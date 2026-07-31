@@ -27,3 +27,12 @@ export type Reservation = {
   updatedAt: string; // ISO
   expiresAt: number; // unix ms — TTL Firestore (purge RGPD)
 };
+
+// Statuts qui immobilisent la voiture ; terminee/annulee la libèrent.
+export const BLOCKING_STATUSES: ReservationStatus[] = ['nouvelle', 'confirmee', 'en_cours'];
+
+// Chevauchement inclusif de plages "YYYY-MM-DD" (comparaison lexicale ISO).
+// Bord commun = conflit : pas de rotation même-jour en v1.
+export function rangesOverlap(aDep: string, aRet: string, bDep: string, bRet: string): boolean {
+  return aDep <= bRet && bDep <= aRet;
+}

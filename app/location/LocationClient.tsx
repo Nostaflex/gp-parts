@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { CheckCircle } from 'lucide-react';
 import type { LocationCar } from '@/lib/location-cars';
 import { formatPrice } from '@/lib/utils';
-import { validateReservation } from './actions';
+import { validateReservation, checkDispo } from './actions';
 
 type Categorie = 'Toutes' | 'Citadine' | 'Berline' | 'SUV' | 'Utilitaire';
 type Step = 0 | 1 | 2;
@@ -47,7 +47,10 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
   const [website, setWebsite] = useState(''); // honeypot anti-spam
   const [done, setDone] = useState(false);
   const [ref, setRef] = useState('');
-  const [errors, setErrors] = useState<Partial<Record<keyof ReservationData, string>>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof ReservationData | '_form', string>>>(
+    {}
+  );
+  const [unavailableIds, setUnavailableIds] = useState<string[]>([]);
   const [formData, setFormData] = useState<ReservationData>({
     vehiculeId: '',
     dateDepart: '',
@@ -59,6 +62,21 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
     permis: '',
     consent: false,
   });
+
+  // Dates choisies → pré-filtre dispo (best-effort ; la garde finale est serveur)
+  useEffect(() => {
+    if (!dateDepart || !dateRetour || dateRetour < dateDepart) {
+      setUnavailableIds([]);
+      return;
+    }
+    let cancelled = false;
+    checkDispo(dateDepart, dateRetour).then(({ unavailableIds: ids }) => {
+      if (!cancelled) setUnavailableIds(ids);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [dateDepart, dateRetour]);
 
   const vehiculesFiltres = useMemo(
     () => VEHICULES.filter((v) => categorie === 'Toutes' || v.categorie === categorie),
@@ -111,6 +129,14 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
 
   const next = async () => {
     if (!validate()) return;
+    if (step === 0 && formData.vehiculeId) {
+      // Vérif dispo du véhicule choisi sur les dates du formulaire
+      const { unavailableIds: ids } = await checkDispo(formData.dateDepart, formData.dateRetour);
+      if (ids.includes(formData.vehiculeId)) {
+        setErrors({ dateRetour: 'Ce véhicule est déjà réservé sur ces dates.' });
+        return;
+      }
+    }
     if (step === 2) {
       const result = await validateReservation({
         locationCarId: formData.vehiculeId,
@@ -125,7 +151,7 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
         website,
       });
       if (!result.success) {
-        setErrors(result.errors as Partial<Record<keyof ReservationData, string>>);
+        setErrors(result.errors as Partial<Record<keyof ReservationData | '_form', string>>);
         return;
       }
       setRef(result.reference!);
@@ -320,9 +346,19 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <span
-                    className={`absolute top-3 left-3 text-white text-[0.65rem] cp-mono px-3 py-1 rounded-full ${v.disponible ? 'bg-[#7A9B76]/90' : 'bg-[#D4A24C]/90'}`}
+                    className={`absolute top-3 left-3 text-white text-[0.65rem] cp-mono px-3 py-1 rounded-full ${
+                      unavailableIds.includes(v.id)
+                        ? 'bg-[#B85450]/90'
+                        : v.disponible
+                          ? 'bg-[#7A9B76]/90'
+                          : 'bg-[#D4A24C]/90'
+                    }`}
                   >
-                    {v.disponible ? 'Disponible' : 'Stock limité'}
+                    {unavailableIds.includes(v.id)
+                      ? 'Indisponible à ces dates'
+                      : v.disponible
+                        ? 'Disponible'
+                        : 'Stock limité'}
                   </span>
                   <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-[#1A0F06]/85 to-transparent">
                     <p className="cp-title text-[0.75rem] font-bold text-[#E9C46A] tracking-widest uppercase">
@@ -361,7 +397,8 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
                     </div>
                     <button
                       onClick={() => openReservation(v.id)}
-                      className="px-4 py-2 rounded-xl bg-cp-red/10 border border-cp-red/20 text-cp-mango text-sm font-semibold hover:bg-cp-red/20 hover:border-cp-red/40 transition-all"
+                      disabled={unavailableIds.includes(v.id)}
+                      className="px-4 py-2 rounded-xl bg-cp-red/10 border border-cp-red/20 text-cp-mango text-sm font-semibold hover:bg-cp-red/20 hover:border-cp-red/40 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-cp-red/10 disabled:hover:border-cp-red/20"
                     >
                       Réserver
                     </button>
@@ -733,6 +770,11 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
                 )}
 
                 {/* Navigation */}
+                {errors._form && (
+                  <p role="alert" className="text-[0.8rem] text-red-500 mt-4">
+                    {errors._form}
+                  </p>
+                )}
                 <div className="flex gap-3 mt-6">
                   {step > 0 ? (
                     <button
