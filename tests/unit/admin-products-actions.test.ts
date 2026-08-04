@@ -98,6 +98,7 @@ import {
   updateProduct,
   deleteProduct,
   restoreProduct,
+  updateProductStock,
 } from '@/app/admin/products/actions';
 
 function fd(obj: Record<string, string | string[]>): FormData {
@@ -439,6 +440,52 @@ describe('Server Actions products', () => {
     const [, written] = txSetMock.mock.calls[0];
     expect(written.compatibility).toHaveLength(1);
     expect(written.compatibility[0].brand).toBe('Renault');
+  });
+
+  // ─── UPDATE STOCK (inline −/+) ────────────────────────────────────────────
+
+  it('updateProductStock : delta appliqué en transaction + audit before/after + revalidate', async () => {
+    txGetMock.mockResolvedValue(makeExistingSnap()); // stock: 12
+    const res = await updateProductStock('prod-001', -1);
+    expect(txUpdateMock).toHaveBeenCalledTimes(1);
+    const [, patch] = txUpdateMock.mock.calls[0];
+    expect(patch.stock).toBe(11);
+    expect(typeof patch.updatedAt).toBe('string');
+    expect(writeAuditLogMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'update',
+        resourceType: 'product',
+        diff: { stock: { before: 12, after: 11 } },
+      })
+    );
+    expect(revalidateTagMock).toHaveBeenCalledWith('products');
+    expect(res).toEqual(expect.objectContaining({ ok: true }));
+  });
+
+  it('updateProductStock : jamais de stock négatif (clamp à 0)', async () => {
+    txGetMock.mockResolvedValue(makeExistingSnap({ stock: 0 }));
+    await updateProductStock('prod-001', -5);
+    const [, patch] = txUpdateMock.mock.calls[0];
+    expect(patch.stock).toBe(0);
+  });
+
+  it('updateProductStock : delta invalide (0, non-entier, >1000) → erreur sans écriture', async () => {
+    for (const delta of [0, 1.5, 1001]) {
+      const res = await updateProductStock('prod-001', delta);
+      expect(res && 'errors' in res ? res.errors?._form : undefined).toBeDefined();
+    }
+    expect(txUpdateMock).not.toHaveBeenCalled();
+  });
+
+  it('updateProductStock : requireAdmin throw → audit denied + rethrow, 0 écriture', async () => {
+    requireAdminMock.mockRejectedValue(
+      Object.assign(new Error('Non authentifié'), { name: 'AdminError', status: 401 })
+    );
+    await expect(updateProductStock('prod-001', 1)).rejects.toMatchObject({ status: 401 });
+    expect(writeAuditLogMock).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'denied', resourceType: 'product' })
+    );
+    expect(txUpdateMock).not.toHaveBeenCalled();
   });
 
   // ─── AUDIT DENIED ──────────────────────────────────────────────────────────

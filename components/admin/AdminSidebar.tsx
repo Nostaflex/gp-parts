@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 
 import type { LucideIcon } from 'lucide-react';
+import type { NavBadges } from '@/lib/admin/nav-badges';
 
 type NavItem = {
   href: string;
@@ -88,7 +89,7 @@ const IOS = {
   borderFaint: 'rgba(198, 198, 200, 0.5)',
 } as const;
 
-function NavLink({ item, active }: { item: NavItem; active: boolean }) {
+function NavLink({ item, active, badge }: { item: NavItem; active: boolean; badge?: number }) {
   const Icon = item.icon;
 
   if (!item.enabled) {
@@ -114,11 +115,27 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
     >
       <Icon size={18} strokeWidth={1.75} style={{ color: active ? IOS.blue : IOS.textMuted }} />
       <span className="truncate">{item.label}</span>
+      {badge != null && badge > 0 && (
+        <span
+          aria-label={`${badge} à traiter`}
+          className="ml-auto min-w-5 h-5 px-1.5 rounded-full text-[0.7rem] font-semibold text-white flex items-center justify-center"
+          style={{ background: 'var(--red)' }}
+        >
+          {badge > 99 ? '99+' : badge}
+        </span>
+      )}
     </Link>
   );
 }
 
-function NavContent({ pathname }: { pathname: string }) {
+// Badge « à traiter » par route (compteurs status=nouvelle, calculés serveur).
+const BADGE_ROUTES: Record<string, keyof NavBadges> = {
+  '/admin/commandes': 'commandes',
+  '/admin/reservations': 'reservations',
+  '/admin/demandes': 'demandes',
+};
+
+function NavContent({ pathname, badges }: { pathname: string; badges?: NavBadges }) {
   return (
     <nav className="flex flex-col gap-1 px-3 py-4" aria-label="Navigation admin">
       {SECTIONS.map((section, i) => (
@@ -133,6 +150,7 @@ function NavContent({ pathname }: { pathname: string }) {
               key={item.href}
               item={item}
               active={pathname === item.href || pathname.startsWith(`${item.href}/`)}
+              badge={badges?.[BADGE_ROUTES[item.href] as keyof NavBadges]}
             />
           ))}
         </div>
@@ -150,7 +168,7 @@ function NavContent({ pathname }: { pathname: string }) {
  * Le collapse tablet 60px (spec §7) est reporté : nécessite un mode icônes-only
  * avec tooltips, hors scope Phase 1 (aucune route ne le requiert encore).
  */
-export function AdminSidebar() {
+export function AdminSidebar({ badges }: { badges?: NavBadges }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -180,7 +198,7 @@ export function AdminSidebar() {
             Car Performance
           </span>
         </div>
-        <NavContent pathname={pathname} />
+        <NavContent pathname={pathname} badges={badges} />
       </aside>
 
       {/* Drawer mobile */}
@@ -215,7 +233,7 @@ export function AdminSidebar() {
               </button>
             </div>
             <div onClick={() => setMobileOpen(false)}>
-              <NavContent pathname={pathname} />
+              <NavContent pathname={pathname} badges={badges} />
             </div>
           </aside>
         </div>

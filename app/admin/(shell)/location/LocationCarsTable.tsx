@@ -1,12 +1,42 @@
 'use client';
 
 import Link from 'next/link';
+import { useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 
 import { DataTable, type Column } from '@/components/admin/DataTable';
 import { StatusBadge, type BadgeTone } from '@/components/admin/StatusBadge';
+import { deleteLocationCar } from '@/app/admin/location/actions';
 import { formatPrice } from '@/lib/utils';
 
 import type { LocationCar } from '@/lib/location-cars';
+
+/** Bouton de suppression (soft-delete → retirée du site public). */
+function DeleteLocationCarButton({ car }: { car: LocationCar }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+
+  const onDelete = () => {
+    if (pending) return;
+    if (!window.confirm(`Retirer « ${car.marque} ${car.modele} » du parc de location ?`)) return;
+    startTransition(async () => {
+      await deleteLocationCar(car.id);
+      router.refresh();
+    });
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={onDelete}
+      disabled={pending}
+      className="text-body-sm font-semibold ml-4 disabled:opacity-40"
+      style={{ color: 'var(--red)' }}
+    >
+      {pending ? '…' : 'Supprimer'}
+    </button>
+  );
+}
 
 const columns: Column<LocationCar>[] = [
   {
@@ -47,13 +77,16 @@ const columns: Column<LocationCar>[] = [
     header: '',
     align: 'right',
     render: (c) => (
-      <Link
-        href={`/admin/location/${c.id}`}
-        className="text-body-sm font-semibold"
-        style={{ color: 'var(--blue)' }}
-      >
-        Éditer
-      </Link>
+      <>
+        <Link
+          href={`/admin/location/${c.id}`}
+          className="text-body-sm font-semibold"
+          style={{ color: 'var(--blue)' }}
+        >
+          Éditer
+        </Link>
+        <DeleteLocationCarButton car={c} />
+      </>
     ),
   },
 ];

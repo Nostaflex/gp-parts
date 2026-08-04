@@ -62,6 +62,7 @@ export function CompatibilityFields({ initial }: { initial: VehicleCompatibility
           <input
             name={`compat_${idx}_yearFrom`}
             type="number"
+            inputMode="numeric"
             placeholder="Année début"
             defaultValue={row.yearFrom || ''}
             onChange={(e) => updateRow(idx, 'yearFrom', e.target.value)}
@@ -71,6 +72,7 @@ export function CompatibilityFields({ initial }: { initial: VehicleCompatibility
             <input
               name={`compat_${idx}_yearTo`}
               type="number"
+              inputMode="numeric"
               placeholder="Année fin"
               defaultValue={row.yearTo ?? ''}
               onChange={(e) => updateRow(idx, 'yearTo', e.target.value)}
