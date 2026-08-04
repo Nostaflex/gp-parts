@@ -8,6 +8,7 @@ import { CpUniversStrip } from '@/components/cp/CpUniversStrip';
 import { notFound } from 'next/navigation';
 import { getAdapter } from '@/lib/data';
 import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
+import { getLocationSettings } from '@/lib/server/location-settings';
 import { LocationClient } from './LocationClient';
 
 export const metadata: Metadata = {
@@ -24,6 +25,7 @@ export default async function LocationPage() {
   if (!flags.location) notFound();
   const adapter = await getAdapter();
   const cars = (await adapter.getLocationCars()).filter((c) => c.disponible);
+  const settings = await getLocationSettings();
   return (
     <>
       <CpHeader darkSectionIds={['loc-hero']} />
@@ -188,7 +190,7 @@ export default async function LocationPage() {
       <CpBridge fromColor="#F6F2EA" toColor="#F4EDE0" />
 
       {/* ── CLIENT COMPONENT (search + catalogue + form) ── */}
-      <LocationClient cars={cars} />
+      <LocationClient cars={cars} settings={settings} />
 
       <CpUniversStrip current="location" />
       <CpBridge fromColor="#F4EDE0" toColor="#1A0F06" />

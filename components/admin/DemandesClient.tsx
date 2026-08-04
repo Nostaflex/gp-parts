@@ -18,6 +18,7 @@ const TYPE_LABEL: Record<string, string> = {
   piece: 'Pièce',
   financement: 'Financement',
   reparation: 'Réparation',
+  location: 'Location LLD',
 };
 
 export function DemandesClient({ demandes }: { demandes: Demande[] }) {

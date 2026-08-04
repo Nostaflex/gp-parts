@@ -4,8 +4,11 @@ import { normalizeFeatureFlags } from '@/lib/feature-flags';
 import type { FeatureFlags } from '@/lib/feature-flags';
 import { normalizeContactInfo } from '@/lib/contact-info';
 import type { ContactInfo } from '@/lib/contact-info';
+import { normalizeLocationSettings } from '@/lib/location-settings';
+import type { LocationSettings } from '@/lib/location-settings';
 import { FeatureFlagsForm } from '@/components/admin/FeatureFlagsForm';
 import { ContactInfoForm } from '@/components/admin/ContactInfoForm';
+import { LocationSettingsForm } from '@/components/admin/LocationSettingsForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +21,10 @@ export default async function ParametresPage() {
   const ciSnap = await getAdminFirestore().doc('meta/contactInfo').get();
   const contactInfo: ContactInfo = normalizeContactInfo(
     ciSnap.exists ? (ciSnap.data() as Partial<ContactInfo>) : null
+  );
+  const lsSnap = await getAdminFirestore().doc('meta/locationSettings').get();
+  const locationSettings: LocationSettings = normalizeLocationSettings(
+    lsSnap.exists ? lsSnap.data() : null
   );
 
   return (
@@ -42,6 +49,17 @@ export default async function ParametresPage() {
         </p>
       </div>
       <ContactInfoForm initial={contactInfo} />
+
+      <div className="pt-4">
+        <h2 className="font-title text-h3" style={{ color: 'var(--text)' }}>
+          Location — conditions & cautions
+        </h2>
+        <p className="text-body-sm" style={{ color: 'rgba(28, 28, 30, 0.6)' }}>
+          Conditions conducteur (âge, ancienneté de permis), surcharge jeune conducteur et cautions
+          par défaut annoncées dans le funnel de réservation.
+        </p>
+      </div>
+      <LocationSettingsForm initial={locationSettings} />
     </section>
   );
 }
