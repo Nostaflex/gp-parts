@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { CheckCircle } from 'lucide-react';
+import { localDateISO } from '@/lib/utils';
 import { submitRdv } from './actions';
 
 type Step = 0 | 1 | 2 | 3;
@@ -429,7 +430,7 @@ export function RdvForm() {
                 id="date"
                 className={field}
                 type="date"
-                min={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
+                min={localDateISO(1)}
                 value={data.date}
                 onChange={(e) => set('date', e.target.value)}
               />

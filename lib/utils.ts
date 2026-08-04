@@ -4,6 +4,18 @@
 import { LOW_STOCK_THRESHOLD } from '@/lib/config';
 
 /**
+ * Date "YYYY-MM-DD" en fuseau LOCAL, décalée de `offsetDays` jours.
+ * JAMAIS toISOString() pour un input date : l'ISO est en UTC et la
+ * Guadeloupe est en UTC−4 → min décalé d'un jour le soir (audit #29).
+ * 'en-CA' formate nativement en YYYY-MM-DD.
+ */
+export function localDateISO(offsetDays: number = 0): string {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return d.toLocaleDateString('en-CA');
+}
+
+/**
  * Formate un prix (centimes) en chaîne "65,00 €" avec séparateur français.
  * - Entrée invalide (NaN / non-finie) → "—"
  * - Valeur négative → clampée à 0 (jamais de prix négatif affiché)

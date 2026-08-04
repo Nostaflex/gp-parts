@@ -43,34 +43,10 @@ const VALEURS = [
 ];
 
 const EQUIPE = [
-  {
-    prenom: 'Stéphane',
-    nom: 'M.',
-    role: 'Fondateur & Directeur',
-    image:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80&fit=crop&crop=face',
-  },
-  {
-    prenom: 'Christelle',
-    nom: 'B.',
-    role: 'Responsable accueil & RDV',
-    image:
-      'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80&fit=crop&crop=face',
-  },
-  {
-    prenom: 'Jérôme',
-    nom: 'L.',
-    role: 'Chef mécanicien',
-    image:
-      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80&fit=crop&crop=face',
-  },
-  {
-    prenom: 'Nadège',
-    nom: 'C.',
-    role: 'Technicienne carrosserie',
-    image:
-      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80&fit=crop&crop=face',
-  },
+  { prenom: 'Stéphane', nom: 'M.', role: 'Fondateur & Directeur' },
+  { prenom: 'Christelle', nom: 'B.', role: 'Responsable accueil & RDV' },
+  { prenom: 'Jérôme', nom: 'L.', role: 'Chef mécanicien' },
+  { prenom: 'Nadège', nom: 'C.', role: 'Technicienne carrosserie' },
 ];
 
 const ENGAGEMENTS = [
@@ -304,13 +280,17 @@ export default function AProposPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {EQUIPE.map((m) => (
               <div key={m.prenom} className="group">
-                <div className="aspect-square rounded-2xl overflow-hidden mb-4 bg-cp-cream/5">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={m.image}
-                    alt={`${m.prenom} ${m.nom}`}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
+                {/* Avatar initiales — pas de photo stock sous un vrai nom
+                    (audit #17) ; les vraies photos de l'équipe viendront ici. */}
+                <div className="aspect-square rounded-2xl overflow-hidden mb-4 bg-cp-cream/5 border border-cp-cream/10 flex items-center justify-center">
+                  <span
+                    aria-hidden="true"
+                    className="cp-title font-black text-cp-mango/70"
+                    style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)' }}
+                  >
+                    {m.prenom[0]}
+                    {m.nom[0]}
+                  </span>
                 </div>
                 <p className="cp-title font-black text-cp-cream text-lg leading-tight">
                   {m.prenom} {m.nom}

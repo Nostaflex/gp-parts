@@ -45,9 +45,12 @@
     @apply bg-cream text-basalt font-body;
   }
 
-  /* Focus ring global — accessibilité clavier */
+  /* Focus ring global — accessibilité clavier (audit #19 : ne JAMAIS
+     supprimer l'outline sans remplacement visible ; les composants qui
+     posent leur propre ring Tailwind l'emportent naturellement). */
   *:focus-visible {
-    outline: none;
+    outline: 2px solid #e87200; /* cp-mango */
+    outline-offset: 2px;
   }
 
   /* Scrollbar style Car Performance */

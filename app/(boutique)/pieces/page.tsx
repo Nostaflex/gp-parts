@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { getCachedProducts } from '@/lib/data/products-cache';
 import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
 import { CatalogueClient } from './CatalogueClient';
+import { PiecesHero } from './PiecesHero';
 
 export const metadata = {
   title: 'Catalogue',
@@ -19,9 +20,15 @@ export default async function CataloguePage() {
   if (!flags.pieces) notFound();
   const products = await getCachedProducts();
   return (
-    <Suspense fallback={<CatalogueSkeleton />}>
-      <CatalogueClient products={products} />
-    </Suspense>
+    <>
+      <PiecesHero />
+      {/* pt-24 compense le margin négatif du bridge (90px) */}
+      <div style={{ backgroundColor: '#F8F5F0', minHeight: '60vh' }} className="pt-24">
+        <Suspense fallback={<CatalogueSkeleton />}>
+          <CatalogueClient products={products} />
+        </Suspense>
+      </div>
+    </>
   );
 }
 

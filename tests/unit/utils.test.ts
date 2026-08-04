@@ -7,6 +7,7 @@ import {
   cn,
   getStockStatus,
   getStockLabel,
+  localDateISO,
 } from '../../lib/utils';
 import { LOW_STOCK_THRESHOLD } from '../../lib/config';
 
@@ -148,5 +149,19 @@ describe('getStockLabel', () => {
 
   it('retourne "En stock" pour stock normal', () => {
     expect(getStockLabel(20)).toBe('En stock');
+  });
+});
+
+describe('localDateISO', () => {
+  it('format YYYY-MM-DD, cohérent avec la date LOCALE (jamais UTC)', () => {
+    const today = localDateISO(0);
+    expect(today).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    const now = new Date();
+    const expected = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    expect(today).toBe(expected);
+  });
+
+  it('offsetDays décale correctement (J+1 > J)', () => {
+    expect(localDateISO(1) > localDateISO(0)).toBe(true);
   });
 });
