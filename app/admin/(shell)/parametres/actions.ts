@@ -6,7 +6,46 @@ import { writeAuditLog } from '@/lib/admin/audit';
 import { getAdminFirestore } from '@/lib/firebase-admin';
 import type { FeatureFlags } from '@/lib/feature-flags';
 import { ContactInfoSchema } from '@/lib/contact-info';
+import { normalizeLocationSettings } from '@/lib/location-settings';
 import type { FormActionState } from '@/components/admin/FormShell';
+
+export async function updateLocationSettings(
+  _prev: FormActionState,
+  formData: FormData
+): Promise<FormActionState> {
+  const session = await requireAdmin();
+
+  const num = (k: string) => Number(formData.get(k));
+  const cents = (k: string) => Math.round(num(k) * 100);
+
+  // normalize = même garde que la lecture : valeurs invalides → défauts.
+  const settings = normalizeLocationSettings({
+    ageMinimum: num('ageMinimum'),
+    permisAncienneteMinAnnees: num('permisAncienneteMinAnnees'),
+    surchargeJeuneActive: formData.get('surchargeJeuneActive') != null,
+    surchargeJeuneEnCentsParJour: cents('surchargeJeune'),
+    cautionsParCategorieEnCents: {
+      Citadine: cents('cautionCitadine'),
+      Berline: cents('cautionBerline'),
+      SUV: cents('cautionSUV'),
+      Utilitaire: cents('cautionUtilitaire'),
+    },
+  });
+
+  await getAdminFirestore()
+    .doc('meta/locationSettings')
+    .set({ ...settings, updatedAt: Date.now(), updatedBy: session.email }, { merge: true });
+
+  await writeAuditLog({
+    actor: session.email,
+    action: 'update',
+    resourceType: 'location-settings',
+    resourceId: 'locationSettings',
+  });
+
+  revalidatePath('/location');
+  return { ok: true, message: 'Réglages location enregistrés.' };
+}
 
 export async function toggleFeatureFlags(
   _prev: FormActionState,
