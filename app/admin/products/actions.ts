@@ -460,3 +460,57 @@ export async function restoreProduct(
   revalidateProducts(productSlug);
   return { ok: true, message: 'Produit restauré.' };
 }
+
+// ─── updateProductStock (édition inline −/+, pas de lock : delta atomique) ──
+
+export async function updateProductStock(
+  productId: string,
+  delta: number
+): Promise<FormActionState> {
+  let session: Awaited<ReturnType<typeof requireAdmin>>;
+  try {
+    session = await requireAdmin();
+  } catch (e) {
+    await emitDeniedAudit(productId);
+    throw e;
+  }
+
+  if (!productId || !SLUG_RE.test(productId)) {
+    return { errors: { _form: ['Identifiant produit invalide.'] } };
+  }
+  if (!Number.isInteger(delta) || delta === 0 || Math.abs(delta) > 1000) {
+    return { errors: { _form: ['Variation de stock invalide.'] } };
+  }
+
+  const db = getAdminFirestore();
+  const ref = db.collection('products').doc(productId);
+  const now = new Date().toISOString();
+
+  let productSlug = '';
+  let prevStock = 0;
+  let newStock = 0;
+
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const before = (snap.data?.() ?? {}) as Record<string, unknown>;
+    productSlug = (before.slug as string) || productId;
+    prevStock = typeof before.stock === 'number' ? before.stock : 0;
+    newStock = Math.max(0, prevStock + delta);
+    tx.update(ref, { stock: newStock, updatedAt: now });
+  });
+
+  await writeAuditLog({
+    actor: session.email,
+    action: 'update',
+    resourceType: 'product',
+    resourceId: productId,
+    diff: { stock: { before: prevStock, after: newStock } },
+  }).catch((err) => {
+    process.stderr.write(
+      `[audit] post-commit audit write failed for product ${productId} action stock: ${String(err)}\n`
+    );
+  });
+
+  revalidateProducts(productSlug);
+  return { ok: true, message: `Stock mis à jour (${newStock}).` };
+}

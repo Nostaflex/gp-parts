@@ -287,12 +287,13 @@ export function OrdersClient() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<OrderStatus | 'toutes'>('toutes');
+  const [search, setSearch] = useState('');
   const { showToast } = useToast();
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     try {
-      const r = await fetch('/api/admin/orders?limit=50');
+      const r = await fetch('/api/admin/orders?limit=200');
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const data = (await r.json()) as Order[];
       setOrders(data);
@@ -324,7 +325,15 @@ export function OrdersClient() {
     }
   };
 
-  const filtered = filter === 'toutes' ? orders : orders.filter((o) => o.status === filter);
+  const byStatus = filter === 'toutes' ? orders : orders.filter((o) => o.status === filter);
+  const q = search.trim().toLowerCase();
+  const filtered = !q
+    ? byStatus
+    : byStatus.filter((o) =>
+        `${o.id} ${o.customer.firstName} ${o.customer.lastName} ${o.customer.email} ${o.customer.phone}`
+          .toLowerCase()
+          .includes(q)
+      );
 
   const counts = orders.reduce<Record<string, number>>((acc, o) => {
     acc[o.status] = (acc[o.status] ?? 0) + 1;
@@ -354,6 +363,18 @@ export function OrdersClient() {
             <RefreshCw size={20} strokeWidth={2} />
           </button>
         </div>
+
+        {/* Recherche n° / nom / tel / email */}
+        <input
+          type="search"
+          inputMode="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Rechercher (n°, nom, téléphone, email)…"
+          aria-label="Rechercher une commande"
+          className="w-full h-11 px-4 mb-4 rounded-[10px] border text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--blue)]"
+          style={{ background: IOS.surface, borderColor: IOS.border, color: IOS.text }}
+        />
 
         {/* Filtres statut */}
         <div className="flex gap-2 flex-wrap mb-6">
