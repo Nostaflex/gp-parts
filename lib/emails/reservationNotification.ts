@@ -23,7 +23,7 @@ export function buildReservationNotificationEmail(r: Reservation): {
   <h2>Réservation ${escapeHtml(r.carLabel)}</h2>
   <table style="width:100%;max-width:520px;border-collapse:collapse;">
     <tr><td>Référence</td><td style="text-align:right;font-weight:600;">${escapeHtml(r.reference)}</td></tr>
-    <tr><td>Période</td><td style="text-align:right;">${escapeHtml(r.dateDepart)} → ${escapeHtml(r.dateRetour)} (${r.nbJours}j)</td></tr>
+    <tr><td>Période</td><td style="text-align:right;">${escapeHtml(r.dateDepart)}${r.heureDepart ? ` ${escapeHtml(r.heureDepart)}` : ''} → ${escapeHtml(r.dateRetour)}${r.heureRetour ? ` ${escapeHtml(r.heureRetour)}` : ''} (${r.nbJours}j)</td></tr>
     <tr><td>Total estimé</td><td style="text-align:right;font-weight:700;">${formatPrice(r.totalEnCents)}</td></tr>
   </table>
   <h3>Client</h3>

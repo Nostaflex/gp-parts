@@ -14,6 +14,8 @@ export const LocationCarWriteSchema = z.object({
   disponible: z.boolean(),
   image: z.string(),
   reference: z.string().min(1).max(40),
+  // Caution annoncée au funnel (L112-1) ; absente → défaut par catégorie.
+  cautionEnCents: z.number().int().nonnegative().optional(),
   updatedAt: z.string(),
 });
 

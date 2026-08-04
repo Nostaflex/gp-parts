@@ -34,6 +34,10 @@ function parseForm(formData: FormData) {
     carburant: sanitize(formData.get('carburant')),
     prixJourEnCents: eurosToCents(formData.get('prixJour')),
     prixSemaineEnCents: eurosToCents(formData.get('prixSemaine')),
+    // Caution optionnelle : champ vide → clé absente (défaut catégorie au funnel)
+    ...(String(formData.get('caution') ?? '').trim() !== ''
+      ? { cautionEnCents: eurosToCents(formData.get('caution')) }
+      : {}),
     disponible: formData.get('disponible') === 'true',
     image: images[0] ?? '',
     reference: sanitize(formData.get('reference')),
