@@ -18,6 +18,7 @@ export type LocationCar = {
   disponible: boolean; // dispo globale (le calendrier viendra en sous-projet C)
   image: string;
   reference: string;
+  cautionEnCents?: number; // caution annoncée (L112-1) ; absente → défaut catégorie
   updatedAt: string; // ISO — optimistic lock + tri admin
 };
 

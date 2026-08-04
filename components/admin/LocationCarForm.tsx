@@ -161,6 +161,21 @@ export function LocationCarForm({ initial }: { initial?: LocationCar }) {
           <FieldError name="prixSemaineEnCents" />
         </div>
         <div>
+          <label className={LABEL} htmlFor="caution">
+            Caution (€) — vide = défaut catégorie
+          </label>
+          <input
+            id="caution"
+            name="caution"
+            type="number"
+            inputMode="decimal"
+            step="0.01"
+            defaultValue={toEuros(initial?.cautionEnCents)}
+            className={FIELD}
+          />
+          <FieldError name="cautionEnCents" />
+        </div>
+        <div>
           <label className={LABEL} htmlFor="disponible">
             Disponible
           </label>

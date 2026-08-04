@@ -4,10 +4,12 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 vi.mock('../../app/location/actions', () => ({
   validateReservation: vi.fn(async () => ({ success: true, errors: {}, reference: 'LOC-TEST' })),
   checkDispo: vi.fn(async () => ({ unavailableIds: [] })),
+  submitDevisLLD: vi.fn(async () => ({ success: true, errors: {} })),
 }));
 
 import { checkDispo } from '../../app/location/actions';
 import { LocationClient } from '../../app/location/LocationClient';
+import { DEFAULT_LOCATION_SETTINGS } from '@/lib/location-settings';
 import type { LocationCar } from '@/lib/location-cars';
 
 const cars: LocationCar[] = [
@@ -35,14 +37,16 @@ beforeEach(() => {
 
 describe('LocationClient — dispo par dates', () => {
   it('sans dates : aucun appel checkDispo, bouton Réserver actif', () => {
-    render(<LocationClient cars={cars} />);
+    render(<LocationClient cars={cars} settings={DEFAULT_LOCATION_SETTINGS} />);
     expect(checkDispo).not.toHaveBeenCalled();
     expect(screen.getByRole('button', { name: 'Réserver' })).toBeEnabled();
   });
 
   it('dates choisies + véhicule occupé → badge « Indisponible à ces dates » + bouton désactivé', async () => {
     vi.mocked(checkDispo).mockResolvedValue({ unavailableIds: ['clio-v'] });
-    const { container } = render(<LocationClient cars={cars} />);
+    const { container } = render(
+      <LocationClient cars={cars} settings={DEFAULT_LOCATION_SETTINGS} />
+    );
     const dateInputs = container.querySelectorAll('input[type="date"]');
     fireEvent.change(dateInputs[0], { target: { value: '2099-07-01' } });
     fireEvent.change(dateInputs[1], { target: { value: '2099-07-05' } });
@@ -55,7 +59,9 @@ describe('LocationClient — dispo par dates', () => {
   });
 
   it('dates choisies + véhicule libre → badge « Disponible », bouton actif', async () => {
-    const { container } = render(<LocationClient cars={cars} />);
+    const { container } = render(
+      <LocationClient cars={cars} settings={DEFAULT_LOCATION_SETTINGS} />
+    );
     const dateInputs = container.querySelectorAll('input[type="date"]');
     fireEvent.change(dateInputs[0], { target: { value: '2099-07-01' } });
     fireEvent.change(dateInputs[1], { target: { value: '2099-07-05' } });

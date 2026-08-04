@@ -1,10 +1,14 @@
 'use client';
 
 import { useState, useMemo, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import { CheckCircle } from 'lucide-react';
 import type { LocationCar } from '@/lib/location-cars';
+import type { LocationSettings } from '@/lib/location-settings';
+import { cautionPourVoiture } from '@/lib/location-settings';
+import { ageAtDate, yearsBetween, LLD_SEUIL_JOURS } from '@/lib/reservations';
 import { formatPrice } from '@/lib/utils';
-import { validateReservation, checkDispo } from './actions';
+import { validateReservation, checkDispo, submitDevisLLD } from './actions';
 
 type Categorie = 'Toutes' | 'Citadine' | 'Berline' | 'SUV' | 'Utilitaire';
 type Step = 0 | 1 | 2;
@@ -13,13 +17,24 @@ type ReservationData = {
   vehiculeId: string;
   dateDepart: string;
   dateRetour: string;
+  heureDepart: string;
+  heureRetour: string;
   prenom: string;
   nom: string;
   email: string;
   tel: string;
   permis: string;
+  dateNaissance: string;
+  dateObtentionPermis: string;
+  adresseRue: string;
+  adresseCodePostal: string;
+  adresseVille: string;
   consent: boolean;
+  cgl: boolean;
 };
+
+// Créneaux de prise/restitution (heure collectée, prix au jour — décision 2026-07-31)
+const HEURES = ['08:00', '09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00'];
 
 const CATEGORIES: Categorie[] = ['Toutes', 'Citadine', 'Berline', 'SUV', 'Utilitaire'];
 
@@ -35,7 +50,13 @@ function calcNbJours(depart: string, retour: string): number {
   return diff > 0 ? diff : 0;
 }
 
-export function LocationClient({ cars }: { cars: LocationCar[] }) {
+export function LocationClient({
+  cars,
+  settings,
+}: {
+  cars: LocationCar[];
+  settings: LocationSettings;
+}) {
   const VEHICULES = cars;
   const [categorie, setCategorie] = useState<Categorie>('Toutes');
   const [dateDepart, setDateDepart] = useState('');
@@ -55,13 +76,22 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
     vehiculeId: '',
     dateDepart: '',
     dateRetour: '',
+    heureDepart: '09:00',
+    heureRetour: '17:00',
     prenom: '',
     nom: '',
     email: '',
     tel: '',
     permis: '',
+    dateNaissance: '',
+    dateObtentionPermis: '',
+    adresseRue: '',
+    adresseCodePostal: '',
+    adresseVille: '',
     consent: false,
+    cgl: false,
   });
+  const [showDevisLLD, setShowDevisLLD] = useState(false);
 
   // Dates choisies → pré-filtre dispo (best-effort ; la garde finale est serveur)
   useEffect(() => {
@@ -112,6 +142,8 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
       if (!formData.dateRetour) errs.dateRetour = 'Date de retour requise';
       else if (calcNbJours(formData.dateDepart, formData.dateRetour) <= 0)
         errs.dateRetour = 'Date de retour invalide';
+      else if (calcNbJours(formData.dateDepart, formData.dateRetour) >= LLD_SEUIL_JOURS)
+        errs.dateRetour = `Au-delà de ${LLD_SEUIL_JOURS - 1} jours, demandez un devis longue durée ci-dessous.`;
     }
     if (step === 1) {
       if (!formData.prenom.trim()) errs.prenom = 'Prénom requis';
@@ -119,8 +151,27 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errs.email = 'Email invalide';
       if (!/^[0-9\s\+]{8,}$/.test(formData.tel)) errs.tel = 'Numéro invalide';
       if (!formData.permis.trim()) errs.permis = 'N° de permis requis';
+      const dep = formData.dateDepart;
+      if (!formData.dateNaissance) {
+        errs.dateNaissance = 'Date de naissance requise';
+      } else if (dep && ageAtDate(formData.dateNaissance, dep) < settings.ageMinimum) {
+        errs.dateNaissance = `Âge minimum : ${settings.ageMinimum} ans à la date de départ`;
+      }
+      if (!formData.dateObtentionPermis) {
+        errs.dateObtentionPermis = 'Date d’obtention requise';
+      } else if (
+        dep &&
+        yearsBetween(formData.dateObtentionPermis, dep) < settings.permisAncienneteMinAnnees
+      ) {
+        errs.dateObtentionPermis = `Permis requis depuis au moins ${settings.permisAncienneteMinAnnees} an(s)`;
+      }
+      if (!formData.adresseRue.trim()) errs.adresseRue = 'Adresse requise';
+      if (!/^[0-9A-Za-z\s-]{4,10}$/.test(formData.adresseCodePostal))
+        errs.adresseCodePostal = 'Code postal requis';
+      if (!formData.adresseVille.trim()) errs.adresseVille = 'Ville requise';
     }
     if (step === 2) {
+      if (!formData.cgl) errs.cgl = 'Acceptation des conditions de location requise';
       if (!formData.consent) errs.consent = 'Consentement requis';
     }
     setErrors(errs);
@@ -142,12 +193,20 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
         locationCarId: formData.vehiculeId,
         dateDepart: formData.dateDepart,
         dateRetour: formData.dateRetour,
+        heureDepart: formData.heureDepart,
+        heureRetour: formData.heureRetour,
         prenom: formData.prenom,
         nom: formData.nom,
         email: formData.email,
         telephone: formData.tel,
         permis: formData.permis,
+        dateNaissance: formData.dateNaissance,
+        dateObtentionPermis: formData.dateObtentionPermis,
+        adresseRue: formData.adresseRue,
+        adresseCodePostal: formData.adresseCodePostal,
+        adresseVille: formData.adresseVille,
         consent: formData.consent,
+        cgl: formData.cgl,
         website,
       });
       if (!result.success) {
@@ -410,8 +469,16 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
         </div>
       </section>
 
+      {/* ── DEVIS LONGUE DURÉE (≥ 30 j) ────── */}
+      {showDevisLLD && (
+        <DevisLLDSection
+          onClose={() => setShowDevisLLD(false)}
+          dureeInitialeMois={nbJours >= LLD_SEUIL_JOURS ? String(Math.round(nbJours / 30)) : ''}
+        />
+      )}
+
       {/* ── FORMULAIRE RÉSERVATION ─────────── */}
-      {showForm && vehiculeSelectionne && (
+      {showForm && vehiculeSelectionne && !showDevisLLD && (
         <section
           ref={formSectionRef}
           className="py-24 px-6 pt-32"
@@ -565,7 +632,63 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
                       </div>
                     </div>
 
-                    {nbJours > 0 && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="heureDepart" className={lbl}>
+                          Heure de prise
+                        </label>
+                        <select
+                          id="heureDepart"
+                          className={field}
+                          value={formData.heureDepart}
+                          onChange={(e) => setForm('heureDepart', e.target.value)}
+                        >
+                          {HEURES.map((h) => (
+                            <option key={h} value={h}>
+                              {h}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label htmlFor="heureRetour" className={lbl}>
+                          Heure de restitution
+                        </label>
+                        <select
+                          id="heureRetour"
+                          className={field}
+                          value={formData.heureRetour}
+                          onChange={(e) => setForm('heureRetour', e.target.value)}
+                        >
+                          {HEURES.map((h) => (
+                            <option key={h} value={h}>
+                              {h}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {nbJours >= LLD_SEUIL_JOURS && (
+                      <div className="bg-[#F8F5F0] border border-[#E9C46A]/60 rounded-xl p-4">
+                        <p className="text-sm font-semibold text-cp-ink mb-1">
+                          Location longue durée ({nbJours} jours)
+                        </p>
+                        <p className="text-xs text-cp-ink/55 leading-relaxed mb-3">
+                          Au-delà de {LLD_SEUIL_JOURS - 1} jours, nous établissons un devis
+                          personnalisé (tarif dégressif, contrat adapté). Réponse sous 48 h.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setShowDevisLLD(true)}
+                          className="px-4 py-2 rounded-xl bg-cp-ink text-cp-cream text-sm font-semibold hover:bg-cp-red transition-colors"
+                        >
+                          Demander un devis longue durée
+                        </button>
+                      </div>
+                    )}
+
+                    {nbJours > 0 && nbJours < LLD_SEUIL_JOURS && (
                       <div className="bg-[#F8F5F0] rounded-xl p-4">
                         <div className="flex justify-between text-sm text-cp-ink/60 mb-1">
                           <span>
@@ -660,6 +783,42 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
                       />
                       {err('tel')}
                     </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="dateNaissance" className={lbl}>
+                          Date de naissance *
+                        </label>
+                        <input
+                          id="dateNaissance"
+                          className={field}
+                          type="date"
+                          autoComplete="bday"
+                          value={formData.dateNaissance}
+                          onChange={(e) => setForm('dateNaissance', e.target.value)}
+                        />
+                        {err('dateNaissance')}
+                      </div>
+                      <div>
+                        <label htmlFor="dateObtentionPermis" className={lbl}>
+                          Permis obtenu le *
+                        </label>
+                        <input
+                          id="dateObtentionPermis"
+                          className={field}
+                          type="date"
+                          value={formData.dateObtentionPermis}
+                          onChange={(e) => setForm('dateObtentionPermis', e.target.value)}
+                        />
+                        {err('dateObtentionPermis')}
+                      </div>
+                    </div>
+                    <p className="text-[0.7rem] text-cp-ink/40 -mt-2">
+                      Conditions : {settings.ageMinimum} ans minimum,{' '}
+                      {settings.permisAncienneteMinAnnees} an
+                      {settings.permisAncienneteMinAnnees > 1 ? 's' : ''} de permis. Original du
+                      permis et pièce d&apos;identité vérifiés à la remise des clés — aucune copie
+                      n&apos;est stockée en ligne.
+                    </p>
                     <div>
                       <label htmlFor="permis" className={lbl}>
                         N° de permis *
@@ -674,6 +833,54 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
                         onChange={(e) => setForm('permis', e.target.value.toUpperCase())}
                       />
                       {err('permis')}
+                    </div>
+                    <div>
+                      <label htmlFor="adresseRue" className={lbl}>
+                        Adresse *
+                      </label>
+                      <input
+                        id="adresseRue"
+                        className={field}
+                        type="text"
+                        autoComplete="street-address"
+                        placeholder="12 rue des Alizés"
+                        value={formData.adresseRue}
+                        onChange={(e) => setForm('adresseRue', e.target.value)}
+                      />
+                      {err('adresseRue')}
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label htmlFor="adresseCodePostal" className={lbl}>
+                          Code postal *
+                        </label>
+                        <input
+                          id="adresseCodePostal"
+                          className={field}
+                          type="text"
+                          inputMode="numeric"
+                          autoComplete="postal-code"
+                          placeholder="97122"
+                          value={formData.adresseCodePostal}
+                          onChange={(e) => setForm('adresseCodePostal', e.target.value)}
+                        />
+                        {err('adresseCodePostal')}
+                      </div>
+                      <div>
+                        <label htmlFor="adresseVille" className={lbl}>
+                          Ville *
+                        </label>
+                        <input
+                          id="adresseVille"
+                          className={field}
+                          type="text"
+                          autoComplete="address-level2"
+                          placeholder="Baie-Mahault"
+                          value={formData.adresseVille}
+                          onChange={(e) => setForm('adresseVille', e.target.value)}
+                        />
+                        {err('adresseVille')}
+                      </div>
                     </div>
                     {/* Honeypot anti-spam : invisible pour un humain, rempli par les bots. */}
                     <input
@@ -718,18 +925,22 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
                         {
                           k: 'Départ',
                           v: formData.dateDepart
-                            ? new Date(formData.dateDepart).toLocaleDateString('fr-FR')
+                            ? `${new Date(formData.dateDepart).toLocaleDateString('fr-FR')} · ${formData.heureDepart}`
                             : '',
                         },
                         {
                           k: 'Retour',
                           v: formData.dateRetour
-                            ? new Date(formData.dateRetour).toLocaleDateString('fr-FR')
+                            ? `${new Date(formData.dateRetour).toLocaleDateString('fr-FR')} · ${formData.heureRetour}`
                             : '',
                         },
                         { k: 'Durée', v: `${nbJours} jour${nbJours > 1 ? 's' : ''}` },
                         { k: 'Conducteur', v: `${formData.prenom} ${formData.nom}` },
                         { k: 'Total TTC', v: formatPrice(prixTotalEnCents) },
+                        {
+                          k: 'Caution (au comptoir)',
+                          v: formatPrice(cautionPourVoiture(settings, vehiculeSelectionne)),
+                        },
                       ].map(({ k, v }) => (
                         <div
                           key={k}
@@ -745,7 +956,37 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
                       ))}
                     </div>
 
-                    <div className="border border-[#E5DDD3] rounded-xl p-4">
+                    <p className="text-[0.7rem] text-cp-ink/45 leading-relaxed">
+                      La caution est une empreinte bancaire prise à la remise des clés, libérée à la
+                      restitution du véhicule en l&apos;état. Franchise selon les conditions
+                      d&apos;assurance du contrat. Carburant : rendu au niveau de départ.
+                    </p>
+
+                    <div className="border border-[#E5DDD3] rounded-xl p-4 flex flex-col gap-3">
+                      <div className="flex items-start gap-3">
+                        <input
+                          id="cgl"
+                          type="checkbox"
+                          checked={formData.cgl}
+                          onChange={(e) => setForm('cgl', e.target.checked)}
+                          className="w-4 h-4 accent-cp-mango cursor-pointer mt-0.5 flex-shrink-0"
+                        />
+                        <label
+                          htmlFor="cgl"
+                          className="text-xs text-cp-ink/60 leading-relaxed cursor-pointer"
+                        >
+                          J&apos;ai lu et j&apos;accepte les{' '}
+                          <Link
+                            href="/location/cgl"
+                            target="_blank"
+                            className="text-cp-mango underline"
+                          >
+                            conditions générales de location
+                          </Link>{' '}
+                          et je confirme l&apos;exactitude des informations fournies.
+                        </label>
+                      </div>
+                      {err('cgl')}
                       <div className="flex items-start gap-3">
                         <input
                           id="consent"
@@ -758,10 +999,8 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
                           htmlFor="consent"
                           className="text-xs text-cp-ink/60 leading-relaxed cursor-pointer"
                         >
-                          J&apos;accepte les{' '}
-                          <span className="text-cp-mango">conditions générales de location</span> et
-                          confirme l&apos;exactitude des informations fournies. Une caution de 500 €
-                          sera prélevée à la remise du véhicule.
+                          J&apos;accepte que mes données soient utilisées pour traiter ma
+                          réservation (conservées 12 mois, jamais transmises à des tiers).
                         </label>
                       </div>
                       {err('consent')}
@@ -840,5 +1079,257 @@ export function LocationClient({ cars }: { cars: LocationCar[] }) {
         </section>
       )}
     </>
+  );
+}
+
+/** Devis longue durée (≥ 30 jours) — décision 2026-07-31 : devis en ligne,
+ * contrat LLD signé en agence. La demande arrive dans la boîte Demandes BO. */
+function DevisLLDSection({
+  onClose,
+  dureeInitialeMois,
+}: {
+  onClose: () => void;
+  dureeInitialeMois: string;
+}) {
+  const [data, setData] = useState({
+    dureeMois: dureeInitialeMois,
+    kmParMois: '',
+    categorie: '',
+    budgetMensuel: '',
+    prenom: '',
+    nom: '',
+    email: '',
+    telephone: '',
+    consent: false,
+  });
+  const [website, setWebsite] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [done, setDone] = useState(false);
+  const [sending, setSending] = useState(false);
+
+  const set = (k: keyof typeof data, v: string | boolean) => {
+    setData((d) => ({ ...d, [k]: v }));
+    setErrors((e) => ({ ...e, [k]: '' }));
+  };
+
+  const submit = async () => {
+    if (sending) return;
+    setSending(true);
+    const res = await submitDevisLLD({ ...data, website });
+    setSending(false);
+    if (!res.success) {
+      setErrors(res.errors);
+      return;
+    }
+    setDone(true);
+  };
+
+  const e = (k: string) =>
+    errors[k] ? <p className="text-[0.75rem] text-red-500 mt-1">{errors[k]}</p> : null;
+
+  return (
+    <section className="py-16 px-6" style={{ backgroundColor: '#F4EDE0' }}>
+      <div className="max-w-xl mx-auto bg-white rounded-2xl border border-[#E5DDD3] p-8">
+        {done ? (
+          <div className="text-center">
+            <CheckCircle className="text-[#52C88A] mx-auto mb-4" size={36} strokeWidth={1.5} />
+            <p className="cp-title font-black text-cp-ink text-2xl mb-2">DEMANDE ENVOYÉE</p>
+            <p className="text-sm text-cp-ink/55 leading-relaxed">
+              Nous préparons votre devis longue durée et revenons vers vous sous 48 h (jours
+              ouvrés).
+            </p>
+            <button onClick={onClose} className="mt-6 text-sm text-cp-mango hover:underline">
+              Fermer
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            <div>
+              <p className="cp-mono text-[0.65rem] text-[#C8A040] uppercase tracking-widest mb-1">
+                Longue durée · 30 jours et plus
+              </p>
+              <p className="cp-title font-black text-cp-ink text-xl">Devis personnalisé</p>
+              <p className="text-xs text-cp-ink/40 mt-1">
+                Tarif dégressif, contrat adapté, réponse sous 48 h. Le contrat longue durée est
+                établi et signé à l&apos;agence.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="lld-duree" className={lbl}>
+                  Durée (mois) *
+                </label>
+                <input
+                  id="lld-duree"
+                  className={field}
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  value={data.dureeMois}
+                  onChange={(ev) => set('dureeMois', ev.target.value)}
+                />
+                {e('dureeMois')}
+              </div>
+              <div>
+                <label htmlFor="lld-km" className={lbl}>
+                  Km / mois (estimé)
+                </label>
+                <input
+                  id="lld-km"
+                  className={field}
+                  type="number"
+                  inputMode="numeric"
+                  value={data.kmParMois}
+                  onChange={(ev) => set('kmParMois', ev.target.value)}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="lld-cat" className={lbl}>
+                  Catégorie
+                </label>
+                <select
+                  id="lld-cat"
+                  className={field}
+                  value={data.categorie}
+                  onChange={(ev) => set('categorie', ev.target.value)}
+                >
+                  <option value="">Indifférent</option>
+                  {CATEGORIES.filter((c) => c !== 'Toutes').map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="lld-budget" className={lbl}>
+                  Budget (€ / mois)
+                </label>
+                <input
+                  id="lld-budget"
+                  className={field}
+                  type="number"
+                  inputMode="decimal"
+                  value={data.budgetMensuel}
+                  onChange={(ev) => set('budgetMensuel', ev.target.value)}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="lld-prenom" className={lbl}>
+                  Prénom *
+                </label>
+                <input
+                  id="lld-prenom"
+                  className={field}
+                  type="text"
+                  autoComplete="given-name"
+                  value={data.prenom}
+                  onChange={(ev) => set('prenom', ev.target.value)}
+                />
+                {e('prenom')}
+              </div>
+              <div>
+                <label htmlFor="lld-nom" className={lbl}>
+                  Nom *
+                </label>
+                <input
+                  id="lld-nom"
+                  className={field}
+                  type="text"
+                  autoComplete="family-name"
+                  value={data.nom}
+                  onChange={(ev) => set('nom', ev.target.value)}
+                />
+                {e('nom')}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="lld-email" className={lbl}>
+                  Email *
+                </label>
+                <input
+                  id="lld-email"
+                  className={field}
+                  type="email"
+                  autoComplete="email"
+                  value={data.email}
+                  onChange={(ev) => set('email', ev.target.value)}
+                />
+                {e('email')}
+              </div>
+              <div>
+                <label htmlFor="lld-tel" className={lbl}>
+                  Téléphone *
+                </label>
+                <input
+                  id="lld-tel"
+                  className={field}
+                  type="tel"
+                  autoComplete="tel"
+                  value={data.telephone}
+                  onChange={(ev) => set('telephone', ev.target.value)}
+                />
+                {e('telephone')}
+              </div>
+            </div>
+            {/* Honeypot anti-spam */}
+            <input
+              type="text"
+              name="website"
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              value={website}
+              onChange={(ev) => setWebsite(ev.target.value)}
+              style={{
+                position: 'absolute',
+                left: '-9999px',
+                width: '1px',
+                height: '1px',
+                opacity: 0,
+              }}
+            />
+            <div className="flex items-start gap-3">
+              <input
+                id="lld-consent"
+                type="checkbox"
+                checked={data.consent}
+                onChange={(ev) => set('consent', ev.target.checked)}
+                className="w-4 h-4 accent-cp-mango cursor-pointer mt-0.5 flex-shrink-0"
+              />
+              <label
+                htmlFor="lld-consent"
+                className="text-xs text-cp-ink/60 leading-relaxed cursor-pointer"
+              >
+                J&apos;accepte que mes données soient utilisées pour établir ce devis.
+              </label>
+            </div>
+            {e('consent')}
+            <div className="flex gap-3 mt-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="text-sm font-medium text-cp-ink/50 hover:text-cp-ink transition-colors"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={submit}
+                disabled={sending}
+                className="flex-1 py-3 rounded-xl bg-cp-ink text-cp-cream text-sm font-semibold hover:bg-cp-red transition-colors disabled:opacity-60"
+              >
+                {sending ? 'Envoi…' : 'Demander mon devis'}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }

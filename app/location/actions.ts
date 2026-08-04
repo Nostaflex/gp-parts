@@ -2,10 +2,13 @@
 
 import { generateReservationReference } from '@/lib/utils';
 import { getAdapter } from '@/lib/data';
-import { createReservationIntake } from '@/lib/server/intake';
+import { createReservationIntake, createDemandeIntake } from '@/lib/server/intake';
 import { getBusyRangesForCar, getUnavailableCarIds } from '@/lib/server/availability';
+import { getLocationSettings } from '@/lib/server/location-settings';
+import { cautionPourVoiture } from '@/lib/location-settings';
 import { sendReservationEmails } from '@/lib/emails/send';
-import { rangesOverlap } from '@/lib/reservations';
+import { rangesOverlap, ageAtDate, yearsBetween, LLD_SEUIL_JOURS } from '@/lib/reservations';
+import { demandeExpiry } from '@/lib/demandes';
 import type { Reservation } from '@/lib/reservations';
 
 export interface ReservationValidationResult {
@@ -34,6 +37,15 @@ export async function validateReservation(input: {
   permis: string;
   consent: boolean;
   website?: string;
+  // Funnel v2 — nouveaux champs (optionnels pour compat ; exigés si fournis par l'UI v2)
+  heureDepart?: string;
+  heureRetour?: string;
+  dateNaissance?: string;
+  dateObtentionPermis?: string;
+  adresseRue?: string;
+  adresseCodePostal?: string;
+  adresseVille?: string;
+  cgl?: boolean;
 }): Promise<ReservationValidationResult> {
   // Honeypot : un humain ne remplit jamais ce champ → succès factice, rien créé.
   if (input.website && input.website.trim() !== '') {
@@ -74,6 +86,46 @@ export async function validateReservation(input: {
   }
 
   if (input.consent !== true) errors.consent = 'Consentement requis';
+  if (input.cgl !== true) errors.cgl = 'Acceptation des conditions de location requise';
+
+  // ── Funnel v2 : conducteur (gates légales/assurance, réglages BO) ────────
+  const settings = await getLocationSettings();
+  const dateNaissance = sanitize(input.dateNaissance);
+  const dateObtentionPermis = sanitize(input.dateObtentionPermis);
+  const adresseRue = sanitize(input.adresseRue);
+  const adresseCodePostal = sanitize(input.adresseCodePostal);
+  const adresseVille = sanitize(input.adresseVille);
+  const heureDepart = sanitize(input.heureDepart);
+  const heureRetour = sanitize(input.heureRetour);
+  const heureRe = /^\d{2}:\d{2}$/;
+
+  if (!dateRe.test(dateNaissance)) {
+    errors.dateNaissance = 'Date de naissance requise';
+  } else if (!Number.isNaN(depMs) && ageAtDate(dateNaissance, dateDepart) < settings.ageMinimum) {
+    errors.dateNaissance = `Âge minimum : ${settings.ageMinimum} ans à la date de départ`;
+  }
+  if (!dateRe.test(dateObtentionPermis)) {
+    errors.dateObtentionPermis = 'Date d’obtention du permis requise';
+  } else if (
+    !Number.isNaN(depMs) &&
+    yearsBetween(dateObtentionPermis, dateDepart) < settings.permisAncienneteMinAnnees
+  ) {
+    errors.dateObtentionPermis = `Permis requis depuis au moins ${settings.permisAncienneteMinAnnees} an(s)`;
+  }
+  if (!adresseRue || adresseRue.length > 120) errors.adresseRue = 'Adresse requise';
+  if (!/^[0-9A-Za-z\s-]{4,10}$/.test(adresseCodePostal))
+    errors.adresseCodePostal = 'Code postal requis';
+  if (!adresseVille || adresseVille.length > 80) errors.adresseVille = 'Ville requise';
+  if (heureDepart && !heureRe.test(heureDepart)) errors.heureDepart = 'Heure invalide';
+  if (heureRetour && !heureRe.test(heureRetour)) errors.heureRetour = 'Heure invalide';
+
+  // Charnière LLD : au-delà du seuil, la résa en ligne s'efface devant le devis.
+  if (!Number.isNaN(depMs) && !Number.isNaN(retMs)) {
+    const jours = Math.ceil((retMs - depMs) / DAY_MS);
+    if (jours >= LLD_SEUIL_JOURS) {
+      errors._form = `Au-delà de ${LLD_SEUIL_JOURS} jours, utilisez la demande de devis longue durée.`;
+    }
+  }
 
   if (Object.keys(errors).length > 0) return { success: false, errors };
 
@@ -92,6 +144,7 @@ export async function validateReservation(input: {
 
   const nbJours = Math.max(1, Math.ceil((retMs - depMs) / DAY_MS));
   const totalEnCents = nbJours * car.prixJourEnCents;
+  const cautionEnCents = cautionPourVoiture(settings, car);
   const now = new Date().toISOString();
   const reference = generateReservationReference();
 
@@ -105,7 +158,20 @@ export async function validateReservation(input: {
     nbJours,
     prixJourEnCents: car.prixJourEnCents,
     totalEnCents,
-    customer: { prenom, nom, email, telephone, permis },
+    customer: {
+      prenom,
+      nom,
+      email,
+      telephone,
+      permis,
+      dateNaissance,
+      dateObtentionPermis,
+      adresse: { rue: adresseRue, codePostal: adresseCodePostal, ville: adresseVille },
+    },
+    ...(heureDepart ? { heureDepart } : {}),
+    ...(heureRetour ? { heureRetour } : {}),
+    cautionEnCents,
+    cglAcceptedAt: now,
     createdAt: now,
     updatedAt: now,
     expiresAt: Date.now() + TTL_MS,
@@ -115,6 +181,62 @@ export async function validateReservation(input: {
   sendReservationEmails({ ...data, id });
 
   return { success: true, errors: {}, reference };
+}
+
+// ── Devis longue durée (≥ 30 jours) — décision ratifiée : devis en ligne,
+// contrat LLD signé en agence (mentions obligatoires hors ligne). La demande
+// atterrit dans la boîte Demandes du BO (type 'location').
+export async function submitDevisLLD(input: {
+  dureeMois: string;
+  kmParMois: string;
+  categorie: string;
+  budgetMensuel: string;
+  prenom: string;
+  nom: string;
+  email: string;
+  telephone: string;
+  consent: boolean;
+  website?: string;
+}): Promise<{ success: boolean; errors: Record<string, string> }> {
+  if (input.website && input.website.trim() !== '') return { success: true, errors: {} };
+
+  const errors: Record<string, string> = {};
+  const prenom = sanitize(input.prenom);
+  const nom = sanitize(input.nom);
+  const email = sanitize(input.email);
+  const telephone = sanitize(input.telephone);
+  const dureeMois = sanitize(input.dureeMois);
+  const kmParMois = sanitize(input.kmParMois);
+  const categorie = sanitize(input.categorie);
+  const budgetMensuel = sanitize(input.budgetMensuel);
+
+  if (!prenom || prenom.length > 50) errors.prenom = 'Prénom requis';
+  if (!nom || nom.length > 50) errors.nom = 'Nom requis';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 100)
+    errors.email = 'Email invalide';
+  if (!/^[0-9+\s().-]{8,20}$/.test(telephone)) errors.telephone = 'Téléphone invalide';
+  if (!dureeMois) errors.dureeMois = 'Durée souhaitée requise';
+  if (input.consent !== true) errors.consent = 'Consentement requis';
+  if (Object.keys(errors).length > 0) return { success: false, errors };
+
+  const nowMs = Date.now();
+  const nowIso = new Date(nowMs).toISOString();
+  await createDemandeIntake({
+    type: 'location',
+    status: 'nouvelle',
+    nom: `${prenom} ${nom}`,
+    email,
+    telephone,
+    message:
+      `[Devis LLD] Durée : ${dureeMois} mois` +
+      (kmParMois ? ` · Km/mois : ${kmParMois}` : '') +
+      (categorie ? ` · Catégorie : ${categorie}` : '') +
+      (budgetMensuel ? ` · Budget : ${budgetMensuel} €/mois` : ''),
+    createdAt: nowIso,
+    updatedAt: nowIso,
+    expiresAt: demandeExpiry(nowMs),
+  });
+  return { success: true, errors: {} };
 }
 
 // Pré-filtre UI : IDs des voitures indisponibles sur la plage demandée.

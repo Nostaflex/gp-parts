@@ -24,10 +24,11 @@ export function buildReservationConfirmationEmail(r: Reservation): {
   Nous vous recontactons rapidement pour la confirmer.</p>
   <table style="width:100%;max-width:480px;border-collapse:collapse;margin-top:12px;">
     <tr><td>Référence</td><td style="text-align:right;font-weight:600;">${escapeHtml(r.reference)}</td></tr>
-    <tr><td>Du</td><td style="text-align:right;">${escapeHtml(r.dateDepart)}</td></tr>
-    <tr><td>Au</td><td style="text-align:right;">${escapeHtml(r.dateRetour)}</td></tr>
+    <tr><td>Du</td><td style="text-align:right;">${escapeHtml(r.dateDepart)}${r.heureDepart ? ` · ${escapeHtml(r.heureDepart)}` : ''}</td></tr>
+    <tr><td>Au</td><td style="text-align:right;">${escapeHtml(r.dateRetour)}${r.heureRetour ? ` · ${escapeHtml(r.heureRetour)}` : ''}</td></tr>
     <tr><td>Durée</td><td style="text-align:right;">${r.nbJours} jour(s)</td></tr>
     <tr><td>Total estimé</td><td style="text-align:right;font-weight:700;">${formatPrice(r.totalEnCents)}</td></tr>
+    ${r.cautionEnCents != null ? `<tr><td>Caution (empreinte CB à la remise des clés)</td><td style="text-align:right;">${formatPrice(r.cautionEnCents)}</td></tr>` : ''}
   </table>
   <p style="font-size:12px;color:#999;margin-top:16px;">Car Performance Guadeloupe — cette estimation ne vaut pas confirmation.</p>
 </body></html>`;
