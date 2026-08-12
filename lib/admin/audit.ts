@@ -27,7 +27,8 @@ export type AuditResourceType =
   | 'reservation'
   | 'feature-flags'
   | 'contact-info'
-  | 'location-settings';
+  | 'location-settings'
+  | 'social-settings';
 
 export interface AuditLogEntry {
   timestamp: number; // unix ms

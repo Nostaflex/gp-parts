@@ -35,7 +35,6 @@ export default async function ParametresPage() {
         </h1>
         <p className="text-body-sm" style={{ color: 'rgba(28, 28, 30, 0.6)' }}>
           Activez ou désactivez les sections publiques du site. Effet immédiat, sans redéploiement.
-          Vente véhicule reste toujours visible.
         </p>
       </div>
       <FeatureFlagsForm initial={initial} />
