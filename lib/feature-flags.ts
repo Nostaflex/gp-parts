@@ -5,6 +5,7 @@
 export type FeatureFlags = {
   pieces: boolean;
   location: boolean;
+  venteVehicule: boolean;
   venteMoto: boolean;
   reparation: boolean;
 };
@@ -14,6 +15,7 @@ export type FeatureFlags = {
 export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   pieces: true,
   location: true,
+  venteVehicule: true,
   venteMoto: true,
   reparation: true,
 };
@@ -24,6 +26,10 @@ export function normalizeFeatureFlags(raw: Partial<FeatureFlags> | null | undefi
   return {
     pieces: typeof src.pieces === 'boolean' ? src.pieces : DEFAULT_FEATURE_FLAGS.pieces,
     location: typeof src.location === 'boolean' ? src.location : DEFAULT_FEATURE_FLAGS.location,
+    venteVehicule:
+      typeof src.venteVehicule === 'boolean'
+        ? src.venteVehicule
+        : DEFAULT_FEATURE_FLAGS.venteVehicule,
     venteMoto: typeof src.venteMoto === 'boolean' ? src.venteMoto : DEFAULT_FEATURE_FLAGS.venteMoto,
     reparation:
       typeof src.reparation === 'boolean' ? src.reparation : DEFAULT_FEATURE_FLAGS.reparation,
@@ -31,10 +37,11 @@ export function normalizeFeatureFlags(raw: Partial<FeatureFlags> | null | undefi
 }
 
 // Préfixe d'URL → flag qui le gouverne. Une route non listée = toujours
-// visible (vente-vehicule, contact, a-propos, légales…).
+// visible (contact, a-propos, légales…).
 const SECTION_FLAG_BY_PREFIX: { prefix: string; flag: keyof FeatureFlags }[] = [
   { prefix: '/pieces', flag: 'pieces' },
   { prefix: '/location', flag: 'location' },
+  { prefix: '/vente-vehicule', flag: 'venteVehicule' },
   { prefix: '/vente-moto', flag: 'venteMoto' },
   { prefix: '/reparation', flag: 'reparation' },
 ];

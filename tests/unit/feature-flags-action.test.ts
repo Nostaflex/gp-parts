@@ -29,13 +29,14 @@ describe('toggleFeatureFlags', () => {
   it('écrit le doc, audit, revalide', async () => {
     const res = await toggleFeatureFlags(
       null,
-      fd({ pieces: 'on', location: '', venteMoto: 'on', reparation: '' })
+      fd({ pieces: 'on', location: '', venteVehicule: 'on', venteMoto: 'on', reparation: '' })
     );
     expect(requireAdmin).toHaveBeenCalled();
     expect(setMock).toHaveBeenCalledWith(
       expect.objectContaining({
         pieces: true,
         location: false,
+        venteVehicule: true,
         venteMoto: true,
         reparation: false,
         updatedBy: 'admin@test.gp',

@@ -17,7 +17,7 @@ const ciStub = {
 };
 vi.mock('@/lib/data/contact-info-cache', () => ({ getCachedContactInfo: async () => ciStub }));
 vi.mock('@/lib/data/feature-flags-cache', () => ({
-  getCachedFeatureFlags: async () => ({ venteMoto: true }),
+  getCachedFeatureFlags: async () => ({ venteVehicule: true, venteMoto: true }),
 }));
 
 const vendu: Vehicule = {

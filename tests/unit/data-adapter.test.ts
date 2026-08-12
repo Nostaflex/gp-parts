@@ -108,6 +108,7 @@ describe('getAdapter', () => {
       getFeatureFlags: async () => ({
         pieces: true,
         location: true,
+        venteVehicule: true,
         venteMoto: true,
         reparation: true,
       }),
@@ -423,6 +424,7 @@ describe('StaticAdapter — soft-delete exclusion', () => {
       getFeatureFlags: async () => ({
         pieces: true,
         location: true,
+        venteVehicule: true,
         venteMoto: true,
         reparation: true,
       }),

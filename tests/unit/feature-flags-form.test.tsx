@@ -11,7 +11,13 @@ describe('FeatureFlagsForm', () => {
   it("rend un interrupteur par section avec l'état initial", () => {
     render(
       <FeatureFlagsForm
-        initial={{ pieces: false, location: true, venteMoto: false, reparation: true }}
+        initial={{
+          pieces: false,
+          location: true,
+          venteVehicule: true,
+          venteMoto: false,
+          reparation: true,
+        }}
       />
     );
     const pieces = screen.getByRole('checkbox', { name: /pièces/i });

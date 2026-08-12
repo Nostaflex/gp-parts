@@ -8,6 +8,7 @@ import type { FormActionState } from '@/components/admin/FormShell';
 const SECTIONS: { key: keyof FeatureFlags; label: string }[] = [
   { key: 'pieces', label: 'Pièces (boutique)' },
   { key: 'location', label: 'Location' },
+  { key: 'venteVehicule', label: 'Vente véhicule' },
   { key: 'venteMoto', label: 'Vente moto' },
   { key: 'reparation', label: 'Réparation' },
 ];

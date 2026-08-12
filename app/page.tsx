@@ -201,12 +201,14 @@ export default async function HomePage() {
                   </svg>
                 </Link>
               )}
-              <Link
-                href="/vente-vehicule"
-                className="inline-flex items-center gap-2 border border-cp-cream/30 text-cp-cream font-semibold px-6 py-3 rounded-full hover:bg-cp-cream/10 active:scale-[0.98] transition-[background-color,transform]"
-              >
-                Voir les véhicules
-              </Link>
+              {flags.venteVehicule && (
+                <Link
+                  href="/vente-vehicule"
+                  className="inline-flex items-center gap-2 border border-cp-cream/30 text-cp-cream font-semibold px-6 py-3 rounded-full hover:bg-cp-cream/10 active:scale-[0.98] transition-[background-color,transform]"
+                >
+                  Voir les véhicules
+                </Link>
+              )}
             </div>
           </CpReveal>
         </div>

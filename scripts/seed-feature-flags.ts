@@ -31,6 +31,7 @@ const bool = (v: string | undefined, def: boolean) =>
 const flags = {
   pieces: bool(process.env.FLAGS_PIECES, true),
   location: bool(process.env.FLAGS_LOCATION, true),
+  venteVehicule: bool(process.env.FLAGS_VENTE_VEHICULE, true),
   venteMoto: bool(process.env.FLAGS_VENTE_MOTO, true),
   reparation: bool(process.env.FLAGS_REPARATION, true),
   updatedAt: Date.now(),
