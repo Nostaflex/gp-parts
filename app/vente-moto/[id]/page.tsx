@@ -381,7 +381,7 @@ export default async function MotoDetailPage({ params }: Props) {
               Cette moto vous intéresse ?
             </p>
             <p className="text-cp-cream/60 text-sm mb-6 max-w-md mx-auto">
-              Réservez un essai ou demandez plus d&apos;infos. Réponse sous 24h.
+              Réservez un essai ou demandez plus d&apos;infos. Réponse sous 48h (jours ouvrés).
             </p>
             <Link
               href={contactHref}

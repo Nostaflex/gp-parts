@@ -21,12 +21,15 @@ const CONTENT: Record<Tab, React.ReactNode> = {
       <p>
         <strong>Car Performance Guadeloupe</strong>
         <br />
-        SARL au capital de 10 000 €<br />
+        SARL au capital de 1 500 €<br />
+        {/* TODO(Stéphane): SIRET réel (question S4 envoyée le 2026-08-12). */}
         SIRET : 000 000 000 00000
         <br />
-        RCS Pointe-à-Pitre
+        RCS : 102 854 023
         <br />
-        ZI de Jarry, 97122 Baie-Mahault, Guadeloupe
+        {/* Adresse provisoire actée par Stéphane (2026-08-12) en attendant
+            l'adresse complète du siège (question S5). */}
+        971 Guadeloupe
         <br />
         Tél. : 0590 00 00 00
         <br />

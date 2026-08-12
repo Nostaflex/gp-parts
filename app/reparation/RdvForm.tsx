@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { localDateISO } from '@/lib/utils';
+import { CpRgpdNotice } from '@/components/cp/CpRgpdNotice';
 import { submitRdv } from './actions';
 
 type Step = 0 | 1 | 2 | 3;
@@ -524,6 +525,7 @@ export function RdvForm() {
             {submitError}
           </p>
         )}
+        <CpRgpdNotice className="mt-4" />
       </div>
     </div>
   );

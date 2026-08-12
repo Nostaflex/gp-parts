@@ -11,7 +11,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Réparation & RDV',
   description:
-    'Prenez rendez-vous en ligne pour votre réparation auto ou moto. Réponse sous 1h, devis gratuit, toutes marques en Guadeloupe.',
+    'Prenez rendez-vous en ligne pour votre réparation auto ou moto. Réponse sous 48h en jours ouvrés, devis gratuit, toutes marques en Guadeloupe.',
   alternates: { canonical: '/reparation' },
 };
 
@@ -27,12 +27,12 @@ const PROMISES = [
         viewBox="0 0 24 24"
         aria-hidden="true"
       >
-        <circle cx="12" cy="12" r="10" />
-        <path d="M12 6v6l4 2" />
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 21v-1a8 8 0 0 1 16 0v1" />
       </svg>
     ),
-    title: 'Confirmation en 1h',
-    desc: 'Email immédiat, appel de validation sous 1h en jours ouvrés.',
+    title: 'Prise en charge personnalisée',
+    desc: 'Chaque demande est étudiée par notre équipe afin de vous orienter vers la prise en charge adaptée.',
   },
   {
     icon: (
@@ -48,8 +48,8 @@ const PROMISES = [
         <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
       </svg>
     ),
-    title: 'Devis gratuit',
-    desc: 'Estimation transparente avant tout travail. Aucune surprise.',
+    title: 'Transparence avant intervention',
+    desc: 'Les prestations à réaliser et leur estimation vous sont présentées avant toute intervention.',
   },
   {
     icon: (
@@ -68,8 +68,8 @@ const PROMISES = [
         <circle cx="18.5" cy="18.5" r="2.5" />
       </svg>
     ),
-    title: 'Véhicule de remplacement',
-    desc: 'Location disponible pendant la durée de votre réparation.',
+    title: 'Solution de mobilité',
+    desc: 'En cas d’immobilisation de votre véhicule, une solution de location peut vous être proposée.',
   },
   {
     icon: (
@@ -85,8 +85,8 @@ const PROMISES = [
         <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
       </svg>
     ),
-    title: 'Toutes marques',
-    desc: 'Auto et moto, toutes marques, toutes motorisations.',
+    title: 'Expertise automobile multimarque',
+    desc: 'Entretien, diagnostic et réparation, avec également une expertise automobile à distance pour un gain de réactivité.',
   },
 ];
 
@@ -185,15 +185,13 @@ export default async function ReparationPage() {
               className="cp-title font-black text-cp-ink leading-none mb-8"
               style={{ fontSize: 'clamp(2.5rem, 5vw, 5rem)' }}
             >
-              SIMPLE,
+              VOTRE BESOIN.
               <br />
-              RAPIDE,
-              <br />
-              <em className="text-cp-red not-italic">CONFIRMÉ</em>
+              <em className="text-cp-red not-italic">NOTRE EXPERTISE.</em>
             </h2>
             <p className="text-cp-ink/60 text-base leading-relaxed mb-10 max-w-md">
-              Remplissez le formulaire en 2 minutes. Notre équipe vous rappelle pour confirmer le
-              créneau et vous donne une première estimation.
+              Décrivez votre besoin en quelques instants. Notre équipe analyse votre demande et vous
+              accompagne dans la prise en charge de votre véhicule.
             </p>
             <div className="flex flex-col gap-6">
               {PROMISES.map((p) => (

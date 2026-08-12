@@ -8,6 +8,7 @@ import type { LocationSettings } from '@/lib/location-settings';
 import { cautionPourVoiture } from '@/lib/location-settings';
 import { ageAtDate, yearsBetween, LLD_SEUIL_JOURS } from '@/lib/reservations';
 import { formatPrice, localDateISO } from '@/lib/utils';
+import { CpRgpdNotice } from '@/components/cp/CpRgpdNotice';
 import { validateReservation, checkDispo, submitDevisLLD } from './actions';
 
 type Categorie = 'Toutes' | 'Citadine' | 'Berline' | 'SUV' | 'Utilitaire';
@@ -1068,6 +1069,7 @@ export function LocationClient({
                     )}
                   </button>
                 </div>
+                <CpRgpdNotice className="mt-4" />
               </div>
             </div>
           </div>
@@ -1322,6 +1324,7 @@ function DevisLLDSection({
                 {sending ? 'Envoi…' : 'Demander mon devis'}
               </button>
             </div>
+            <CpRgpdNotice className="mt-4" />
           </div>
         )}
       </div>

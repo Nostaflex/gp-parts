@@ -398,7 +398,7 @@ export default async function VehiculeDetailPage({ params }: Props) {
               Ce véhicule vous intéresse ?
             </p>
             <p className="text-cp-cream/60 text-sm mb-6 max-w-md mx-auto">
-              Réservez un essai ou demandez plus d&apos;infos. Réponse sous 24h, souvent bien moins.
+              Réservez un essai ou demandez plus d&apos;infos. Réponse sous 48h (jours ouvrés).
             </p>
             <Link
               href={contactHref}

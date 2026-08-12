@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle, Upload, X } from 'lucide-react';
+import { CpRgpdNotice } from '@/components/cp/CpRgpdNotice';
 import { submitContact } from './actions';
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 Mo
@@ -199,9 +200,7 @@ export function ContactForm() {
   return (
     <div>
       <h2 className="cp-title font-black text-cp-cream text-3xl mb-2">Écrivez-nous</h2>
-      <p className="text-cp-cream/40 text-sm mb-6">
-        Réponse garantie sous 24h — souvent bien moins.
-      </p>
+      <p className="text-cp-cream/40 text-sm mb-6">Réponse sous 48h — jours ouvrés.</p>
 
       {/* Chips sujet */}
       <div className="flex flex-wrap gap-2 mb-6">
@@ -405,6 +404,7 @@ export function ContactForm() {
             {submitError}
           </p>
         )}
+        <CpRgpdNotice tone="dark" className="mt-4" />
       </div>
     </div>
   );
