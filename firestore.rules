@@ -101,6 +101,12 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Log des publications réseaux sociaux : admin seulement (écrit via Admin SDK).
+    // La connexion (tokens) vit dans meta/social, déjà couvert par match /meta/{doc=**}.
+    match /social_posts/{doc} {
+      allow read, write: if isAdmin();
+    }
+
     // Default deny
     match /{document=**} {
       allow read, write: if false;
