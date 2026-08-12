@@ -3,7 +3,11 @@
 import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import type { Moto, CategorieMoto, Permis } from '@/lib/motos';
+import type { Moto, CategorieMoto, Permis, Disponibilite } from '@/lib/motos';
+import { DispoRibbon } from '@/components/cp/DispoRibbon';
+
+// Tri des cartes : la vitrine montre d'abord ce qui s'achète encore.
+const DISPO_ORDRE: Record<Disponibilite, number> = { disponible: 0, reserve: 1, vendu: 2 };
 
 type TypeFiltre = 'Tous' | 'Occasion' | 'Neuf';
 type CategorieFiltre = 'Toutes' | CategorieMoto;
@@ -47,7 +51,8 @@ export function VenteMotoClient({ motos }: { motos: Moto[] }) {
     });
     // Vendues repoussées en fin de grille — tri stable, ordre préservé par groupe.
     return filtered.sort(
-      (a, b) => Number(a.disponibilite === 'vendu') - Number(b.disponibilite === 'vendu')
+      // disponibles d'abord, puis réservées (encore consultables), vendues en fin
+      (a, b) => DISPO_ORDRE[a.disponibilite] - DISPO_ORDRE[b.disponibilite]
     );
   }, [motos, typeFiltre, categorie, permis, budget]);
 
@@ -174,7 +179,7 @@ export function VenteMotoClient({ motos }: { motos: Moto[] }) {
                     aria-label={`${m.marque} ${m.modele} — vendue`}
                     className="bg-white rounded-2xl border border-[#E5DDD3] overflow-hidden cursor-default"
                   >
-                    <MotoCardBody m={m} vendu />
+                    <MotoCardBody m={m} statut="vendu" />
                   </article>
                 ) : (
                   <Link
@@ -182,7 +187,7 @@ export function VenteMotoClient({ motos }: { motos: Moto[] }) {
                     href={`/vente-moto/${m.id}`}
                     className="group bg-white rounded-2xl border border-[#E5DDD3] overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_60px_rgba(26,15,6,0.10)] hover:border-cp-red/40 focus:outline-none focus:ring-2 focus:ring-cp-mango/50"
                   >
-                    <MotoCardBody m={m} />
+                    <MotoCardBody m={m} statut={m.disponibilite} />
                   </Link>
                 )
               )}
@@ -299,10 +304,12 @@ export function VenteMotoClient({ motos }: { motos: Moto[] }) {
 /**
  * Corps de carte moto (image + infos), partagé entre la carte cliquable
  * (disponible/réservée, dans un <Link>) et la carte vendue (dans un <article>
- * non-interactif). En mode `vendu` : image grisée, bandeau « VENDU » en
- * travers, et le CTA devient un label statique.
+ * non-interactif). Statuts : ruban de coin DispoRibbon (vendu = rouge,
+ * réservé = gold) — photo légèrement désaturée seulement quand c'est vendu.
  */
-function MotoCardBody({ m, vendu = false }: { m: Moto; vendu?: boolean }) {
+function MotoCardBody({ m, statut }: { m: Moto; statut: Disponibilite }) {
+  const vendu = statut === 'vendu';
+  const reserve = statut === 'reserve';
   return (
     <>
       <div className="relative h-48 overflow-hidden bg-[#F8F5F0]">
@@ -312,9 +319,10 @@ function MotoCardBody({ m, vendu = false }: { m: Moto; vendu?: boolean }) {
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className={`object-cover transition-transform duration-500 ${
-            vendu ? 'grayscale opacity-70' : 'group-hover:scale-105'
+            vendu ? 'grayscale-[0.65] opacity-85' : 'group-hover:scale-105'
           }`}
         />
+        {(vendu || reserve) && <DispoRibbon statut={statut} />}
         <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-[#1A0F06]/80 to-transparent">
           <p className="cp-title text-[0.75rem] font-bold text-[#E9C46A] tracking-widest uppercase">
             {m.marque}
@@ -327,13 +335,7 @@ function MotoCardBody({ m, vendu = false }: { m: Moto; vendu?: boolean }) {
         >
           {m.type === 'neuf' ? 'Neuf' : 'Occasion'}
         </span>
-        {vendu ? (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <span className="bg-cp-red text-cp-cream cp-title font-black text-lg tracking-[0.35em] px-8 py-1.5 -rotate-6 shadow-lg">
-              VENDU
-            </span>
-          </div>
-        ) : (
+        {!vendu && !reserve && (
           <span className="absolute top-3 right-3 bg-[#52C88A]/90 text-white cp-mono text-[0.6rem] px-2.5 py-1 rounded-full tracking-wide">
             ✓ {m.type === 'neuf' ? 'Garantie 2 ans' : 'Contrôlée'}
           </span>
@@ -378,8 +380,12 @@ function MotoCardBody({ m, vendu = false }: { m: Moto; vendu?: boolean }) {
             <p className="text-xs text-cp-ink/35 mt-0.5">ou {m.mensualite} €/mois</p>
           </div>
           {vendu ? (
-            <span className="px-4 py-2 rounded-xl bg-[#E5DDD3] text-cp-ink/50 text-xs font-semibold">
-              Vendu
+            <span className="px-4 py-2 rounded-xl border border-cp-red/30 text-cp-red text-xs font-semibold bg-cp-red/[0.06]">
+              A trouvé preneur
+            </span>
+          ) : reserve ? (
+            <span className="px-4 py-2 rounded-xl border border-[#C8A040]/40 text-[#8A5A00] text-xs font-semibold bg-[#E9C46A]/15 group-hover:bg-[#E9C46A]/25 transition-colors">
+              Réservée · voir quand même
             </span>
           ) : (
             <span className="px-4 py-2 rounded-xl bg-cp-ink text-cp-cream text-xs font-semibold group-hover:bg-cp-red transition-colors">
@@ -387,6 +393,18 @@ function MotoCardBody({ m, vendu = false }: { m: Moto; vendu?: boolean }) {
             </span>
           )}
         </div>
+        {vendu && (
+          <p className="mt-3 text-[0.7rem] text-cp-ink/40 leading-snug">
+            D&apos;autres arrivent régulièrement —{' '}
+            <Link
+              href="/contact?sujet=Vente+moto"
+              className="text-cp-mango hover:underline pointer-events-auto"
+            >
+              contactez-nous
+            </Link>{' '}
+            pour être prévenu.
+          </p>
+        )}
       </div>
     </>
   );

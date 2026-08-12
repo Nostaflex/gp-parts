@@ -40,11 +40,11 @@ describe('VenteMotoClient — motos vendues visibles mais non-interactives', () 
     expect(hrefs).toContain('/vente-moto/m-dispo');
   });
 
-  it('la moto vendue n’est PAS un lien et affiche « VENDU »', () => {
+  it('la moto vendue n’est PAS un lien et affiche le ruban « Vendu »', () => {
     render(<VenteMotoClient motos={[vendu]} />);
     const hrefs = screen.getAllByRole('link').map((a) => a.getAttribute('href'));
     expect(hrefs).not.toContain('/vente-moto/m-vendu');
-    expect(screen.getByText('VENDU')).toBeTruthy();
+    expect(screen.getByText('Vendu')).toBeTruthy();
   });
 
   it('les vendues sont triées après les disponibles (ordre DOM)', () => {

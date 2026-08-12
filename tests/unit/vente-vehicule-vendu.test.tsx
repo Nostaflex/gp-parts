@@ -41,11 +41,11 @@ describe('VenteVehiculeClient — véhicules vendus visibles mais non-interactif
     expect(hrefs).toContain('/vente-vehicule/v-dispo');
   });
 
-  it('le véhicule vendu n’est PAS un lien et affiche « VENDU »', () => {
+  it('le véhicule vendu n’est PAS un lien et affiche le ruban « Vendu »', () => {
     render(<VenteVehiculeClient vehicules={[vendu]} />);
     const hrefs = screen.getAllByRole('link').map((a) => a.getAttribute('href'));
     expect(hrefs).not.toContain('/vente-vehicule/v-vendu');
-    expect(screen.getByText('VENDU')).toBeTruthy();
+    expect(screen.getByText('Vendu')).toBeTruthy();
   });
 
   it('les vendus sont triés après les disponibles (ordre DOM)', () => {
