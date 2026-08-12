@@ -103,7 +103,8 @@ export default async function ContactPage() {
             <em className="text-cp-vert-l not-italic">À L&apos;ÉCOUTE</em>
           </h1>
           <p className="text-cp-cream/45 text-base leading-relaxed max-w-md mt-4">
-            Une question, un devis, un renseignement — notre équipe vous répond dans la journée.
+            Une question, un devis, un renseignement — notre équipe vous répond sous 48h en jours
+            ouvrés.
           </p>
         </div>
       </section>

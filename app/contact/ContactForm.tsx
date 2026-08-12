@@ -163,8 +163,7 @@ export function ContactForm() {
         </p>
         <h3 className="cp-title font-black text-cp-cream text-3xl mb-3">ON VOUS RÉPOND !</h3>
         <p className="text-cp-cream/45 text-sm leading-relaxed mb-2 max-w-sm">
-          Votre message a bien été reçu. Notre équipe vous répond dans la journée, souvent bien
-          moins.
+          Votre message a bien été reçu. Notre équipe vous répond sous 48h en jours ouvrés.
         </p>
         <p className="text-cp-cream/35 text-xs leading-relaxed mb-6 max-w-sm">
           {emailed ? (

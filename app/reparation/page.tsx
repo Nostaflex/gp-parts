@@ -139,11 +139,11 @@ export default async function ReparationPage() {
               <span className="text-cp-red">VOTRE RDV</span>
             </h1>
             <p className="text-cp-cream/55 text-base leading-relaxed max-w-md mb-8">
-              Décrivez votre problème, choisissez votre créneau. Nous vous confirmons par email dans
-              l&apos;heure.
+              Décrivez votre besoin, choisissez votre créneau. Notre équipe vous répond sous 48h en
+              jours ouvrés.
             </p>
             <div className="flex flex-wrap gap-2">
-              {['Toutes marques', 'Réponse < 1h', 'Devis gratuit'].map((pill) => (
+              {['Toutes marques', 'Réponse sous 48h ouvrées', 'Devis gratuit'].map((pill) => (
                 <span
                   key={pill}
                   className="cp-mono text-xs text-cp-cream/50 border border-cp-cream/15 px-3 py-1.5 rounded-full"

@@ -159,10 +159,10 @@ export function RdvForm() {
         <p className="cp-mono text-xs text-cp-ink/35 tracking-widest uppercase mb-2">
           Demande envoyée
         </p>
-        <h3 className="cp-title font-black text-cp-ink text-3xl mb-3">RDV CONFIRMÉ</h3>
+        <h3 className="cp-title font-black text-cp-ink text-3xl mb-3">DEMANDE REÇUE</h3>
         <p className="text-cp-ink/55 text-sm leading-relaxed mb-6">
-          Votre demande a bien été enregistrée. Nous vous contactons sous 1h pour valider le
-          créneau.
+          Votre demande a bien été enregistrée. Notre équipe vous contacte sous 48h en jours ouvrés
+          pour valider le créneau.
         </p>
         <div className="bg-[#F8F5F0] rounded-xl px-6 py-4 mb-6">
           <p className="text-xs text-cp-ink/40 mb-1">Référence de votre demande</p>
@@ -175,7 +175,7 @@ export function RdvForm() {
             </>
           ) : (
             <>
-              Nous vous recontactons sous 1h (jours ouvrés) au <strong>{data.tel}</strong>.
+              Nous vous recontactons sous 48h (jours ouvrés) au <strong>{data.tel}</strong>.
             </>
           )}
         </p>
