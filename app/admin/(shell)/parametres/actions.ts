@@ -64,6 +64,7 @@ export async function toggleFeatureFlags(
     venteVehicule: checked('venteVehicule'),
     venteMoto: checked('venteMoto'),
     reparation: checked('reparation'),
+    lavage: checked('lavage'),
   };
 
   const db = getAdminFirestore();

@@ -7,6 +7,7 @@ export async function CpFooter() {
   const flags = await getCachedFeatureFlags();
   const services = [
     { href: '/reparation', label: 'Réparation' },
+    { href: '/lavage', label: 'Lavage' },
     { href: '/location', label: 'Location' },
     { href: '/vente-vehicule', label: 'Vente véhicule' },
     { href: '/vente-moto', label: 'Vente moto' },

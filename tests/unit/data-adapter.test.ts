@@ -111,6 +111,7 @@ describe('getAdapter', () => {
         venteVehicule: true,
         venteMoto: true,
         reparation: true,
+        lavage: true,
       }),
       getContactInfo: async () => ({
         phone: '+590690112233',
@@ -427,6 +428,7 @@ describe('StaticAdapter — soft-delete exclusion', () => {
         venteVehicule: true,
         venteMoto: true,
         reparation: true,
+        lavage: true,
       }),
       getContactInfo: async () => ({
         phone: '+590690112233',

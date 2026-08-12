@@ -34,6 +34,7 @@ const flags = {
   venteVehicule: bool(process.env.FLAGS_VENTE_VEHICULE, true),
   venteMoto: bool(process.env.FLAGS_VENTE_MOTO, true),
   reparation: bool(process.env.FLAGS_REPARATION, true),
+  lavage: bool(process.env.FLAGS_LAVAGE, true),
   updatedAt: Date.now(),
   updatedBy: 'seed-script',
 };

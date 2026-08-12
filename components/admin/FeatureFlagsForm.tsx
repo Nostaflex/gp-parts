@@ -11,6 +11,7 @@ const SECTIONS: { key: keyof FeatureFlags; label: string }[] = [
   { key: 'venteVehicule', label: 'Vente véhicule' },
   { key: 'venteMoto', label: 'Vente moto' },
   { key: 'reparation', label: 'Réparation' },
+  { key: 'lavage', label: 'Lavage' },
 ];
 
 export function FeatureFlagsForm({ initial }: { initial: FeatureFlags }) {

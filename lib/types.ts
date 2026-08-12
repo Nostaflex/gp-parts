@@ -150,6 +150,7 @@ export type DemandeType =
   | 'piece'
   | 'financement'
   | 'reparation'
+  | 'lavage'
   | 'location'; // devis longue durée (funnel v2)
 
 export type DemandeStatus = 'nouvelle' | 'en_cours' | 'traitee' | 'deleted';

@@ -17,6 +17,7 @@ describe('FeatureFlagsForm', () => {
           venteVehicule: true,
           venteMoto: false,
           reparation: true,
+          lavage: true,
         }}
       />
     );

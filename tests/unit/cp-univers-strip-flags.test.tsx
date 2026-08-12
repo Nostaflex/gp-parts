@@ -19,6 +19,7 @@ describe('CpUniversStrip — filtrage par flags', () => {
       venteVehicule: false,
       venteMoto: false,
       reparation: false,
+      lavage: false,
     });
     render(await CpUniversStrip({ current: 'reparation' }));
     expect(screen.queryByText('Location')).toBeNull();

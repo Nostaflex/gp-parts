@@ -22,6 +22,7 @@ describe('sitemap — filtrage par flags', () => {
       venteVehicule: false,
       venteMoto: false,
       reparation: false,
+      lavage: false,
     });
     const entries = await sitemap();
     const urls = entries.map((e) => e.url);
@@ -39,6 +40,7 @@ describe('sitemap — filtrage par flags', () => {
       venteVehicule: true,
       venteMoto: true,
       reparation: true,
+      lavage: true,
     });
     const urls = (await sitemap()).map((e) => e.url);
     expect(urls.some((u) => u.endsWith('/pieces'))).toBe(true);

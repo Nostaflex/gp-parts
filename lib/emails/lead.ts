@@ -3,7 +3,7 @@
 // accusé de réception au client.
 
 export type Lead = {
-  kind: 'rdv' | 'contact';
+  kind: 'rdv' | 'lavage' | 'contact';
   ref: string;
   prenom: string;
   nom: string;
@@ -33,7 +33,11 @@ function rows(pairs: [string, string | undefined][]): string {
 }
 
 const kindLabel = (l: Lead) =>
-  l.kind === 'rdv' ? 'demande de RDV réparation' : 'message de contact';
+  l.kind === 'rdv'
+    ? 'demande de RDV réparation'
+    : l.kind === 'lavage'
+      ? 'demande de RDV lavage'
+      : 'message de contact';
 
 /** Notification au gérant — contient tout ce qu'il faut pour rappeler le client. */
 export function buildLeadNotificationEmail(l: Lead): { subject: string; html: string } {
@@ -63,13 +67,14 @@ export function buildLeadNotificationEmail(l: Lead): { subject: string; html: st
 /** Accusé de réception au client. */
 export function buildLeadAckEmail(l: Lead): { subject: string; html: string } {
   const subject =
-    l.kind === 'rdv'
-      ? 'Votre demande de RDV est bien reçue — Car Performance'
-      : 'Votre message est bien reçu — Car Performance';
+    l.kind === 'contact'
+      ? 'Votre message est bien reçu — Car Performance'
+      : 'Votre demande de RDV est bien reçue — Car Performance';
+  // Délai officiel : 48h jours ouvrés (retours Stéphane 2026-08-12).
   const intro =
-    l.kind === 'rdv'
-      ? 'Votre demande de rendez-vous a bien été enregistrée. Nous vous recontactons sous 1h (jours ouvrés) pour valider le créneau.'
-      : 'Votre message a bien été reçu. Nous vous répondons sous 24h.';
+    l.kind === 'contact'
+      ? 'Votre message a bien été reçu. Nous vous répondons sous 48h en jours ouvrés.'
+      : 'Votre demande de rendez-vous a bien été enregistrée. Nous vous recontactons sous 48h (jours ouvrés) pour valider le créneau.';
   const html = `
 <div style="font-family:system-ui,sans-serif;max-width:560px;margin:0 auto;color:#1a1a1a">
   <h2 style="margin:0 0 12px">Merci ${esc(l.prenom)} !</h2>

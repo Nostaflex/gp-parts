@@ -9,6 +9,7 @@ describe('feature-flags', () => {
       venteVehicule: true,
       venteMoto: true,
       reparation: true,
+      lavage: true,
     });
   });
 
@@ -19,6 +20,7 @@ describe('feature-flags', () => {
       venteVehicule: true,
       venteMoto: true,
       reparation: true,
+      lavage: true,
     });
   });
 
@@ -38,6 +40,7 @@ describe('feature-flags', () => {
       venteVehicule: false,
       venteMoto: false,
       reparation: true,
+      lavage: true,
     };
     expect(isPathVisible('/pieces', flags)).toBe(false);
     expect(isPathVisible('/pieces?type=auto', flags)).toBe(false);
@@ -57,6 +60,7 @@ describe('feature-flags', () => {
       venteVehicule: false,
       venteMoto: false,
       reparation: false,
+      lavage: false,
     };
     expect(isPathVisible('/contact', allOff)).toBe(true);
     expect(isPathVisible('/', allOff)).toBe(true);
@@ -69,8 +73,18 @@ describe('feature-flags', () => {
       venteVehicule: true,
       venteMoto: false,
       reparation: true,
+      lavage: true,
     };
     expect(isPathVisible('/vente-vehicule', flags)).toBe(true);
     expect(isPathVisible('/vente-moto', flags)).toBe(false);
+  });
+});
+
+describe('feature-flags — lavage', () => {
+  it('isPathVisible : /lavage gouverné par le flag lavage', () => {
+    const on = { ...DEFAULT_FEATURE_FLAGS };
+    const off = { ...DEFAULT_FEATURE_FLAGS, lavage: false };
+    expect(isPathVisible('/lavage', on)).toBe(true);
+    expect(isPathVisible('/lavage', off)).toBe(false);
   });
 });
