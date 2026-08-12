@@ -17,21 +17,41 @@ type FormData = {
   modele: string;
   annee: string;
   immat: string;
+  nature: string;
   type: string;
+  roulable: string;
+  sinistre: string;
   description: string;
   date: string;
   creneau: string;
 };
 
-const TYPES = [
+// Deux parcours distincts (retours Stéphane 2026-08-12) : une panne
+// mécanique et un dégât de carrosserie ne se décrivent pas pareil.
+const NATURES = [
+  {
+    id: 'mecanique',
+    label: 'Panne / Mécanique',
+    desc: 'Panne, entretien, voyant, bruit, comportement anormal…',
+  },
+  {
+    id: 'carrosserie',
+    label: 'Carrosserie',
+    desc: 'Choc, rayure, bosse, peinture, remplacement d’élément…',
+  },
+];
+
+const TYPES_MECANIQUE = [
   'Mécanique',
-  'Carrosserie',
   'Électrique',
   'Vidange & entretien',
   'Freinage',
   'Climatisation',
   'Autre',
 ];
+
+const ROULABLE = ['Oui', 'Non', 'Je ne sais pas'];
+const SINISTRE = ['Oui, déclaré', 'En cours', 'Non / sans assurance'];
 const CRENEAUX = [
   '08:00 – 09:00',
   '09:00 – 10:00',
@@ -65,7 +85,7 @@ const MARQUES = [
   'Autre',
 ];
 
-const STEP_LABELS = ['Vos coordonnées', 'Votre véhicule', 'La prestation', 'Date & créneau'];
+const STEP_LABELS = ['Vos coordonnées', 'Votre véhicule', 'Votre besoin', 'Date & créneau'];
 
 const field =
   'w-full px-4 py-3 rounded-xl border border-[#E5DDD3] bg-white text-cp-ink placeholder:text-cp-ink/30 text-sm outline-none transition-all focus:border-cp-red focus:ring-2 focus:ring-cp-mango/10';
@@ -89,7 +109,10 @@ export function RdvForm() {
     modele: '',
     annee: '',
     immat: '',
+    nature: '',
     type: '',
+    roulable: '',
+    sinistre: '',
     description: '',
     date: '',
     creneau: '',
@@ -113,8 +136,9 @@ export function RdvForm() {
       if (!data.modele.trim()) errs.modele = 'Modèle requis';
     }
     if (step === 2) {
-      if (!data.type) errs.type = 'Type de prestation requis';
-      if (!data.description.trim()) errs.description = 'Description requise';
+      if (!data.nature) errs.nature = 'Choisissez la nature de votre besoin';
+      if (data.nature === 'mecanique' && !data.type) errs.type = 'Type de prestation requis';
+      if (data.nature && !data.description.trim()) errs.description = 'Description requise';
     }
     if (step === 3) {
       if (!data.date) errs.date = 'Date requise';
@@ -192,7 +216,10 @@ export function RdvForm() {
               modele: '',
               annee: '',
               immat: '',
+              nature: '',
               type: '',
+              roulable: '',
+              sinistre: '',
               description: '',
               date: '',
               creneau: '',
@@ -384,39 +411,129 @@ export function RdvForm() {
           </div>
         )}
 
-        {/* Step 2 — Prestation */}
+        {/* Step 2 — Votre besoin : parcours distinct mécanique / carrosserie */}
         {step === 2 && (
           <div className="flex flex-col gap-4">
             <div>
-              <p className={label}>Type de prestation *</p>
-              <div className="flex flex-wrap gap-2">
-                {TYPES.map((t) => (
+              <p className={label}>Nature du besoin *</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {NATURES.map((n) => (
                   <button
-                    key={t}
+                    key={n.id}
                     type="button"
-                    onClick={() => set('type', t)}
-                    className={`px-4 py-2 rounded-full border text-sm font-medium transition-all ${data.type === t ? 'bg-cp-ink border-cp-ink text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/60 hover:border-cp-red hover:text-cp-mango'}`}
+                    onClick={() => {
+                      // Changer de nature réinitialise les champs de l'autre
+                      // parcours — jamais de sinistre fantôme sur une vidange.
+                      setData((d) => ({
+                        ...d,
+                        nature: n.id,
+                        type: n.id === 'carrosserie' ? 'Carrosserie' : '',
+                        roulable: '',
+                        sinistre: '',
+                      }));
+                      setErrors((e) => ({ ...e, nature: undefined, type: undefined }));
+                    }}
+                    className={`text-left p-4 rounded-xl border transition-all ${data.nature === n.id ? 'bg-cp-ink border-cp-ink text-cp-cream' : 'border-[#E5DDD3] text-cp-ink hover:border-cp-red'}`}
                   >
-                    {t}
+                    <p className="text-sm font-bold mb-1">{n.label}</p>
+                    <p
+                      className={`text-xs leading-relaxed ${data.nature === n.id ? 'text-cp-cream/60' : 'text-cp-ink/45'}`}
+                    >
+                      {n.desc}
+                    </p>
                   </button>
                 ))}
               </div>
-              {err('type')}
+              {err('nature')}
             </div>
-            <div>
-              <label htmlFor="description" className={label}>
-                Décrivez le problème *
-              </label>
-              <textarea
-                id="description"
-                className={`${field} resize-none`}
-                rows={4}
-                placeholder="Décrivez le symptôme ou la panne observée…"
-                value={data.description}
-                onChange={(e) => set('description', e.target.value)}
-              />
-              {err('description')}
-            </div>
+
+            {data.nature === 'mecanique' && (
+              <>
+                <div>
+                  <p className={label}>Type de prestation *</p>
+                  <div className="flex flex-wrap gap-2">
+                    {TYPES_MECANIQUE.map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => set('type', t)}
+                        className={`px-4 py-2 rounded-full border text-sm font-medium transition-all ${data.type === t ? 'bg-cp-ink border-cp-ink text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/60 hover:border-cp-red hover:text-cp-mango'}`}
+                      >
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                  {err('type')}
+                </div>
+                <div>
+                  <p className={label}>Le véhicule est-il roulable ?</p>
+                  <div className="flex flex-wrap gap-2">
+                    {ROULABLE.map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => set('roulable', r)}
+                        className={`px-4 py-2 rounded-full border text-sm font-medium transition-all ${data.roulable === r ? 'bg-cp-ink border-cp-ink text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/60 hover:border-cp-red hover:text-cp-mango'}`}
+                      >
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label htmlFor="description" className={label}>
+                    Décrivez le problème *
+                  </label>
+                  <textarea
+                    id="description"
+                    className={`${field} resize-none`}
+                    rows={4}
+                    placeholder="Symptômes observés : voyant allumé, bruit, à-coups, depuis quand…"
+                    value={data.description}
+                    onChange={(e) => set('description', e.target.value)}
+                  />
+                  {err('description')}
+                </div>
+              </>
+            )}
+
+            {data.nature === 'carrosserie' && (
+              <>
+                <div>
+                  <p className={label}>Sinistre déclaré à l&apos;assurance ?</p>
+                  <div className="flex flex-wrap gap-2">
+                    {SINISTRE.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => set('sinistre', s)}
+                        className={`px-4 py-2 rounded-full border text-sm font-medium transition-all ${data.sinistre === s ? 'bg-cp-ink border-cp-ink text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/60 hover:border-cp-red hover:text-cp-mango'}`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label htmlFor="description" className={label}>
+                    Décrivez les dégâts *
+                  </label>
+                  <textarea
+                    id="description"
+                    className={`${field} resize-none`}
+                    rows={4}
+                    placeholder="Zones touchées (aile avant droite, pare-chocs…), origine du choc, rayure ou déformation…"
+                    value={data.description}
+                    onChange={(e) => set('description', e.target.value)}
+                  />
+                  {err('description')}
+                </div>
+                <p className="text-xs text-cp-ink/45 leading-relaxed bg-[#F8F5F0] rounded-xl px-4 py-3">
+                  📷 Après l&apos;envoi, notre équipe vous demandera des photos des dégâts (par
+                  WhatsApp ou email) pour préparer l&apos;estimation avant votre venue.
+                </p>
+              </>
+            )}
           </div>
         )}
 
@@ -468,7 +585,8 @@ export function RdvForm() {
                   {data.annee}
                 </p>
                 <p>
-                  <span className="text-cp-ink">Prestation :</span> {data.type}
+                  <span className="text-cp-ink">Prestation :</span>{' '}
+                  {data.nature === 'carrosserie' ? 'Carrosserie' : data.type}
                 </p>
               </div>
             </div>

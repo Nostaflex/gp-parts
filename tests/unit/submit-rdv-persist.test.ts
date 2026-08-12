@@ -45,3 +45,44 @@ describe('submitRdv', () => {
     expect(res.ok).toBe(true);
   });
 });
+
+describe('submitRdv — parcours mécanique / carrosserie', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('mécanique : nature + roulable dans le message admin', async () => {
+    const res = await submitRdv({
+      ...base,
+      nature: 'mecanique',
+      type: 'Freinage',
+      roulable: 'Non',
+    });
+    const msg = createDemandeIntake.mock.calls[0][0].message as string;
+    expect(msg).toContain('Nature : Panne / Mécanique');
+    expect(msg).toContain('Véhicule roulable : Non');
+    expect(msg).not.toContain('Sinistre');
+    expect(res.ok).toBe(true);
+  });
+
+  it('carrosserie : nature + sinistre dans le message admin', async () => {
+    const res = await submitRdv({
+      ...base,
+      nature: 'carrosserie',
+      type: 'Carrosserie',
+      sinistre: 'En cours',
+    });
+    const msg = createDemandeIntake.mock.calls[0][0].message as string;
+    expect(msg).toContain('Nature : Carrosserie');
+    expect(msg).toContain('Sinistre assurance : En cours');
+    expect(msg).not.toContain('roulable');
+    expect(res.ok).toBe(true);
+  });
+
+  it('sans nature (ancien formulaire encore ouvert) : soumission OK, pas de ligne Nature', async () => {
+    const res = await submitRdv(base);
+    const msg = createDemandeIntake.mock.calls[0][0].message as string;
+    expect(msg).not.toContain('Nature :');
+    expect(res.ok).toBe(true);
+  });
+});

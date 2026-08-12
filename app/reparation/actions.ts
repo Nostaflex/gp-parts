@@ -14,6 +14,12 @@ export type RdvInput = {
   modele: string;
   annee: string;
   immat: string;
+  // Parcours distinct mécanique/carrosserie (retours Stéphane 2026-08-12).
+  // Optionnels : un client sur l'ancien formulaire (onglet ouvert avant
+  // déploiement) doit pouvoir soumettre sans ces champs.
+  nature?: string;
+  roulable?: string;
+  sinistre?: string;
   type: string;
   description: string;
   date: string;
@@ -68,9 +74,18 @@ export async function submitRdv(input: RdvInput): Promise<LeadResult> {
   // 1) Persister d'abord (le lead ne doit jamais être perdu).
   const now = Date.now();
   const nowIso = new Date(now).toISOString();
+  const natureLabel =
+    input.nature === 'carrosserie'
+      ? 'Carrosserie'
+      : input.nature === 'mecanique'
+        ? 'Panne / Mécanique'
+        : null;
   const messageFull = [
     `Véhicule : ${vehiculeStr || '—'}`,
+    ...(natureLabel ? [`Nature : ${natureLabel}`] : []),
     `Prestation : ${input.type}`,
+    ...(input.roulable ? [`Véhicule roulable : ${input.roulable}`] : []),
+    ...(input.sinistre ? [`Sinistre assurance : ${input.sinistre}`] : []),
     `Date : ${input.date} · Créneau : ${input.creneau}`,
     '',
     input.description.trim(),
