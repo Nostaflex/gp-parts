@@ -13,7 +13,9 @@ const cachedRawContactInfo = unstable_cache(
     return adapter.getContactInfo();
   },
   ['contact-info'],
-  { tags: ['contact-info'] }
+  // revalidate = filet : une écriture hors Server Action (console Firebase)
+  // ne laisse jamais le site périmé > 1 h. Le tag reste le chemin rapide.
+  { tags: ['contact-info'], revalidate: 3600 }
 );
 
 /**
