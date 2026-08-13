@@ -11,10 +11,24 @@ export type NavBadges = {
 
 const EMPTY: NavBadges = { commandes: 0, reservations: 0, demandes: 0 };
 
-async function countNouvelles(collection: string): Promise<number> {
+// Statuts « encore à traiter » par collection : tout ce qui n'est pas
+// terminal. Ne compter que 'nouvelle' faisait mentir le badge — une commande
+// confirmée ou en préparation disparaissait du compteur alors qu'elle
+// demande toujours une action de l'admin.
+const OPEN_STATUSES: Record<keyof NavBadges, { collection: string; statuses: string[] }> = {
+  commandes: {
+    collection: 'orders',
+    statuses: ['nouvelle', 'confirmee', 'preparation', 'expediee'],
+  },
+  reservations: { collection: 'reservations', statuses: ['nouvelle', 'confirmee', 'en_cours'] },
+  demandes: { collection: 'demandes', statuses: ['nouvelle', 'en_cours'] },
+};
+
+async function countOuvertes(key: keyof NavBadges): Promise<number> {
+  const { collection, statuses } = OPEN_STATUSES[key];
   const snap = await getAdminFirestore()
     .collection(collection)
-    .where('status', '==', 'nouvelle')
+    .where('status', 'in', statuses)
     .count()
     .get();
   return snap.data().count;
@@ -23,9 +37,9 @@ async function countNouvelles(collection: string): Promise<number> {
 export async function getNavBadges(): Promise<NavBadges> {
   try {
     const [commandes, reservations, demandes] = await Promise.all([
-      countNouvelles('orders'),
-      countNouvelles('reservations'),
-      countNouvelles('demandes'),
+      countOuvertes('commandes'),
+      countOuvertes('reservations'),
+      countOuvertes('demandes'),
     ]);
     return { commandes, reservations, demandes };
   } catch (err) {
