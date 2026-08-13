@@ -93,17 +93,25 @@ function DemandeRow({ d }: { d: Demande }) {
             </a>
           </div>
           <div className="flex gap-2 flex-wrap">
-            <button type="button" onClick={() => updateDemandeStatus(d.id, 'en_cours')}>
+            <button
+              type="button"
+              onClick={() => updateDemandeStatus(d.id, 'en_cours', d.updatedAt)}
+            >
               En cours
             </button>
-            <button type="button" onClick={() => updateDemandeStatus(d.id, 'traitee')}>
+            <button type="button" onClick={() => updateDemandeStatus(d.id, 'traitee', d.updatedAt)}>
               Traitée
             </button>
-            <button type="button" onClick={() => updateDemandeStatus(d.id, 'deleted')}>
+            <button type="button" onClick={() => updateDemandeStatus(d.id, 'deleted', d.updatedAt)}>
               Supprimer
             </button>
           </div>
-          <form action={() => saveDemandeNote(d.id, note)} className="flex flex-col gap-2">
+          <form
+            action={async () => {
+              await saveDemandeNote(d.id, note, d.updatedAt);
+            }}
+            className="flex flex-col gap-2"
+          >
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}

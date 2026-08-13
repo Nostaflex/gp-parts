@@ -146,14 +146,30 @@ export async function updateMoto(
   return { ok: true, message: 'Moto mise à jour.' };
 }
 
-export async function deleteMoto(id: string): Promise<FormActionState> {
+export async function deleteMoto(id: string, clientUpdatedAt: string): Promise<FormActionState> {
   const session = await requireAdmin();
 
   const db = getAdminFirestore();
-  await db.doc(`motos/${id}`).update({
-    disponibilite: 'vendu',
-    updatedAt: new Date().toISOString(),
+  // Lock optimiste (même transaction que updateMoto) : un « Supprimer »
+  // n'écrase jamais silencieusement une édition concurrente.
+  let conflict = false;
+  await db.runTransaction(async (tx) => {
+    const ref = db.doc(`motos/${id}`);
+    const snap = await tx.get(ref);
+    const before = (snap.data?.() ?? {}) as Record<string, unknown>;
+    if (before.updatedAt && before.updatedAt !== clientUpdatedAt) {
+      conflict = true;
+      return;
+    }
+    tx.update(ref, {
+      disponibilite: 'vendu',
+      updatedAt: new Date().toISOString(),
+    });
   });
+
+  if (conflict) {
+    return { errors: { _form: ['Cette moto a été modifiée entre-temps. Rechargez la page.'] } };
+  }
 
   await writeAuditLog({
     actor: session.email,

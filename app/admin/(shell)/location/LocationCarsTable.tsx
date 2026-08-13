@@ -20,7 +20,9 @@ function DeleteLocationCarButton({ car }: { car: LocationCar }) {
     if (pending) return;
     if (!window.confirm(`Retirer « ${car.marque} ${car.modele} » du parc de location ?`)) return;
     startTransition(async () => {
-      await deleteLocationCar(car.id);
+      const res = await deleteLocationCar(car.id, car.updatedAt);
+      // Conflit de lock optimiste : jamais silencieux.
+      if (res && 'errors' in res && res.errors._form?.[0]) window.alert(res.errors._form[0]);
       router.refresh();
     });
   };

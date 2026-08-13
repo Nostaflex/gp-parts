@@ -3,10 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { requireAdmin } from '@/lib/admin/auth';
 import { writeAuditLog } from '@/lib/admin/audit';
-import {
-  getReservationByIdAdmin,
-  updateReservationStatusAdmin,
-} from '@/lib/admin/reservations-server';
+import { transitionReservationStatusAdmin } from '@/lib/admin/reservations-server';
 import type { ReservationStatus } from '@/lib/reservations';
 
 import type { FormActionState } from '@/components/admin/FormShell';
@@ -25,15 +22,15 @@ export async function updateReservationStatus(
 ): Promise<FormActionState> {
   const session = await requireAdmin();
 
-  const current = await getReservationByIdAdmin(id);
-  if (!current) {
-    return { errors: { _form: ['Réservation introuvable.'] } };
+  // Lecture + garde + écriture dans UNE transaction (anti-TOCTOU) : la garde
+  // est réévaluée sur l'état réellement courant au moment de l'écriture.
+  const result = await transitionReservationStatusAdmin(id, status, TRANSITIONS);
+  if (!result.ok) {
+    if (result.reason === 'introuvable') {
+      return { errors: { _form: ['Réservation introuvable.'] } };
+    }
+    return { errors: { _form: [`Transition ${result.current} → ${status} non autorisée.`] } };
   }
-  if (!TRANSITIONS[current.status].includes(status)) {
-    return { errors: { _form: [`Transition ${current.status} → ${status} non autorisée.`] } };
-  }
-
-  await updateReservationStatusAdmin(id, status);
 
   await writeAuditLog({
     actor: session.email,

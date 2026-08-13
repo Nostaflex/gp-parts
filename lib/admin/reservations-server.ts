@@ -37,12 +37,32 @@ export async function getReservationByIdAdmin(id: string): Promise<Reservation |
   return parseReservation({ ...snap.data(), id: snap.id });
 }
 
-export async function updateReservationStatusAdmin(
+export type TransitionResult =
+  | { ok: true }
+  | { ok: false; reason: 'introuvable' }
+  | { ok: false; reason: 'transition'; current: ReservationStatus };
+
+/**
+ * Transition de statut TRANSACTIONNELLE : lecture + garde + écriture dans la
+ * même transaction. Sans elle, deux admins (ou un double-clic) pouvaient
+ * faire passer `nouvelle → confirmee` et `nouvelle → annulee` concurremment,
+ * les deux gardes passant sur l'état lu avant l'autre écriture (TOCTOU).
+ */
+export async function transitionReservationStatusAdmin(
   id: string,
-  status: ReservationStatus
-): Promise<void> {
-  await getAdminFirestore()
-    .collection('reservations')
-    .doc(id)
-    .update({ status, updatedAt: new Date().toISOString() });
+  status: ReservationStatus,
+  allowed: Record<ReservationStatus, ReservationStatus[]>
+): Promise<TransitionResult> {
+  const db = getAdminFirestore();
+  const ref = db.collection('reservations').doc(id);
+  return db.runTransaction(async (tx): Promise<TransitionResult> => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) return { ok: false, reason: 'introuvable' };
+    const current = (snap.data()?.status ?? 'nouvelle') as ReservationStatus;
+    if (!allowed[current]?.includes(status)) {
+      return { ok: false, reason: 'transition', current };
+    }
+    tx.update(ref, { status, updatedAt: new Date().toISOString() });
+    return { ok: true };
+  });
 }

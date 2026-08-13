@@ -184,13 +184,31 @@ describe('Server Actions véhicules', () => {
     expect(res).toMatchObject({ errors: { _form: expect.any(Array) } });
   });
 
-  it('deleteVehicule : soft → disponibilite vendu + audit', async () => {
-    const res = await deleteVehicule('peugeot-308sw');
-    expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({ disponibilite: 'vendu' }));
+  it('deleteVehicule : soft-delete verrouillé + audit', async () => {
+    txGetMock.mockResolvedValue({
+      exists: true,
+      data: () => ({ updatedAt: '2026-05-01T00:00:00.000Z' }),
+    });
+    const res = await deleteVehicule('peugeot-308sw', '2026-05-01T00:00:00.000Z');
+    expect(txUpdateMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ disponibilite: 'vendu' })
+    );
     expect(writeAuditLogMock).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'delete', resourceType: 'vehicule' })
     );
     expect(revalidateTagMock).toHaveBeenCalledWith('vehicules');
     expect(res).toMatchObject({ ok: true });
+  });
+
+  it('deleteVehicule : conflit lock (édition concurrente) → refus, aucune écriture', async () => {
+    txGetMock.mockResolvedValue({
+      exists: true,
+      data: () => ({ updatedAt: '2026-05-10T00:00:00.000Z' }),
+    });
+    const res = await deleteVehicule('peugeot-308sw', '2026-05-01T00:00:00.000Z');
+    expect(txUpdateMock).not.toHaveBeenCalled();
+    expect(writeAuditLogMock).not.toHaveBeenCalled();
+    expect(res).toMatchObject({ errors: { _form: expect.any(Array) } });
   });
 });
