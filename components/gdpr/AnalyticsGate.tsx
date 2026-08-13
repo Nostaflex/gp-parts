@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import Script from 'next/script';
 
 import { STORAGE_KEYS } from '@/lib/config';
@@ -32,6 +33,7 @@ function hasAnalyticsConsent(): boolean {
  */
 export function AnalyticsGate() {
   const [enabled, setEnabled] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const sync = () => setEnabled(hasAnalyticsConsent());
@@ -45,6 +47,8 @@ export function AnalyticsGate() {
     };
   }, []);
 
+  // Le back-office n'est pas du trafic : jamais mesuré (review C4).
+  if (pathname.startsWith('/admin')) return null;
   if (!enabled) return null;
   return <Script defer src="/_vercel/insights/script.js" strategy="afterInteractive" />;
 }

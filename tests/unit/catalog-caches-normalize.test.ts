@@ -27,6 +27,9 @@ const vehiculeValide = {
   reference: 'VO-308SW',
   disponibilite: 'disponible',
   updatedAt: '2026-08-01T00:00:00.000Z',
+  // Sentinelle anti-strip (review B3) : champ ajouté APRÈS le schéma — il
+  // doit survivre (le schéma détecte, ne transforme jamais).
+  champFutur: 'doit-survivre',
 };
 
 // Entrée « d'époque » : champ requis absent (sérialisée avant son ajout).
@@ -48,6 +51,8 @@ describe('caches catalogue — normalisation en sortie', () => {
     const list = await getCachedVehicules();
     expect(list).toHaveLength(2);
     expect(list[0].id).toBe('peugeot-308sw');
+    // Anti-strip : un champ inconnu du schéma n'est JAMAIS supprimé en sortie.
+    expect((list[0] as Record<string, unknown>).champFutur).toBe('doit-survivre');
     // Fail-open : l'entrée non conforme n'est PAS filtrée (le site public
     // continue d'afficher le véhicule) …
     expect(list[1].id).toBe('clio-v');

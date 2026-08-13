@@ -33,8 +33,10 @@ let warnedStale = false;
 export async function getCachedProducts(): Promise<Product[]> {
   return (await cachedRawProducts()).map((p) => {
     const parsed = ProductSchema.safeParse(p);
-    if (parsed.success) return parsed.data;
-    if (!warnedStale) {
+    // Le schéma sert de DÉTECTEUR, jamais de transformateur : retourner
+    // parsed.data strip-erait les champs ajoutés après coup (z.object zod v4
+    // strip par défaut) — la dérive muette exacte qu'on chasse (review B3).
+    if (!parsed.success && !warnedStale) {
       warnedStale = true;
       console.warn(
         '[products-cache] entrée cache non conforme au schéma (champ ajouté ? donnée ancienne ?) — rendue telle quelle:',

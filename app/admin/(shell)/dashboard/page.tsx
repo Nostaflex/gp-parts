@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { requireAdminPage } from '@/lib/admin/auth';
 
 import { AdminDashboardClient } from './AdminDashboardClient';
 
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
  * Phase 5+ : implémenter une session cookie Firebase + middleware server-side
  * pour une protection SSR complète.
  */
-export default function AdminDashboardPage() {
+export default async function AdminDashboardPage() {
+  await requireAdminPage();
   return <AdminDashboardClient />;
 }

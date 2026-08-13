@@ -16,6 +16,7 @@
  */
 import { cache } from 'react';
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { getAdminAuth, getAdminFirestore } from '@/lib/firebase-admin';
 
 export class AdminError extends Error {
@@ -87,3 +88,20 @@ export const requireAdmin = cache(async function requireAdmin(): Promise<AdminSe
 
   return { uid, email };
 });
+
+/**
+ * Garde des PAGES admin (Server Components) : même vérification que
+ * requireAdmin, mais session invalide → redirect login au lieu d'un écran
+ * d'erreur. À appeler dans CHAQUE page qui lit des données — le guard du
+ * layout ne suffit pas : en navigation douce App Router, le layout n'est
+ * pas ré-exécuté, seule la page l'est (review 2026-08-13, finding A1).
+ * Grâce à React.cache, l'appel est gratuit quand le layout a déjà vérifié.
+ */
+export async function requireAdminPage(): Promise<AdminSession> {
+  try {
+    return await requireAdmin();
+  } catch (e) {
+    if (e instanceof AdminError) redirect('/admin/login');
+    throw e;
+  }
+}

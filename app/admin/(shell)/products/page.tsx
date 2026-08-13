@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { requireAdminPage } from '@/lib/admin/auth';
 
 import { getAdapter } from '@/lib/data';
 
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function AdminProductsPage() {
+  await requireAdminPage();
   const adapter = await getAdapter();
   const products = await adapter.getProducts({ includeDeleted: true });
 

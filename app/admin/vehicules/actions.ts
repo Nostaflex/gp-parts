@@ -163,9 +163,14 @@ export async function deleteVehicule(
   // Lock optimiste (même transaction que updateVehicule) : un « Supprimer »
   // n'écrase jamais silencieusement une édition concurrente.
   let conflict = false;
+  let missing = false;
   await db.runTransaction(async (tx) => {
     const ref = db.doc(`vehicules/${id}`);
     const snap = await tx.get(ref);
+    if (!snap.exists) {
+      missing = true;
+      return;
+    }
     const before = (snap.data?.() ?? {}) as Record<string, unknown>;
     if (before.updatedAt && before.updatedAt !== clientUpdatedAt) {
       conflict = true;
@@ -177,6 +182,9 @@ export async function deleteVehicule(
     });
   });
 
+  if (missing) {
+    return { errors: { _form: ['Véhicule introuvable.'] } };
+  }
   if (conflict) {
     return { errors: { _form: ['Ce véhicule a été modifié entre-temps. Rechargez la page.'] } };
   }

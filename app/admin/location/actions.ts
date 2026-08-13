@@ -133,9 +133,14 @@ export async function deleteLocationCar(
   // Lock optimiste (même transaction que updateLocationCar) : un « Supprimer »
   // n'écrase jamais silencieusement une édition concurrente.
   let conflict = false;
+  let missing = false;
   await db.runTransaction(async (tx) => {
     const ref = db.doc(`location-cars/${id}`);
     const snap = await tx.get(ref);
+    if (!snap.exists) {
+      missing = true;
+      return;
+    }
     const before = (snap.data?.() ?? {}) as Record<string, unknown>;
     if (before.updatedAt && before.updatedAt !== clientUpdatedAt) {
       conflict = true;
@@ -145,6 +150,9 @@ export async function deleteLocationCar(
     tx.update(ref, { deletedAt: now, updatedAt: now });
   });
 
+  if (missing) {
+    return { errors: { _form: ['Voiture introuvable.'] } };
+  }
   if (conflict) {
     return { errors: { _form: ['Cette voiture a été modifiée entre-temps. Rechargez la page.'] } };
   }
