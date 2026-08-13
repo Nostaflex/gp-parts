@@ -45,6 +45,9 @@ export function CookieBanner() {
     } catch {
       // ignore
     }
+    // Prévient AnalyticsGate dans le même onglet (l'event `storage` ne se
+    // déclenche que dans les AUTRES onglets).
+    window.dispatchEvent(new Event('gpparts-consent-change'));
     setVisible(false);
   };
 

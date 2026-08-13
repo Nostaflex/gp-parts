@@ -14,15 +14,20 @@ export const dynamic = 'force-dynamic';
 
 export default async function ParametresPage() {
   await requireAdmin();
-  const snap = await getAdminFirestore().doc('meta/featureFlags').get();
+  // Les 3 lectures meta/* sont indépendantes : Promise.all évite 3 allers-
+  // retours Firestore séquentiels (~150-350 ms) sur chaque ouverture.
+  const db = getAdminFirestore();
+  const [snap, ciSnap, lsSnap] = await Promise.all([
+    db.doc('meta/featureFlags').get(),
+    db.doc('meta/contactInfo').get(),
+    db.doc('meta/locationSettings').get(),
+  ]);
   const initial: FeatureFlags = normalizeFeatureFlags(
     snap.exists ? (snap.data() as Partial<FeatureFlags>) : null
   );
-  const ciSnap = await getAdminFirestore().doc('meta/contactInfo').get();
   const contactInfo: ContactInfo = normalizeContactInfo(
     ciSnap.exists ? (ciSnap.data() as Partial<ContactInfo>) : null
   );
-  const lsSnap = await getAdminFirestore().doc('meta/locationSettings').get();
   const locationSettings: LocationSettings = normalizeLocationSettings(
     lsSnap.exists ? lsSnap.data() : null
   );
