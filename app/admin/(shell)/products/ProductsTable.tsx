@@ -99,7 +99,7 @@ const columns: Column<Product>[] = [
     render: (p) => (
       <span className="flex flex-col">
         <span className="font-medium text-[var(--text)]">{p.name}</span>
-        <span className="text-body-xs text-[var(--text-secondary)] font-mono">{p.reference}</span>
+        <span className="text-caption text-[var(--text-secondary)] font-mono">{p.reference}</span>
       </span>
     ),
   },

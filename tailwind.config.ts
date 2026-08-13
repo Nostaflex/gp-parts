@@ -44,6 +44,10 @@ const config: Config = {
         mono: ['var(--font-mono)', 'monospace'],
       },
       fontSize: {
+        // `title` : titres de pages du back-office (iOS large title). La
+        // famille homonyme (fontFamily.title) reste indépendante — sans cette
+        // entrée, `text-title` n'existait pas et les titres tombaient à 16 px.
+        title: ['1.75rem', { lineHeight: '1.2', letterSpacing: '-0.01em', fontWeight: '700' }],
         display: ['3rem', { lineHeight: '1', letterSpacing: '-0.02em', fontWeight: '700' }],
         h1: ['2.25rem', { lineHeight: '1.1', letterSpacing: '-0.01em', fontWeight: '700' }],
         h2: ['1.875rem', { lineHeight: '1.15', letterSpacing: '-0.01em', fontWeight: '700' }],

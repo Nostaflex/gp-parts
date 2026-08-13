@@ -7,7 +7,12 @@
   --bg: #f2f2f7;
   --surface: #ffffff;
   --text: #1c1c1e;
+  --text-secondary: rgba(28, 28, 30, 0.6);
   --blue: #007aff;
+  --blue-tint: rgba(0, 122, 255, 0.1);
+  --green: #34c759;
+  --red: #ff3b30;
+  --orange: #ff6b2c;
   --border: #c6c6c8;
 }
 
