@@ -14,6 +14,7 @@
  *
  * Node.js runtime uniquement (Admin SDK). Ne pas importer côté client/Edge.
  */
+import { cache } from 'react';
 import { cookies } from 'next/headers';
 import { getAdminAuth, getAdminFirestore } from '@/lib/firebase-admin';
 
@@ -32,7 +33,12 @@ export interface AdminSession {
   email: string;
 }
 
-export async function requireAdmin(): Promise<AdminSession> {
+/**
+ * Mémoïsé par requête via React.cache : le layout (shell) l'appelle pour
+ * protéger TOUTES les pages admin, et les pages/actions qui l'appellent
+ * aussi ne repaient ni la vérification crypto ni la lecture whitelist.
+ */
+export const requireAdmin = cache(async function requireAdmin(): Promise<AdminSession> {
   const sessionCookie = (await cookies()).get('__session')?.value;
   if (!sessionCookie) {
     throw new AdminError('Non authentifié', 401);
@@ -55,8 +61,12 @@ export async function requireAdmin(): Promise<AdminSession> {
     }
   } else {
     // Production : session cookie opaque signé par Google.
+    // checkRevoked=false : la vérification reste cryptographique (signature +
+    // expiration) mais épargne un aller-retour réseau Firebase Auth (~50-200 ms)
+    // par requête. Fenêtre de révocation acceptée = TTL du cookie (5 j) ;
+    // une révocation immédiate passe par la rotation de la whitelist meta/admins.
     try {
-      const decoded = await getAdminAuth().verifySessionCookie(sessionCookie, true);
+      const decoded = await getAdminAuth().verifySessionCookie(sessionCookie, false);
       uid = decoded.uid;
       email = decoded.email;
       emailVerified = decoded.email_verified === true;
@@ -76,4 +86,4 @@ export async function requireAdmin(): Promise<AdminSession> {
   }
 
   return { uid, email };
-}
+});
