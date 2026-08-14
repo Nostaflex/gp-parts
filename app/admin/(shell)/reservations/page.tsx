@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-import { requireAdmin, AdminError } from '@/lib/admin/auth';
+import { requireAdminPage } from '@/lib/admin/auth';
 import { getReservationsAdmin } from '@/lib/admin/reservations-server';
 
 import { ReservationsClient } from './ReservationsClient';
@@ -16,12 +16,7 @@ export const dynamic = 'force-dynamic';
 export default async function AdminReservationsPage() {
   // PII clients + lecture via Admin SDK (bypass rules) → vérif crypto admin
   // obligatoire ici (le middleware Edge ne contrôle que la présence du cookie).
-  try {
-    await requireAdmin();
-  } catch (e) {
-    if (e instanceof AdminError) redirect('/admin/login');
-    throw e;
-  }
+  await requireAdminPage();
 
   const reservations = await getReservationsAdmin({ limit: 100 });
 

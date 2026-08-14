@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
+import { STORAGE_KEYS } from '@/lib/config';
+import { CONSENT_EVENT } from '@/components/gdpr/AnalyticsGate';
+
 interface ConsentState {
   essential: true; // Toujours true (obligatoire)
   analytics: boolean;
@@ -10,7 +13,9 @@ interface ConsentState {
   timestamp: string;
 }
 
-const STORAGE_KEY = 'gpparts-cookie-consent';
+// Clé + event partagés avec AnalyticsGate — un renommage unilatéral
+// tuerait la mesure en silence (review C3).
+const STORAGE_KEY = STORAGE_KEYS.cookieConsent;
 
 // Boutons alignés sur le design system storefront (cp-), pas les tokens legacy.
 const BTN_PRIMARY =
@@ -45,6 +50,9 @@ export function CookieBanner() {
     } catch {
       // ignore
     }
+    // Prévient AnalyticsGate dans le même onglet (l'event `storage` ne se
+    // déclenche que dans les AUTRES onglets).
+    window.dispatchEvent(new Event(CONSENT_EVENT));
     setVisible(false);
   };
 

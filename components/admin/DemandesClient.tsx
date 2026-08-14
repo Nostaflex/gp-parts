@@ -65,6 +65,14 @@ function DemandeRow({ d }: { d: Demande }) {
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState(d.notes ?? '');
 
+  // Un refus (conflit de lock, introuvable) doit être VISIBLE — jamais
+  // silencieux (review C1). Toast propre au Lot 3 ; alert en attendant,
+  // comme les tables catalogue.
+  const applyStatus = async (status: DemandeStatus) => {
+    const res = await updateDemandeStatus(d.id, status, d.updatedAt);
+    if (!res.ok) window.alert(res.error);
+  };
+
   return (
     <div
       className="rounded-[14px] p-4"
@@ -93,17 +101,23 @@ function DemandeRow({ d }: { d: Demande }) {
             </a>
           </div>
           <div className="flex gap-2 flex-wrap">
-            <button type="button" onClick={() => updateDemandeStatus(d.id, 'en_cours')}>
+            <button type="button" onClick={() => applyStatus('en_cours')}>
               En cours
             </button>
-            <button type="button" onClick={() => updateDemandeStatus(d.id, 'traitee')}>
+            <button type="button" onClick={() => applyStatus('traitee')}>
               Traitée
             </button>
-            <button type="button" onClick={() => updateDemandeStatus(d.id, 'deleted')}>
+            <button type="button" onClick={() => applyStatus('deleted')}>
               Supprimer
             </button>
           </div>
-          <form action={() => saveDemandeNote(d.id, note)} className="flex flex-col gap-2">
+          <form
+            action={async () => {
+              const res = await saveDemandeNote(d.id, note, d.updatedAt);
+              if (!res.ok) window.alert(res.error);
+            }}
+            className="flex flex-col gap-2"
+          >
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}

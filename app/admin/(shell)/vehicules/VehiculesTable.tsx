@@ -11,7 +11,15 @@ import { deleteVehicule } from '@/app/admin/vehicules/actions';
 import type { Vehicule, Disponibilite } from '@/lib/vehicules';
 
 /** Bouton de suppression (soft-delete → « vendu », retiré du site public). */
-function DeleteVehiculeButton({ id, disabled }: { id: string; disabled: boolean }) {
+function DeleteVehiculeButton({
+  id,
+  updatedAt,
+  disabled,
+}: {
+  id: string;
+  updatedAt: string;
+  disabled: boolean;
+}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
@@ -19,7 +27,9 @@ function DeleteVehiculeButton({ id, disabled }: { id: string; disabled: boolean 
     if (disabled || pending) return;
     if (!window.confirm('Retirer ce véhicule du site ? (il sera marqué comme vendu)')) return;
     startTransition(async () => {
-      await deleteVehicule(id);
+      const res = await deleteVehicule(id, updatedAt);
+      // Conflit de lock optimiste : jamais silencieux (la ligne réapparaîtrait sans explication).
+      if (res && 'errors' in res && res.errors._form?.[0]) window.alert(res.errors._form[0]);
       router.refresh();
     });
   };
@@ -90,7 +100,11 @@ const columns: Column<Vehicule>[] = [
         >
           Éditer
         </Link>
-        <DeleteVehiculeButton id={v.id} disabled={v.disponibilite === 'vendu'} />
+        <DeleteVehiculeButton
+          id={v.id}
+          updatedAt={v.updatedAt}
+          disabled={v.disponibilite === 'vendu'}
+        />
       </>
     ),
   },

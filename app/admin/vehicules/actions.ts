@@ -153,14 +153,41 @@ export async function updateVehicule(
   return { ok: true, message: 'Véhicule mis à jour.' };
 }
 
-export async function deleteVehicule(id: string): Promise<FormActionState> {
+export async function deleteVehicule(
+  id: string,
+  clientUpdatedAt: string
+): Promise<FormActionState> {
   const session = await requireAdmin();
 
   const db = getAdminFirestore();
-  await db.doc(`vehicules/${id}`).update({
-    disponibilite: 'vendu',
-    updatedAt: new Date().toISOString(),
+  // Lock optimiste (même transaction que updateVehicule) : un « Supprimer »
+  // n'écrase jamais silencieusement une édition concurrente.
+  let conflict = false;
+  let missing = false;
+  await db.runTransaction(async (tx) => {
+    const ref = db.doc(`vehicules/${id}`);
+    const snap = await tx.get(ref);
+    if (!snap.exists) {
+      missing = true;
+      return;
+    }
+    const before = (snap.data?.() ?? {}) as Record<string, unknown>;
+    if (before.updatedAt && before.updatedAt !== clientUpdatedAt) {
+      conflict = true;
+      return;
+    }
+    tx.update(ref, {
+      disponibilite: 'vendu',
+      updatedAt: new Date().toISOString(),
+    });
   });
+
+  if (missing) {
+    return { errors: { _form: ['Véhicule introuvable.'] } };
+  }
+  if (conflict) {
+    return { errors: { _form: ['Ce véhicule a été modifié entre-temps. Rechargez la page.'] } };
+  }
 
   await writeAuditLog({
     actor: session.email,

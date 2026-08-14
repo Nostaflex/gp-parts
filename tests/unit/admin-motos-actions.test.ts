@@ -187,13 +187,31 @@ describe('Server Actions motos', () => {
     expect(res).toMatchObject({ errors: { _form: expect.any(Array) } });
   });
 
-  it('deleteMoto : soft → disponibilite vendu + audit', async () => {
-    const res = await deleteMoto('yamaha-mt07');
-    expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({ disponibilite: 'vendu' }));
+  it('deleteMoto : soft-delete verrouillé + audit', async () => {
+    txGetMock.mockResolvedValue({
+      exists: true,
+      data: () => ({ updatedAt: '2026-05-01T00:00:00.000Z' }),
+    });
+    const res = await deleteMoto('yamaha-mt07', '2026-05-01T00:00:00.000Z');
+    expect(txUpdateMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ disponibilite: 'vendu' })
+    );
     expect(writeAuditLogMock).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'delete', resourceType: 'moto' })
     );
     expect(revalidateTagMock).toHaveBeenCalledWith('motos');
     expect(res).toMatchObject({ ok: true });
+  });
+
+  it('deleteMoto : conflit lock (édition concurrente) → refus, aucune écriture', async () => {
+    txGetMock.mockResolvedValue({
+      exists: true,
+      data: () => ({ updatedAt: '2026-05-10T00:00:00.000Z' }),
+    });
+    const res = await deleteMoto('yamaha-mt07', '2026-05-01T00:00:00.000Z');
+    expect(txUpdateMock).not.toHaveBeenCalled();
+    expect(writeAuditLogMock).not.toHaveBeenCalled();
+    expect(res).toMatchObject({ errors: { _form: expect.any(Array) } });
   });
 });

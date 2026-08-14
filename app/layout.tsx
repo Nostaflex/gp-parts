@@ -3,6 +3,7 @@ import { Big_Shoulders, Instrument_Sans, JetBrains_Mono } from 'next/font/google
 import { CartProvider } from '@/components/cart/CartProvider';
 import { ToastProvider } from '@/components/ui/Toast';
 import { CookieBanner } from '@/components/gdpr/CookieBanner';
+import { AnalyticsGate } from '@/components/gdpr/AnalyticsGate';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { FeatureFlagsProvider } from '@/components/cp/FeatureFlagsProvider';
 import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
@@ -73,8 +74,11 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const featureFlags = await getCachedFeatureFlags();
-  const contactInfo = await getCachedContactInfo();
+  // Indépendants : en parallèle (à froid / après revalidateTag, 2 RTT → 1).
+  const [featureFlags, contactInfo] = await Promise.all([
+    getCachedFeatureFlags(),
+    getCachedContactInfo(),
+  ]);
 
   return (
     <html
@@ -99,6 +103,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 {children}
               </main>
               <CookieBanner />
+              <AnalyticsGate />
             </CartProvider>
           </ToastProvider>
         </FeatureFlagsProvider>

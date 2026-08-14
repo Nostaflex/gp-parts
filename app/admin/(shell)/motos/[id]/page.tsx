@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { requireAdminPage } from '@/lib/admin/auth';
 
 import { MotoForm } from '@/components/admin/MotoForm';
 import { getAdapter } from '@/lib/data';
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function EditMotoPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireAdminPage();
   const { id } = await params;
   const adapter = await getAdapter();
   // Charge toutes les motos puis filtre par id : l'interface DataAdapter

@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { requireAdminMock, writeAuditLogMock, revalidatePathMock, updateStatusMock, getByIdMock } =
-  vi.hoisted(() => ({
+const { requireAdminMock, writeAuditLogMock, revalidatePathMock, transitionMock } = vi.hoisted(
+  () => ({
     requireAdminMock: vi.fn(),
     writeAuditLogMock: vi.fn(),
     revalidatePathMock: vi.fn(),
-    updateStatusMock: vi.fn(),
-    getByIdMock: vi.fn(),
-  }));
+    transitionMock: vi.fn(),
+  })
+);
 
 vi.mock('@/lib/admin/auth', () => ({
   requireAdmin: requireAdminMock,
@@ -16,39 +16,38 @@ vi.mock('@/lib/admin/auth', () => ({
 vi.mock('@/lib/admin/audit', () => ({ writeAuditLog: writeAuditLogMock }));
 vi.mock('next/cache', () => ({ revalidatePath: revalidatePathMock }));
 vi.mock('@/lib/admin/reservations-server', () => ({
-  getReservationByIdAdmin: getByIdMock,
-  updateReservationStatusAdmin: updateStatusMock,
+  transitionReservationStatusAdmin: transitionMock,
 }));
 
 import { updateReservationStatus } from '@/app/admin/reservations/actions';
 
-describe('updateReservationStatus', () => {
+describe('updateReservationStatus (transition transactionnelle)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     requireAdminMock.mockResolvedValue({ uid: 'u1', email: 'admin@gp.fr' });
   });
 
-  it('transition autorisée nouvelle→confirmee : update + audit', async () => {
-    getByIdMock.mockResolvedValue({ id: 'r1', status: 'nouvelle' });
+  it('transition autorisée nouvelle→confirmee : transaction + audit', async () => {
+    transitionMock.mockResolvedValue({ ok: true });
     const res = await updateReservationStatus('r1', 'confirmee');
-    expect(updateStatusMock).toHaveBeenCalledWith('r1', 'confirmee');
+    expect(transitionMock).toHaveBeenCalledWith('r1', 'confirmee', expect.any(Object));
     expect(writeAuditLogMock).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'update', resourceType: 'reservation', resourceId: 'r1' })
     );
     expect(res).toMatchObject({ ok: true });
   });
 
-  it('transition interdite nouvelle→terminee : rejet sans update', async () => {
-    getByIdMock.mockResolvedValue({ id: 'r1', status: 'nouvelle' });
+  it('transition interdite : rejet sans audit', async () => {
+    transitionMock.mockResolvedValue({ ok: false, reason: 'transition', current: 'nouvelle' });
     const res = await updateReservationStatus('r1', 'terminee');
-    expect(updateStatusMock).not.toHaveBeenCalled();
+    expect(writeAuditLogMock).not.toHaveBeenCalled();
     expect(res).toMatchObject({ errors: { _form: expect.any(Array) } });
   });
 
   it('réservation introuvable : rejet', async () => {
-    getByIdMock.mockResolvedValue(null);
+    transitionMock.mockResolvedValue({ ok: false, reason: 'introuvable' });
     const res = await updateReservationStatus('rX', 'confirmee');
-    expect(updateStatusMock).not.toHaveBeenCalled();
+    expect(writeAuditLogMock).not.toHaveBeenCalled();
     expect(res).toMatchObject({ errors: { _form: expect.any(Array) } });
   });
 

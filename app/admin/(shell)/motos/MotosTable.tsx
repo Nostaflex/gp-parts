@@ -11,7 +11,15 @@ import { deleteMoto } from '@/app/admin/motos/actions';
 import type { Moto, Disponibilite } from '@/lib/motos';
 
 /** Bouton de suppression (soft-delete → « vendu », retiré du site public). */
-function DeleteMotoButton({ id, disabled }: { id: string; disabled: boolean }) {
+function DeleteMotoButton({
+  id,
+  updatedAt,
+  disabled,
+}: {
+  id: string;
+  updatedAt: string;
+  disabled: boolean;
+}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
@@ -19,7 +27,9 @@ function DeleteMotoButton({ id, disabled }: { id: string; disabled: boolean }) {
     if (disabled || pending) return;
     if (!window.confirm('Retirer cette moto du site ? (elle sera marquée comme vendue)')) return;
     startTransition(async () => {
-      await deleteMoto(id);
+      const res = await deleteMoto(id, updatedAt);
+      // Conflit de lock optimiste : jamais silencieux.
+      if (res && 'errors' in res && res.errors._form?.[0]) window.alert(res.errors._form[0]);
       router.refresh();
     });
   };
@@ -96,7 +106,11 @@ const columns: Column<Moto>[] = [
         >
           Éditer
         </Link>
-        <DeleteMotoButton id={m.id} disabled={m.disponibilite === 'vendu'} />
+        <DeleteMotoButton
+          id={m.id}
+          updatedAt={m.updatedAt}
+          disabled={m.disponibilite === 'vendu'}
+        />
       </>
     ),
   },

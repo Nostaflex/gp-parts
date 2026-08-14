@@ -14,7 +14,9 @@ const cachedRawFlags = unstable_cache(
     return adapter.getFeatureFlags();
   },
   ['feature-flags'],
-  { tags: ['feature-flags'] }
+  // revalidate = filet : une écriture hors Server Action (console Firebase)
+  // ne laisse jamais le site périmé > 1 h. Le tag reste le chemin rapide.
+  { tags: ['feature-flags'], revalidate: 3600 }
 );
 
 /**

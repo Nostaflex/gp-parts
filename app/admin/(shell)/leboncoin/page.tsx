@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { requireAdminPage } from '@/lib/admin/auth';
 
 import { getAdapter } from '@/lib/data';
 
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function LeboncoinPage() {
+  await requireAdminPage();
   const adapter = await getAdapter();
   const [vehicules, motos] = await Promise.all([adapter.getVehicules(), adapter.getMotos()]);
 

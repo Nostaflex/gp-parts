@@ -176,9 +176,14 @@ describe('Server Actions location', () => {
     expect(res).toMatchObject({ errors: { _form: expect.any(Array) } });
   });
 
-  it('deleteLocationCar : soft-delete (deletedAt) + audit', async () => {
-    const res = await deleteLocationCar('clio-v');
-    expect(updateMock).toHaveBeenCalledWith(
+  it('deleteLocationCar : soft-delete verrouillé + audit', async () => {
+    txGetMock.mockResolvedValue({
+      exists: true,
+      data: () => ({ updatedAt: '2026-05-01T00:00:00.000Z' }),
+    });
+    const res = await deleteLocationCar('clio-v', '2026-05-01T00:00:00.000Z');
+    expect(txUpdateMock).toHaveBeenCalledWith(
+      expect.anything(),
       expect.objectContaining({ deletedAt: expect.any(String) })
     );
     expect(writeAuditLogMock).toHaveBeenCalledWith(
@@ -186,5 +191,16 @@ describe('Server Actions location', () => {
     );
     expect(revalidatePathMock).toHaveBeenCalledWith('/location');
     expect(res).toMatchObject({ ok: true });
+  });
+
+  it('deleteLocationCar : conflit lock (édition concurrente) → refus, aucune écriture', async () => {
+    txGetMock.mockResolvedValue({
+      exists: true,
+      data: () => ({ updatedAt: '2026-05-10T00:00:00.000Z' }),
+    });
+    const res = await deleteLocationCar('clio-v', '2026-05-01T00:00:00.000Z');
+    expect(txUpdateMock).not.toHaveBeenCalled();
+    expect(writeAuditLogMock).not.toHaveBeenCalled();
+    expect(res).toMatchObject({ errors: { _form: expect.any(Array) } });
   });
 });

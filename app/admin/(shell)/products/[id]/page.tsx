@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { requireAdminPage } from '@/lib/admin/auth';
 
 import { ProductForm } from '@/components/admin/ProductForm';
 import { getAdapter } from '@/lib/data';
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireAdminPage();
   const { id } = await params;
   const adapter = await getAdapter();
   const product = await adapter.getProductById(id, { includeDeleted: true });
