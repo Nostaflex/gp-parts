@@ -5,7 +5,9 @@ import { CpHeader } from '@/components/cp/CpHeader';
 import { CpBridge } from '@/components/cp/CpBridge';
 import { CpFooter } from '@/components/cp/CpFooter';
 import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
-import { FORMULES } from './formules';
+import { getCachedLavageSettings } from '@/lib/data/lavage-settings-cache';
+import { htFromTTCEnCents } from '@/lib/lavage-settings';
+import { formatPrice } from '@/lib/utils';
 import { LavageForm } from './LavageForm';
 
 export const metadata: Metadata = {
@@ -18,6 +20,7 @@ export const metadata: Metadata = {
 export default async function LavagePage() {
   const flags = await getCachedFeatureFlags();
   if (!flags.lavage) notFound();
+  const { formules } = await getCachedLavageSettings();
 
   return (
     <>
@@ -91,10 +94,10 @@ export default async function LavagePage() {
             className="cp-title font-black text-cp-ink leading-none mb-12"
             style={{ fontSize: 'clamp(2.5rem, 5vw, 5rem)' }}
           >
-            QUATRE FORMULES
+            NOS FORMULES
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
-            {FORMULES.map((f) => (
+            {formules.map((f) => (
               <div
                 key={f.nom}
                 className="bg-white rounded-2xl border border-[#E5DDD3] p-6 flex flex-col"
@@ -102,7 +105,7 @@ export default async function LavagePage() {
                 <h3 className="cp-title font-black text-cp-ink text-2xl mb-2">
                   {f.nom.toUpperCase()}
                 </h3>
-                <p className="text-cp-ink/55 text-sm leading-relaxed mb-4">{f.desc}</p>
+                <p className="text-cp-ink/55 text-sm leading-relaxed mb-4">{f.description}</p>
                 <ul className="flex flex-col gap-2 mb-6">
                   {f.inclus.map((i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-cp-ink/70">
@@ -113,7 +116,19 @@ export default async function LavagePage() {
                     </li>
                   ))}
                 </ul>
-                <p className="cp-mono text-cp-mango text-sm tracking-wide mt-auto">{f.prix}</p>
+                <p className="cp-mono text-cp-mango text-sm tracking-wide mt-auto">
+                  {f.mode === 'prix' ? (
+                    <>
+                      {formatPrice(f.prixTTCEnCents)} TTC
+                      <span className="text-cp-ink/40">
+                        {' '}
+                        · {formatPrice(htFromTTCEnCents(f.prixTTCEnCents))} HT
+                      </span>
+                    </>
+                  ) : (
+                    'Sur devis'
+                  )}
+                </p>
               </div>
             ))}
           </div>
@@ -138,7 +153,7 @@ export default async function LavagePage() {
                 selon l&apos;état et la taille du véhicule.
               </p>
             </div>
-            <LavageForm />
+            <LavageForm formules={formules.map((f) => f.nom)} />
           </div>
         </div>
       </section>
