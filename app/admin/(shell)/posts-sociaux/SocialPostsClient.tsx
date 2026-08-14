@@ -121,22 +121,34 @@ export function SocialPostsClient({ vehicules, motos, settings }: Props) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     setCanvasError(null);
+    // Effacer TOUT DE SUITE : si la nouvelle photo échoue, l'ancien visuel
+    // ne doit jamais rester affiché sous la mauvaise annonce (vu en preview
+    // 2026-08-13 : canvas Peugeot sous une sélection BMW).
+    ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
+    // Garde anti-course : une photo lente ne doit pas se dessiner après
+    // qu'on a changé d'annonce.
+    let stale = false;
     const img = new window.Image();
     // Autorise l'export du canvas si la photo vient d'un autre domaine
     // (Unsplash, Firebase Storage) — sinon canvas « tainted » = export mort.
     img.crossOrigin = 'anonymous';
     img.onload = () => {
+      if (stale) return;
       ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
       drawCover(ctx, img, CANVAS_SIZE);
       drawOverlay(ctx, selected, CANVAS_SIZE);
     };
     img.onerror = () => {
+      if (stale) return;
       setCanvasError(
         'Photo introuvable ou bloquée (CORS) — visuel indisponible, la légende reste utilisable.'
       );
     };
     img.src = selected.data.image;
+    return () => {
+      stale = true;
+    };
   }, [selected]);
 
   const copyCaption = async () => {
