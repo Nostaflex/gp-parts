@@ -141,31 +141,38 @@ test.describe('Admin — smoke back-office', () => {
     // (middleware présence + Auth getUser + whitelist meta/admins).
     await loginViaEmulator(page);
     await page.goto('/admin/dashboard');
-    // Attendre que le dashboard soit chargé (données Firestore et produits visibles)
-    await expect(page.getByText('Produits en catalogue')).toBeVisible({ timeout: 15_000 });
+    // Attendre que le hub soit rendu (Server Component : tout arrive d'un bloc)
+    await expect(page.getByRole('heading', { name: /tableau de bord/i })).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
-  test('la page /admin charge et affiche les 4 KPIs', async ({ page }) => {
-    await expect(page.getByText('Produits en catalogue')).toBeVisible();
-    await expect(page.getByRole('paragraph').filter({ hasText: /^Stock faible$/ })).toBeVisible();
-    await expect(page.getByRole('paragraph').filter({ hasText: /^En promotion$/ })).toBeVisible();
-    await expect(page.getByText('Valeur du stock')).toBeVisible();
+  test('le bandeau « À traiter » affiche les 4 tuiles cliquables', async ({ page }) => {
+    await expect(page.getByText('Commandes ouvertes')).toBeVisible();
+    await expect(page.getByText('Avis à modérer')).toBeVisible();
+    await expect(page.getByText('Réservations ouvertes')).toBeVisible();
+    await expect(page.getByText('Demandes ouvertes')).toBeVisible();
   });
 
-  test('la table produits est affichée avec au moins 1 ligne', async ({ page }) => {
-    await expect(page.getByText(/référence/i).first()).toBeVisible();
-    await expect(page.getByText(/catégorie/i).first()).toBeVisible();
-    await expect(page.getByText(/PEU-208/i).first()).toBeVisible();
+  test('les KPIs business du mois sont affichés', async ({ page }) => {
+    await expect(page.getByText('CA du mois (payé)')).toBeVisible();
+    await expect(page.getByText(/commandes aujourd'hui/i)).toBeVisible();
+    await expect(page.getByText('Stock faible / ruptures')).toBeVisible();
+    await expect(page.getByText('Valeur du stock pièces')).toBeVisible();
   });
 
-  test('les filtres fonctionnent (Stock faible)', async ({ page }) => {
-    await page.getByRole('button', { name: /stock faible/i }).click();
-    await expect(page.getByText(/référence/i).first()).toBeVisible();
+  test('la grille pôles navigue vers la gestion des pièces', async ({ page }) => {
+    await page
+      .getByRole('link', { name: /pièces/i })
+      .first()
+      .click();
+    await page.waitForURL(/\/admin\/products$/, { timeout: 15_000 });
   });
 
-  test('le bouton Modifier déclenche le toast démo', async ({ page }) => {
-    const editBtn = page.getByLabel(/modifier/i).first();
-    await editBtn.click();
-    await expect(page.getByText(/disponible en v2/i)).toBeVisible({ timeout: 5_000 });
+  test('la section dernières commandes est rendue (table ou état vide)', async ({ page }) => {
+    const section = page.getByRole('region', { name: /dernières commandes/i });
+    await expect(section).toBeVisible();
+    // Table de commandes OU état vide — les deux sont valides selon le seed
+    await expect(section.getByText(/aucune commande|statut/i).first()).toBeVisible();
   });
 });
