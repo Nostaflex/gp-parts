@@ -5,11 +5,9 @@ import { test, expect } from '@playwright/test';
  *
  * Réutilise EXACTEMENT le mécanisme de login des smoke tests existants
  * (tests/e2e/admin.spec.ts, describe « Admin — smoke back-office ») :
- *   - injectSessionCookie : pose le cookie __session (bypass login UI).
- *     Le middleware Edge ne vérifie que la *présence* du cookie ; les pages
- *     admin (Server Components) rendent sans appeler requireAdmin() —
- *     seules les Server Actions le font, et ces tests ne soumettent aucun
- *     formulaire. L'injection suffit donc, comme pour le smoke dashboard.
+ *   - loginViaEmulator : vrai login via l'API emulator-login (vrai uid).
+ *     Depuis le Lot 1 (2026-08-13), chaque page admin appelle
+ *     requireAdminPage() — le cookie factice ne suffit plus, par design.
  *   - gating HAS_AUTH_CREDENTIALS : skip hors CI émulateur (mêmes vars que
  *     admin.spec.ts : TEST_ADMIN_EMAIL + TEST_ADMIN_PASSWORD).
  *
@@ -28,16 +26,26 @@ const TEST_PASSWORD = process.env.TEST_ADMIN_PASSWORD;
 const HAS_AUTH_CREDENTIALS = Boolean(TEST_EMAIL && TEST_PASSWORD);
 
 /** Injecte un session cookie valide pour bypasser le middleware sans passer par l'UI */
-async function injectSessionCookie(context: import('@playwright/test').BrowserContext) {
-  await context.addCookies([
-    {
-      name: '__session',
-      value: 'e2e-test-session',
-      url: 'http://localhost:3000',
-      httpOnly: true,
-      sameSite: 'Lax',
+/**
+ * Vrai login émulateur (même mécanisme que admin.spec.ts) : l'API
+ * emulator-login pose un cookie __session au VRAI uid. Nécessaire depuis le
+ * Lot 1 Fondations : chaque page admin appelle requireAdminPage() (Auth
+ * getUser + whitelist meta/admins) — un cookie factice redirige vers login.
+ */
+async function loginViaEmulator(page: import('@playwright/test').Page) {
+  await page.goto('/admin/login');
+  await page.evaluate(
+    async ({ email, password }) => {
+      const res = await fetch('/api/admin/emulator-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+        credentials: 'include',
+      });
+      if (!res.ok) throw new Error(`emulator-login failed: ${res.status}`);
     },
-  ]);
+    { email: TEST_EMAIL, password: TEST_PASSWORD }
+  );
 }
 
 test.describe('Admin véhicules (émulateur)', () => {
@@ -46,9 +54,9 @@ test.describe('Admin véhicules (émulateur)', () => {
     'Requires TEST_ADMIN_EMAIL + TEST_ADMIN_PASSWORD (Firebase Auth emulator — Phase 4a)'
   );
 
-  test.beforeEach(async ({ context }) => {
-    // Injection du cookie de session → bypass login UI, middleware autorise l'accès
-    await injectSessionCookie(context);
+  test.beforeEach(async ({ page }) => {
+    // Vrai login émulateur — requireAdminPage() exige un uid réel + whitelist.
+    await loginViaEmulator(page);
   });
 
   test('liste /admin/vehicules accessible après login', async ({ page }) => {
