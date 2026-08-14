@@ -1,6 +1,8 @@
 // Compteurs « à traiter » pour la sidebar admin (badge par section).
 // Admin SDK (rules admin-only) + agrégat count() : pas de documents lus.
 // Fail-open + WARN : un badge absent ne doit jamais casser le back-office.
+import { cache } from 'react';
+
 import { getAdminFirestore } from '@/lib/firebase-admin';
 
 export type NavBadges = {
@@ -36,7 +38,9 @@ async function countOuvertes(key: keyof NavBadges): Promise<number> {
   return snap.data().count;
 }
 
-export async function getNavBadges(): Promise<NavBadges> {
+// React.cache : dédoublonne par requête — le layout shell ET le dashboard
+// appellent getNavBadges() sur /admin/dashboard ; sans cache, 8 count() au lieu de 4.
+export const getNavBadges = cache(async (): Promise<NavBadges> => {
   try {
     const [commandes, reservations, demandes, avis] = await Promise.all([
       countOuvertes('commandes'),
@@ -49,4 +53,4 @@ export async function getNavBadges(): Promise<NavBadges> {
     console.warn('[nav-badges] comptage échoué (fail-open, badges masqués):', err);
     return EMPTY;
   }
-}
+});
