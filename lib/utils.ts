@@ -118,3 +118,18 @@ export function getStockLabel(stock: number): string {
   if (status === 'low-stock') return `Plus que ${stock}`;
   return 'En stock';
 }
+
+/**
+ * Masque un email pour affichage/stockage non sensible (récap de commande).
+ * Nombre FIXE de puces : ne fuit ni la longueur du local-part (l'ancien
+ * masque répétait un `*` par caractère), ni rien si l'entrée n'est pas
+ * un email. Le domaine reste lisible pour que le client se reconnaisse.
+ */
+export function maskEmail(email: string): string {
+  const at = email.indexOf('@');
+  if (at === -1) return '•••';
+  const local = email.slice(0, at);
+  const domain = email.slice(at);
+  const visible = local.length > 2 ? local.slice(0, 2) : '';
+  return `${visible}•••${domain}`;
+}
