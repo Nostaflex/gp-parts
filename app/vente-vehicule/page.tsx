@@ -25,6 +25,8 @@ export default async function VenteVehiculePage() {
   const flags = await getCachedFeatureFlags();
   if (!flags.venteVehicule) notFound();
   const vehicules = await getCachedVehicules();
+  // Le stock annoncé au hero = les VRAIS disponibles (ni réservés ni vendus).
+  const nbDisponibles = vehicules.filter((v) => v.disponibilite === 'disponible').length;
 
   return (
     <>
@@ -162,7 +164,9 @@ export default async function VenteVehiculePage() {
                 Stock disponible
               </p>
               <p className="cp-title font-black text-xl mt-1" style={{ color: '#F8EDD8' }}>
-                5 véhicules
+                {nbDisponibles > 0
+                  ? `${nbDisponibles} véhicule${nbDisponibles > 1 ? 's' : ''}`
+                  : 'Arrivages en cours'}
               </p>
               <p className="text-xs mt-0.5" style={{ color: 'rgba(128,96,64,0.9)' }}>
                 Mis à jour régulièrement
