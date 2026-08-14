@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { CardPaymentForm } from '@/components/checkout/CardPaymentForm';
 import { useCart } from '@/components/cart/CartProvider';
 import { useToast } from '@/components/ui/Toast';
-import { formatPrice, cn } from '@/lib/utils';
+import { formatPrice, cn, maskEmail } from '@/lib/utils';
 import { CpRgpdNotice } from '@/components/cp/CpRgpdNotice';
 import { validateCheckout } from './actions';
 import { DELIVERY_OPTIONS_CONFIG, getDeliveryPrice } from '@/lib/config';
@@ -77,10 +77,7 @@ export default function CheckoutPage() {
   // setOrderPlaced(true) AVANT clearCart() — anti race condition Bug #3.
   const completeOrder = (orderNumber: string | undefined) => {
     try {
-      const maskedEmail = form.email.replace(
-        /^(.{2})(.*)(@.*)$/,
-        (_, start, middle, domain) => start + '*'.repeat(middle.length) + domain
-      );
+      const maskedEmail = maskEmail(form.email);
       sessionStorage.setItem(
         'gpparts-last-order',
         JSON.stringify({
@@ -92,7 +89,11 @@ export default function CheckoutPage() {
           deliveryOption: form.deliveryOption,
         })
       );
-    } catch {}
+    } catch (err) {
+      // Fail-open (la commande est déjà validée) mais JAMAIS muet : sans ce
+      // récap, la page de confirmation sera vide de détails.
+      console.warn('[checkout] sessionStorage indisponible, récap non stocké:', err);
+    }
 
     setOrderPlaced(true);
     clearCart();

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  maskEmail,
   formatPrice,
   slugify,
   productSlug,
@@ -163,5 +164,22 @@ describe('localDateISO', () => {
 
   it('offsetDays décale correctement (J+1 > J)', () => {
     expect(localDateISO(1) > localDateISO(0)).toBe(true);
+  });
+});
+
+// ─── maskEmail ───────────────────────────────────────────────────────
+describe('maskEmail', () => {
+  it('masque le local-part sans fuir sa longueur (nombre fixe de •)', () => {
+    expect(maskEmail('jean.dupont@gmail.com')).toBe('je•••@gmail.com');
+    // 2 caractères : les montrer révélerait TOUT le local-part → tout masqué
+    expect(maskEmail('jd@gmail.com')).toBe('•••@gmail.com');
+  });
+
+  it('local-part de 2 caractères ou moins : tout masqué, jamais vide', () => {
+    expect(maskEmail('a@ex.fr')).toBe('•••@ex.fr');
+  });
+
+  it('entrée sans @ : renvoyée masquée entièrement (jamais de PII brute)', () => {
+    expect(maskEmail('pas-un-email')).toBe('•••');
   });
 });
