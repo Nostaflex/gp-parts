@@ -13,6 +13,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Image from 'next/image';
 import type { Vehicule } from '@/lib/vehicules';
 import type { Moto } from '@/lib/motos';
 import type { SocialSettings } from '@/lib/social-settings';
@@ -106,9 +107,15 @@ export function SocialPostsClient({ vehicules, motos, settings }: Props) {
   const [copied, setCopied] = useState(false);
   const [canvasError, setCanvasError] = useState<string | null>(null);
   const [shareError, setShareError] = useState<string | null>(null);
+  // Index de la photo utilisée pour le visuel (une annonce a jusqu'à 5 photos).
+  const [photoIdx, setPhotoIdx] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const selected = items.find((i) => i.data.id === selectedId) ?? items[0];
+  const photos = selected?.data.images?.length
+    ? selected.data.images
+    : [selected?.data.image ?? ''];
+  const photo = photos[Math.min(photoIdx, photos.length - 1)];
   const post = useMemo(
     () => (selected ? generateSocialPost(selected, network, settings) : null),
     [selected, network, settings]
@@ -145,11 +152,16 @@ export function SocialPostsClient({ vehicules, motos, settings }: Props) {
         'Photo introuvable ou bloquée (CORS) — visuel indisponible, la légende reste utilisable.'
       );
     };
-    img.src = selected.data.image;
+    img.src = photo;
     return () => {
       stale = true;
     };
-  }, [selected]);
+  }, [selected, photo]);
+
+  // Changer d'annonce → repartir sur sa première photo.
+  useEffect(() => {
+    setPhotoIdx(0);
+  }, [selectedId]);
 
   const copyCaption = async () => {
     if (!post) return;
@@ -327,6 +339,32 @@ export function SocialPostsClient({ vehicules, motos, settings }: Props) {
                 className="w-full max-w-[420px] rounded-xl border"
                 style={{ borderColor: IOS.border }}
               />
+              {/* Choix de la photo du visuel — seulement si l'annonce en a plusieurs */}
+              {photos.length > 1 && (
+                <div
+                  className="flex gap-2 mt-3 flex-wrap"
+                  role="radiogroup"
+                  aria-label="Photo utilisée pour le visuel"
+                >
+                  {photos.map((p, i) => (
+                    <button
+                      key={p}
+                      type="button"
+                      role="radio"
+                      aria-checked={photoIdx === i}
+                      aria-label={`Photo ${i + 1} sur ${photos.length}`}
+                      onClick={() => setPhotoIdx(i)}
+                      className="relative h-14 w-14 rounded-lg overflow-hidden border-2 transition-all"
+                      style={{
+                        borderColor: photoIdx === i ? IOS.blue : IOS.border,
+                        opacity: photoIdx === i ? 1 : 0.6,
+                      }}
+                    >
+                      <Image src={p} alt="" fill sizes="56px" className="object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
               {canvasError && (
                 <p className="text-xs mt-2" style={{ color: IOS.danger }}>
                   ⚠️ {canvasError}
