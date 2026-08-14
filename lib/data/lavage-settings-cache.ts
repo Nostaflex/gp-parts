@@ -20,6 +20,19 @@ const cachedRawLavageSettings = unstable_cache(
   { tags: ['lavage-settings'], revalidate: 3600 }
 );
 
+let warnedFail = false;
+
 export async function getCachedLavageSettings(): Promise<LavageSettings> {
-  return normalizeLavageSettings(await cachedRawLavageSettings());
+  // Fail-open : /lavage ne meurt JAMAIS sur cette lecture (credentials
+  // absents au build CI, quota, réseau) — défauts + WARN, jamais un crash.
+  // Vécu 2026-08-14 : la CI GitHub prérend /lavage sans env Firebase Admin.
+  try {
+    return normalizeLavageSettings(await cachedRawLavageSettings());
+  } catch (err) {
+    if (!warnedFail) {
+      warnedFail = true;
+      console.warn('[lavage-settings-cache] lecture échouée (fail-open, défauts):', err);
+    }
+    return normalizeLavageSettings(null);
+  }
 }
