@@ -18,6 +18,7 @@ describe('FeatureFlagsForm', () => {
           venteMoto: false,
           reparation: true,
           lavage: true,
+          avis: true,
         }}
       />
     );

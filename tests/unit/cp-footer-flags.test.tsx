@@ -20,6 +20,7 @@ describe('CpFooter — filtrage par flags', () => {
       venteMoto: false,
       reparation: false,
       lavage: false,
+      avis: false,
     });
     render(await CpFooter());
     expect(screen.queryByRole('link', { name: 'Réparation' })).toBeNull();

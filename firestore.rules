@@ -46,6 +46,14 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Avis clients : dépôt via Admin SDK uniquement (Server Action validée),
+    // lecture publique via cache serveur — jamais en direct client.
+    match /avis/{doc} {
+      allow create: if false;
+      allow read, update: if isAdmin();
+      allow delete: if false;
+    }
+
     // Leboncoin drafts: admin only (lecture + écriture)
     match /leboncoin_drafts/{doc=**} {
       allow read, write: if isAdmin();

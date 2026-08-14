@@ -33,8 +33,9 @@ describe('getNavBadges', () => {
     countsByCollection.orders = 3;
     countsByCollection.reservations = 1;
     countsByCollection.demandes = 7;
+    countsByCollection.avis = 2;
     const badges = await getNavBadges();
-    expect(badges).toEqual({ commandes: 3, reservations: 1, demandes: 7 });
+    expect(badges).toEqual({ commandes: 3, reservations: 1, demandes: 7, avis: 2 });
     expect(collectionMock).toHaveBeenCalledWith('orders');
     expect(collectionMock).toHaveBeenCalledWith('reservations');
     expect(collectionMock).toHaveBeenCalledWith('demandes');
@@ -45,8 +46,9 @@ describe('getNavBadges', () => {
     countsByCollection.orders = new Error('boom');
     countsByCollection.reservations = 1;
     countsByCollection.demandes = 2;
+    countsByCollection.avis = 0;
     const badges = await getNavBadges();
-    expect(badges).toEqual({ commandes: 0, reservations: 0, demandes: 0 });
+    expect(badges).toEqual({ commandes: 0, reservations: 0, demandes: 0, avis: 0 });
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();
   });

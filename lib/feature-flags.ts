@@ -9,6 +9,7 @@ export type FeatureFlags = {
   venteMoto: boolean;
   reparation: boolean;
   lavage: boolean;
+  avis: boolean;
 };
 
 // Défaut = tout visible : une lecture sur un Firestore non seedé ne casse
@@ -20,6 +21,7 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   venteMoto: true,
   reparation: true,
   lavage: true,
+  avis: true,
 };
 
 /** Merge un doc Firestore (partiel/inconnu) sur les défauts, clés connues only. */
@@ -36,6 +38,7 @@ export function normalizeFeatureFlags(raw: Partial<FeatureFlags> | null | undefi
     reparation:
       typeof src.reparation === 'boolean' ? src.reparation : DEFAULT_FEATURE_FLAGS.reparation,
     lavage: typeof src.lavage === 'boolean' ? src.lavage : DEFAULT_FEATURE_FLAGS.lavage,
+    avis: typeof src.avis === 'boolean' ? src.avis : DEFAULT_FEATURE_FLAGS.avis,
   };
 }
 
@@ -48,6 +51,7 @@ const SECTION_FLAG_BY_PREFIX: { prefix: string; flag: keyof FeatureFlags }[] = [
   { prefix: '/vente-moto', flag: 'venteMoto' },
   { prefix: '/reparation', flag: 'reparation' },
   { prefix: '/lavage', flag: 'lavage' },
+  { prefix: '/avis', flag: 'avis' },
 ];
 
 /** Un lien/route est-il visible selon les flags ? (gère query + sous-routes) */

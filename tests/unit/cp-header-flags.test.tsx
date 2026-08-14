@@ -29,6 +29,7 @@ describe('CpHeader — filtrage par flags', () => {
       venteMoto: false,
       reparation: false,
       lavage: false,
+      avis: false,
     });
     expect(screen.queryByRole('link', { name: 'Pièces' })).toBeNull();
     expect(screen.queryByRole('link', { name: 'Location' })).toBeNull();
@@ -45,6 +46,7 @@ describe('CpHeader — filtrage par flags', () => {
       venteMoto: true,
       reparation: true,
       lavage: true,
+      avis: true,
     });
     expect(screen.getAllByRole('link', { name: 'Pièces' }).length).toBeGreaterThan(0);
     expect(screen.getAllByRole('link', { name: 'Vente véhicule' }).length).toBeGreaterThan(0);

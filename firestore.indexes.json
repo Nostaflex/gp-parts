@@ -4,122 +4,232 @@
       "collectionGroup": "products",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "category", "order": "ASCENDING" },
-        { "fieldPath": "price", "order": "ASCENDING" }
+        {
+          "fieldPath": "category",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "price",
+          "order": "ASCENDING"
+        }
       ]
     },
     {
       "collectionGroup": "products",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "vehicleType", "order": "ASCENDING" },
-        { "fieldPath": "category", "order": "ASCENDING" }
+        {
+          "fieldPath": "vehicleType",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "category",
+          "order": "ASCENDING"
+        }
       ]
     },
     {
       "collectionGroup": "products",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "isPromoted", "order": "ASCENDING" },
-        { "fieldPath": "stock", "order": "DESCENDING" }
+        {
+          "fieldPath": "isPromoted",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "stock",
+          "order": "DESCENDING"
+        }
       ]
     },
     {
       "collectionGroup": "products",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "deletedAt", "order": "ASCENDING" },
-        { "fieldPath": "category", "order": "ASCENDING" }
+        {
+          "fieldPath": "deletedAt",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "category",
+          "order": "ASCENDING"
+        }
       ]
     },
     {
       "collectionGroup": "products",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "deletedAt", "order": "ASCENDING" },
-        { "fieldPath": "vehicleType", "order": "ASCENDING" }
+        {
+          "fieldPath": "deletedAt",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "vehicleType",
+          "order": "ASCENDING"
+        }
       ]
     },
     {
       "collectionGroup": "products",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "deletedAt", "order": "ASCENDING" },
-        { "fieldPath": "isPromoted", "order": "ASCENDING" }
+        {
+          "fieldPath": "deletedAt",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "isPromoted",
+          "order": "ASCENDING"
+        }
       ]
     },
     {
       "collectionGroup": "products",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "deletedAt", "order": "ASCENDING" },
-        { "fieldPath": "stock", "order": "DESCENDING" }
+        {
+          "fieldPath": "deletedAt",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "stock",
+          "order": "DESCENDING"
+        }
       ]
     },
     {
       "collectionGroup": "vehicules",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "type", "order": "ASCENDING" },
-        { "fieldPath": "prix", "order": "ASCENDING" }
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "type",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "prix",
+          "order": "ASCENDING"
+        }
       ]
     },
     {
       "collectionGroup": "vehicules",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "updatedAt",
+          "order": "DESCENDING"
+        }
       ]
     },
     {
       "collectionGroup": "motos",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "type", "order": "ASCENDING" },
-        { "fieldPath": "prix", "order": "ASCENDING" }
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "type",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "prix",
+          "order": "ASCENDING"
+        }
       ]
     },
     {
       "collectionGroup": "motos",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "updatedAt",
+          "order": "DESCENDING"
+        }
       ]
     },
     {
       "collectionGroup": "demandes",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
       ]
     },
     {
       "collectionGroup": "demandes",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "type", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
+        {
+          "fieldPath": "type",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
       ]
     },
     {
       "collectionGroup": "audit_log",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "resourceType", "order": "ASCENDING" },
-        { "fieldPath": "timestamp", "order": "DESCENDING" }
+        {
+          "fieldPath": "resourceType",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "timestamp",
+          "order": "DESCENDING"
+        }
       ]
     },
     {
       "collectionGroup": "audit_log",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "actor", "order": "ASCENDING" },
-        { "fieldPath": "timestamp", "order": "DESCENDING" }
+        {
+          "fieldPath": "actor",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "timestamp",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "avis",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "publishedAt",
+          "order": "DESCENDING"
+        }
       ]
     }
   ],

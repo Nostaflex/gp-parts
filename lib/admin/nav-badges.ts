@@ -7,9 +7,10 @@ export type NavBadges = {
   commandes: number;
   reservations: number;
   demandes: number;
+  avis: number;
 };
 
-const EMPTY: NavBadges = { commandes: 0, reservations: 0, demandes: 0 };
+const EMPTY: NavBadges = { commandes: 0, reservations: 0, demandes: 0, avis: 0 };
 
 // Statuts « encore à traiter » par collection : tout ce qui n'est pas
 // terminal. Ne compter que 'nouvelle' faisait mentir le badge — une commande
@@ -22,6 +23,7 @@ const OPEN_STATUSES: Record<keyof NavBadges, { collection: string; statuses: str
   },
   reservations: { collection: 'reservations', statuses: ['nouvelle', 'confirmee', 'en_cours'] },
   demandes: { collection: 'demandes', statuses: ['nouvelle', 'en_cours'] },
+  avis: { collection: 'avis', statuses: ['nouveau'] },
 };
 
 async function countOuvertes(key: keyof NavBadges): Promise<number> {
@@ -36,12 +38,13 @@ async function countOuvertes(key: keyof NavBadges): Promise<number> {
 
 export async function getNavBadges(): Promise<NavBadges> {
   try {
-    const [commandes, reservations, demandes] = await Promise.all([
+    const [commandes, reservations, demandes, avis] = await Promise.all([
       countOuvertes('commandes'),
       countOuvertes('reservations'),
       countOuvertes('demandes'),
+      countOuvertes('avis'),
     ]);
-    return { commandes, reservations, demandes };
+    return { commandes, reservations, demandes, avis };
   } catch (err) {
     console.warn('[nav-badges] comptage échoué (fail-open, badges masqués):', err);
     return EMPTY;

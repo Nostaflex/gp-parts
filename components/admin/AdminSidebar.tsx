@@ -20,6 +20,7 @@ import {
   Menu,
   X,
   Droplets,
+  Star,
 } from 'lucide-react';
 
 import type { LucideIcon } from 'lucide-react';
@@ -61,6 +62,7 @@ const SECTIONS: NavSection[] = [
       { href: '/admin/commandes', label: 'Commandes', icon: ClipboardList, enabled: true },
       { href: '/admin/reservations', label: 'Réservations', icon: CalendarCheck, enabled: true },
       { href: '/admin/demandes', label: 'Demandes', icon: MessageSquare, enabled: true },
+      { href: '/admin/avis', label: 'Avis clients', icon: Star, enabled: true },
     ],
   },
   {
@@ -137,6 +139,7 @@ const BADGE_ROUTES: Record<string, keyof NavBadges> = {
   '/admin/commandes': 'commandes',
   '/admin/reservations': 'reservations',
   '/admin/demandes': 'demandes',
+  '/admin/avis': 'avis',
 };
 
 function NavContent({ pathname, badges }: { pathname: string; badges?: NavBadges }) {

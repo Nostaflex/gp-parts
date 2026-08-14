@@ -10,6 +10,7 @@ describe('feature-flags', () => {
       venteMoto: true,
       reparation: true,
       lavage: true,
+      avis: true,
     });
   });
 
@@ -21,6 +22,7 @@ describe('feature-flags', () => {
       venteMoto: true,
       reparation: true,
       lavage: true,
+      avis: true,
     });
   });
 
@@ -41,6 +43,7 @@ describe('feature-flags', () => {
       venteMoto: false,
       reparation: true,
       lavage: true,
+      avis: true,
     };
     expect(isPathVisible('/pieces', flags)).toBe(false);
     expect(isPathVisible('/pieces?type=auto', flags)).toBe(false);
@@ -61,6 +64,7 @@ describe('feature-flags', () => {
       venteMoto: false,
       reparation: false,
       lavage: false,
+      avis: false,
     };
     expect(isPathVisible('/contact', allOff)).toBe(true);
     expect(isPathVisible('/', allOff)).toBe(true);
@@ -74,6 +78,7 @@ describe('feature-flags', () => {
       venteMoto: false,
       reparation: true,
       lavage: true,
+      avis: true,
     };
     expect(isPathVisible('/vente-vehicule', flags)).toBe(true);
     expect(isPathVisible('/vente-moto', flags)).toBe(false);
