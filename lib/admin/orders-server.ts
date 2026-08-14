@@ -31,9 +31,12 @@ function docToOrder(id: string, data: Record<string, unknown>): Order {
 export async function getOrdersAdmin(opts?: {
   status?: OrderStatus;
   limit?: number;
+  /** Borne basse sur createdAt (Timestamp Firestore) — ex. début du mois pour le dashboard. */
+  since?: Date;
 }): Promise<Order[]> {
   let q = getAdminFirestore().collection('orders').orderBy('createdAt', 'desc');
   if (opts?.status) q = q.where('status', '==', opts.status) as typeof q;
+  if (opts?.since) q = q.where('createdAt', '>=', opts.since) as typeof q;
   if (opts?.limit) q = q.limit(opts.limit) as typeof q;
   const snap = await q.get();
   return snap.docs.map((d) => docToOrder(d.id, d.data() as Record<string, unknown>));
