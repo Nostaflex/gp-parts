@@ -28,6 +28,7 @@ export type AuditResourceType =
   | 'feature-flags'
   | 'contact-info'
   | 'location-settings'
+  | 'lavage-settings'
   | 'social-settings';
 
 export interface AuditLogEntry {

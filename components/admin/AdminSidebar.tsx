@@ -19,6 +19,7 @@ import {
   SlidersHorizontal,
   Menu,
   X,
+  Droplets,
 } from 'lucide-react';
 
 import type { LucideIcon } from 'lucide-react';
@@ -51,6 +52,7 @@ const SECTIONS: NavSection[] = [
       { href: '/admin/vehicules', label: 'Véhicules', icon: Car, enabled: true },
       { href: '/admin/motos', label: 'Motos', icon: Bike, enabled: true },
       { href: '/admin/location', label: 'Location', icon: CarFront, enabled: true },
+      { href: '/admin/lavage', label: 'Lavage', icon: Droplets, enabled: true },
     ],
   },
   {

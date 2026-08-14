@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { localDateISO } from '@/lib/utils';
 import { CpRgpdNotice } from '@/components/cp/CpRgpdNotice';
-import { FORMULES } from './formules';
 import { submitLavage } from './actions';
 
 type FormData = {
@@ -47,7 +46,13 @@ const field =
   'w-full px-4 py-3 rounded-xl border border-[#E5DDD3] bg-white text-cp-ink placeholder:text-cp-ink/30 text-sm outline-none transition-all focus:border-cp-red focus:ring-2 focus:ring-cp-mango/10';
 const label = 'block text-xs font-semibold text-cp-ink/50 uppercase tracking-wider mb-1.5';
 
-export function LavageForm({ initialFormule = '' }: { initialFormule?: string }) {
+export function LavageForm({
+  formules,
+  initialFormule = '',
+}: {
+  formules: string[];
+  initialFormule?: string;
+}) {
   const [website, setWebsite] = useState(''); // honeypot anti-spam
   const [done, setDone] = useState(false);
   const [ref, setRef] = useState('');
@@ -226,14 +231,14 @@ export function LavageForm({ initialFormule = '' }: { initialFormule?: string })
         <div>
           <p className={label}>Formule *</p>
           <div className="flex flex-wrap gap-2">
-            {FORMULES.map((f) => (
+            {formules.map((nom) => (
               <button
-                key={f.nom}
+                key={nom}
                 type="button"
-                onClick={() => set('formule', f.nom)}
-                className={`px-4 py-2 rounded-full border text-sm font-medium transition-all ${data.formule === f.nom ? 'bg-cp-ink border-cp-ink text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/60 hover:border-cp-red hover:text-cp-mango'}`}
+                onClick={() => set('formule', nom)}
+                className={`px-4 py-2 rounded-full border text-sm font-medium transition-all ${data.formule === nom ? 'bg-cp-ink border-cp-ink text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/60 hover:border-cp-red hover:text-cp-mango'}`}
               >
-                {f.nom}
+                {nom}
               </button>
             ))}
           </div>
