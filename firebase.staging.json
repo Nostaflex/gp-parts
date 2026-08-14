@@ -1,0 +1,7 @@
+{
+  "//": "Config staging (car-performance-staging, plan Spark) : mêmes rules que prod, indexes SANS les fieldOverrides TTL — le TTL exige le billing. Usage : firebase deploy --only firestore --project car-performance-staging --config firebase.staging.json",
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.staging.json"
+  }
+}
