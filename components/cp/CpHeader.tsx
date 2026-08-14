@@ -10,6 +10,7 @@ import { CpLogo } from '@/components/cp/CpLogo';
 
 const NAV_LINKS = [
   { href: '/reparation', label: 'Réparation' },
+  { href: '/lavage', label: 'Lavage' },
   { href: '/location', label: 'Location' },
   { href: '/vente-vehicule', label: 'Vente véhicule' },
   { href: '/vente-moto', label: 'Vente moto' },

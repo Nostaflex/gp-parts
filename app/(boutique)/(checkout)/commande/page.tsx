@@ -9,6 +9,7 @@ import { CardPaymentForm } from '@/components/checkout/CardPaymentForm';
 import { useCart } from '@/components/cart/CartProvider';
 import { useToast } from '@/components/ui/Toast';
 import { formatPrice, cn } from '@/lib/utils';
+import { CpRgpdNotice } from '@/components/cp/CpRgpdNotice';
 import { validateCheckout } from './actions';
 import { DELIVERY_OPTIONS_CONFIG, getDeliveryPrice } from '@/lib/config';
 import type { OrderInfo, PaymentMethod } from '@/lib/types';
@@ -446,6 +447,7 @@ export default function CheckoutPage() {
                     ? 'Payer par carte'
                     : 'Valider la commande'}
               </Button>
+              <CpRgpdNotice className="mt-3" />
               <p className="text-xs text-cp-ink/35 text-center mt-3">
                 {paymentMethod === 'card'
                   ? 'Paiement sécurisé par Stripe'

@@ -61,8 +61,10 @@ export async function toggleFeatureFlags(
   const flags: FeatureFlags = {
     pieces: checked('pieces'),
     location: checked('location'),
+    venteVehicule: checked('venteVehicule'),
     venteMoto: checked('venteMoto'),
     reparation: checked('reparation'),
+    lavage: checked('lavage'),
   };
 
   const db = getAdminFirestore();

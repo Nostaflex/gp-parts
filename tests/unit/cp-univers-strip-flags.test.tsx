@@ -12,16 +12,18 @@ describe('CpUniversStrip — filtrage par flags', () => {
     vi.clearAllMocks();
   });
 
-  it('masque les tuiles des sections OFF, garde vente-véhicule', async () => {
+  it('masque les tuiles des sections OFF, y compris vente-véhicule', async () => {
     vi.mocked(getCachedFeatureFlags).mockResolvedValue({
-      pieces: false,
+      pieces: true,
       location: false,
+      venteVehicule: false,
       venteMoto: false,
       reparation: false,
+      lavage: false,
     });
     render(await CpUniversStrip({ current: 'reparation' }));
-    expect(screen.queryByText('Pièces détachées')).toBeNull();
     expect(screen.queryByText('Location')).toBeNull();
-    expect(screen.getByText('Vente véhicule')).toBeInTheDocument();
+    expect(screen.queryByText('Vente véhicule')).toBeNull();
+    expect(screen.getByText('Pièces détachées')).toBeInTheDocument();
   });
 });

@@ -11,7 +11,14 @@ describe('FeatureFlagsProvider', () => {
   it('expose les flags fournis via useFeatureFlags', () => {
     render(
       <FeatureFlagsProvider
-        value={{ pieces: false, location: true, venteMoto: true, reparation: true }}
+        value={{
+          pieces: false,
+          location: true,
+          venteVehicule: true,
+          venteMoto: true,
+          reparation: true,
+          lavage: true,
+        }}
       >
         <Probe />
       </FeatureFlagsProvider>

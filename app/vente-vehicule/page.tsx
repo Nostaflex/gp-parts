@@ -5,6 +5,8 @@ import { CpFooter } from '@/components/cp/CpFooter';
 import { CpUniversStrip } from '@/components/cp/CpUniversStrip';
 import { VenteVehiculeClient } from './VenteVehiculeClient';
 import { getCachedVehicules } from '@/lib/data/vehicules-cache';
+import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -20,6 +22,8 @@ export const metadata: Metadata = {
 };
 
 export default async function VenteVehiculePage() {
+  const flags = await getCachedFeatureFlags();
+  if (!flags.venteVehicule) notFound();
   const vehicules = await getCachedVehicules();
 
   return (

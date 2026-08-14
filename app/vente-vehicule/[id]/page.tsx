@@ -5,6 +5,7 @@ import { CpHeader } from '@/components/cp/CpHeader';
 import { CpFooter } from '@/components/cp/CpFooter';
 import type { Vehicule } from '@/lib/vehicules';
 import { getCachedVehicules } from '@/lib/data/vehicules-cache';
+import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
 import { getCachedContactInfo } from '@/lib/data/contact-info-cache';
 import type { ContactInfo } from '@/lib/contact-info';
 import { FinancementSimulator } from './FinancementSimulator';
@@ -99,6 +100,8 @@ function vehicleJsonLd(v: Vehicule, ci: ContactInfo) {
 }
 
 export default async function VehiculeDetailPage({ params }: Props) {
+  const flags = await getCachedFeatureFlags();
+  if (!flags.venteVehicule) notFound();
   const { id } = await params;
   const vehicules = await getCachedVehicules();
   const v = vehicules.find((veh) => veh.id === id);
@@ -395,7 +398,7 @@ export default async function VehiculeDetailPage({ params }: Props) {
               Ce véhicule vous intéresse ?
             </p>
             <p className="text-cp-cream/60 text-sm mb-6 max-w-md mx-auto">
-              Réservez un essai ou demandez plus d&apos;infos. Réponse sous 24h, souvent bien moins.
+              Réservez un essai ou demandez plus d&apos;infos. Réponse sous 48h (jours ouvrés).
             </p>
             <Link
               href={contactHref}

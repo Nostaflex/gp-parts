@@ -6,8 +6,10 @@ describe('feature-flags', () => {
     expect(DEFAULT_FEATURE_FLAGS).toEqual({
       pieces: true,
       location: true,
+      venteVehicule: true,
       venteMoto: true,
       reparation: true,
+      lavage: true,
     });
   });
 
@@ -15,8 +17,10 @@ describe('feature-flags', () => {
     expect(normalizeFeatureFlags({ pieces: false })).toEqual({
       pieces: false,
       location: true,
+      venteVehicule: true,
       venteMoto: true,
       reparation: true,
+      lavage: true,
     });
   });
 
@@ -30,26 +34,57 @@ describe('feature-flags', () => {
   });
 
   it('isPathVisible : section ON visible, OFF masquée', () => {
-    const flags = { pieces: false, location: true, venteMoto: false, reparation: true };
+    const flags = {
+      pieces: false,
+      location: true,
+      venteVehicule: false,
+      venteMoto: false,
+      reparation: true,
+      lavage: true,
+    };
     expect(isPathVisible('/pieces', flags)).toBe(false);
     expect(isPathVisible('/pieces?type=auto', flags)).toBe(false);
     expect(isPathVisible('/pieces/clio-4', flags)).toBe(false);
     expect(isPathVisible('/location', flags)).toBe(true);
     expect(isPathVisible('/vente-moto', flags)).toBe(false);
     expect(isPathVisible('/vente-moto/honda-pcx', flags)).toBe(false);
+    expect(isPathVisible('/vente-vehicule', flags)).toBe(false);
+    expect(isPathVisible('/vente-vehicule/peugeot-308', flags)).toBe(false);
     expect(isPathVisible('/reparation', flags)).toBe(true);
   });
 
-  it('isPathVisible : vente-vehicule & support toujours visibles', () => {
-    const allOff = { pieces: false, location: false, venteMoto: false, reparation: false };
-    expect(isPathVisible('/vente-vehicule', allOff)).toBe(true);
-    expect(isPathVisible('/vente-vehicule/peugeot-308', allOff)).toBe(true);
+  it('isPathVisible : routes support toujours visibles', () => {
+    const allOff = {
+      pieces: false,
+      location: false,
+      venteVehicule: false,
+      venteMoto: false,
+      reparation: false,
+      lavage: false,
+    };
     expect(isPathVisible('/contact', allOff)).toBe(true);
     expect(isPathVisible('/', allOff)).toBe(true);
   });
 
-  it('isPathVisible : /vente-moto ne matche pas /vente-vehicule', () => {
-    const flags = { pieces: true, location: true, venteMoto: false, reparation: true };
+  it('isPathVisible : /vente-moto et /vente-vehicule indépendants', () => {
+    const flags = {
+      pieces: true,
+      location: true,
+      venteVehicule: true,
+      venteMoto: false,
+      reparation: true,
+      lavage: true,
+    };
     expect(isPathVisible('/vente-vehicule', flags)).toBe(true);
+    expect(isPathVisible('/vente-moto', flags)).toBe(false);
+  });
+});
+
+describe('feature-flags — lavage', () => {
+  it('isPathVisible : /lavage gouverné par le flag lavage', () => {
+    const on = { ...DEFAULT_FEATURE_FLAGS };
+    const off = { ...DEFAULT_FEATURE_FLAGS, lavage: false };
+    expect(isPathVisible('/lavage', on)).toBe(true);
+    expect(isPathVisible('/lavage', off)).toBe(false);
   });
 });

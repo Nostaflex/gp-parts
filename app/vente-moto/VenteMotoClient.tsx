@@ -217,7 +217,7 @@ export function VenteMotoClient({ motos }: { motos: Moto[] }) {
 
               <ul className="flex flex-col gap-3 mb-8">
                 {[
-                  'Estimation gratuite sous 24h ouvrées',
+                  'Estimation gratuite sous 48h ouvrées',
                   'Sans engagement de votre part',
                   'Reprise déduite du prix de la nouvelle moto',
                   'Rachat ferme possible même sans achat',
@@ -262,7 +262,7 @@ export function VenteMotoClient({ motos }: { motos: Moto[] }) {
                   },
                   {
                     n: '02',
-                    titre: 'On revient vers vous sous 24h',
+                    titre: 'On revient vers vous sous 48h (jours ouvrés)',
                     desc: 'Notre équipe étudie votre dossier et vous propose une fourchette de reprise.',
                   },
                   {

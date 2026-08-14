@@ -32,7 +32,7 @@ const UNIVERS = [
     href: '/location',
     label: 'Location',
     tag: '02',
-    desc: 'Véhicules de remplacement Racoon disponibles pendant votre réparation.',
+    desc: 'Location de véhicules Racoon — kilométrage illimité, assurance incluse, disponible dès demain.',
     accent: '#52C88A',
     img: '/images/location/toyota-yaris.jpg',
   },
@@ -67,7 +67,7 @@ const UNIVERS = [
 
 const STATS = [
   { value: '971', unit: '', label: 'Guadeloupe' },
-  { value: '24h', unit: '', label: 'délai réponse' },
+  { value: '48h', unit: '', label: 'délai de réponse — jours ouvrés' },
   { value: '12', unit: 'mois', label: 'garantie pièces' },
   { value: '4.99', unit: '%', label: 'financement TAEG' },
 ];
@@ -84,7 +84,7 @@ const TEMOIGNAGES = [
     role: 'Client devis pièces',
   },
   {
-    text: "Le véhicule de remplacement m'a sauvé la mise. Merci pour la disponibilité.",
+    text: "La location Racoon m'a sauvé la mise. Merci pour la disponibilité.",
     author: 'Sandra K.',
     role: 'Cliente location',
   },
@@ -177,7 +177,9 @@ export default async function HomePage() {
           </CpReveal>
           <CpReveal delay={2}>
             <p className="text-cp-cream/60 text-lg max-w-xl mb-10 leading-relaxed">
-              Réparation, location et vente de véhicules. Votre garage de confiance en Guadeloupe.
+              Centre de maintenance et réparation automobile digital.
+              <br />
+              L&apos;innovation automobile au service de la performance.
             </p>
           </CpReveal>
           <CpReveal delay={3}>
@@ -201,12 +203,14 @@ export default async function HomePage() {
                   </svg>
                 </Link>
               )}
-              <Link
-                href="/vente-vehicule"
-                className="inline-flex items-center gap-2 border border-cp-cream/30 text-cp-cream font-semibold px-6 py-3 rounded-full hover:bg-cp-cream/10 active:scale-[0.98] transition-[background-color,transform]"
-              >
-                Voir les véhicules
-              </Link>
+              {flags.venteVehicule && (
+                <Link
+                  href="/vente-vehicule"
+                  className="inline-flex items-center gap-2 border border-cp-cream/30 text-cp-cream font-semibold px-6 py-3 rounded-full hover:bg-cp-cream/10 active:scale-[0.98] transition-[background-color,transform]"
+                >
+                  Voir les véhicules
+                </Link>
+              )}
             </div>
           </CpReveal>
         </div>

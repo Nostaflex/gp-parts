@@ -12,8 +12,7 @@ vi.mock('next/cache', () => ({ revalidateTag: vi.fn(), revalidatePath: vi.fn() }
 
 import { requireAdmin } from '@/lib/admin/auth';
 import { writeAuditLog } from '@/lib/admin/audit';
-import { revalidateTag } from 'next/cache';
-import { toggleFeatureFlags } from '@/app/admin/(shell)/parametres/actions';
+import { updateSocialSettings } from '@/app/admin/(shell)/posts-sociaux/actions';
 
 function fd(values: Record<string, string>) {
   const f = new FormData();
@@ -21,37 +20,26 @@ function fd(values: Record<string, string>) {
   return f;
 }
 
-describe('toggleFeatureFlags', () => {
+describe('updateSocialSettings', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('écrit le doc, audit, revalide', async () => {
-    const res = await toggleFeatureFlags(
+  it('écrit le doc, audit', async () => {
+    const res = await updateSocialSettings(
       null,
-      fd({ pieces: 'on', location: '', venteVehicule: 'on', venteMoto: 'on', reparation: '' })
+      fd({ defaultHashtags: '#CP #971', signature: 'Car Performance' })
     );
     expect(requireAdmin).toHaveBeenCalled();
     expect(setMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        pieces: true,
-        location: false,
-        venteVehicule: true,
-        venteMoto: true,
-        reparation: false,
-        lavage: false,
+        defaultHashtags: '#CP #971',
+        signature: 'Car Performance',
         updatedBy: 'admin@test.gp',
       }),
       { merge: true }
     );
     expect(writeAuditLog).toHaveBeenCalled();
-    expect(revalidateTag).toHaveBeenCalledWith('feature-flags');
-    expect(res).toEqual({ ok: true, message: expect.any(String) });
-  });
-
-  it('refuse sans admin', async () => {
-    vi.mocked(requireAdmin).mockRejectedValueOnce(new Error('Non authentifié'));
-    await expect(toggleFeatureFlags(null, fd({}))).rejects.toThrow('Non authentifié');
-    expect(setMock).not.toHaveBeenCalled();
+    expect(res?.ok).toBe(true);
   });
 });

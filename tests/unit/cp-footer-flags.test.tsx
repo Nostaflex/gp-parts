@@ -16,16 +16,18 @@ describe('CpFooter — filtrage par flags', () => {
     vi.mocked(getCachedFeatureFlags).mockResolvedValue({
       pieces: false,
       location: false,
+      venteVehicule: false,
       venteMoto: false,
       reparation: false,
+      lavage: false,
     });
     render(await CpFooter());
     expect(screen.queryByRole('link', { name: 'Réparation' })).toBeNull();
     expect(screen.queryByRole('link', { name: 'Location' })).toBeNull();
     expect(screen.queryByRole('link', { name: 'Vente moto' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Vente véhicule' })).toBeNull();
     expect(screen.queryByRole('link', { name: 'Catalogue' })).toBeNull();
     expect(screen.queryByRole('link', { name: 'Promotions' })).toBeNull();
-    expect(screen.getByRole('link', { name: 'Vente véhicule' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Contact' })).toBeInTheDocument();
   });
 });

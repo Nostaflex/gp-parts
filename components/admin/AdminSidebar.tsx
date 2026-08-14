@@ -14,6 +14,7 @@ import {
   MessageSquare,
   Wrench,
   Megaphone,
+  Share2,
   ScrollText,
   SlidersHorizontal,
   Menu,
@@ -65,6 +66,7 @@ const SECTIONS: NavSection[] = [
     items: [
       { href: '/admin/estimation', label: 'Estimation reprise', icon: Wrench, enabled: true },
       { href: '/admin/leboncoin', label: 'Export Leboncoin', icon: Megaphone, enabled: true },
+      { href: '/admin/posts-sociaux', label: 'Posts sociaux', icon: Share2, enabled: true },
     ],
   },
   {

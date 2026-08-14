@@ -15,12 +15,14 @@ describe('sitemap — filtrage par flags', () => {
     vi.clearAllMocks();
   });
 
-  it('exclut les URLs des sections OFF, garde vente-véhicule', async () => {
+  it('exclut les URLs des sections OFF, y compris vente-véhicule', async () => {
     vi.mocked(getCachedFeatureFlags).mockResolvedValue({
       pieces: false,
       location: false,
+      venteVehicule: false,
       venteMoto: false,
       reparation: false,
+      lavage: false,
     });
     const entries = await sitemap();
     const urls = entries.map((e) => e.url);
@@ -28,19 +30,22 @@ describe('sitemap — filtrage par flags', () => {
     expect(urls.some((u) => u.includes('/location'))).toBe(false);
     expect(urls.some((u) => u.includes('/reparation'))).toBe(false);
     expect(urls.some((u) => u.includes('/vente-moto'))).toBe(false);
-    expect(urls.some((u) => u.endsWith('/vente-vehicule'))).toBe(true);
+    expect(urls.some((u) => u.includes('/vente-vehicule'))).toBe(false);
   });
 
   it('tout ON → conserve les sections', async () => {
     vi.mocked(getCachedFeatureFlags).mockResolvedValue({
       pieces: true,
       location: true,
+      venteVehicule: true,
       venteMoto: true,
       reparation: true,
+      lavage: true,
     });
     const urls = (await sitemap()).map((e) => e.url);
     expect(urls.some((u) => u.endsWith('/pieces'))).toBe(true);
     expect(urls.some((u) => u.endsWith('/location'))).toBe(true);
     expect(urls.some((u) => u.endsWith('/reparation'))).toBe(true);
+    expect(urls.some((u) => u.endsWith('/vente-vehicule'))).toBe(true);
   });
 });

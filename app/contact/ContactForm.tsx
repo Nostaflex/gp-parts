@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle, Upload, X } from 'lucide-react';
+import { CpRgpdNotice } from '@/components/cp/CpRgpdNotice';
 import { submitContact } from './actions';
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 Mo
@@ -162,8 +163,7 @@ export function ContactForm() {
         </p>
         <h3 className="cp-title font-black text-cp-cream text-3xl mb-3">ON VOUS RÉPOND !</h3>
         <p className="text-cp-cream/45 text-sm leading-relaxed mb-2 max-w-sm">
-          Votre message a bien été reçu. Notre équipe vous répond dans la journée, souvent bien
-          moins.
+          Votre message a bien été reçu. Notre équipe vous répond sous 48h en jours ouvrés.
         </p>
         <p className="text-cp-cream/35 text-xs leading-relaxed mb-6 max-w-sm">
           {emailed ? (
@@ -199,9 +199,7 @@ export function ContactForm() {
   return (
     <div>
       <h2 className="cp-title font-black text-cp-cream text-3xl mb-2">Écrivez-nous</h2>
-      <p className="text-cp-cream/40 text-sm mb-6">
-        Réponse garantie sous 24h — souvent bien moins.
-      </p>
+      <p className="text-cp-cream/40 text-sm mb-6">Réponse sous 48h — jours ouvrés.</p>
 
       {/* Chips sujet */}
       <div className="flex flex-wrap gap-2 mb-6">
@@ -405,6 +403,7 @@ export function ContactForm() {
             {submitError}
           </p>
         )}
+        <CpRgpdNotice tone="dark" className="mt-4" />
       </div>
     </div>
   );
