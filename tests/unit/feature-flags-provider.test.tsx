@@ -18,6 +18,7 @@ describe('FeatureFlagsProvider', () => {
           venteMoto: true,
           reparation: true,
           lavage: true,
+          avis: true,
         }}
       >
         <Probe />

@@ -27,6 +27,7 @@ describe('gardes de routes section', () => {
       venteMoto: true,
       reparation: false,
       lavage: false,
+      avis: false,
     });
     await expect(ReparationPage()).rejects.toThrow('NEXT_NOT_FOUND');
     expect(notFound).toHaveBeenCalled();
@@ -40,6 +41,7 @@ describe('gardes de routes section', () => {
       venteMoto: true,
       reparation: true,
       lavage: true,
+      avis: true,
     });
     await expect(LocationPage()).rejects.toThrow('NEXT_NOT_FOUND');
   });
@@ -52,6 +54,7 @@ describe('gardes de routes section', () => {
       venteMoto: true,
       reparation: true,
       lavage: true,
+      avis: true,
     });
     await expect(VenteVehiculePage()).rejects.toThrow('NEXT_NOT_FOUND');
     expect(notFound).toHaveBeenCalled();
@@ -65,6 +68,7 @@ describe('gardes de routes section', () => {
       venteMoto: true,
       reparation: true,
       lavage: true,
+      avis: true,
     });
     await ReparationPage();
     expect(notFound).not.toHaveBeenCalled();

@@ -40,6 +40,7 @@ describe('toggleFeatureFlags', () => {
         venteMoto: true,
         reparation: false,
         lavage: false,
+        avis: false,
         updatedBy: 'admin@test.gp',
       }),
       { merge: true }

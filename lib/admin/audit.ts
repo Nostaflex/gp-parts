@@ -29,6 +29,7 @@ export type AuditResourceType =
   | 'contact-info'
   | 'location-settings'
   | 'lavage-settings'
+  | 'avis'
   | 'social-settings';
 
 export interface AuditLogEntry {

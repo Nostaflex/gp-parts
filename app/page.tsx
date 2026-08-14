@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { AvisSection } from '@/components/cp/AvisSection';
 import Image from 'next/image';
 import Link from 'next/link';
 import { CpHeader } from '@/components/cp/CpHeader';
@@ -70,24 +71,6 @@ const STATS = [
   { value: '48h', unit: '', label: 'délai de réponse — jours ouvrés' },
   { value: '12', unit: 'mois', label: 'garantie pièces' },
   { value: '4.99', unit: '%', label: 'financement TAEG' },
-];
-
-const TEMOIGNAGES = [
-  {
-    text: 'Équipe très professionnelle, mon véhicule est revenu comme neuf en 48h. Je recommande.',
-    author: 'Marie-Laure B.',
-    role: 'Cliente réparation',
-  },
-  {
-    text: "J'ai envoyé mes photos le matin, j'avais un devis détaillé l'après-midi. Efficace !",
-    author: 'Thierry M.',
-    role: 'Client devis pièces',
-  },
-  {
-    text: "La location Racoon m'a sauvé la mise. Merci pour la disponibilité.",
-    author: 'Sandra K.',
-    role: 'Cliente location',
-  },
 ];
 
 const HORAIRES = [
@@ -323,40 +306,8 @@ export default async function HomePage() {
 
       <CpBridge fromColor="#0D0905" toColor="#1A1208" />
 
-      {/* ── TÉMOIGNAGES ─────────────────────────── */}
-      <section id="temoignages" className="py-24 px-6" style={{ backgroundColor: '#1A1208' }}>
-        <div className="max-w-7xl mx-auto">
-          <CpReveal>
-            <h2
-              className="cp-title text-cp-cream font-black leading-none mb-16"
-              style={{ fontSize: 'clamp(2rem, 4vw, 4rem)' }}
-            >
-              TÉMOIGNAGES
-            </h2>
-          </CpReveal>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {TEMOIGNAGES.map((t, i) => (
-              <CpReveal key={t.author} delay={(i % 3) as 0 | 1 | 2}>
-                <div className="rounded-2xl p-6 border border-white/10 bg-white/5">
-                  <svg
-                    className="text-cp-gold mb-4"
-                    width="24"
-                    height="18"
-                    fill="currentColor"
-                    viewBox="0 0 24 18"
-                    aria-hidden="true"
-                  >
-                    <path d="M0 18V11.5C0 5.167 2.5 1.333 7.5 0L9 2.5C6.667 3.333 5.333 5 5 7.5h5V18H0Zm13 0V11.5C13 5.167 15.5 1.333 20.5 0L22 2.5C19.667 3.333 18.333 5 18 7.5h5V18H13Z" />
-                  </svg>
-                  <p className="text-cp-cream/80 text-sm leading-relaxed mb-4">{t.text}</p>
-                  <p className="text-cp-cream font-semibold text-sm">{t.author}</p>
-                  <p className="text-cp-cream/40 text-xs">{t.role}</p>
-                </div>
-              </CpReveal>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ── AVIS CLIENTS (réels, modérés — jamais de faux avis, L121-4) ── */}
+      <AvisSection visible={flags.avis} />
 
       <CpBridge fromColor="#1A1208" toColor="#0E1F18" />
 
