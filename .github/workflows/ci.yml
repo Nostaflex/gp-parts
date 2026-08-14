@@ -55,7 +55,8 @@ jobs:
           echo "Thresholds are enforced by vitest.config.ts — the previous step fails if not met."
 
       - name: Build
-        run: npm run build
+        # Retry x1 : fonts.gstatic.com flaky depuis les runners (2 échecs le 2026-08-14)
+        run: npm run build || (echo 'build retry (flake réseau ?)' && sleep 10 && npm run build)
         env:
           NEXT_TELEMETRY_DISABLED: '1'
 
@@ -112,7 +113,8 @@ jobs:
         run: npx tsx scripts/seed-firestore.ts
 
       - name: Build production
-        run: npm run build
+        # Retry x1 : fonts.gstatic.com flaky depuis les runners (2 échecs le 2026-08-14)
+        run: npm run build || (echo 'build retry (flake réseau ?)' && sleep 10 && npm run build)
         env:
           NEXT_TELEMETRY_DISABLED: '1'
 
