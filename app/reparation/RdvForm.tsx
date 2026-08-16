@@ -21,6 +21,9 @@ type FormData = {
   type: string;
   roulable: string;
   sinistre: string;
+  kilometrage: string;
+  assurance: string;
+  numAssure: string;
   description: string;
   date: string;
   creneau: string;
@@ -113,6 +116,9 @@ export function RdvForm() {
     type: '',
     roulable: '',
     sinistre: '',
+    kilometrage: '',
+    assurance: '',
+    numAssure: '',
     description: '',
     date: '',
     creneau: '',
@@ -138,6 +144,17 @@ export function RdvForm() {
     if (step === 2) {
       if (!data.nature) errs.nature = 'Choisissez la nature de votre besoin';
       if (data.nature === 'mecanique' && !data.type) errs.type = 'Type de prestation requis';
+      if (data.nature === 'carrosserie') {
+        // Réponse S2 Stéphane (2026-08-16) : plaque + kilométrage + assurance
+        // + n° d'assuré suffisent pour le devis — pas de photos.
+        if (!data.immat.trim()) errs.immat = 'Plaque requise pour générer votre véhicule';
+        if (!data.kilometrage.trim()) errs.kilometrage = 'Kilométrage requis';
+        if (!data.sinistre) errs.sinistre = 'Précisez la situation assurance';
+        if (data.sinistre && data.sinistre !== 'Non / sans assurance') {
+          if (!data.assurance.trim()) errs.assurance = 'Compagnie d’assurance requise';
+          if (!data.numAssure.trim()) errs.numAssure = 'Numéro d’assuré requis';
+        }
+      }
       if (data.nature && !data.description.trim()) errs.description = 'Description requise';
     }
     if (step === 3) {
@@ -220,6 +237,9 @@ export function RdvForm() {
               type: '',
               roulable: '',
               sinistre: '',
+              kilometrage: '',
+              assurance: '',
+              numAssure: '',
               description: '',
               date: '',
               creneau: '',
@@ -430,6 +450,9 @@ export function RdvForm() {
                         type: n.id === 'carrosserie' ? 'Carrosserie' : '',
                         roulable: '',
                         sinistre: '',
+                        kilometrage: '',
+                        assurance: '',
+                        numAssure: '',
                       }));
                       setErrors((e) => ({ ...e, nature: undefined, type: undefined }));
                     }}
@@ -499,8 +522,43 @@ export function RdvForm() {
 
             {data.nature === 'carrosserie' && (
               <>
+                {/* Réponse S2 Stéphane (2026-08-16) : plaque + kilométrage +
+                    assurance + n° d'assuré suffisent — pas de photos. La plaque
+                    permet de générer le véhicule via le module d'estimation. */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="immat-carrosserie" className={label}>
+                      Immatriculation *
+                    </label>
+                    <input
+                      id="immat-carrosserie"
+                      className={`${field} cp-mono tracking-widest`}
+                      type="text"
+                      placeholder="AB-123-CD"
+                      autoComplete="off"
+                      value={data.immat}
+                      onChange={(e) => set('immat', e.target.value.toUpperCase())}
+                    />
+                    {err('immat')}
+                  </div>
+                  <div>
+                    <label htmlFor="kilometrage" className={label}>
+                      Kilométrage *
+                    </label>
+                    <input
+                      id="kilometrage"
+                      className={field}
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="85 000"
+                      value={data.kilometrage}
+                      onChange={(e) => set('kilometrage', e.target.value)}
+                    />
+                    {err('kilometrage')}
+                  </div>
+                </div>
                 <div>
-                  <p className={label}>Sinistre déclaré à l&apos;assurance ?</p>
+                  <p className={label}>Sinistre déclaré à l&apos;assurance ? *</p>
                   <div className="flex flex-wrap gap-2">
                     {SINISTRE.map((s) => (
                       <button
@@ -513,7 +571,41 @@ export function RdvForm() {
                       </button>
                     ))}
                   </div>
+                  {err('sinistre')}
                 </div>
+                {data.sinistre && data.sinistre !== 'Non / sans assurance' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="assurance" className={label}>
+                        Compagnie d&apos;assurance *
+                      </label>
+                      <input
+                        id="assurance"
+                        className={field}
+                        type="text"
+                        placeholder="GFA Caraïbes, Allianz…"
+                        value={data.assurance}
+                        onChange={(e) => set('assurance', e.target.value)}
+                      />
+                      {err('assurance')}
+                    </div>
+                    <div>
+                      <label htmlFor="numAssure" className={label}>
+                        Numéro d&apos;assuré *
+                      </label>
+                      <input
+                        id="numAssure"
+                        className={`${field} cp-mono`}
+                        type="text"
+                        autoComplete="off"
+                        placeholder="A-123456"
+                        value={data.numAssure}
+                        onChange={(e) => set('numAssure', e.target.value)}
+                      />
+                      {err('numAssure')}
+                    </div>
+                  </div>
+                )}
                 <div>
                   <label htmlFor="description" className={label}>
                     Décrivez les dégâts *
@@ -528,10 +620,6 @@ export function RdvForm() {
                   />
                   {err('description')}
                 </div>
-                <p className="text-xs text-cp-ink/45 leading-relaxed bg-[#F8F5F0] rounded-xl px-4 py-3">
-                  📷 Après l&apos;envoi, notre équipe vous demandera des photos des dégâts (par
-                  WhatsApp ou email) pour préparer l&apos;estimation avant votre venue.
-                </p>
               </>
             )}
           </div>
