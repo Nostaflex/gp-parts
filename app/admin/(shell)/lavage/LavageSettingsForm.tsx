@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from 'react';
 import { updateLavageSettings } from './actions';
-import { htFromTTCEnCents } from '@/lib/lavage-settings';
+import { htFromTTCEnCents, serializeFormulesForSave } from '@/lib/lavage-settings';
 import type { LavageFormule, LavageSettings } from '@/lib/lavage-settings';
 import type { FormActionState } from '@/components/admin/FormShell';
 import { formatPrice } from '@/lib/utils';
@@ -49,8 +49,9 @@ export function LavageSettingsForm({ initial }: { initial: LavageSettings }) {
       },
     ]);
 
-  // Payload : sans la clé locale `key`.
-  const payload = JSON.stringify(rows.map(({ key: _key, ...f }) => f));
+  // Payload : sans la clé locale `key`, lignes « inclus » nettoyées (une
+  // ligne vide de textarea faisait refuser TOUT l'enregistrement).
+  const payload = serializeFormulesForSave(rows.map(({ key: _key, ...f }) => f));
 
   return (
     <form action={formAction} className="flex flex-col gap-4 max-w-2xl">

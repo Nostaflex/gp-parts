@@ -3,6 +3,7 @@ import { describe, it, expect } from 'vitest';
 import {
   normalizeLavageSettings,
   htFromTTCEnCents,
+  serializeFormulesForSave,
   DEFAULT_LAVAGE_SETTINGS,
 } from '@/lib/lavage-settings';
 import { LavageSettingsSchema } from '@/lib/schemas/lavage';
@@ -81,5 +82,43 @@ describe('LavageSettingsSchema (saisie BO stricte)', () => {
 
   it('liste vide → refus (min 1)', () => {
     expect(LavageSettingsSchema.safeParse({ formules: [] }).success).toBe(false);
+  });
+
+  it('ligne inclus vide → refus avec message FRANÇAIS actionnable', () => {
+    const r = LavageSettingsSchema.safeParse({
+      formules: [{ ...valide.formules[0], inclus: ['Lavage main', ''] }],
+    });
+    expect(r.success).toBe(false);
+    if (!r.success) {
+      const msg = r.error.issues.map((i) => i.message).join(' ');
+      expect(msg).toContain('ligne vide');
+      expect(msg).not.toMatch(/Too small|expected string/);
+    }
+  });
+});
+
+describe('serializeFormulesForSave (bug 2026-08-16 : « l’enregistrement ne reste pas »)', () => {
+  const f = {
+    nom: 'Express',
+    description: 'desc',
+    inclus: ['Lavage main'],
+    mode: 'prix' as const,
+    prixTTCEnCents: 2500,
+  };
+
+  it('retour à la ligne final dans le textarea → payload valide pour le schéma', () => {
+    // Le textarea BO produit ['Jantes', 'Vitres', ''] sur « Jantes\nVitres\n ».
+    const payload = serializeFormulesForSave([{ ...f, inclus: ['Jantes', 'Vitres', ''] }]);
+    const parsed = LavageSettingsSchema.safeParse({ formules: JSON.parse(payload) });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) expect(parsed.data.formules[0].inclus).toEqual(['Jantes', 'Vitres']);
+  });
+
+  it('lignes espaces-seuls et blancs de bord retirés, reste préservé', () => {
+    const payload = serializeFormulesForSave([{ ...f, inclus: ['  Jantes ', '   ', 'Vitres'] }]);
+    const out = JSON.parse(payload)[0];
+    expect(out.inclus).toEqual(['Jantes', 'Vitres']);
+    expect(out.nom).toBe('Express');
+    expect(out.prixTTCEnCents).toBe(2500);
   });
 });

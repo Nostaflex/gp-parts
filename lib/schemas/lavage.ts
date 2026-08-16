@@ -8,7 +8,15 @@ export const LavageFormuleSchema = z
   .object({
     nom: z.string().trim().min(1, 'Nom requis').max(40, 'Nom trop long (40 max)'),
     description: z.string().trim().max(200, 'Description trop longue (200 max)'),
-    inclus: z.array(z.string().trim().min(1).max(80)).max(12, '12 prestations incluses max'),
+    inclus: z
+      .array(
+        z
+          .string()
+          .trim()
+          .min(1, 'Prestation vide — supprime la ligne vide dans « Prestations incluses »')
+          .max(80, 'Prestation trop longue (80 caractères max)')
+      )
+      .max(12, '12 prestations incluses max'),
     mode: z.enum(['devis', 'prix']),
     // TTC en centimes ; plafond 10 000 € — garde-fou de saisie, pas une règle métier.
     prixTTCEnCents: z.number().int().min(0).max(1_000_000),

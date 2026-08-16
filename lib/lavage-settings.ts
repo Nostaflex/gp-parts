@@ -97,6 +97,16 @@ export function normalizeLavageSettings(raw: unknown): LavageSettings {
   return formules.length > 0 ? { formules } : DEFAULT_LAVAGE_SETTINGS;
 }
 
+/** Sérialisation BO → payload d'enregistrement. Nettoie les lignes « inclus »
+ * (trim + lignes vides retirées) : le textarea produit une ligne vide au
+ * moindre retour à la ligne final, et le schéma strict refusait alors TOUTE
+ * la sauvegarde (bug « l'enregistrement ne reste pas », 2026-08-16). */
+export function serializeFormulesForSave(formules: LavageFormule[]): string {
+  return JSON.stringify(
+    formules.map((f) => ({ ...f, inclus: f.inclus.map((s) => s.trim()).filter(Boolean) }))
+  );
+}
+
 /** HT depuis un TTC en centimes — TVA Guadeloupe 8,5 % (lib/config.VAT_RATE). */
 export function htFromTTCEnCents(ttcEnCents: number): number {
   return Math.round(ttcEnCents / (1 + VAT_RATE));
