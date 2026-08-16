@@ -20,9 +20,9 @@ export const revalidate = 60;
 const PIT_LANE_JOURS = 14;
 
 export const metadata: Metadata = {
-  title: 'Esthétique automobile — RDV en ligne',
+  title: 'SPLASH — Esthétique automobile premium',
   description:
-    'Esthétique automobile premium en Guadeloupe : Premium Wash ou Ultimate Wash, intérieur et extérieur. Prenez votre créneau en ligne, réponse sous 24 h en jours ouvrés.',
+    'SPLASH, l’esthétique automobile premium de Car Performance en Guadeloupe : Premium Wash ou Ultimate Wash, lavage manuel intérieur et extérieur. Prenez votre créneau en ligne, réponse sous 24 h en jours ouvrés.',
   alternates: { canonical: '/lavage' },
 };
 
@@ -44,6 +44,14 @@ export default async function LavagePage() {
   // Fériés Guadeloupe — calcul local, zéro API (indication, pas blocage :
   // Stéphane décide d'ouvrir ou non via la semaine type / les exceptions).
   const feries = feriesPourDates(dates);
+
+  // Demande Stéphane (mail 2026-08-14) : deux cartes larges pour les formules
+  // détaillées, le forfait (tarif unique, sans liste de prestations) en
+  // bandeau complémentaire SOUS les offres.
+  const estBandeau = (f: (typeof formules)[number]) =>
+    f.tarifs.length === 1 && f.inclus.length === 0;
+  const cartes = formules.filter((f) => !estBandeau(f));
+  const bandeaux = formules.filter(estBandeau);
 
   return (
     <>
@@ -78,7 +86,7 @@ export default async function LavagePage() {
           </nav>
 
           <p className="cp-mono text-cp-mango text-xs tracking-widest uppercase mb-5">
-            Esthétique automobile premium
+            Splash · Esthétique automobile premium
           </p>
           <h1
             className="cp-title font-black text-cp-cream leading-none mb-6"
@@ -88,10 +96,16 @@ export default async function LavagePage() {
             <br />
             <span className="text-cp-red">COMME NEUF</span>
           </h1>
-          <p className="text-cp-cream/55 text-base leading-relaxed max-w-md mb-8">
-            Premium Wash ou Ultimate Wash : intérieur et extérieur, à la main, avec des produits
-            professionnels. Choisissez votre formule et votre créneau — notre équipe vous confirme
-            sous 24 h en jours ouvrés.
+          {/* Texte de Stéphane (mail 2026-08-14) — délai ajusté à 24 h (le
+              48 h de son brouillon concerne la vente d'occasion). */}
+          <p className="text-cp-cream/55 text-base leading-relaxed max-w-md mb-4">
+            Prenez soin de votre véhicule jusque dans les détails. SPLASH associe lavage manuel,
+            nettoyage intérieur et soins esthétiques dans deux formules simples, adaptées au type de
+            véhicule. Choisissez votre formule et votre créneau — notre équipe vous confirme sous 24
+            h en jours ouvrés.
+          </p>
+          <p className="cp-mono text-cp-mango/80 text-sm italic mb-8">
+            « On ti splash, lave’y fè’y kléré ! »
           </p>
           <div className="flex flex-wrap gap-2">
             {['Sur rendez-vous', 'Produits professionnels', 'Intérieur & extérieur'].map((pill) => (
@@ -120,17 +134,17 @@ export default async function LavagePage() {
           >
             NOS FORMULES
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
-            {formules.map((f) => (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {cartes.map((f) => (
               <div
                 key={f.nom}
-                className="bg-white rounded-2xl border border-[#E5DDD3] p-6 flex flex-col"
+                className="bg-white rounded-2xl border border-[#E5DDD3] p-8 flex flex-col"
               >
-                <h3 className="cp-title font-black text-cp-ink text-2xl mb-2">
+                <h3 className="cp-title font-black text-cp-ink text-3xl mb-2">
                   {f.nom.toUpperCase()}
                 </h3>
-                <p className="text-cp-ink/55 text-sm leading-relaxed mb-4">{f.description}</p>
-                <ul className="flex flex-col gap-2 mb-6">
+                <p className="text-cp-ink/55 text-sm leading-relaxed mb-5">{f.description}</p>
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 mb-6">
                   {f.inclus.map((i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-cp-ink/70">
                       <span className="text-[#52C88A] mt-0.5" aria-hidden="true">
@@ -163,6 +177,30 @@ export default async function LavagePage() {
                     </p>
                   )}
                 </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Bandeau(x) complémentaire(s) — forfaits à tarif unique */}
+          <div className="flex flex-col gap-4 mb-20">
+            {bandeaux.map((f) => (
+              <div
+                key={f.nom}
+                className="bg-white rounded-2xl border border-[#E5DDD3] px-8 py-5 flex flex-wrap items-center justify-between gap-4"
+              >
+                <div>
+                  <h3 className="cp-title font-black text-cp-ink text-xl">{f.nom.toUpperCase()}</h3>
+                  {f.description && (
+                    <p className="text-cp-ink/55 text-sm leading-relaxed">{f.description}</p>
+                  )}
+                </div>
+                <p className="cp-mono text-cp-mango text-lg tracking-wide">
+                  {f.tarifs[0].label !== 'Forfait' && (
+                    <span className="text-cp-ink/50 text-sm mr-2">{f.tarifs[0].label}</span>
+                  )}
+                  {formatPrice(f.tarifs[0].prixTTCEnCents)}
+                  <span className="text-cp-ink/40 text-xs"> TTC</span>
+                </p>
               </div>
             ))}
           </div>
