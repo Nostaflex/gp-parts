@@ -135,7 +135,7 @@ export function LavageDisposGrid({
               type="button"
               onClick={() => setSelected(date)}
               title={feries[date]}
-              aria-label={`${labelJour(date)}${feries[date] ? ` (férié : ${feries[date]})` : ''}${fermeParSemaine(date) ? ', fermé' : ''}`}
+              aria-label={`${labelJour(date)}${feries[date] ? ` (${feries[date]})` : ''}${fermeParSemaine(date) ? ', fermé' : ''}`}
               className="flex-shrink-0 h-11 px-3 rounded-[10px] border text-body-sm font-medium"
               style={{
                 background: actif ? 'var(--blue)' : 'transparent',
@@ -173,7 +173,7 @@ export function LavageDisposGrid({
 
       {feries[selected] && (
         <p className="text-body-sm" style={{ color: 'var(--orange)' }}>
-          ● Jour férié : {feries[selected]}
+          ● {feries[selected]}
         </p>
       )}
       {fermeParSemaine(selected) && (

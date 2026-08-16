@@ -369,7 +369,7 @@ export function LavageForm({
                   disabled={complet}
                   aria-pressed={sel}
                   title={feries[d]}
-                  aria-label={`${JOUR_LONG.format(midi(d))}${feries[d] ? ` (férié : ${feries[d]})` : ''}, ${
+                  aria-label={`${JOUR_LONG.format(midi(d))}${feries[d] ? ` (${feries[d]})` : ''}, ${
                     complet ? 'complet' : `${CRENEAUX_LAVAGE.length - n} créneaux libres`
                   }`}
                   onClick={() => {
