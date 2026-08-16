@@ -50,3 +50,17 @@ export const LavageSettingsSchema = z.object({
 });
 
 export type LavageSettingsInput = z.infer<typeof LavageSettingsSchema>;
+
+// Semaine type (doc meta/lavageSemaineType) — validation stricte de la saisie
+// BO ; la lecture publique passe par normalizeSemaineType (tolérante).
+export const SemaineTypeSchema = z.object({
+  jours: z.record(
+    z.enum(['1', '2', '3', '4', '5', '6', '7']),
+    z.object({
+      ouvert: z.boolean(),
+      creneaux: z
+        .array(z.string().trim().min(1, 'Créneau vide dans la semaine type'))
+        .max(20, '20 créneaux max par jour'),
+    })
+  ),
+});

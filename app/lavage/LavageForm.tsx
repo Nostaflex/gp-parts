@@ -57,6 +57,7 @@ export function LavageForm({
   formules,
   dates,
   initialPris,
+  feries = {},
   initialFormule = '',
 }: {
   formules: LavageFormFormule[];
@@ -64,6 +65,8 @@ export function LavageForm({
   dates: string[];
   /** Créneaux pris par date, rendus côté serveur — zéro fetch au premier affichage. */
   initialPris: PrisParDate;
+  /** Jours fériés de l'horizon (date → libellé) — indication, pas blocage. */
+  feries?: Record<string, string>;
   initialFormule?: string;
 }) {
   const [website, setWebsite] = useState(''); // honeypot anti-spam
@@ -365,7 +368,8 @@ export function LavageForm({
                   type="button"
                   disabled={complet}
                   aria-pressed={sel}
-                  aria-label={`${JOUR_LONG.format(midi(d))}, ${
+                  title={feries[d]}
+                  aria-label={`${JOUR_LONG.format(midi(d))}${feries[d] ? ` (férié : ${feries[d]})` : ''}, ${
                     complet ? 'complet' : `${CRENEAUX_LAVAGE.length - n} créneaux libres`
                   }`}
                   onClick={() => {
@@ -382,6 +386,12 @@ export function LavageForm({
                 >
                   <span className="block text-[0.6rem] uppercase tracking-wider opacity-60">
                     {JOUR_COURT.format(midi(d))}
+                    {/* Férié : point mangue — l'info complète vit dans title/aria-label */}
+                    {feries[d] && (
+                      <span aria-hidden="true" className="ml-0.5 text-cp-mango">
+                        ●
+                      </span>
+                    )}
                   </span>
                   <span className="cp-mono block text-base font-bold">{d.slice(8)}</span>
                   {/* Jauge : piste blanche, avancement vert → orange → rouge */}

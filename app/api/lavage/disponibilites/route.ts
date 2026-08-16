@@ -6,7 +6,7 @@
 // Libellés seulement, jamais la source ni l'id de demande (zéro PII en sortie).
 import { NextResponse } from 'next/server';
 import { DISPO_HORIZON_JOURS, isDateKey } from '@/lib/lavage-creneaux';
-import { getBlocages, getBlocagesRange } from '@/lib/server/lavage-dispos';
+import { getPrisEffectifs } from '@/lib/server/lavage-dispos';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,19 +32,22 @@ export async function GET(request: Request) {
           { status: 400 }
         );
       }
-      const range = await getBlocagesRange(from, to);
-      const dispos = Object.fromEntries(
-        Object.entries(range).map(([date, blocages]) => [date, blocages.map((b) => b.creneau)])
-      );
-      return NextResponse.json({ dispos });
+      const dates: string[] = [];
+      const d = new Date(`${from}T00:00:00Z`);
+      const fin = new Date(`${to}T00:00:00Z`);
+      while (d.getTime() <= fin.getTime()) {
+        dates.push(d.toISOString().slice(0, 10));
+        d.setUTCDate(d.getUTCDate() + 1);
+      }
+      return NextResponse.json({ dispos: await getPrisEffectifs(dates) });
     }
 
     const date = params.get('date') ?? '';
     if (!isDateKey(date)) {
       return NextResponse.json({ error: 'Date invalide (YYYY-MM-DD attendu).' }, { status: 400 });
     }
-    const bloques = await getBlocages(date);
-    return NextResponse.json({ bloques: bloques.map((b) => b.creneau) });
+    const effectifs = await getPrisEffectifs([date]);
+    return NextResponse.json({ bloques: effectifs[date] ?? [] });
   } catch (err) {
     // Fail-open : le formulaire affiche tout disponible, la re-vérification
     // au submit reste la vraie garde. Jamais muet.

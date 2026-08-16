@@ -6,7 +6,8 @@ import { CpBridge } from '@/components/cp/CpBridge';
 import { CpFooter } from '@/components/cp/CpFooter';
 import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
 import { getCachedLavageSettings } from '@/lib/data/lavage-settings-cache';
-import { getBlocagesRange } from '@/lib/server/lavage-dispos';
+import { getPrisEffectifs } from '@/lib/server/lavage-dispos';
+import { feriesPourDates } from '@/lib/jours-feries';
 import { formatPrice, localDateISO } from '@/lib/utils';
 import type { PrisParDate } from '@/lib/lavage-creneaux';
 import { LavageForm } from './LavageForm';
@@ -30,18 +31,19 @@ export default async function LavagePage() {
   if (!flags.lavage) notFound();
   const { formules } = await getCachedLavageSettings();
 
-  // Disponibilités de l'horizon en UNE requête, rendues côté serveur — zéro
-  // fetch au premier affichage. Fail-open : la CI prérend sans Firebase.
+  // Indisponibilités EFFECTIVES (semaine type ∪ exceptions) de l'horizon en
+  // UNE requête, rendues côté serveur — zéro fetch au premier affichage.
+  // Fail-open : la CI prérend sans Firebase.
   const dates = Array.from({ length: PIT_LANE_JOURS }, (_, i) => localDateISO(1 + i));
   let initialPris: PrisParDate = {};
   try {
-    const range = await getBlocagesRange(dates[0], dates[dates.length - 1]);
-    initialPris = Object.fromEntries(
-      Object.entries(range).map(([date, blocages]) => [date, blocages.map((b) => b.creneau)])
-    );
+    initialPris = await getPrisEffectifs(dates);
   } catch (err) {
     console.warn('[lavage] lecture dispos échouée (fail-open, tout libre):', err);
   }
+  // Fériés Guadeloupe — calcul local, zéro API (indication, pas blocage :
+  // Stéphane décide d'ouvrir ou non via la semaine type / les exceptions).
+  const feries = feriesPourDates(dates);
 
   return (
     <>
@@ -189,6 +191,7 @@ export default async function LavagePage() {
               formules={formules.map((f) => ({ nom: f.nom, tarifs: f.tarifs }))}
               dates={dates}
               initialPris={initialPris}
+              feries={feries}
             />
           </div>
         </div>

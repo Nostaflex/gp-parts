@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { createDemandeIntake, getBlocages } = vi.hoisted(() => ({
+const { createDemandeIntake, getPrisEffectifs } = vi.hoisted(() => ({
   createDemandeIntake: vi.fn(async (_d: Record<string, unknown>) => 'dem-lav'),
-  getBlocages: vi.fn(async (_date: string) => [] as { creneau: string; source: string }[]),
+  getPrisEffectifs: vi.fn(async (_dates: string[]) => ({}) as Record<string, string[]>),
 }));
 vi.mock('@/lib/server/intake', () => ({ createDemandeIntake }));
-vi.mock('@/lib/server/lavage-dispos', () => ({ getBlocages }));
+vi.mock('@/lib/server/lavage-dispos', () => ({ getPrisEffectifs }));
 vi.mock('@/lib/emails/send', () => ({ sendLeadEmails: vi.fn(async () => ({ emailed: true })) }));
 
 import { sendLeadEmails } from '@/lib/emails/send';
@@ -62,7 +62,7 @@ describe('submitLavage', () => {
 describe('submitLavage — disponibilités des créneaux', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    getBlocages.mockResolvedValue([]);
+    getPrisEffectifs.mockResolvedValue({});
   });
 
   it('RDV structuré persisté (rdvDate + rdvCreneau)', async () => {
@@ -73,7 +73,7 @@ describe('submitLavage — disponibilités des créneaux', () => {
   });
 
   it('créneau bloqué → refus explicite, rien persisté', async () => {
-    getBlocages.mockResolvedValue([{ creneau: '09:00 – 10:00', source: 'rdv' }]);
+    getPrisEffectifs.mockResolvedValue({ '2026-09-01': ['09:00 – 10:00'] });
     const res = await submitLavage(base);
     expect(res.ok).toBe(false);
     if (!res.ok) expect(res.error).toContain('créneau');
@@ -81,14 +81,14 @@ describe('submitLavage — disponibilités des créneaux', () => {
   });
 
   it('autre créneau bloqué → la demande passe', async () => {
-    getBlocages.mockResolvedValue([{ creneau: '08:00 – 09:00', source: 'manuel' }]);
+    getPrisEffectifs.mockResolvedValue({ '2026-09-01': ['08:00 – 09:00'] });
     const res = await submitLavage(base);
     expect(res.ok).toBe(true);
     expect(createDemandeIntake).toHaveBeenCalled();
   });
 
   it('lecture dispos en panne → fail-open, la demande passe (jamais un lead perdu)', async () => {
-    getBlocages.mockRejectedValue(new Error('firestore down'));
+    getPrisEffectifs.mockRejectedValue(new Error('firestore down'));
     const res = await submitLavage(base);
     expect(res.ok).toBe(true);
     expect(createDemandeIntake).toHaveBeenCalled();

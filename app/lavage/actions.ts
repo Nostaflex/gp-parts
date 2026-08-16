@@ -4,7 +4,7 @@ import { createDemandeIntake } from '@/lib/server/intake';
 import { sendLeadEmails } from '@/lib/emails/send';
 import { demandeExpiry } from '@/lib/demandes';
 import { isDateKey } from '@/lib/lavage-creneaux';
-import { getBlocages } from '@/lib/server/lavage-dispos';
+import { getPrisEffectifs } from '@/lib/server/lavage-dispos';
 import type { Lead } from '@/lib/emails/lead';
 import type { LeadResult } from '@/app/reparation/actions';
 
@@ -50,8 +50,8 @@ export async function submitLavage(input: LavageInput): Promise<LeadResult> {
   // de dispo — la demande passe, Stéphane arbitre. Jamais muet.
   if (isDateKey(input.date)) {
     try {
-      const bloques = await getBlocages(input.date);
-      if (bloques.some((b) => b.creneau === input.creneau)) {
+      const effectifs = await getPrisEffectifs([input.date]);
+      if ((effectifs[input.date] ?? []).includes(input.creneau)) {
         return {
           ok: false,
           error: 'Ce créneau vient d’être réservé — choisissez un autre horaire.',
