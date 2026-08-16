@@ -29,6 +29,7 @@ export type AuditResourceType =
   | 'contact-info'
   | 'location-settings'
   | 'lavage-settings'
+  | 'lavage-dispos'
   | 'avis'
   | 'social-settings';
 

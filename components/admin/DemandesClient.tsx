@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { updateDemandeStatus, saveDemandeNote } from '@/app/admin/(shell)/demandes/actions';
+import { reserveCreneauDemande } from '@/app/admin/(shell)/lavage/actions';
 import type { Demande, DemandeStatus } from '@/lib/types';
 
 const STATUSES: { key: DemandeStatus | 'all'; label: string }[] = [
@@ -61,6 +62,53 @@ export function DemandesClient({ demandes }: { demandes: Demande[] }) {
   );
 }
 
+/** Réservation 1-tap du créneau porté par une demande lavage. Idempotent côté
+ * serveur : re-réserver un créneau déjà posé le ré-écrit à l'identique — pas
+ * besoin de connaître l'état au chargement. */
+function CreneauActions({ d }: { d: Demande }) {
+  const [etat, setEtat] = useState<'idle' | 'pending' | 'reserve' | 'libere'>('idle');
+
+  const appliquer = async (bloquer: boolean) => {
+    setEtat('pending');
+    const res = await reserveCreneauDemande(d.id, bloquer);
+    if (!res.ok) {
+      setEtat('idle');
+      window.alert(res.error);
+      return;
+    }
+    setEtat(bloquer ? 'reserve' : 'libere');
+  };
+
+  return (
+    <div className="flex gap-2 items-center flex-wrap">
+      <span className="text-body-sm" style={{ color: 'rgba(28,28,30,0.5)' }}>
+        RDV {d.rdvDate} · {d.rdvCreneau}
+      </span>
+      <button
+        type="button"
+        disabled={etat === 'pending'}
+        onClick={() => appliquer(true)}
+        className="rounded-[10px] px-3 py-1.5 text-body-sm font-medium disabled:opacity-60"
+        style={{
+          background: etat === 'reserve' ? 'var(--green)' : 'var(--blue)',
+          color: '#fff',
+        }}
+      >
+        {etat === 'reserve' ? 'Créneau réservé ✓' : 'Réserver le créneau'}
+      </button>
+      <button
+        type="button"
+        disabled={etat === 'pending'}
+        onClick={() => appliquer(false)}
+        className="rounded-[10px] px-3 py-1.5 text-body-sm disabled:opacity-60"
+        style={{ color: 'var(--red)', border: '1px solid rgba(198,198,200,0.6)' }}
+      >
+        {etat === 'libere' ? 'Créneau libéré' : 'Libérer'}
+      </button>
+    </div>
+  );
+}
+
 function DemandeRow({ d }: { d: Demande }) {
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState(d.notes ?? '');
@@ -100,6 +148,7 @@ function DemandeRow({ d }: { d: Demande }) {
               {d.email}
             </a>
           </div>
+          {d.type === 'lavage' && d.rdvDate && d.rdvCreneau && <CreneauActions d={d} />}
           <div className="flex gap-2 flex-wrap">
             <button type="button" onClick={() => applyStatus('en_cours')}>
               En cours

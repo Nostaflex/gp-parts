@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { localDateISO } from '@/lib/utils';
 import { CpRgpdNotice } from '@/components/cp/CpRgpdNotice';
 import { formatPrice } from '@/lib/utils';
+import { CRENEAUX_LAVAGE } from '@/lib/lavage-creneaux';
 import { submitLavage } from './actions';
 
 import type { LavageTarif } from '@/lib/lavage-settings';
@@ -25,15 +26,8 @@ type FormData = {
 
 export type LavageFormFormule = { nom: string; tarifs: LavageTarif[] };
 
-const CRENEAUX = [
-  '08:00 – 09:00',
-  '09:00 – 10:00',
-  '10:00 – 11:00',
-  '11:00 – 12:00',
-  '14:00 – 15:00',
-  '15:00 – 16:00',
-  '16:00 – 17:00',
-];
+// Liste canonique partagée avec la grille BO (lib/lavage-creneaux).
+const CRENEAUX = CRENEAUX_LAVAGE;
 
 const EMPTY: FormData = {
   prenom: '',
@@ -72,6 +66,33 @@ export function LavageForm({
   const set = (k: keyof FormData, v: string) => {
     setData((d) => ({ ...d, [k]: v }));
     setErrors((e) => ({ ...e, [k]: undefined }));
+  };
+
+  // Créneaux indisponibles pour la date choisie. Fail-open : si la lecture
+  // échoue, tout reste sélectionnable — le serveur re-vérifie au submit.
+  const [indispos, setIndispos] = useState<string[]>([]);
+  const fetchSeq = useRef(0);
+
+  const choisirDate = (date: string) => {
+    setData((d) => ({
+      ...d,
+      date,
+      // Un créneau choisi peut ne plus exister à la nouvelle date.
+      creneau: '',
+    }));
+    setErrors((e) => ({ ...e, date: undefined, creneau: undefined }));
+    setIndispos([]);
+    if (!date) return;
+    const seq = ++fetchSeq.current;
+    fetch(`/api/lavage/disponibilites?date=${date}`)
+      .then((r) => (r.ok ? r.json() : { bloques: [] }))
+      .then((j: { bloques?: string[] }) => {
+        // Garde anti-course : seule la dernière date choisie s'applique.
+        if (seq === fetchSeq.current) setIndispos(Array.isArray(j.bloques) ? j.bloques : []);
+      })
+      .catch(() => {
+        /* fail-open — le submit serveur reste la garde */
+      });
   };
 
   // Tarifs de la formule choisie — plus d'un tarif → le gabarit est requis
@@ -290,7 +311,7 @@ export function LavageForm({
               type="date"
               min={localDateISO(1)}
               value={data.date}
-              onChange={(e) => set('date', e.target.value)}
+              onChange={(e) => choisirDate(e.target.value)}
             />
             {err('date')}
           </div>
@@ -304,12 +325,17 @@ export function LavageForm({
             >
               <option value="">Choisir…</option>
               {CRENEAUX.map((c) => (
-                <option key={c} value={c}>
-                  {c}
+                <option key={c} value={c} disabled={indispos.includes(c)}>
+                  {indispos.includes(c) ? `${c} — indisponible` : c}
                 </option>
               ))}
             </select>
             {err('creneau')}
+            {data.date && indispos.length === CRENEAUX.length && (
+              <p className="text-[0.75rem] text-cp-ink/50 mt-1">
+                Journée complète — choisissez une autre date.
+              </p>
+            )}
           </div>
         </div>
         <div>
