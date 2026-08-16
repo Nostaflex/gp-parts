@@ -1,8 +1,19 @@
 import { z } from 'zod';
 
-// Validation des formules lavage saisies au BO (écriture meta/lavageSettings).
+// Validation des formules esthétique saisies au BO (écriture meta/lavageSettings).
 // La lecture publique passe par normalizeLavageSettings (fusion tolérante) —
-// ici on est STRICT : une saisie invalide est refusée avec un message.
+// ici on est STRICT : une saisie invalide est refusée avec un message FRANÇAIS
+// actionnable (jamais le défaut zod anglais — leçon du 2026-08-16).
+
+export const LavageTarifSchema = z.object({
+  label: z
+    .string()
+    .trim()
+    .min(1, 'Libellé de tarif vide — nomme le gabarit (Citadine, SUV…) ou supprime la ligne')
+    .max(30, 'Libellé de tarif trop long (30 caractères max)'),
+  // TTC en centimes ; plafond 10 000 € — garde-fou de saisie, pas une règle métier.
+  prixTTCEnCents: z.number().int().min(0).max(1_000_000, 'Prix trop élevé (10 000 € max)'),
+});
 
 export const LavageFormuleSchema = z
   .object({
@@ -16,19 +27,19 @@ export const LavageFormuleSchema = z
           .min(1, 'Prestation vide — supprime la ligne vide dans « Prestations incluses »')
           .max(80, 'Prestation trop longue (80 caractères max)')
       )
-      .max(12, '12 prestations incluses max'),
-    mode: z.enum(['devis', 'prix']),
-    // TTC en centimes ; plafond 10 000 € — garde-fou de saisie, pas une règle métier.
-    prixTTCEnCents: z.number().int().min(0).max(1_000_000),
+      .max(20, '20 prestations incluses max'),
+    tarifs: z.array(LavageTarifSchema).max(6, '6 tarifs maximum par formule'),
   })
   .superRefine((f, ctx) => {
-    if (f.mode === 'prix' && f.prixTTCEnCents <= 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['prixTTCEnCents'],
-        message: `« ${f.nom} » : un prix affiché doit être supérieur à 0 € (ou passe la formule en « Sur devis »).`,
-      });
-    }
+    f.tarifs.forEach((t, i) => {
+      if (t.prixTTCEnCents <= 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['tarifs', i, 'prixTTCEnCents'],
+          message: `« ${f.nom} » : le tarif « ${t.label} » doit être supérieur à 0 € (ou supprime la ligne — sans tarif, la formule s'affiche « Sur devis »).`,
+        });
+      }
+    });
   });
 
 export const LavageSettingsSchema = z.object({

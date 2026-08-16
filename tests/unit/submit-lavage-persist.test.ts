@@ -36,6 +36,13 @@ describe('submitLavage', () => {
     expect(res.ok).toBe(true);
   });
 
+  it('gabarit fourni → dans le message admin et la prestation email', async () => {
+    const res = await submitLavage({ ...base, formule: 'Premium Wash', gabarit: 'SUV' });
+    const msg = createDemandeIntake.mock.calls[0][0].message as string;
+    expect(msg).toContain('Formule : Premium Wash — SUV');
+    expect(res.ok).toBe(true);
+  });
+
   it('formule manquante → erreur', async () => {
     const res = await submitLavage({ ...base, formule: '' });
     expect(res.ok).toBe(false);

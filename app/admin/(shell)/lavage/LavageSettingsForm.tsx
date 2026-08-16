@@ -44,10 +44,30 @@ export function LavageSettingsForm({ initial }: { initial: LavageSettings }) {
         nom: '',
         description: '',
         inclus: [],
-        mode: 'devis',
-        prixTTCEnCents: 0,
+        tarifs: [],
       },
     ]);
+
+  const patchTarif = (key: number, i: number, p: Partial<LavageFormule['tarifs'][number]>) =>
+    setRows((rs) =>
+      rs.map((r) =>
+        r.key === key
+          ? { ...r, tarifs: r.tarifs.map((t, ti) => (ti === i ? { ...t, ...p } : t)) }
+          : r
+      )
+    );
+
+  const addTarif = (key: number) =>
+    setRows((rs) =>
+      rs.map((r) =>
+        r.key === key ? { ...r, tarifs: [...r.tarifs, { label: '', prixTTCEnCents: 0 }] } : r
+      )
+    );
+
+  const removeTarif = (key: number, i: number) =>
+    setRows((rs) =>
+      rs.map((r) => (r.key === key ? { ...r, tarifs: r.tarifs.filter((_, ti) => ti !== i) } : r))
+    );
 
   // Payload : sans la clé locale `key`, lignes « inclus » nettoyées (une
   // ligne vide de textarea faisait refuser TOUT l'enregistrement).
@@ -145,57 +165,65 @@ export function LavageSettingsForm({ initial }: { initial: LavageSettings }) {
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
-            <div>
-              <p className={LABEL}>Tarification</p>
-              <div
-                className="grid grid-cols-2 gap-1 rounded-[10px] p-1 border"
-                style={{ borderColor: 'var(--border)' }}
-                role="radiogroup"
-                aria-label="Mode de tarification"
-              >
-                {(['devis', 'prix'] as const).map((m) => (
+          <div>
+            <p className={LABEL}>Tarifs par gabarit (aucun tarif → « Sur devis »)</p>
+            <div className="flex flex-col gap-2">
+              {r.tarifs.map((t, ti) => (
+                <div key={ti} className="flex gap-2 items-start">
+                  <div className="flex-1">
+                    <input
+                      value={t.label}
+                      onChange={(e) => patchTarif(r.key, ti, { label: e.target.value })}
+                      className={FIELD}
+                      maxLength={30}
+                      placeholder="Citadine, Gamme B, SUV, Forfait…"
+                      aria-label={`Gabarit du tarif ${ti + 1}`}
+                    />
+                  </div>
+                  <div className="w-32">
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      step="0.01"
+                      min={0}
+                      value={t.prixTTCEnCents === 0 ? '' : t.prixTTCEnCents / 100}
+                      onChange={(e) =>
+                        patchTarif(r.key, ti, {
+                          prixTTCEnCents: Math.round(Number(e.target.value || 0) * 100),
+                        })
+                      }
+                      className={FIELD}
+                      placeholder="€ TTC"
+                      aria-label={`Prix TTC (€) du tarif ${ti + 1}`}
+                    />
+                    {t.prixTTCEnCents > 0 && (
+                      <p className="text-caption mt-1" style={{ color: 'var(--text-secondary)' }}>
+                        {formatPrice(htFromTTCEnCents(t.prixTTCEnCents))} HT
+                      </p>
+                    )}
+                  </div>
                   <button
-                    key={m}
                     type="button"
-                    role="radio"
-                    aria-checked={r.mode === m}
-                    onClick={() => patch(r.key, { mode: m })}
-                    className="h-9 rounded-[8px] text-body-sm font-semibold"
-                    style={{
-                      background: r.mode === m ? 'var(--blue)' : 'transparent',
-                      color: r.mode === m ? '#fff' : 'var(--text)',
-                    }}
+                    onClick={() => removeTarif(r.key, ti)}
+                    aria-label={`Supprimer le tarif « ${t.label || `tarif ${ti + 1}`} »`}
+                    className="h-11 w-11 rounded-[10px] border"
+                    style={{ color: 'var(--red)', borderColor: 'var(--border)' }}
                   >
-                    {m === 'devis' ? 'Sur devis' : 'Prix affiché'}
+                    ✕
                   </button>
-                ))}
-              </div>
+                </div>
+              ))}
+              {r.tarifs.length < 6 && (
+                <button
+                  type="button"
+                  onClick={() => addTarif(r.key)}
+                  className="self-start h-9 px-3 rounded-[10px] border text-body-sm font-medium"
+                  style={{ color: 'var(--blue)', borderColor: 'var(--border)' }}
+                >
+                  + Ajouter un tarif
+                </button>
+              )}
             </div>
-            {r.mode === 'prix' && (
-              <div>
-                <label className={LABEL} htmlFor={`prix-${r.key}`}>
-                  Prix TTC (€)
-                </label>
-                <input
-                  id={`prix-${r.key}`}
-                  type="number"
-                  inputMode="decimal"
-                  step="0.01"
-                  min={0}
-                  value={r.prixTTCEnCents === 0 ? '' : r.prixTTCEnCents / 100}
-                  onChange={(e) =>
-                    patch(r.key, { prixTTCEnCents: Math.round(Number(e.target.value || 0) * 100) })
-                  }
-                  className={FIELD}
-                />
-                {r.prixTTCEnCents > 0 && (
-                  <p className="text-caption mt-1" style={{ color: 'var(--text-secondary)' }}>
-                    soit {formatPrice(htFromTTCEnCents(r.prixTTCEnCents))} HT (TVA 8,5 %)
-                  </p>
-                )}
-              </div>
-            )}
           </div>
         </fieldset>
       ))}

@@ -8,6 +8,29 @@ import {
 } from '@/lib/lavage-settings';
 import { LavageSettingsSchema } from '@/lib/schemas/lavage';
 
+describe('DEFAULT_LAVAGE_SETTINGS (gamme Stéphane 2026-08-16)', () => {
+  it('Premium Wash, Ultimate Wash et forfait Pick-up & Utilitaire, tarifs exacts', () => {
+    const noms = DEFAULT_LAVAGE_SETTINGS.formules.map((f) => f.nom);
+    expect(noms).toEqual(['Premium Wash', 'Ultimate Wash', 'Pick-up & Utilitaire']);
+    const [premium, ultimate, pickup] = DEFAULT_LAVAGE_SETTINGS.formules;
+    expect(premium.tarifs).toEqual([
+      { label: 'Citadine', prixTTCEnCents: 3000 },
+      { label: 'Gamme B', prixTTCEnCents: 5000 },
+      { label: 'SUV', prixTTCEnCents: 9000 },
+    ]);
+    expect(ultimate.tarifs).toEqual([
+      { label: 'Citadine', prixTTCEnCents: 5000 },
+      { label: 'Gamme B', prixTTCEnCents: 8000 },
+      { label: 'SUV', prixTTCEnCents: 12000 },
+    ]);
+    expect(pickup.tarifs).toEqual([{ label: 'Forfait', prixTTCEnCents: 11000 }]);
+  });
+
+  it('les défauts passent le schéma strict du BO (sinon la 1re sauvegarde échouerait)', () => {
+    expect(LavageSettingsSchema.safeParse(DEFAULT_LAVAGE_SETTINGS).success).toBe(true);
+  });
+});
+
 describe('normalizeLavageSettings (fusion tolérante)', () => {
   it('null / objet vide / liste vide → défauts (jamais 0 formule en public)', () => {
     expect(normalizeLavageSettings(null)).toEqual(DEFAULT_LAVAGE_SETTINGS);
@@ -15,12 +38,19 @@ describe('normalizeLavageSettings (fusion tolérante)', () => {
     expect(normalizeLavageSettings({ formules: [] })).toEqual(DEFAULT_LAVAGE_SETTINGS);
   });
 
-  it('items invalides filtrés, champs manquants complétés, ordre préservé', () => {
+  it('items invalides filtrés, tarifs invalides retirés, ordre préservé', () => {
     const out = normalizeLavageSettings({
       formules: [
-        { nom: 'Express', mode: 'prix', prixTTCEnCents: 2500 },
+        {
+          nom: 'Express',
+          tarifs: [
+            { label: 'Citadine', prixTTCEnCents: 2500 },
+            { label: '', prixTTCEnCents: 900 }, // sans libellé → retiré
+            { label: 'SUV', prixTTCEnCents: -5 }, // prix invalide → retiré
+          ],
+        },
         { nom: '' }, // sans nom → filtrée
-        { nom: 'Pack Complet', description: 'Tout', inclus: ['A', '', 'B'], mode: 'invalide' },
+        { nom: 'Pack', description: 'Tout', inclus: ['A', '', 'B'] },
       ],
     });
     expect(out.formules).toHaveLength(2);
@@ -28,19 +58,22 @@ describe('normalizeLavageSettings (fusion tolérante)', () => {
       nom: 'Express',
       description: '',
       inclus: [],
-      mode: 'prix',
-      prixTTCEnCents: 2500,
+      tarifs: [{ label: 'Citadine', prixTTCEnCents: 2500 }],
     });
-    // mode inconnu → devis (fail-safe) ; inclus vides filtrés
-    expect(out.formules[1].mode).toBe('devis');
+    // sans tarifs → liste vide (« Sur devis ») ; inclus vides filtrés
+    expect(out.formules[1].tarifs).toEqual([]);
     expect(out.formules[1].inclus).toEqual(['A', 'B']);
   });
 
-  it('prix négatif ou non numérique → 0', () => {
+  it('legacy v1 (mode prix, tarif unique) → migré en un tarif', () => {
     const out = normalizeLavageSettings({
-      formules: [{ nom: 'X', mode: 'prix', prixTTCEnCents: -50 }],
+      formules: [
+        { nom: 'X', mode: 'prix', prixTTCEnCents: 4500 },
+        { nom: 'Y', mode: 'devis', prixTTCEnCents: 0 },
+      ],
     });
-    expect(out.formules[0].prixTTCEnCents).toBe(0);
+    expect(out.formules[0].tarifs).toEqual([{ label: 'Tarif', prixTTCEnCents: 4500 }]);
+    expect(out.formules[1].tarifs).toEqual([]);
   });
 });
 
@@ -60,23 +93,34 @@ describe('LavageSettingsSchema (saisie BO stricte)', () => {
         nom: 'Express',
         description: '',
         inclus: ['Lavage main'],
-        mode: 'prix',
-        prixTTCEnCents: 2500,
+        tarifs: [{ label: 'Citadine', prixTTCEnCents: 2500 }],
       },
     ],
   };
 
-  it('saisie valide → OK', () => {
+  it('saisie valide → OK ; sans tarifs (« Sur devis ») → OK aussi', () => {
     expect(LavageSettingsSchema.safeParse(valide).success).toBe(true);
+    expect(
+      LavageSettingsSchema.safeParse({
+        formules: [{ ...valide.formules[0], tarifs: [] }],
+      }).success
+    ).toBe(true);
   });
 
-  it('mode « prix » avec 0 € → refus explicite nommant la formule', () => {
+  it('tarif à 0 € → refus explicite nommant la formule et le gabarit', () => {
     const r = LavageSettingsSchema.safeParse({
-      formules: [{ ...valide.formules[0], prixTTCEnCents: 0 }],
+      formules: [
+        {
+          ...valide.formules[0],
+          tarifs: [{ label: 'SUV', prixTTCEnCents: 0 }],
+        },
+      ],
     });
     expect(r.success).toBe(false);
     if (!r.success) {
-      expect(r.error.issues.map((i) => i.message).join(' ')).toContain('Express');
+      const msg = r.error.issues.map((i) => i.message).join(' ');
+      expect(msg).toContain('Express');
+      expect(msg).toContain('SUV');
     }
   });
 
@@ -102,8 +146,7 @@ describe('serializeFormulesForSave (bug 2026-08-16 : « l’enregistrement ne re
     nom: 'Express',
     description: 'desc',
     inclus: ['Lavage main'],
-    mode: 'prix' as const,
-    prixTTCEnCents: 2500,
+    tarifs: [{ label: 'Citadine', prixTTCEnCents: 2500 }],
   };
 
   it('retour à la ligne final dans le textarea → payload valide pour le schéma', () => {
@@ -119,6 +162,27 @@ describe('serializeFormulesForSave (bug 2026-08-16 : « l’enregistrement ne re
     const out = JSON.parse(payload)[0];
     expect(out.inclus).toEqual(['Jantes', 'Vitres']);
     expect(out.nom).toBe('Express');
-    expect(out.prixTTCEnCents).toBe(2500);
+    expect(out.tarifs).toEqual([{ label: 'Citadine', prixTTCEnCents: 2500 }]);
+  });
+
+  it('ligne de tarif entièrement vide retirée ; libellés trimés', () => {
+    const payload = serializeFormulesForSave([
+      {
+        ...f,
+        tarifs: [
+          { label: '  SUV ', prixTTCEnCents: 9000 },
+          { label: '', prixTTCEnCents: 0 }, // ligne vide (juste ajoutée) → retirée
+        ],
+      },
+    ]);
+    const out = JSON.parse(payload)[0];
+    expect(out.tarifs).toEqual([{ label: 'SUV', prixTTCEnCents: 9000 }]);
+  });
+
+  it('ligne de tarif à moitié remplie CONSERVÉE (le schéma doit la signaler, pas la perdre)', () => {
+    const payload = serializeFormulesForSave([
+      { ...f, tarifs: [{ label: 'SUV', prixTTCEnCents: 0 }] },
+    ]);
+    expect(JSON.parse(payload)[0].tarifs).toEqual([{ label: 'SUV', prixTTCEnCents: 0 }]);
   });
 });
