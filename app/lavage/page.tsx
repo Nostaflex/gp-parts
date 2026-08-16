@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { CpHeader } from '@/components/cp/CpHeader';
@@ -219,11 +220,31 @@ export default async function LavagePage() {
                 <br />
                 <em className="text-cp-red not-italic">VOTRE CRÉNEAU.</em>
               </h2>
-              <p className="text-cp-ink/60 text-base leading-relaxed mb-10 max-w-md">
+              <p className="text-cp-ink/60 text-base leading-relaxed mb-8 max-w-md">
                 Un rendez-vous dédié à l&apos;esthétique, distinct de l&apos;atelier : choisissez
                 votre formule, le gabarit de votre véhicule, votre date et votre créneau. Notre
                 équipe vous confirme sous 24 h en jours ouvrés.
               </p>
+              {/* Réassurance SPLASH — visuel validé par Stéphane (référence
+                  officielle, recadrée en médaillon, jamais redessinée). */}
+              <div className="flex items-center gap-4 mb-10">
+                <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-cp-mango flex-shrink-0">
+                  <Image
+                    src="/images/splash/splash-sans-gant.png"
+                    alt="Splash, la mascotte de l'esthétique automobile Car Performance"
+                    fill
+                    sizes="80px"
+                    className="object-cover object-top"
+                  />
+                </div>
+                <div>
+                  <p className="cp-title font-black text-cp-ink text-lg leading-tight">SPLASH</p>
+                  <p className="text-cp-ink/55 text-sm leading-snug">
+                    L&apos;expert de l&apos;entretien auto — votre véhicule est entre de bonnes
+                    mains.
+                  </p>
+                </div>
+              </div>
             </div>
             <LavageForm
               formules={formules.map((f) => ({ nom: f.nom, tarifs: f.tarifs }))}
