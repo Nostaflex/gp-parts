@@ -6,8 +6,17 @@ import { CpBridge } from '@/components/cp/CpBridge';
 import { CpFooter } from '@/components/cp/CpFooter';
 import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
 import { getCachedLavageSettings } from '@/lib/data/lavage-settings-cache';
-import { formatPrice } from '@/lib/utils';
+import { getBlocagesRange } from '@/lib/server/lavage-dispos';
+import { formatPrice, localDateISO } from '@/lib/utils';
+import type { PrisParDate } from '@/lib/lavage-creneaux';
 import { LavageForm } from './LavageForm';
+
+// Fraîcheur des disponibilités servies au premier rendu (le client re-vérifie
+// au focus, le serveur re-vérifie au submit — 60 s suffisent ici).
+export const revalidate = 60;
+
+/** Horizon du sélecteur : 14 jours à partir de demain. */
+const PIT_LANE_JOURS = 14;
 
 export const metadata: Metadata = {
   title: 'Esthétique automobile — RDV en ligne',
@@ -20,6 +29,19 @@ export default async function LavagePage() {
   const flags = await getCachedFeatureFlags();
   if (!flags.lavage) notFound();
   const { formules } = await getCachedLavageSettings();
+
+  // Disponibilités de l'horizon en UNE requête, rendues côté serveur — zéro
+  // fetch au premier affichage. Fail-open : la CI prérend sans Firebase.
+  const dates = Array.from({ length: PIT_LANE_JOURS }, (_, i) => localDateISO(1 + i));
+  let initialPris: PrisParDate = {};
+  try {
+    const range = await getBlocagesRange(dates[0], dates[dates.length - 1]);
+    initialPris = Object.fromEntries(
+      Object.entries(range).map(([date, blocages]) => [date, blocages.map((b) => b.creneau)])
+    );
+  } catch (err) {
+    console.warn('[lavage] lecture dispos échouée (fail-open, tout libre):', err);
+  }
 
   return (
     <>
@@ -163,7 +185,11 @@ export default async function LavagePage() {
                 équipe vous confirme sous 24 h en jours ouvrés.
               </p>
             </div>
-            <LavageForm formules={formules.map((f) => ({ nom: f.nom, tarifs: f.tarifs }))} />
+            <LavageForm
+              formules={formules.map((f) => ({ nom: f.nom, tarifs: f.tarifs }))}
+              dates={dates}
+              initialPris={initialPris}
+            />
           </div>
         </div>
       </section>

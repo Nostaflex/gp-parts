@@ -26,6 +26,10 @@ const config: Config = {
           vert: '#2A5C45',
           'vert-l': '#52C88A',
           gold: '#E9C46A',
+          // Palette Antilles du sélecteur Pit Lane (spec 2026-08-16) :
+          // lagon = l'eau (pastilles libres, horizon), jamais une couleur de fond.
+          lagon: '#0E8FA6',
+          'lagon-l': '#E6F2F4',
         },
         // Car Performance — univers (backgrounds de section)
         u: {

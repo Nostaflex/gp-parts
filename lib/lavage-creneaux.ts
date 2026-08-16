@@ -28,6 +28,36 @@ export type LavageBlocage = {
   demandeId?: string;
 };
 
+/** Créneaux PRIS par date (libellés) — la forme servie par l'API publique. */
+export type PrisParDate = Record<string, string[]>;
+
+/** Raccourci « Prochain créneau » (pattern Doctolib) : premier créneau libre
+ * en parcourant les dates dans l'ordre. null = tout l'horizon est complet. */
+export function prochainCreneau(
+  dates: string[],
+  pris: PrisParDate
+): { date: string; creneau: string } | null {
+  for (const date of dates) {
+    const occupes = new Set(pris[date] ?? []);
+    for (const creneau of CRENEAUX_LAVAGE) {
+      if (!occupes.has(creneau)) return { date, creneau };
+    }
+  }
+  return null;
+}
+
+/** Niveau de la jauge de remplissage (décision Djemil 2026-08-16) :
+ * vert = la journée respire, orange = la saturation arrive (≥ 4/7),
+ * rouge = plus de dispo. */
+export function niveauRemplissage(
+  nPris: number,
+  total: number = CRENEAUX_LAVAGE.length
+): 'vert' | 'orange' | 'rouge' {
+  if (nPris >= total) return 'rouge';
+  if (nPris / total >= 0.5) return 'orange';
+  return 'vert';
+}
+
 /** Clé de date d'un doc lavageDispos : YYYY-MM-DD strict. Parse en UTC pour
  * que la validation ne dépende jamais du fuseau du serveur (leçon TZ
  * Guadeloupe UTC−4) ; « 2026-02-30 » glisse en mars → refusé. */
