@@ -218,7 +218,8 @@ export default async function LavagePage() {
               >
                 RÉSERVEZ
                 <br />
-                <em className="text-cp-red not-italic">VOTRE CRÉNEAU.</em>
+                {/* Accent lagon — rester dans l'univers bleu de Splash (retour Djemil). */}
+                <em className="text-cp-lagon not-italic">VOTRE CRÉNEAU.</em>
               </h2>
               <p className="text-cp-ink/60 text-base leading-relaxed mb-8 max-w-md">
                 Un rendez-vous dédié à l&apos;esthétique, distinct de l&apos;atelier : choisissez

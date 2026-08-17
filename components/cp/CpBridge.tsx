@@ -4,23 +4,19 @@ type BridgeProps = {
   accentColor?: string;
 };
 
+/**
+ * Transition entre deux sections : bande dédiée de 128 px — dégradé, double
+ * vague douce, orbe qui respire. JAMAIS de chevauchement des sections
+ * voisines (retour Djemil 2026-08-17 : les marges négatives coupaient les
+ * mascottes posées en bord de section).
+ */
 export function CpBridge({ fromColor, toColor, accentColor = '#E87200' }: BridgeProps) {
   const id = `bridge-${fromColor.replace('#', '')}-${toColor.replace('#', '')}`;
   const gradId = `grad-${id}`;
   const orbId = `orb-${id}`;
 
   return (
-    <div
-      aria-hidden="true"
-      style={{
-        height: '128px',
-        marginTop: '-64px',
-        marginBottom: '-64px',
-        position: 'relative',
-        zIndex: 5,
-        overflow: 'visible',
-      }}
-    >
+    <div aria-hidden="true" style={{ height: '128px', overflow: 'hidden' }}>
       <svg
         viewBox="0 0 1440 180"
         preserveAspectRatio="none"
@@ -37,23 +33,23 @@ export function CpBridge({ fromColor, toColor, accentColor = '#E87200' }: Bridge
           </radialGradient>
         </defs>
 
-        {/* Background gradient rect */}
+        {/* Fond : dégradé de la section précédente vers la suivante */}
         <rect width="1440" height="180" fill={`url(#${gradId})`} />
 
-        {/* Wave paths */}
+        {/* Double vague douce — amplitudes contenues, longues ondulations */}
         <path
-          d="M0,60 C240,120 480,20 720,80 C960,140 1200,40 1440,90 L1440,180 L0,180 Z"
+          d="M0,84 C360,116 720,56 1080,92 C1260,108 1360,92 1440,100 L1440,180 L0,180 Z"
           fill={toColor}
-          opacity="0.5"
+          opacity="0.45"
         />
         <path
-          d="M0,90 C360,40 720,160 1080,60 C1260,20 1380,100 1440,80 L1440,180 L0,180 Z"
+          d="M0,124 C320,96 640,150 960,118 C1160,98 1320,132 1440,116 L1440,180 L0,180 Z"
           fill={toColor}
-          opacity="0.8"
+          opacity="0.85"
         />
 
-        {/* Orb */}
-        <ellipse cx="720" cy="90" rx="320" ry="80" fill={`url(#${orbId})`}>
+        {/* Orbe qui respire */}
+        <ellipse cx="720" cy="92" rx="320" ry="70" fill={`url(#${orbId})`}>
           <animate attributeName="rx" values="280;360;280" dur="6s" repeatCount="indefinite" />
           <animate attributeName="opacity" values="0.6;1;0.6" dur="6s" repeatCount="indefinite" />
         </ellipse>
