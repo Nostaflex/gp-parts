@@ -64,6 +64,17 @@ const UNIVERS = [
     accent: '#E9C46A',
     img: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=900&q=80&fit=crop',
   },
+  // « Il manque un bloc pour le lavage » (mail Stéphane 2026-08-15) — la
+  // carte SPLASH complète la grille des univers.
+  {
+    id: 'lavage',
+    href: '/lavage',
+    label: 'Esthétique auto',
+    tag: '06',
+    desc: 'SPLASH, l’expert de l’entretien auto — Premium Wash ou Ultimate Wash, lavage manuel sur rendez-vous.',
+    accent: '#0E8FA6',
+    img: '/images/splash/splash-gant.png',
+  },
 ];
 
 const STATS = [
@@ -224,9 +235,11 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {univers.map((u, i) => (
               <CpReveal key={u.id} delay={(i % 4) as 0 | 1 | 2 | 3}>
+                {/* 6 cartes = grille 3×2 complète — la pleine largeur de
+                    « pieces » recréerait le trou signalé par Stéphane (15/08). */}
                 <Link
                   href={u.href}
-                  className={`group flex flex-col relative rounded-2xl overflow-hidden p-8 min-h-[260px] md:min-h-[300px] ${u.id === 'pieces' ? 'md:col-span-2' : ''}`}
+                  className="group flex flex-col relative rounded-2xl overflow-hidden p-8 min-h-[260px] md:min-h-[300px]"
                 >
                   {/* Photo univers + voile ink — zoom lent au survol */}
                   <Image

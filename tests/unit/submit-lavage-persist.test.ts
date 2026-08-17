@@ -1,9 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { createDemandeIntake } = vi.hoisted(() => ({
+const { createDemandeIntake, getPrisEffectifs } = vi.hoisted(() => ({
   createDemandeIntake: vi.fn(async (_d: Record<string, unknown>) => 'dem-lav'),
+  getPrisEffectifs: vi.fn(async (_dates: string[]) => ({}) as Record<string, string[]>),
 }));
 vi.mock('@/lib/server/intake', () => ({ createDemandeIntake }));
+vi.mock('@/lib/server/lavage-dispos', () => ({ getPrisEffectifs }));
 vi.mock('@/lib/emails/send', () => ({ sendLeadEmails: vi.fn(async () => ({ emailed: true })) }));
 
 import { sendLeadEmails } from '@/lib/emails/send';
@@ -54,5 +56,41 @@ describe('submitLavage', () => {
     expect(createDemandeIntake).not.toHaveBeenCalled();
     expect(sendLeadEmails).not.toHaveBeenCalled();
     expect(res.ok).toBe(true);
+  });
+});
+
+describe('submitLavage — disponibilités des créneaux', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getPrisEffectifs.mockResolvedValue({});
+  });
+
+  it('RDV structuré persisté (rdvDate + rdvCreneau)', async () => {
+    await submitLavage(base);
+    expect(createDemandeIntake).toHaveBeenCalledWith(
+      expect.objectContaining({ rdvDate: '2026-09-01', rdvCreneau: '09:00 – 10:00' })
+    );
+  });
+
+  it('créneau bloqué → refus explicite, rien persisté', async () => {
+    getPrisEffectifs.mockResolvedValue({ '2026-09-01': ['09:00 – 10:00'] });
+    const res = await submitLavage(base);
+    expect(res.ok).toBe(false);
+    if (!res.ok) expect(res.error).toContain('créneau');
+    expect(createDemandeIntake).not.toHaveBeenCalled();
+  });
+
+  it('autre créneau bloqué → la demande passe', async () => {
+    getPrisEffectifs.mockResolvedValue({ '2026-09-01': ['08:00 – 09:00'] });
+    const res = await submitLavage(base);
+    expect(res.ok).toBe(true);
+    expect(createDemandeIntake).toHaveBeenCalled();
+  });
+
+  it('lecture dispos en panne → fail-open, la demande passe (jamais un lead perdu)', async () => {
+    getPrisEffectifs.mockRejectedValue(new Error('firestore down'));
+    const res = await submitLavage(base);
+    expect(res.ok).toBe(true);
+    expect(createDemandeIntake).toHaveBeenCalled();
   });
 });

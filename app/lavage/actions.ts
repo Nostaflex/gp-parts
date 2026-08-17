@@ -3,6 +3,8 @@
 import { createDemandeIntake } from '@/lib/server/intake';
 import { sendLeadEmails } from '@/lib/emails/send';
 import { demandeExpiry } from '@/lib/demandes';
+import { isDateKey } from '@/lib/lavage-creneaux';
+import { getPrisEffectifs } from '@/lib/server/lavage-dispos';
 import type { Lead } from '@/lib/emails/lead';
 import type { LeadResult } from '@/app/reparation/actions';
 
@@ -42,6 +44,23 @@ export async function submitLavage(input: LavageInput): Promise<LeadResult> {
   if (!TEL_RE.test(input.tel ?? '')) return { ok: false, error: 'Téléphone invalide.' };
   if (!input.formule) return { ok: false, error: 'Formule requise.' };
   if (!input.date || !input.creneau) return { ok: false, error: 'Date et créneau requis.' };
+
+  // Créneau déjà bloqué (RDV confirmé ou blocage manuel) → refus explicite.
+  // Fail-open sur erreur de lecture : un lead ne se perd jamais sur une panne
+  // de dispo — la demande passe, Stéphane arbitre. Jamais muet.
+  if (isDateKey(input.date)) {
+    try {
+      const effectifs = await getPrisEffectifs([input.date]);
+      if ((effectifs[input.date] ?? []).includes(input.creneau)) {
+        return {
+          ok: false,
+          error: 'Ce créneau vient d’être réservé — choisissez un autre horaire.',
+        };
+      }
+    } catch (err) {
+      console.warn('[submitLavage] lecture dispos échouée (fail-open):', err);
+    }
+  }
 
   const ref = genRef();
   const vehiculeStr = [input.marque, input.modele]
@@ -83,6 +102,8 @@ export async function submitLavage(input: LavageInput): Promise<LeadResult> {
       email: input.email.trim(),
       telephone: input.tel.trim(),
       message: messageFull,
+      // RDV structuré → blocage 1-tap du créneau au BO.
+      ...(isDateKey(input.date) ? { rdvDate: input.date, rdvCreneau: input.creneau } : {}),
       createdAt: nowIso,
       updatedAt: nowIso,
       expiresAt: demandeExpiry(now),

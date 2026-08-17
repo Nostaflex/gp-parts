@@ -165,6 +165,10 @@ export interface Demande {
   message: string;
   // Référence optionnelle vers la ressource concernée (id véhicule/moto/produit)
   resourceRef?: string;
+  // RDV structuré (demandes lavage/esthétique) — permet le blocage 1-tap du
+  // créneau au BO sans parser le message texte.
+  rdvDate?: string; // YYYY-MM-DD
+  rdvCreneau?: string;
   // Notes internes ajoutées par l'admin (jamais exposées côté public)
   notes?: string;
   createdAt: string; // ISO date
