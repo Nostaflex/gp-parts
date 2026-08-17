@@ -33,7 +33,7 @@ export function CpUniversCard({ univers: u }: { univers: UniversEntry }) {
           alt={u.mascotte.alt}
           width={u.mascotte.width}
           height={u.mascotte.height}
-          className="absolute -right-[10px] -bottom-[14px] z-[1] h-[170px] md:h-[195px] w-auto drop-shadow-[0_14px_22px_rgba(0,0,0,.4)] transition-transform duration-500 ease-cp-out group-hover:scale-[1.04]"
+          className="absolute -right-[10px] -bottom-[14px] z-[1] h-[170px] md:h-[195px] w-auto transition-transform duration-500 ease-cp-out group-hover:scale-[1.04]"
           style={{
             WebkitMaskImage: 'linear-gradient(to bottom, #000 78%, transparent 100%)',
             maskImage: 'linear-gradient(to bottom, #000 78%, transparent 100%)',
