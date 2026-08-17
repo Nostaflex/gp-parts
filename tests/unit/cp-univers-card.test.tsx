@@ -9,16 +9,23 @@ const BASE = {
   tag: '02',
   desc: 'SPLASH, expert entretien.',
   accent: '#3CC5DE',
-  img: '/images/splash/atelier-lavage.png',
+  bg: 'linear-gradient(to top, rgba(6,39,48,0.94) 0%, rgba(14,143,166,0.3) 100%)',
 };
 
-describe('CpUniversCard — carte univers (handoff 2026-08-17)', () => {
+describe('CpUniversCard — carte univers (handoff 2026-08-17, fond univers sans photo)', () => {
   it('affiche tag, label en capitales et description', () => {
     render(<CpUniversCard univers={BASE} />);
     expect(screen.getByText('02')).toBeInTheDocument();
     expect(screen.getByText('LAVAGE')).toBeInTheDocument();
     expect(screen.getByText('SPLASH, expert entretien.')).toBeInTheDocument();
     expect(screen.getByRole('link')).toHaveAttribute('href', '/lavage');
+  });
+
+  it("peint le fond avec le dégradé d'univers, sans aucune photo", () => {
+    const { container } = render(<CpUniversCard univers={BASE} />);
+    expect(container.querySelector('img')).toBeNull();
+    const link = screen.getByRole('link');
+    expect(link.getAttribute('style')).toContain('linear-gradient');
   });
 
   it('affiche la mascotte détourée quand fournie, et réserve la place du texte', () => {

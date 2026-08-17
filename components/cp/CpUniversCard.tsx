@@ -9,47 +9,31 @@ export type UniversEntry = {
   tag: string;
   desc: string;
   accent: string;
-  img: string;
-  /** Voile custom (maquette cp-v4 : lagon pour Lavage, vert pour Location). Défaut : voile ink. */
-  veil?: string;
+  /** Fond de carte = dégradé de l'univers (retour Djemil 2026-08-17 : pas de photo). */
+  bg: string;
   /** Mascotte détourée en surimpression droite (Splash, Max) — handoff 2026-08-17. */
   mascotte?: { src: string; alt: string };
 };
 
-const VOILE_INK =
-  'linear-gradient(to top, rgba(26,15,6,0.92) 0%, rgba(26,15,6,0.45) 55%, rgba(26,15,6,0.18) 100%)';
-
 /**
  * Carte de la grille « Nos univers » (accueil). Extraite de app/page.tsx au
- * lot 2 du handoff design 2026-08-17 pour porter mascottes + voiles colorés.
+ * lot 2 du handoff design 2026-08-17. Chaque univers est un aplat coloré —
+ * les photos de fond ont été retirées sur retour Djemil (2026-08-17).
  */
 export function CpUniversCard({ univers: u }: { univers: UniversEntry }) {
   return (
     <Link
       href={u.href}
       className="group flex flex-col relative rounded-2xl overflow-hidden p-8 min-h-[260px] md:min-h-[300px]"
+      style={{ background: u.bg }}
     >
-      {/* Photo univers + voile — zoom lent au survol */}
-      <Image
-        src={u.img}
-        alt=""
-        fill
-        sizes="(min-width: 768px) 50vw, 100vw"
-        className="object-cover transition-transform duration-700 ease-cp-out group-hover:scale-105"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute inset-0"
-        style={{ background: u.veil ?? VOILE_INK }}
-      />
-
       {u.mascotte && (
         <Image
           src={u.mascotte.src}
           alt={u.mascotte.alt}
           width={180}
           height={270}
-          className="absolute -right-[10px] -bottom-[14px] z-[1] h-[240px] md:h-[270px] w-auto drop-shadow-[0_14px_22px_rgba(0,0,0,.4)]"
+          className="absolute -right-[10px] -bottom-[14px] z-[1] h-[240px] md:h-[270px] w-auto drop-shadow-[0_14px_22px_rgba(0,0,0,.4)] transition-transform duration-500 ease-cp-out group-hover:scale-[1.04]"
           style={{
             WebkitMaskImage: 'linear-gradient(to bottom, #000 78%, transparent 100%)',
             maskImage: 'linear-gradient(to bottom, #000 78%, transparent 100%)',
