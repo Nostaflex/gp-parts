@@ -33,13 +33,18 @@ describe('CpUniversCard — carte univers (handoff 2026-08-17, fond univers sans
       <CpUniversCard
         univers={{
           ...BASE,
-          mascotte: { src: '/images/mascottes/splash-gant.webp', alt: 'Splash, mascotte iguane' },
+          mascotte: {
+            src: '/images/mascottes/splash-gant.webp',
+            alt: 'Splash, mascotte iguane',
+            width: 560,
+            height: 840,
+          },
         }}
       />
     );
     expect(screen.getByAltText('Splash, mascotte iguane')).toBeInTheDocument();
     expect(screen.getByText('SPLASH, expert entretien.').parentElement?.className).toContain(
-      'pr-[112px]'
+      'pr-[92px]'
     );
   });
 

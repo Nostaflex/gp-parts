@@ -12,7 +12,7 @@ export type UniversEntry = {
   /** Fond de carte = dégradé de l'univers (retour Djemil 2026-08-17 : pas de photo). */
   bg: string;
   /** Mascotte détourée en surimpression droite (Splash, Max) — handoff 2026-08-17. */
-  mascotte?: { src: string; alt: string };
+  mascotte?: { src: string; alt: string; width: number; height: number };
 };
 
 /**
@@ -24,16 +24,16 @@ export function CpUniversCard({ univers: u }: { univers: UniversEntry }) {
   return (
     <Link
       href={u.href}
-      className="group flex flex-col relative rounded-2xl overflow-hidden p-8 min-h-[260px] md:min-h-[300px]"
+      className="group flex flex-col relative rounded-2xl overflow-hidden p-6 min-h-[200px] md:min-h-[230px]"
       style={{ background: u.bg }}
     >
       {u.mascotte && (
         <Image
           src={u.mascotte.src}
           alt={u.mascotte.alt}
-          width={180}
-          height={270}
-          className="absolute -right-[10px] -bottom-[14px] z-[1] h-[240px] md:h-[270px] w-auto drop-shadow-[0_14px_22px_rgba(0,0,0,.4)] transition-transform duration-500 ease-cp-out group-hover:scale-[1.04]"
+          width={u.mascotte.width}
+          height={u.mascotte.height}
+          className="absolute -right-[10px] -bottom-[14px] z-[1] h-[170px] md:h-[195px] w-auto drop-shadow-[0_14px_22px_rgba(0,0,0,.4)] transition-transform duration-500 ease-cp-out group-hover:scale-[1.04]"
           style={{
             WebkitMaskImage: 'linear-gradient(to bottom, #000 78%, transparent 100%)',
             maskImage: 'linear-gradient(to bottom, #000 78%, transparent 100%)',
@@ -63,8 +63,8 @@ export function CpUniversCard({ univers: u }: { univers: UniversEntry }) {
       {/* Titres alignés entre cartes d'une même rangée : place réservée à la
           mascotte via padding-right (jamais en bridant la largeur du texte),
           description bornée à 2 lignes. */}
-      <div className={cn('relative z-[2] mt-auto pt-16', u.mascotte && 'pr-[112px] md:pr-[150px]')}>
-        <h3 className="cp-title text-cp-cream font-black text-4xl leading-none mb-3">
+      <div className={cn('relative z-[2] mt-auto pt-10', u.mascotte && 'pr-[92px] md:pr-[120px]')}>
+        <h3 className="cp-title text-cp-cream font-black text-3xl leading-none mb-3">
           {u.label.toUpperCase()}
         </h3>
         <p className="text-cp-cream/75 text-sm leading-relaxed max-w-md line-clamp-2">{u.desc}</p>

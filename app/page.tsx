@@ -39,7 +39,12 @@ const UNIVERS = [
     desc: 'SPLASH, l’expert de l’entretien auto — Premium Wash ou Ultimate Wash, lavage manuel sur rendez-vous.',
     accent: '#3CC5DE',
     bg: 'linear-gradient(to top, rgba(6,39,48,0.94) 0%, rgba(14,143,166,0.55) 55%, rgba(14,143,166,0.3) 100%)',
-    mascotte: { src: '/images/mascottes/splash-gant.webp', alt: 'Splash, mascotte iguane' },
+    mascotte: {
+      src: '/images/mascottes/splash-gant.webp',
+      alt: 'Splash, mascotte iguane',
+      width: 560,
+      height: 840,
+    },
   },
   {
     id: 'location',
@@ -49,7 +54,12 @@ const UNIVERS = [
     desc: 'Location de véhicules Racoon — kilométrage illimité, assurance incluse, disponible dès demain.',
     accent: '#52C88A',
     bg: 'linear-gradient(to top, rgba(20,54,38,0.94) 0%, rgba(42,92,69,0.55) 55%, rgba(82,200,138,0.28) 100%)',
-    mascotte: { src: '/images/mascottes/max.webp', alt: 'Max, mascotte raton laveur' },
+    mascotte: {
+      src: '/images/mascottes/max.webp',
+      alt: 'Max, mascotte raton laveur',
+      width: 409,
+      height: 840,
+    },
   },
   {
     id: 'vente-vehicule',
