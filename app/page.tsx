@@ -27,7 +27,7 @@ const UNIVERS = [
     tag: '01',
     desc: 'Mécanique, carrosserie, entretien. Devis gratuit, prise en charge rapide.',
     accent: '#E87200',
-    bg: 'linear-gradient(to top, rgba(30,14,4,0.96) 0%, rgba(232,114,0,0.5) 55%, rgba(232,114,0,0.24) 100%)',
+    bg: 'linear-gradient(to top, #1E0E04 0%, #6B3402 55%, #9B4C01 100%)',
   },
   // « Il manque un bloc pour le lavage » (mail Stéphane 2026-08-15) ; en 02
   // avec l'univers bleu de Splash (handoff design 2026-08-17, maquette cp-v4).
@@ -38,7 +38,7 @@ const UNIVERS = [
     tag: '02',
     desc: 'SPLASH, l’expert de l’entretien auto — Premium Wash ou Ultimate Wash, lavage manuel sur rendez-vous.',
     accent: '#3CC5DE',
-    bg: 'linear-gradient(to top, rgba(6,39,48,0.94) 0%, rgba(14,143,166,0.55) 55%, rgba(14,143,166,0.3) 100%)',
+    bg: 'linear-gradient(to top, #062730 0%, #0A5F72 52%, #0E8FA6 100%)',
     mascotte: {
       src: '/images/mascottes/splash-gant.webp',
       alt: 'Splash, mascotte iguane',
@@ -53,7 +53,7 @@ const UNIVERS = [
     tag: '03',
     desc: 'Location de véhicules Racoon — kilométrage illimité, assurance incluse, disponible dès demain.',
     accent: '#52C88A',
-    bg: 'linear-gradient(to top, rgba(20,54,38,0.94) 0%, rgba(42,92,69,0.55) 55%, rgba(82,200,138,0.28) 100%)',
+    bg: 'linear-gradient(to top, #0E1F18 0%, #1C3E2F 55%, #2E6B4E 100%)',
     mascotte: {
       src: '/images/mascottes/max.webp',
       alt: 'Max, mascotte raton laveur',
@@ -69,7 +69,7 @@ const UNIVERS = [
     desc: "Véhicules d'occasion ou neufs, contrôlés et garantis par nos soins.",
     // Univers vente = rouge (maquette cp-v4 : « rouge pour la vente véhicule et moto »).
     accent: '#D92627',
-    bg: 'linear-gradient(to top, rgba(59,14,12,0.96) 0%, rgba(217,38,39,0.45) 55%, rgba(217,38,39,0.2) 100%)',
+    bg: 'linear-gradient(to top, #3B0E0C 0%, #7A1917 55%, #B32022 100%)',
   },
   {
     id: 'vente-moto',
@@ -78,7 +78,7 @@ const UNIVERS = [
     tag: '05',
     desc: 'Roadster, sport, trail, scooter — toutes cylindrées, occasion ou neuf.',
     accent: '#C8392E',
-    bg: 'linear-gradient(to top, rgba(30,14,4,0.96) 0%, rgba(200,57,46,0.5) 55%, rgba(200,57,46,0.24) 100%)',
+    bg: 'linear-gradient(to top, #2B0B08 0%, #6E211A 55%, #A83227 100%)',
   },
   {
     id: 'pieces',
@@ -87,7 +87,7 @@ const UNIVERS = [
     tag: '06',
     desc: 'Auto & moto, livrées partout en Guadeloupe. Commande en ligne, retrait boutique ou livraison 24-48h.',
     accent: '#E9C46A',
-    bg: 'linear-gradient(to top, rgba(26,18,8,0.96) 0%, rgba(233,196,106,0.45) 55%, rgba(233,196,106,0.22) 100%)',
+    bg: 'linear-gradient(to top, #1A1208 0%, #6E5526 55%, #A8853B 100%)',
   },
 ];
 

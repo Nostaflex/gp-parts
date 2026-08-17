@@ -42,11 +42,9 @@ export function CpUniversCard({ univers: u }: { univers: UniversEntry }) {
       )}
 
       <div className="relative z-[2] flex items-start justify-between">
-        <span className="cp-mono text-xs tracking-widest" style={{ color: u.accent }}>
-          {u.tag}
-        </span>
+        <span className="cp-mono text-xs tracking-widest text-cp-cream/80">{u.tag}</span>
         <svg
-          className="transition-transform duration-300 group-hover:rotate-45 group-hover:translate-x-1 group-hover:-translate-y-1"
+          className="text-cp-cream/80 transition-transform duration-300 group-hover:rotate-45 group-hover:translate-x-1 group-hover:-translate-y-1"
           width="20"
           height="20"
           fill="none"
@@ -54,7 +52,6 @@ export function CpUniversCard({ univers: u }: { univers: UniversEntry }) {
           strokeWidth="1.5"
           viewBox="0 0 24 24"
           aria-hidden="true"
-          style={{ color: u.accent }}
         >
           <path d="M5 12h14M12 5l7 7-7 7" />
         </svg>
