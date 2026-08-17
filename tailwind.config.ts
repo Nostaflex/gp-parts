@@ -30,6 +30,13 @@ const config: Config = {
           // lagon = l'eau (pastilles libres, horizon), jamais une couleur de fond.
           lagon: '#0E8FA6',
           'lagon-l': '#E6F2F4',
+          // Handoff design 2026-08-17 : le README du handoff nomme « --lagon-l »
+          // l'accent vif #3CC5DE — ici c'est lagon-vif, car cp.lagon-l (fond
+          // clair) préexiste et ne doit pas changer de sens.
+          'lagon-vif': '#3CC5DE',
+          // Labels < 14 px : contraste AA garanti — remplacent les alphas .4/.45.
+          'lab-d': 'rgba(244,237,224,.7)', // sur fond sombre
+          'lab-l': 'rgba(26,15,6,.62)', // sur fond clair
         },
         // Car Performance — univers (backgrounds de section)
         u: {
@@ -40,6 +47,7 @@ const config: Config = {
           craft: '#F8F5F0', // Craft Ivoire
           dusk: '#1A1208', // Dusk Tropical
           tropic: '#FBF8F1', // Tropical Clair (univers location Racoon)
+          splash: '#062730', // Bleu Splash profond (bas du hero /lavage — handoff 2026-08-17)
         },
       },
       fontFamily: {
