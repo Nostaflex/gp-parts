@@ -22,8 +22,8 @@ const CONTENT: Record<Tab, React.ReactNode> = {
         <strong>Car Performance Guadeloupe</strong>
         <br />
         SARL au capital de 1 500 €<br />
-        {/* TODO(Stéphane): SIRET réel (question S4 envoyée le 2026-08-12). */}
-        SIRET : 000 000 000 00000
+        {/* SIRET réel fourni par Stéphane le 2026-08-16 (réponse S4). */}
+        SIRET : 102 854 023 00011
         <br />
         RCS : 102 854 023
         <br />
@@ -138,7 +138,14 @@ const CONTENT: Record<Tab, React.ReactNode> = {
       <ul>
         <li>Données d&apos;identification : nom, prénom, email, téléphone</li>
         <li>Données de commande : adresse de livraison, historique d&apos;achats</li>
-        <li>Données véhicule : marque, modèle, immatriculation (pour les RDV et expertises)</li>
+        <li>
+          Données véhicule : marque, modèle, immatriculation, kilométrage (pour les RDV et
+          expertises)
+        </li>
+        <li>
+          Données assurance : compagnie et numéro d&apos;assuré (uniquement pour les demandes de
+          devis carrosserie avec sinistre déclaré)
+        </li>
         <li>Données de navigation : cookies techniques et analytiques</li>
       </ul>
 

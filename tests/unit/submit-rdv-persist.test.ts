@@ -79,6 +79,37 @@ describe('submitRdv — parcours mécanique / carrosserie', () => {
     expect(res.ok).toBe(true);
   });
 
+  it('carrosserie : kilométrage + assurance + n° assuré dans le message admin (réponse S2 Stéphane)', async () => {
+    const res = await submitRdv({
+      ...base,
+      nature: 'carrosserie',
+      type: 'Carrosserie',
+      sinistre: 'Oui, déclaré',
+      kilometrage: '85 000',
+      assurance: 'GFA Caraïbes',
+      numAssure: 'A-123456',
+    });
+    const msg = createDemandeIntake.mock.calls[0][0].message as string;
+    expect(msg).toContain('Kilométrage : 85 000 km');
+    expect(msg).toContain('Assurance : GFA Caraïbes');
+    expect(msg).toContain("N° d'assuré : A-123456");
+    expect(res.ok).toBe(true);
+  });
+
+  it('carrosserie sans champs assurance (ancien formulaire) : aucune ligne fantôme', async () => {
+    const res = await submitRdv({
+      ...base,
+      nature: 'carrosserie',
+      type: 'Carrosserie',
+      sinistre: 'Non / sans assurance',
+    });
+    const msg = createDemandeIntake.mock.calls[0][0].message as string;
+    expect(msg).not.toContain('Kilométrage');
+    expect(msg).not.toContain('Assurance :');
+    expect(msg).not.toContain("N° d'assuré");
+    expect(res.ok).toBe(true);
+  });
+
   it('sans nature (ancien formulaire encore ouvert) : soumission OK, pas de ligne Nature', async () => {
     const res = await submitRdv(base);
     const msg = createDemandeIntake.mock.calls[0][0].message as string;

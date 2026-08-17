@@ -26,8 +26,9 @@ export default async function AdminLavagePage() {
           Lavage — formules & tarifs
         </h1>
         <p className="text-body-sm" style={{ color: 'var(--text-secondary)' }}>
-          Crée tes offres et packs : « Sur devis » ou prix TTC affiché (HT calculé automatiquement,
-          TVA 8,5 %). Effet immédiat sur la page /lavage, sans redéploiement.
+          Crée tes offres et packs, avec un tarif par gabarit (Citadine, Gamme B, SUV…) — sans
+          tarif, la formule s&apos;affiche « Sur devis ». Effet immédiat sur la page /lavage, sans
+          redéploiement.
         </p>
       </div>
       <LavageSettingsForm initial={settings} />

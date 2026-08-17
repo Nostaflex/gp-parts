@@ -6,14 +6,13 @@ import { CpBridge } from '@/components/cp/CpBridge';
 import { CpFooter } from '@/components/cp/CpFooter';
 import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
 import { getCachedLavageSettings } from '@/lib/data/lavage-settings-cache';
-import { htFromTTCEnCents } from '@/lib/lavage-settings';
 import { formatPrice } from '@/lib/utils';
 import { LavageForm } from './LavageForm';
 
 export const metadata: Metadata = {
-  title: 'Lavage auto — RDV en ligne',
+  title: 'Esthétique automobile — RDV en ligne',
   description:
-    'Lavage auto et moto en Guadeloupe : extérieur, intérieur, complet ou rénovation. Prenez votre créneau en ligne, réponse sous 48h en jours ouvrés.',
+    'Esthétique automobile premium en Guadeloupe : Premium Wash ou Ultimate Wash, intérieur et extérieur. Prenez votre créneau en ligne, réponse sous 24 h en jours ouvrés.',
   alternates: { canonical: '/lavage' },
 };
 
@@ -55,7 +54,7 @@ export default async function LavagePage() {
           </nav>
 
           <p className="cp-mono text-cp-mango text-xs tracking-widest uppercase mb-5">
-            Lavage auto & moto
+            Esthétique automobile premium
           </p>
           <h1
             className="cp-title font-black text-cp-cream leading-none mb-6"
@@ -66,11 +65,12 @@ export default async function LavagePage() {
             <span className="text-cp-red">COMME NEUF</span>
           </h1>
           <p className="text-cp-cream/55 text-base leading-relaxed max-w-md mb-8">
-            Extérieur, intérieur, complet ou rénovation. Choisissez votre formule et votre créneau —
-            notre équipe vous confirme sous 48h en jours ouvrés.
+            Premium Wash ou Ultimate Wash : intérieur et extérieur, à la main, avec des produits
+            professionnels. Choisissez votre formule et votre créneau — notre équipe vous confirme
+            sous 24 h en jours ouvrés.
           </p>
           <div className="flex flex-wrap gap-2">
-            {['Sur rendez-vous', 'Produits professionnels', 'Auto & moto'].map((pill) => (
+            {['Sur rendez-vous', 'Produits professionnels', 'Intérieur & extérieur'].map((pill) => (
               <span
                 key={pill}
                 className="cp-mono text-xs text-cp-cream/50 border border-cp-cream/15 px-3 py-1.5 rounded-full"
@@ -96,7 +96,7 @@ export default async function LavagePage() {
           >
             NOS FORMULES
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
             {formules.map((f) => (
               <div
                 key={f.nom}
@@ -116,19 +116,29 @@ export default async function LavagePage() {
                     </li>
                   ))}
                 </ul>
-                <p className="cp-mono text-cp-mango text-sm tracking-wide mt-auto">
-                  {f.mode === 'prix' ? (
+                <div className="mt-auto">
+                  {f.tarifs.length > 0 ? (
                     <>
-                      {formatPrice(f.prixTTCEnCents)} TTC
-                      <span className="text-cp-ink/40">
-                        {' '}
-                        · {formatPrice(htFromTTCEnCents(f.prixTTCEnCents))} HT
-                      </span>
+                      <ul className="flex flex-col gap-1.5 border-t border-[#F8F5F0] pt-4">
+                        {f.tarifs.map((t) => (
+                          <li key={t.label} className="flex items-baseline justify-between gap-3">
+                            <span className="text-sm text-cp-ink/70">{t.label}</span>
+                            <span className="cp-mono text-cp-mango text-sm tracking-wide">
+                              {formatPrice(t.prixTTCEnCents)}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                      <p className="text-[0.7rem] text-cp-ink/40 mt-2">
+                        Prix TTC — TVA 8,5 % incluse
+                      </p>
                     </>
                   ) : (
-                    'Sur devis'
+                    <p className="cp-mono text-cp-mango text-sm tracking-wide border-t border-[#F8F5F0] pt-4">
+                      Sur devis
+                    </p>
                   )}
-                </p>
+                </div>
               </div>
             ))}
           </div>
@@ -148,12 +158,12 @@ export default async function LavagePage() {
                 <em className="text-cp-red not-italic">VOTRE CRÉNEAU.</em>
               </h2>
               <p className="text-cp-ink/60 text-base leading-relaxed mb-10 max-w-md">
-                Un rendez-vous dédié au lavage, distinct de l&apos;atelier : choisissez votre
-                formule, votre date et votre créneau. Notre équipe confirme et vous précise le tarif
-                selon l&apos;état et la taille du véhicule.
+                Un rendez-vous dédié à l&apos;esthétique, distinct de l&apos;atelier : choisissez
+                votre formule, le gabarit de votre véhicule, votre date et votre créneau. Notre
+                équipe vous confirme sous 24 h en jours ouvrés.
               </p>
             </div>
-            <LavageForm formules={formules.map((f) => f.nom)} />
+            <LavageForm formules={formules.map((f) => ({ nom: f.nom, tarifs: f.tarifs }))} />
           </div>
         </div>
       </section>

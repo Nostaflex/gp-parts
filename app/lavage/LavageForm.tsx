@@ -4,7 +4,10 @@ import { useState } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { localDateISO } from '@/lib/utils';
 import { CpRgpdNotice } from '@/components/cp/CpRgpdNotice';
+import { formatPrice } from '@/lib/utils';
 import { submitLavage } from './actions';
+
+import type { LavageTarif } from '@/lib/lavage-settings';
 
 type FormData = {
   prenom: string;
@@ -14,10 +17,13 @@ type FormData = {
   marque: string;
   modele: string;
   formule: string;
+  gabarit: string;
   date: string;
   creneau: string;
   message: string;
 };
+
+export type LavageFormFormule = { nom: string; tarifs: LavageTarif[] };
 
 const CRENEAUX = [
   '08:00 – 09:00',
@@ -37,6 +43,7 @@ const EMPTY: FormData = {
   marque: '',
   modele: '',
   formule: '',
+  gabarit: '',
   date: '',
   creneau: '',
   message: '',
@@ -50,7 +57,7 @@ export function LavageForm({
   formules,
   initialFormule = '',
 }: {
-  formules: string[];
+  formules: LavageFormFormule[];
   initialFormule?: string;
 }) {
   const [website, setWebsite] = useState(''); // honeypot anti-spam
@@ -67,6 +74,10 @@ export function LavageForm({
     setErrors((e) => ({ ...e, [k]: undefined }));
   };
 
+  // Tarifs de la formule choisie — plus d'un tarif → le gabarit est requis
+  // (le prix en dépend : Citadine / Gamme B / SUV, gamme Stéphane 2026-08-16).
+  const tarifsChoisis = formules.find((f) => f.nom === data.formule)?.tarifs ?? [];
+
   const validate = (): boolean => {
     const errs: typeof errors = {};
     if (!data.prenom.trim()) errs.prenom = 'Prénom requis';
@@ -74,6 +85,7 @@ export function LavageForm({
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errs.email = 'Email invalide';
     if (!/^[0-9\s\+]{8,}$/.test(data.tel)) errs.tel = 'Numéro invalide';
     if (!data.formule) errs.formule = 'Choisissez une formule';
+    if (tarifsChoisis.length > 1 && !data.gabarit) errs.gabarit = 'Choisissez le type de véhicule';
     if (!data.date) errs.date = 'Date requise';
     if (!data.creneau) errs.creneau = 'Créneau requis';
     setErrors(errs);
@@ -109,8 +121,8 @@ export function LavageForm({
         </p>
         <h3 className="cp-title font-black text-cp-ink text-3xl mb-3">DEMANDE REÇUE</h3>
         <p className="text-cp-ink/55 text-sm leading-relaxed mb-6">
-          Votre demande de lavage a bien été enregistrée. Notre équipe vous contacte sous 48h en
-          jours ouvrés pour confirmer le créneau.
+          Votre demande a bien été enregistrée. Notre équipe vous contacte sous 24 h en jours ouvrés
+          pour confirmer le créneau.
         </p>
         <div className="bg-[#F8F5F0] rounded-xl px-6 py-4 mb-6">
           <p className="text-xs text-cp-ink/40 mb-1">Référence de votre demande</p>
@@ -123,7 +135,7 @@ export function LavageForm({
             </>
           ) : (
             <>
-              Nous vous recontactons sous 48h (jours ouvrés) au <strong>{data.tel}</strong>.
+              Nous vous recontactons sous 24 h (jours ouvrés) au <strong>{data.tel}</strong>.
             </>
           )}
         </p>
@@ -231,19 +243,42 @@ export function LavageForm({
         <div>
           <p className={label}>Formule *</p>
           <div className="flex flex-wrap gap-2">
-            {formules.map((nom) => (
+            {formules.map((f) => (
               <button
-                key={nom}
+                key={f.nom}
                 type="button"
-                onClick={() => set('formule', nom)}
-                className={`px-4 py-2 rounded-full border text-sm font-medium transition-all ${data.formule === nom ? 'bg-cp-ink border-cp-ink text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/60 hover:border-cp-red hover:text-cp-mango'}`}
+                onClick={() => {
+                  // Changer de formule réinitialise le gabarit — les tarifs
+                  // ne se correspondent pas d'une formule à l'autre.
+                  setData((d) => ({ ...d, formule: f.nom, gabarit: '' }));
+                  setErrors((e) => ({ ...e, formule: undefined, gabarit: undefined }));
+                }}
+                className={`px-4 py-2 rounded-full border text-sm font-medium transition-all ${data.formule === f.nom ? 'bg-cp-ink border-cp-ink text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/60 hover:border-cp-red hover:text-cp-mango'}`}
               >
-                {nom}
+                {f.nom}
               </button>
             ))}
           </div>
           {err('formule')}
         </div>
+        {tarifsChoisis.length > 1 && (
+          <div>
+            <p className={label}>Type de véhicule *</p>
+            <div className="flex flex-wrap gap-2">
+              {tarifsChoisis.map((t) => (
+                <button
+                  key={t.label}
+                  type="button"
+                  onClick={() => set('gabarit', t.label)}
+                  className={`px-4 py-2 rounded-full border text-sm font-medium transition-all ${data.gabarit === t.label ? 'bg-cp-ink border-cp-ink text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/60 hover:border-cp-red hover:text-cp-mango'}`}
+                >
+                  {t.label} · {formatPrice(t.prixTTCEnCents)}
+                </button>
+              ))}
+            </div>
+            {err('gabarit')}
+          </div>
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="lav-date" className={label}>
@@ -309,7 +344,7 @@ export function LavageForm({
           disabled={submitting}
           className="w-full py-3.5 rounded-xl bg-cp-ink text-cp-cream text-sm font-bold hover:bg-cp-red transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {submitting ? 'Envoi…' : 'Demander mon créneau lavage'}
+          {submitting ? 'Envoi…' : 'Demander mon créneau'}
         </button>
         {submitError && (
           <p role="alert" className="text-sm text-red-600 text-center">

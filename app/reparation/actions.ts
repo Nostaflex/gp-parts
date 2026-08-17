@@ -20,6 +20,11 @@ export type RdvInput = {
   nature?: string;
   roulable?: string;
   sinistre?: string;
+  // Carrosserie (réponse S2 Stéphane 2026-08-16) : plaque + kilométrage +
+  // assurance + n° d'assuré suffisent pour le devis — pas de photos.
+  kilometrage?: string;
+  assurance?: string;
+  numAssure?: string;
   type: string;
   description: string;
   date: string;
@@ -85,7 +90,10 @@ export async function submitRdv(input: RdvInput): Promise<LeadResult> {
     ...(natureLabel ? [`Nature : ${natureLabel}`] : []),
     `Prestation : ${input.type}`,
     ...(input.roulable ? [`Véhicule roulable : ${input.roulable}`] : []),
+    ...(input.kilometrage?.trim() ? [`Kilométrage : ${input.kilometrage.trim()} km`] : []),
     ...(input.sinistre ? [`Sinistre assurance : ${input.sinistre}`] : []),
+    ...(input.assurance?.trim() ? [`Assurance : ${input.assurance.trim()}`] : []),
+    ...(input.numAssure?.trim() ? [`N° d'assuré : ${input.numAssure.trim()}`] : []),
     `Date : ${input.date} · Créneau : ${input.creneau}`,
     '',
     input.description.trim(),

@@ -14,6 +14,9 @@ export type LavageInput = {
   marque: string;
   modele: string;
   formule: string;
+  /** Gabarit tarifaire (Citadine, Gamme B, SUV…) — optionnel : une formule
+   * à tarif unique ou « Sur devis » n'en a pas. */
+  gabarit?: string;
   date: string;
   creneau: string;
   message: string;
@@ -54,7 +57,7 @@ export async function submitLavage(input: LavageInput): Promise<LeadResult> {
     email: input.email.trim(),
     tel: input.tel.trim(),
     vehicule: vehiculeStr,
-    prestation: `Lavage — ${input.formule}`,
+    prestation: `Esthétique — ${input.formule}${input.gabarit?.trim() ? ` (${input.gabarit.trim()})` : ''}`,
     date: input.date,
     creneau: input.creneau,
     message: input.message.trim(),
@@ -65,7 +68,7 @@ export async function submitLavage(input: LavageInput): Promise<LeadResult> {
   const nowIso = new Date(now).toISOString();
   const messageFull = [
     `Véhicule : ${vehiculeStr || '—'}`,
-    `Formule : ${input.formule}`,
+    `Formule : ${input.formule}${input.gabarit?.trim() ? ` — ${input.gabarit.trim()}` : ''}`,
     `Date : ${input.date} · Créneau : ${input.creneau}`,
     '',
     input.message.trim(),
