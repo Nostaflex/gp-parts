@@ -6,6 +6,7 @@ import { CpHeader } from '@/components/cp/CpHeader';
 import { CpBridge } from '@/components/cp/CpBridge';
 import { CpLogo } from '@/components/cp/CpLogo';
 import { CpReveal } from '@/components/cp/CpReveal';
+import { CpUniversCard } from '@/components/cp/CpUniversCard';
 import { CpOpenBadge } from '@/components/cp/CpOpenBadge';
 import { isPathVisible } from '@/lib/feature-flags';
 import { addressOneLine, whatsappUrl } from '@/lib/contact-info';
@@ -28,20 +29,35 @@ const UNIVERS = [
     accent: '#E87200',
     img: 'https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=900&q=80&fit=crop',
   },
+  // « Il manque un bloc pour le lavage » (mail Stéphane 2026-08-15) ; en 02
+  // avec l'univers bleu de Splash (handoff design 2026-08-17, maquette cp-v4).
+  {
+    id: 'lavage',
+    href: '/lavage',
+    label: 'Esthétique auto',
+    tag: '02',
+    desc: 'SPLASH, l’expert de l’entretien auto — Premium Wash ou Ultimate Wash, lavage manuel sur rendez-vous.',
+    accent: '#3CC5DE',
+    img: '/images/splash/atelier-lavage.png',
+    veil: 'linear-gradient(to top, rgba(6,39,48,0.94) 0%, rgba(14,143,166,0.55) 55%, rgba(14,143,166,0.3) 100%)',
+    mascotte: { src: '/images/mascottes/splash-gant.webp', alt: 'Splash, mascotte iguane' },
+  },
   {
     id: 'location',
     href: '/location',
     label: 'Location',
-    tag: '02',
+    tag: '03',
     desc: 'Location de véhicules Racoon — kilométrage illimité, assurance incluse, disponible dès demain.',
     accent: '#52C88A',
     img: '/images/location/toyota-yaris.jpg',
+    veil: 'linear-gradient(to top, rgba(20,54,38,0.94) 0%, rgba(42,92,69,0.55) 55%, rgba(82,200,138,0.28) 100%)',
+    mascotte: { src: '/images/mascottes/max.webp', alt: 'Max, mascotte raton laveur' },
   },
   {
     id: 'vente-vehicule',
     href: '/vente-vehicule',
     label: 'Vente véhicule',
-    tag: '03',
+    tag: '04',
     desc: "Véhicules d'occasion ou neufs, contrôlés et garantis par nos soins.",
     accent: '#2A5C45',
     img: '/images/hero-vente-vehicule.webp',
@@ -50,7 +66,7 @@ const UNIVERS = [
     id: 'vente-moto',
     href: '/vente-moto',
     label: 'Vente moto',
-    tag: '04',
+    tag: '05',
     desc: 'Roadster, sport, trail, scooter — toutes cylindrées, occasion ou neuf.',
     accent: '#C8392E',
     img: '/images/hero-vente-moto.webp',
@@ -59,21 +75,10 @@ const UNIVERS = [
     id: 'pieces',
     href: '/pieces',
     label: 'Pièces détachées',
-    tag: '05',
+    tag: '06',
     desc: 'Auto & moto, livrées partout en Guadeloupe. Commande en ligne, retrait boutique ou livraison 24-48h.',
     accent: '#E9C46A',
     img: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=900&q=80&fit=crop',
-  },
-  // « Il manque un bloc pour le lavage » (mail Stéphane 2026-08-15) — la
-  // carte SPLASH complète la grille des univers.
-  {
-    id: 'lavage',
-    href: '/lavage',
-    label: 'Esthétique auto',
-    tag: '06',
-    desc: 'SPLASH, l’expert de l’entretien auto — Premium Wash ou Ultimate Wash, lavage manuel sur rendez-vous.',
-    accent: '#0E8FA6',
-    img: '/images/splash/splash-gant.png',
   },
 ];
 
@@ -233,62 +238,12 @@ export default async function HomePage() {
           </CpReveal>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* 6 cartes = grille 3×2 complète — écart assumé avec la maquette
+                cp-v4 (Pièces en pleine largeur) : 5 cartes simples + 1 wide
+                recréeraient le trou signalé par Stéphane (15/08). */}
             {univers.map((u, i) => (
               <CpReveal key={u.id} delay={(i % 4) as 0 | 1 | 2 | 3}>
-                {/* 6 cartes = grille 3×2 complète — la pleine largeur de
-                    « pieces » recréerait le trou signalé par Stéphane (15/08). */}
-                <Link
-                  href={u.href}
-                  className="group flex flex-col relative rounded-2xl overflow-hidden p-8 min-h-[260px] md:min-h-[300px]"
-                >
-                  {/* Photo univers + voile ink — zoom lent au survol */}
-                  <Image
-                    src={u.img}
-                    alt=""
-                    fill
-                    sizes="(min-width: 768px) 50vw, 100vw"
-                    className="object-cover transition-transform duration-700 ease-cp-out group-hover:scale-105"
-                  />
-                  <div
-                    aria-hidden="true"
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        'linear-gradient(to top, rgba(26,15,6,0.92) 0%, rgba(26,15,6,0.45) 55%, rgba(26,15,6,0.18) 100%)',
-                    }}
-                  />
-
-                  <div className="relative flex items-start justify-between">
-                    <span className="cp-mono text-xs tracking-widest" style={{ color: u.accent }}>
-                      {u.tag}
-                    </span>
-                    <svg
-                      className="transition-transform duration-300 group-hover:rotate-45 group-hover:translate-x-1 group-hover:-translate-y-1"
-                      width="20"
-                      height="20"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                      style={{ color: u.accent }}
-                    >
-                      <path d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
-                  </div>
-
-                  <div className="relative mt-auto pt-16">
-                    <h3 className="cp-title text-cp-cream font-black text-4xl leading-none mb-3">
-                      {u.label.toUpperCase()}
-                    </h3>
-                    <p className="text-cp-cream/75 text-sm leading-relaxed max-w-md">{u.desc}</p>
-                  </div>
-
-                  <div
-                    className="absolute bottom-0 left-0 h-1 w-0 group-hover:w-full transition-all duration-500 rounded-b-2xl"
-                    style={{ backgroundColor: u.accent }}
-                  />
-                </Link>
+                <CpUniversCard univers={u} />
               </CpReveal>
             ))}
           </div>
