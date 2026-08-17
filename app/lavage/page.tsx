@@ -11,6 +11,8 @@ import { getPrisEffectifs } from '@/lib/server/lavage-dispos';
 import { feriesPourDates } from '@/lib/jours-feries';
 import { formatPrice, localDateISO } from '@/lib/utils';
 import type { PrisParDate } from '@/lib/lavage-creneaux';
+import { CpBulle } from '@/components/cp/CpBulle';
+import { FormulesGabarit } from './FormulesGabarit';
 import { LavageForm } from './LavageForm';
 
 // Fraîcheur des disponibilités servies au premier rendu (le client re-vérifie
@@ -58,70 +60,100 @@ export default async function LavagePage() {
     <>
       <CpHeader darkSectionIds={['lav-hero']} />
 
-      {/* ── HERO ─────────────────────────────── */}
+      {/* ── HERO — l'univers bleu de Splash (handoff cp-v4, écran 2) ── */}
       <section
         id="lav-hero"
         className="relative pt-20 overflow-hidden"
-        style={{ backgroundColor: '#0D0905' }}
+        style={{ background: 'linear-gradient(165deg, #0E8FA6 0%, #0A5F72 52%, #062730 100%)' }}
       >
-        <div className="max-w-7xl mx-auto px-6 py-16 md:py-24 min-h-[55vh] flex flex-col justify-end">
-          <nav
-            aria-label="Fil d'Ariane"
-            className="flex items-center gap-2 text-xs text-cp-cream/30 mb-8"
-          >
-            <Link href="/" className="hover:text-cp-mango transition-colors">
-              Accueil
-            </Link>
-            <svg
-              width="10"
-              height="10"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
+        {/* Orbe lagon — décor sous le contenu */}
+        <div
+          aria-hidden="true"
+          className="absolute -top-24 right-[8%] w-[420px] h-[420px] rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(60,197,222,.3) 0%, transparent 68%)' }}
+        />
+        <div className="max-w-7xl mx-auto px-6 py-16 md:py-20 min-h-[55vh] grid grid-cols-1 md:grid-cols-[1fr_auto] items-end gap-10">
+          <div>
+            <nav
+              aria-label="Fil d'Ariane"
+              className="flex items-center gap-2 text-xs text-cp-cream/40 mb-8"
             >
-              <path d="m9 18 6-6-6-6" />
-            </svg>
-            <span className="text-cp-cream/60">Lavage</span>
-          </nav>
-
-          <p className="cp-mono text-cp-mango text-xs tracking-widest uppercase mb-5">
-            Splash · Esthétique automobile premium
-          </p>
-          <h1
-            className="cp-title font-black text-cp-cream leading-none mb-6"
-            style={{ fontSize: 'clamp(3rem, 7vw, 7rem)' }}
-          >
-            VOTRE VÉHICULE
-            <br />
-            <span className="text-cp-red">COMME NEUF</span>
-          </h1>
-          {/* Texte de Stéphane (mail 2026-08-14) — délai ajusté à 24 h (le
-              48 h de son brouillon concerne la vente d'occasion). */}
-          <p className="text-cp-cream/55 text-base leading-relaxed max-w-md mb-4">
-            Prenez soin de votre véhicule jusque dans les détails. SPLASH associe lavage manuel,
-            nettoyage intérieur et soins esthétiques dans deux formules simples, adaptées au type de
-            véhicule. Choisissez votre formule et votre créneau — notre équipe vous confirme sous 24
-            h en jours ouvrés.
-          </p>
-          <p className="cp-mono text-cp-mango/80 text-sm italic mb-8">
-            « On ti splash, lave’y fè’y kléré ! »
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {['Sur rendez-vous', 'Produits professionnels', 'Intérieur & extérieur'].map((pill) => (
-              <span
-                key={pill}
-                className="cp-mono text-xs text-cp-cream/50 border border-cp-cream/15 px-3 py-1.5 rounded-full"
+              <Link href="/" className="hover:text-cp-cream transition-colors">
+                Accueil
+              </Link>
+              <svg
+                width="10"
+                height="10"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
               >
-                {pill}
-              </span>
-            ))}
+                <path d="m9 18 6-6-6-6" />
+              </svg>
+              <span className="text-cp-cream/70">Lavage</span>
+            </nav>
+
+            <p
+              className="cp-mono text-xs tracking-widest uppercase mb-5"
+              style={{ color: '#BFF0FA' }}
+            >
+              Splash · Esthétique automobile premium
+            </p>
+            <h1
+              className="cp-title font-black text-cp-cream leading-none mb-6"
+              style={{ fontSize: 'clamp(3rem, 6vw, 6rem)' }}
+            >
+              VOTRE VÉHICULE
+              <br />
+              {/* Le rouge ne tient pas sur lagon — accent chaud #FFD9A8 (handoff). */}
+              <span style={{ color: '#FFD9A8' }}>COMME NEUF</span>
+            </h1>
+            {/* Texte de Stéphane (mail 2026-08-14) — délai ajusté à 24 h (le
+                48 h de son brouillon concerne la vente d'occasion). */}
+            <p className="text-cp-cream/70 text-base leading-relaxed max-w-md mb-8">
+              Prenez soin de votre véhicule jusque dans les détails. SPLASH associe lavage manuel,
+              nettoyage intérieur et soins esthétiques dans deux formules simples, adaptées au type
+              de véhicule. Choisissez votre formule et votre créneau — notre équipe vous confirme
+              sous 24 h en jours ouvrés.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {['Sur rendez-vous', 'Produits professionnels', 'Intérieur & extérieur'].map(
+                (pill) => (
+                  <span
+                    key={pill}
+                    className="cp-mono text-xs text-cp-cream/70 border border-cp-cream/25 px-3 py-1.5 rounded-full"
+                  >
+                    {pill}
+                  </span>
+                )
+              )}
+            </div>
+          </div>
+
+          {/* Splash en hôte : bulle TOUJOURS au-dessus, pointe vers la tête.
+              Marge négative = les pieds posés sur le bord de section. */}
+          <div className="flex flex-col items-center self-end mx-auto md:mx-0 -mb-16 md:-mb-20">
+            <CpBulle
+              nom="Splash"
+              role="L'expert de l'entretien auto"
+              replique="On ti splash, lave’y fè’y kléré !"
+              className="max-w-[300px] mb-[22px]"
+            />
+            <Image
+              src="/images/mascottes/splash-gant.webp"
+              alt="Splash, mascotte iguane de l'esthétique automobile"
+              width={560}
+              height={840}
+              priority
+              className="h-[290px] md:h-[320px] w-auto"
+            />
           </div>
         </div>
       </section>
 
-      <CpBridge fromColor="#0D0905" toColor="#F4EDE0" />
+      <CpBridge fromColor="#062730" toColor="#F4EDE0" accentColor="#3CC5DE" />
 
       {/* ── FORMULES ─────────────────────────── */}
       <section className="py-24 px-6" style={{ backgroundColor: '#F4EDE0' }}>
@@ -135,51 +167,19 @@ export default async function LavagePage() {
           >
             NOS FORMULES
           </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            {cartes.map((f) => (
-              <div
-                key={f.nom}
-                className="bg-white rounded-2xl border border-[#E5DDD3] p-8 flex flex-col"
-              >
-                <h3 className="cp-title font-black text-cp-ink text-3xl mb-2">
-                  {f.nom.toUpperCase()}
-                </h3>
-                <p className="text-cp-ink/55 text-sm leading-relaxed mb-5">{f.description}</p>
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 mb-6">
-                  {f.inclus.map((i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-cp-ink/70">
-                      <span className="text-[#52C88A] mt-0.5" aria-hidden="true">
-                        ✓
-                      </span>
-                      {i}
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-auto">
-                  {f.tarifs.length > 0 ? (
-                    <>
-                      <ul className="flex flex-col gap-1.5 border-t border-[#F8F5F0] pt-4">
-                        {f.tarifs.map((t) => (
-                          <li key={t.label} className="flex items-baseline justify-between gap-3">
-                            <span className="text-sm text-cp-ink/70">{t.label}</span>
-                            <span className="cp-mono text-cp-mango text-sm tracking-wide">
-                              {formatPrice(t.prixTTCEnCents)}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                      <p className="text-[0.7rem] text-cp-ink/40 mt-2">
-                        Prix TTC — TVA 8,5 % incluse
-                      </p>
-                    </>
-                  ) : (
-                    <p className="cp-mono text-cp-mango text-sm tracking-wide border-t border-[#F8F5F0] pt-4">
-                      Sur devis
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))}
+          {/* Sélecteur de gabarit unique + une ligne de prix par carte
+              (handoff cp-v4). Les labels viennent des données BO. */}
+          <div className="mb-6">
+            <FormulesGabarit formules={cartes} />
+          </div>
+
+          {/* Ce qui se passe ensuite (handoff cp-v4) — 24 h et non 48 h :
+              le 48 h de la spec est une coquille, 48 h = vente d'occasion
+              (clarification Djemil). */}
+          <div className="flex flex-wrap gap-x-8 gap-y-2 mb-10 text-sm text-cp-lab-l">
+            <span>Aucun paiement en ligne</span>
+            <span>Tarif exact confirmé sous 24 h en jours ouvrés</span>
+            <span>Créneau réservé à la confirmation</span>
           </div>
 
           {/* Bandeau(x) complémentaire(s) — forfaits à tarif unique */}
