@@ -2,7 +2,7 @@
 
 import { generateOrderNumber } from '@/lib/utils';
 import { getAdapter } from '@/lib/data';
-import { createOrderIntake } from '@/lib/server/intake';
+import { createOrderIntake, StockInsuffisantError } from '@/lib/server/intake';
 import { sendOrderEmails } from '@/lib/emails/send';
 import { createOrderPaymentIntent } from '@/lib/stripe';
 import { getDeliveryPrice } from '@/lib/config';
@@ -132,7 +132,15 @@ export async function validateCheckout(formData: {
   let serverSubtotal = 0;
   const validatedItems: Order['items'] = [];
 
-  for (const clientItem of formData.items) {
+  // Consolidation : deux lignes du même produit fusionnent (audit S2-3 —
+  // les doublons contournaient le plafonnement par le stock).
+  const consolidated = new Map<string, CartItem>();
+  for (const it of formData.items) {
+    const prev = consolidated.get(it.productId);
+    consolidated.set(it.productId, prev ? { ...prev, quantity: prev.quantity + it.quantity } : it);
+  }
+
+  for (const clientItem of consolidated.values()) {
     const product = await adapter.getProductById(clientItem.productId);
 
     if (!product) {
@@ -140,10 +148,17 @@ export async function validateCheckout(formData: {
       return { success: false, errors };
     }
 
-    const qty = Math.max(
-      1,
-      Math.min(Math.floor(clientItem.quantity), product.stock > 0 ? product.stock : 1)
-    );
+    // Refus hors stock EXPLICITE — fini le « stock 0 ⇒ quantité 1 »
+    // silencieux. La garde finale (concurrence) vit dans la transaction
+    // de createOrderIntake.
+    const qty = Math.max(1, Math.floor(clientItem.quantity));
+    if (product.stock < qty) {
+      errors._items =
+        product.stock <= 0
+          ? `« ${product.name} » est en rupture de stock.`
+          : `« ${product.name} » : seulement ${product.stock} en stock.`;
+      return { success: false, errors };
+    }
     serverSubtotal += product.price * qty;
 
     validatedItems.push({
@@ -186,7 +201,22 @@ export async function validateCheckout(formData: {
   // Firestore refusent désormais toute création client d'orders.
   const rawKey = sanitize(formData.idempotencyKey);
   const idemKey = /^[0-9a-zA-Z-]{16,64}$/.test(rawKey) ? rawKey : undefined;
-  const intake = await createOrderIntake(orderData, idemKey);
+  let intake;
+  try {
+    intake = await createOrderIntake(orderData, idemKey);
+  } catch (err) {
+    if (err instanceof StockInsuffisantError) {
+      // Course perdue : un autre client a pris le stock entre la validation
+      // et la transaction.
+      return {
+        success: false,
+        errors: {
+          _items: 'Un article vient de partir — le stock a été mis à jour, vérifiez votre panier.',
+        },
+      };
+    }
+    throw err;
+  }
   const orderId = intake.id;
 
   // Re-soumission (double-clic, retry réseau) : la commande existe déjà —

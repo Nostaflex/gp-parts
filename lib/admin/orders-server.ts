@@ -1,3 +1,4 @@
+import { FieldValue } from 'firebase-admin/firestore';
 import { getAdminFirestore } from '@/lib/firebase-admin';
 import { parseOrder } from '@/lib/schemas/order';
 import type { Order, OrderStatus, PaymentStatus } from '@/lib/types';
@@ -75,8 +76,22 @@ export async function settlePaymentAdmin(
 }
 
 export async function updateOrderStatusAdmin(id: string, status: OrderStatus): Promise<void> {
-  await getAdminFirestore()
-    .collection('orders')
-    .doc(id)
-    .update({ status, updatedAt: new Date().toISOString() });
+  const db = getAdminFirestore();
+  const ref = db.collection('orders').doc(id);
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) return;
+    const order = snap.data() as Order;
+    // Annulation : le stock décrémenté au checkout REVIENT tout seul
+    // (décision Djemil 2026-08-18). Garde anti-double-restock : seulement
+    // au premier passage vers 'annulee'.
+    if (status === 'annulee' && order.status !== 'annulee') {
+      for (const item of order.items ?? []) {
+        tx.update(db.collection('products').doc(item.productId), {
+          stock: FieldValue.increment(item.quantity),
+        });
+      }
+    }
+    tx.update(ref, { status, updatedAt: new Date().toISOString() });
+  });
 }

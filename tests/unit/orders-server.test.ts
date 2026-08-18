@@ -38,14 +38,30 @@ function fakeQuery(docs: Array<{ id: string; data: () => unknown }>) {
   };
   return q;
 }
+function fakeDoc(id: string) {
+  return {
+    id,
+    get: async () => ({ exists: id !== 'missing', data: () => orderData }),
+    update: async (patch: Record<string, unknown>) => void updates.push({ id, patch }),
+  };
+}
 const fakeDb = {
   collection: () => ({
     orderBy: () => fakeQuery([{ id: 'o1', data: () => orderData }]),
-    doc: (id: string) => ({
-      get: async () => ({ exists: id !== 'missing', data: () => orderData }),
-      update: async (patch: Record<string, unknown>) => void updates.push({ id, patch }),
-    }),
+    doc: (id: string) => fakeDoc(id),
   }),
+  // Transaction simulée : tx.get/update délèguent aux fake docs (les writes
+  // atteignent `updates` comme avant — le contrat testé reste le même).
+  runTransaction: async (
+    cb: (tx: {
+      get: (ref: ReturnType<typeof fakeDoc>) => Promise<unknown>;
+      update: (ref: ReturnType<typeof fakeDoc>, patch: Record<string, unknown>) => void;
+    }) => Promise<unknown>
+  ) =>
+    cb({
+      get: (ref) => ref.get(),
+      update: (ref, patch) => void updates.push({ id: ref.id, patch }),
+    }),
 };
 vi.mock('@/lib/firebase-admin', () => ({ getAdminFirestore: () => fakeDb }));
 
@@ -77,5 +93,28 @@ describe('orders-server (Admin SDK — contourne les rules isAdmin)', () => {
     const list = await getOrdersAdmin({ limit: 10 });
     expect(list).toHaveLength(1);
     expect(list[0].id).toBe('o1');
+  });
+});
+
+describe('updateOrderStatusAdmin — restock à l’annulation (S2-3)', () => {
+  it('annulation → le stock de chaque item est ré-incrémenté + statut écrit', async () => {
+    const { updateOrderStatusAdmin } = await import('@/lib/admin/orders-server');
+    await updateOrderStatusAdmin('o1', 'annulee');
+    const stockPatch = updates.find((u) => u.id === 'p');
+    expect(stockPatch, 'restock du produit attendu').toBeTruthy();
+    const statusPatch = updates.find((u) => u.id === 'o1');
+    expect(statusPatch?.patch.status).toBe('annulee');
+  });
+
+  it('déjà annulée → PAS de second restock', async () => {
+    const { updateOrderStatusAdmin } = await import('@/lib/admin/orders-server');
+    const prev = orderData.status;
+    orderData.status = 'annulee';
+    try {
+      await updateOrderStatusAdmin('o1', 'annulee');
+      expect(updates.find((u) => u.id === 'p')).toBeUndefined();
+    } finally {
+      orderData.status = prev;
+    }
   });
 });

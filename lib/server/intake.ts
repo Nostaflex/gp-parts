@@ -34,30 +34,61 @@ export type OrderIntakeResult =
  * clic) fait du doc id une clé : un double-clic ou un retry réseau ne crée
  * pas de seconde commande.
  */
+export class StockInsuffisantError extends Error {
+  constructor(
+    public readonly productId: string,
+    public readonly disponible: number
+  ) {
+    super(`Stock insuffisant pour ${productId} (${disponible} restant)`);
+    this.name = 'StockInsuffisantError';
+  }
+}
+
 export async function createOrderIntake(
   data: Omit<Order, 'id'>,
   idempotencyKey?: string
 ): Promise<OrderIntakeResult> {
-  const parsed = orderSchema.omit({ id: true }).parse(data);
-  const col = getAdminFirestore().collection('orders');
+  const parsed = orderSchema.omit({ id: true }).parse({
+    ...data,
+  });
+  const db = getAdminFirestore();
+  const orderRef = idempotencyKey
+    ? db.collection('orders').doc(idempotencyKey)
+    : db.collection('orders').doc();
 
-  if (!idempotencyKey) {
-    const ref = await col.add(parsed);
-    return { id: ref.id, existed: false };
-  }
-
-  const ref = col.doc(idempotencyKey);
   try {
-    await ref.create(parsed);
-    return { id: idempotencyKey, existed: false };
+    await db.runTransaction(async (tx) => {
+      // 1) Lire TOUS les stocks dans la transaction (reads avant writes).
+      const productRefs = parsed.items.map((it) => db.collection('products').doc(it.productId));
+      const snaps = await Promise.all(productRefs.map((r) => tx.get(r)));
+
+      // 2) Refus hors stock — plus jamais de « quantité forcée à 1 ».
+      snaps.forEach((snap, i) => {
+        const stock = snap.exists ? Number((snap.data() as { stock?: number }).stock ?? 0) : 0;
+        if (stock < parsed.items[i].quantity) {
+          throw new StockInsuffisantError(parsed.items[i].productId, stock);
+        }
+      });
+
+      // 3) Décrément atomique + création : tout ou rien. Deux checkouts
+      //    concurrents sur la dernière pièce → un seul commit passe.
+      snaps.forEach((snap, i) => {
+        tx.update(productRefs[i], {
+          stock: Number((snap.data() as { stock?: number }).stock ?? 0) - parsed.items[i].quantity,
+        });
+      });
+      tx.create(orderRef, parsed);
+    });
+    return { id: orderRef.id, existed: false };
   } catch (err) {
-    // gRPC ALREADY_EXISTS : la commande a déjà été créée par un appel
-    // concurrent/antérieur avec la même clé — on la renvoie, sans doublon.
+    if (err instanceof StockInsuffisantError) throw err;
+    // gRPC ALREADY_EXISTS : la commande a déjà été créée avec la même clé —
+    // la transaction ENTIÈRE a échoué, donc aucun double décrément de stock.
     if ((err as { code?: number }).code === 6) {
-      const snap = await ref.get();
+      const snap = await orderRef.get();
       const existing = snap.data() as Omit<Order, 'id'> | undefined;
       return {
-        id: idempotencyKey,
+        id: orderRef.id,
         existed: true,
         existingOrderNumber: existing?.orderNumber ?? '',
       };
