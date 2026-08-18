@@ -82,6 +82,15 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Fiche d'identité légale (TVA, médiateur, RC pro) : lecture publique —
+    // la page /mentions-legales l'affiche. Leçon audit 2026-08-18 : cloner un
+    // pattern de données = cloner AUSSI sa règle (le lot 6 avait cloné le code
+    // de contactInfo sans cette règle → fail-open silencieux vers les défauts).
+    match /meta/legalInfo {
+      allow read;
+      allow write: if isAdmin();
+    }
+
     // Meta (whitelist admins + config): admin only
     // Note: meta/admins contient PII (emails admins), pas lecture publique
     match /meta/{doc=**} {

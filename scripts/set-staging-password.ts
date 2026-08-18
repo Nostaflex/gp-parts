@@ -15,7 +15,8 @@ import { getAuth } from 'firebase-admin/auth';
 
 const saPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-if (!saPath || !projectId?.includes('staging')) {
+const STAGING_PROJECT_IDS = ['car-performance-staging'];
+if (!saPath || !projectId || !STAGING_PROJECT_IDS.includes(projectId)) {
   console.error('ERROR: réservé au staging (GOOGLE_APPLICATION_CREDENTIALS + projet *staging*)');
   process.exit(1);
 }

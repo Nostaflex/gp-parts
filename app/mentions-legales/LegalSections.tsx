@@ -405,12 +405,12 @@ export function LegalSections({
                         'jusqu’au retrait',
                       ],
                       [
-                        'Preuve de consentement cookies',
-                        'Prouver que vous avez choisi',
-                        <Tag key="t" tone="req">
-                          Obligation légale
+                        'Choix de cookies (horodaté)',
+                        'Retenir ce que vous avez accepté ou refusé',
+                        <Tag key="t" tone="ok">
+                          Consentement
                         </Tag>,
-                        '6 ans',
+                        '6 mois, dans votre navigateur',
                       ],
                     ] as const
                   ).map(([donnee, pourquoi, base, duree]) => (

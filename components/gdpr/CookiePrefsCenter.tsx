@@ -184,8 +184,8 @@ export function CookiePrefsCenter() {
       </div>
 
       <p className="mt-4 text-[0.8rem] text-cp-ink/55">
-        Votre choix est conservé 6 mois, puis nous vous reposons la question. La preuve de
-        consentement est horodatée, comme l&apos;exige la CNIL.
+        Votre choix est horodaté et conservé 6 mois dans votre navigateur, puis nous vous reposons
+        la question — le retrait est aussi simple que l&apos;accord.
       </p>
     </div>
   );

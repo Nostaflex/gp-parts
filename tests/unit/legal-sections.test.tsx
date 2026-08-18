@@ -19,7 +19,10 @@ describe('LegalSections — page légale cp-v6', () => {
   it('le registre RGPD déclare le permis de conduire (location) et la preuve de consentement', () => {
     const { container } = render(<LegalSections contactInfo={DEFAULT_CONTACT_INFO} />);
     expect(container.textContent).toContain('Permis de conduire');
-    expect(container.textContent).toContain('Preuve de consentement');
+    // Texte honnête (audit 2026-08-18) : le choix cookies vit dans le
+    // navigateur — plus de promesse « 6 ans » non étayée.
+    expect(container.textContent).toContain('Choix de cookies (horodaté)');
+    expect(container.textContent).not.toContain('6 ans');
     // Sous-traitants nommés (obligation de transparence).
     for (const st of ['Vercel', 'Firebase', 'Stripe', 'Resend', 'WhatsApp']) {
       expect(container.textContent).toContain(st);

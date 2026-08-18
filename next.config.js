@@ -7,7 +7,9 @@ const nextConfig = {
   // CSRF — Phase 5 §9.28). Memory mentionne gp-parts.vercel.app comme prod.
   experimental: {
     serverActions: {
-      allowedOrigins: ['gp-parts.vercel.app', '*.vercel.app'],
+      // Previews du SEUL projet gp-parts — jamais '*.vercel.app' entier
+      // (audit 2026-08-18 : confiance trop large envers des sous-domaines tiers).
+      allowedOrigins: ['gp-parts.vercel.app', 'gp-parts-*.vercel.app'],
     },
   },
   images: {

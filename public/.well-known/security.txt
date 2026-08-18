@@ -1,0 +1,6 @@
+# Car Performance Guadeloupe — signalement de vulnérabilités
+Contact: mailto:contact@car-performance.gp
+Expires: 2027-08-18T00:00:00.000Z
+Preferred-Languages: fr, en
+Canonical: https://www.car-performance.biz/.well-known/security.txt
+Policy: https://www.car-performance.biz/mentions-legales
