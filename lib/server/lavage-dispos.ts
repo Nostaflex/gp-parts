@@ -4,6 +4,7 @@
 // Actions (requireAdmin en amont).
 import { FieldPath } from 'firebase-admin/firestore';
 import { getAdminFirestore } from '@/lib/firebase-admin';
+import { ttlTimestamp } from '@/lib/server/ttl';
 import { CRENEAUX_LAVAGE, normalizeBlocages } from '@/lib/lavage-creneaux';
 import { normalizeSemaineType, prisParSemaineType } from '@/lib/lavage-semaine';
 import type { LavageBlocage, PrisParDate } from '@/lib/lavage-creneaux';
@@ -81,7 +82,7 @@ export async function setJournee(opts: {
     bloques,
     updatedAt: Date.now(),
     updatedBy: opts.actor,
-    expiresAt: new Date(`${opts.date}T00:00:00Z`).getTime() + 90 * 24 * 3600 * 1000,
+    expiresAt: ttlTimestamp(new Date(`${opts.date}T00:00:00Z`).getTime() + 90 * 24 * 3600 * 1000),
   });
   return bloques;
 }
@@ -115,7 +116,7 @@ export async function setBlocage(opts: {
     bloques,
     updatedAt: Date.now(),
     updatedBy: opts.actor,
-    expiresAt: new Date(`${opts.date}T00:00:00Z`).getTime() + 90 * 24 * 3600 * 1000,
+    expiresAt: ttlTimestamp(new Date(`${opts.date}T00:00:00Z`).getTime() + 90 * 24 * 3600 * 1000),
   });
   return bloques;
 }

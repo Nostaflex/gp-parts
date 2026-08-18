@@ -1,4 +1,5 @@
 import { getAdminFirestore } from '@/lib/firebase-admin';
+import { ttlMillis } from '@/lib/ttl';
 import type { Demande, DemandeStatus, DemandeType } from '@/lib/types';
 
 /**
@@ -15,5 +16,8 @@ export async function getDemandesAdmin(opts?: {
   if (opts?.status) q = q.where('status', '==', opts.status) as typeof q;
   if (opts?.limit) q = q.limit(opts.limit) as typeof q;
   const snap = await q.get();
-  return snap.docs.map((d) => ({ ...d.data(), id: d.id }) as Demande);
+  return snap.docs.map((d) => {
+    const data = d.data();
+    return { ...data, expiresAt: ttlMillis(data.expiresAt), id: d.id } as Demande;
+  });
 }

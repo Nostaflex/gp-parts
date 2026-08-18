@@ -36,7 +36,7 @@ describe('writeAuditLog', () => {
     expect(written.diff).toEqual({ prix: { before: 18900, after: 17900 } });
     expect(typeof written.timestamp).toBe('number');
     // +12 mois = 365 jours en ms
-    expect(written.expiresAt).toBe(written.timestamp + 365 * 24 * 60 * 60 * 1000);
+    expect(written.expiresAt.toMillis()).toBe(written.timestamp + 365 * 24 * 60 * 60 * 1000);
   });
 
   it("exclut le diff (PII client) quand resourceType === 'demande'", async () => {

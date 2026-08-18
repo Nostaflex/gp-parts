@@ -5,14 +5,20 @@ import { getAdminFirestore } from '@/lib/firebase-admin';
 import type { Demande, Order } from '@/lib/types';
 import type { Reservation } from '@/lib/reservations';
 import { orderSchema } from '@/lib/schemas/order';
+import { ttlTimestamp } from '@/lib/server/ttl';
 
 export async function createDemandeIntake(data: Omit<Demande, 'id'>): Promise<string> {
-  const ref = await getAdminFirestore().collection('demandes').add(data);
+  // TTL natif : Firestore n'expire que des Timestamp (audit 2026-08-18).
+  const ref = await getAdminFirestore()
+    .collection('demandes')
+    .add({ ...data, expiresAt: ttlTimestamp(data.expiresAt) });
   return ref.id;
 }
 
 export async function createReservationIntake(data: Omit<Reservation, 'id'>): Promise<string> {
-  const ref = await getAdminFirestore().collection('reservations').add(data);
+  const ref = await getAdminFirestore()
+    .collection('reservations')
+    .add({ ...data, expiresAt: ttlTimestamp(data.expiresAt) });
   return ref.id;
 }
 

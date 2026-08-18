@@ -37,6 +37,7 @@ import type { ContactInfo } from '@/lib/contact-info';
 import { normalizeLegalInfo } from '@/lib/legal-info';
 import type { LegalInfo } from '@/lib/legal-info';
 import { applyClientFilters } from './filters';
+import { ttlMillis } from '@/lib/ttl';
 
 /**
  * FirebaseAdapter — Implements DataAdapter using Firestore.
@@ -327,7 +328,10 @@ export class FirebaseAdapter implements DataAdapter {
       q = query(q, firestoreLimit(filters.limit));
     }
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }) as Demande);
+    return snapshot.docs.map((d) => {
+      const data = d.data();
+      return { ...data, expiresAt: ttlMillis(data.expiresAt), id: d.id } as Demande;
+    });
   }
 
   async createDemande(data: Omit<Demande, 'id'>): Promise<string> {
