@@ -84,7 +84,6 @@ function warnDevFallback(method: string): void {
  */
 // In-memory store pour les tests et le mode statique
 const ORDERS_STORE: Order[] = [];
-let orderIdCounter = 1;
 
 const RESERVATIONS_STORE: Reservation[] = [];
 let reservationIdCounter = 1;
@@ -162,12 +161,6 @@ export class StaticAdapter implements DataAdapter {
       });
     });
     return Array.from(brands).sort();
-  }
-
-  async createOrder(order: Omit<Order, 'id'>): Promise<string> {
-    const id = `static-order-${orderIdCounter++}`;
-    ORDERS_STORE.push({ ...order, id });
-    return id;
   }
 
   async getOrders(filters?: OrderFilters): Promise<Order[]> {

@@ -48,7 +48,6 @@ export interface DataAdapter {
   getCategories(): Promise<string[]>;
   getBrands(): Promise<string[]>;
 
-  createOrder(order: Omit<Order, 'id'>): Promise<string>;
   getOrders(filters?: OrderFilters): Promise<Order[]>;
   getOrderById(id: string): Promise<Order | null>;
   updateOrderStatus(id: string, status: OrderStatus): Promise<void>;

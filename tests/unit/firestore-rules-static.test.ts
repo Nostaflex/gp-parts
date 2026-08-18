@@ -37,6 +37,10 @@ describe('firestore.rules — invariants (garde statique)', () => {
     expect(rules).toMatch(/reservations[\s\S]{0,400}allow create: if false/);
   });
 
+  it('orders : création client directe INTERDITE (Admin SDK seulement)', () => {
+    expect(blocDe('orders/{doc}')).toMatch(/allow create: if false/);
+  });
+
   it('audit_log : immuable même pour les admins', () => {
     expect(blocDe('audit_log/{doc}')).toMatch(/allow update, delete: if false/);
   });

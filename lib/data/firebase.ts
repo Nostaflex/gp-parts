@@ -192,15 +192,6 @@ export class FirebaseAdapter implements DataAdapter {
     return Array.from(brands).sort();
   }
 
-  async createOrder(order: Omit<Order, 'id'>): Promise<string> {
-    const docRef = await addDoc(this.ordersRef, {
-      ...order,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
-    return docRef.id;
-  }
-
   async getOrders(filters?: OrderFilters): Promise<Order[]> {
     let q = query(this.ordersRef, orderBy('createdAt', 'desc'));
     if (filters?.status) {

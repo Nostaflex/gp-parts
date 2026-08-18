@@ -1,6 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
 
 // Mock Stripe : le chemin carte ne doit pas toucher le réseau réel en test.
+vi.mock('@/lib/server/intake', () => ({
+  createOrderIntake: vi.fn(async () => ({ id: 'mock-id', existed: false })),
+}));
+vi.mock('@/lib/emails/send', () => ({ sendOrderEmails: vi.fn() }));
+
 vi.mock('@/lib/stripe', () => ({
   createOrderPaymentIntent: vi.fn(async () => ({
     clientSecret: 'pi_test_secret_xyz',
@@ -189,5 +194,45 @@ describe('validateCheckout — numéro de commande', () => {
     const r1 = await validateCheckout(validData);
     const r2 = await validateCheckout(validData);
     expect(r1.orderNumber).not.toBe(r2.orderNumber);
+  });
+});
+
+// ─── Idempotence (audit 2026-08-18) ──────────────────────────────────
+import { createOrderIntake } from '@/lib/server/intake';
+import { sendOrderEmails } from '@/lib/emails/send';
+
+describe('validateCheckout — idempotence', () => {
+  it('clé déjà vue → commande existante renvoyée, AUCUN nouvel email', async () => {
+    vi.mocked(createOrderIntake).mockResolvedValueOnce({
+      id: 'mock-id',
+      existed: true,
+      existingOrderNumber: 'GP-EXISTANTE',
+    });
+    vi.mocked(sendOrderEmails).mockClear();
+    const result = await validateCheckout({
+      ...validData,
+      idempotencyKey: '3f2b8c1e-aaaa-bbbb-cccc-1234567890ab',
+    });
+    expect(result.success).toBe(true);
+    expect(result.orderNumber).toBe('GP-EXISTANTE');
+    expect(sendOrderEmails).not.toHaveBeenCalled();
+  });
+
+  it('la clé du client est transmise à l’intake (doc id = clé)', async () => {
+    vi.mocked(createOrderIntake).mockClear();
+    await validateCheckout({
+      ...validData,
+      idempotencyKey: '3f2b8c1e-aaaa-bbbb-cccc-1234567890ab',
+    });
+    expect(vi.mocked(createOrderIntake).mock.calls[0][1]).toBe(
+      '3f2b8c1e-aaaa-bbbb-cccc-1234567890ab'
+    );
+  });
+
+  it('clé malformée → ignorée (fallback add), la commande passe quand même', async () => {
+    vi.mocked(createOrderIntake).mockClear();
+    const result = await validateCheckout({ ...validData, idempotencyKey: '<script>' });
+    expect(result.success).toBe(true);
+    expect(vi.mocked(createOrderIntake).mock.calls[0][1]).toBeUndefined();
   });
 });

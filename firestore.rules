@@ -29,9 +29,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Commandes: création publique (checkout), lecture/update admin, jamais delete
+    // Commandes : création EXCLUSIVEMENT via Admin SDK (Server Action
+    // checkout, audit 2026-08-18 — l'ancien `allow create` public permettait
+    // spam, statuts arbitraires et documents malformés). Lecture/update
+    // admin, jamais delete.
     match /orders/{doc} {
-      allow create;
+      allow create: if false;
       allow read, update: if isAdmin();
       allow delete: if false;
     }
