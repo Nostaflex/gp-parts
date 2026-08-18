@@ -143,7 +143,7 @@ export default async function VenteVehiculePage() {
               {[
                 'Contrôlé par nos techniciens',
                 'Garantie 12 mois incluse',
-                'Financement 4,99 % TAEG',
+                'Financement disponible',
                 'Reprise possible',
               ].map((g) => (
                 <span
