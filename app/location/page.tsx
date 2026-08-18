@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { CpHeader } from '@/components/cp/CpHeader';
 import { CpBridge } from '@/components/cp/CpBridge';
+import { CpBulle } from '@/components/cp/CpBulle';
 import { CpFooter } from '@/components/cp/CpFooter';
 import { CpUniversStrip } from '@/components/cp/CpUniversStrip';
 import { notFound } from 'next/navigation';
@@ -163,8 +164,10 @@ export default async function LocationPage() {
           </div>
 
           {/* Image — véhicule Racoon "posé" : son fond blanc se fond dans la section
-              quasi-blanche (pas de carte/rectangle), halo tropical au sol pour l'ancrer */}
-          <div className="hidden md:flex h-full relative items-end justify-center pb-12">
+              quasi-blanche (pas de carte/rectangle), halo tropical au sol pour l'ancrer.
+              Max en HÔTE au-dessus de la voiture, bulle AU-DESSUS de sa tête
+              (retour Djemil 2026-08-18 + règle handoff). */}
+          <div className="hidden md:flex h-full relative flex-col items-center justify-end pb-12">
             <div
               aria-hidden="true"
               className="absolute bottom-[16%] left-1/2 -translate-x-1/2 w-[80%] h-40 rounded-[50%] pointer-events-none"
@@ -174,6 +177,24 @@ export default async function LocationPage() {
                 filter: 'blur(28px)',
               }}
             />
+            {/* mb négatif : l'image voiture a du vide au-dessus du toit — Max
+                vient se poser dessus au lieu de flotter. */}
+            <div className="relative z-20 -mb-[120px] flex flex-col items-center">
+              <CpBulle
+                nom="Max"
+                role="L'expert de la mobilité"
+                replique="Deux dates, une clé. Le reste, c'est mon problème."
+                className="max-w-[300px] mb-4"
+              />
+              <Image
+                src="/images/mascottes/max.webp"
+                alt="Max Explorer, la mascotte de la location Racoon"
+                width={409}
+                height={840}
+                priority
+                className="h-[230px] w-auto drop-shadow-[0_14px_24px_rgba(26,15,6,0.28)]"
+              />
+            </div>
             <Image
               src="/images/vehicule-racoon-cut.webp"
               alt="Véhicule Racoon — flotte de location Car Performance Guadeloupe"
@@ -187,7 +208,7 @@ export default async function LocationPage() {
         </div>
       </section>
 
-      <CpBridge fromColor="#F6F2EA" toColor="#F4EDE0" />
+      <CpBridge fromColor="#F6F2EA" toColor="#F4EDE0" accentColor="#52C88A" />
 
       {/* ── CLIENT COMPONENT (search + catalogue + form) ── */}
       <LocationClient cars={cars} settings={settings} />
