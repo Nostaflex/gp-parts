@@ -18,12 +18,19 @@ interface ConsentState {
 const STORAGE_KEY = STORAGE_KEYS.cookieConsent;
 
 // Boutons alignés sur le design system storefront (cp-), pas les tokens legacy.
+// CNIL (handoff cp-v6) : refuser doit demander le MÊME effort qu'accepter —
+// « Tout accepter » et « Tout refuser » partagent le même gabarit plein
+// (le refus en encre plus sombre #3B322A), « Choisir en détail » en contour.
 const BTN_PRIMARY =
   'bg-cp-ink text-cp-cream text-sm font-semibold px-4 py-2 rounded-full hover:bg-cp-red transition-colors';
+const BTN_REFUSE =
+  'bg-[#3B322A] text-cp-cream text-sm font-semibold px-4 py-2 rounded-full hover:bg-cp-red transition-colors';
 const BTN_OUTLINE =
   'border border-cp-ink/15 text-cp-ink text-sm font-semibold px-4 py-2 rounded-full hover:border-cp-red hover:text-cp-mango transition-colors';
-const BTN_GHOST =
-  'text-cp-ink/60 text-sm font-semibold px-4 py-2 rounded-full hover:text-cp-mango transition-colors';
+
+// Le consentement se périme : au-delà de 6 mois, la question est reposée
+// (la page légale l'annonce — ne pas mentir).
+const CONSENT_MAX_AGE_MS = 182 * 24 * 60 * 60 * 1000;
 
 export function CookieBanner() {
   const [visible, setVisible] = useState(false);
@@ -33,7 +40,12 @@ export function CookieBanner() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (!saved) setVisible(true);
+      if (!saved) {
+        setVisible(true);
+        return;
+      }
+      const ts = Date.parse(JSON.parse(saved)?.timestamp ?? '');
+      if (Number.isNaN(ts) || Date.now() - ts > CONSENT_MAX_AGE_MS) setVisible(true);
     } catch {
       setVisible(true);
     }
@@ -139,11 +151,11 @@ export function CookieBanner() {
               <button type="button" className={BTN_PRIMARY} onClick={acceptAll}>
                 Tout accepter
               </button>
-              <button type="button" className={BTN_OUTLINE} onClick={rejectAll}>
+              <button type="button" className={BTN_REFUSE} onClick={rejectAll}>
                 Tout refuser
               </button>
-              <button type="button" className={BTN_GHOST} onClick={() => setShowPrefs(true)}>
-                Paramétrer
+              <button type="button" className={BTN_OUTLINE} onClick={() => setShowPrefs(true)}>
+                Choisir en détail
               </button>
             </>
           ) : (

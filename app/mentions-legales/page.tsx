@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { CpHeader } from '@/components/cp/CpHeader';
 import { CpBridge } from '@/components/cp/CpBridge';
 import { CpFooter } from '@/components/cp/CpFooter';
-import { LegalTabs } from './LegalTabs';
+import { getAdapter } from '@/lib/data';
+import { LegalSections, LEGAL_UPDATED_AT } from './LegalSections';
 
 export const metadata: Metadata = {
   title: 'Mentions légales & Confidentialité',
@@ -11,7 +12,9 @@ export const metadata: Metadata = {
   alternates: { canonical: '/mentions-legales' },
 };
 
-export default function MentionsLegalesPage() {
+export default async function MentionsLegalesPage() {
+  // Coordonnées ÉDITABLES (BO contact-info) — fini le téléphone en dur.
+  const contactInfo = await (await getAdapter()).getContactInfo();
   return (
     <>
       <CpHeader darkSectionIds={['legal-hero']} />
@@ -47,7 +50,7 @@ export default function MentionsLegalesPage() {
             LÉGALES &<br />
             <span className="text-cp-mango">CONFIDENTIALITÉ</span>
           </h1>
-          <p className="text-cp-cream/40 text-sm mt-4">Mise à jour — Janvier 2025</p>
+          <p className="text-cp-cream/40 text-sm mt-4">Mise à jour — {LEGAL_UPDATED_AT}</p>
         </div>
       </section>
 
@@ -55,7 +58,7 @@ export default function MentionsLegalesPage() {
 
       {/* ── CONTENU ──────────────────────────── */}
       <section className="py-16 px-6 pt-24" style={{ backgroundColor: '#F8F5F0' }}>
-        <LegalTabs />
+        <LegalSections contactInfo={contactInfo} />
       </section>
 
       <CpBridge fromColor="#F8F5F0" toColor="#1A0F06" />
