@@ -6,6 +6,7 @@ import { demandeTypeFromSujet, demandeExpiry } from '@/lib/demandes';
 import type { Lead } from '@/lib/emails/lead';
 
 export type ContactInput = {
+  marketingOptIn?: boolean;
   prenom: string;
   nom: string;
   email: string;
@@ -58,6 +59,7 @@ export async function submitContact(input: ContactInput): Promise<ContactResult>
       email: input.email.trim(),
       telephone: input.tel?.trim() ?? '',
       message: messageFull,
+      marketingOptIn: Boolean(input.marketingOptIn),
       ...(input.ref ? { resourceRef: input.ref } : {}),
       createdAt: nowIso,
       updatedAt: nowIso,

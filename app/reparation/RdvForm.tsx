@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { localDateISO } from '@/lib/utils';
 import { CpRgpdNotice } from '@/components/cp/CpRgpdNotice';
+import { CpMarketingOptIn } from '@/components/cp/CpMarketingOptIn';
 import { submitRdv } from './actions';
 
 type Step = 0 | 1 | 2 | 3;
@@ -96,6 +97,7 @@ const label = 'block text-xs font-semibold text-cp-ink/50 uppercase tracking-wid
 
 export function RdvForm() {
   const [step, setStep] = useState<Step>(0);
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [website, setWebsite] = useState(''); // honeypot anti-spam
   const [done, setDone] = useState(false);
   const [ref, setRef] = useState('');
@@ -177,7 +179,7 @@ export function RdvForm() {
   const submit = async () => {
     setSubmitting(true);
     setSubmitError(null);
-    const res = await submitRdv({ ...data, website });
+    const res = await submitRdv({ ...data, marketingOptIn, website });
     setSubmitting(false);
     if (!res.ok) {
       setSubmitError(res.error);
@@ -731,6 +733,7 @@ export function RdvForm() {
             {submitError}
           </p>
         )}
+        <CpMarketingOptIn checked={marketingOptIn} onChange={setMarketingOptIn} />
         <CpRgpdNotice className="mt-4" />
       </div>
     </div>

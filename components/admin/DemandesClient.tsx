@@ -165,6 +165,9 @@ function DemandeRow({ d }: { d: Demande }) {
             <a href={`mailto:${d.email}`} style={{ color: 'var(--blue)' }}>
               {d.email}
             </a>
+            <span style={{ color: 'rgba(28,28,30,0.6)' }}>
+              Offres marketing : {d.marketingOptIn ? 'OUI (case cochée)' : 'non'}
+            </span>
           </div>
           {d.type === 'lavage' && d.rdvDate && d.rdvCreneau && <CreneauActions d={d} />}
           <div className="flex gap-2 flex-wrap">

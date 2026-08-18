@@ -33,6 +33,7 @@ export type Reservation = {
   heureRetour?: string; // "HH:MM"
   cautionEnCents?: number; // snapshot au moment de la résa
   cglAcceptedAt?: string; // ISO — preuve d'acceptation des CGL
+  marketingOptIn?: boolean; // case facultative jamais pré-cochée (CNIL, lot 6)
   createdAt: string; // ISO
   updatedAt: string; // ISO
   expiresAt: number; // unix ms — TTL Firestore (purge RGPD)

@@ -170,6 +170,9 @@ export interface Demande {
   // créneau au BO sans parser le message texte.
   rdvDate?: string; // YYYY-MM-DD
   rdvCreneau?: string;
+  // Case marketing FACULTATIVE, jamais pré-cochée (CNIL, lot 6) : true
+  // seulement si le client l'a cochée. Absent = formulaires antérieurs.
+  marketingOptIn?: boolean;
   // Notes internes ajoutées par l'admin (jamais exposées côté public)
   notes?: string;
   createdAt: string; // ISO date

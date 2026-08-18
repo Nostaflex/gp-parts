@@ -44,6 +44,20 @@ const base = {
   cgl: true,
 };
 
+describe('marketingOptIn — la case facultative est écrite, jamais décorative', () => {
+  it('cochée → true dans la réservation ; absente → false explicite', async () => {
+    await validateReservation({ ...base, marketingOptIn: true });
+    let arg = vi.mocked(createReservationIntake).mock.calls[0][0];
+    expect(arg.marketingOptIn).toBe(true);
+
+    vi.clearAllMocks();
+    vi.mocked(getBusyRangesForCar).mockResolvedValue([]);
+    await validateReservation({ ...base });
+    arg = vi.mocked(createReservationIntake).mock.calls[0][0];
+    expect(arg.marketingOptIn).toBe(false);
+  });
+});
+
 describe('validateReservation', () => {
   it('succès : recompute nbJours + total, renvoie une référence LOC-', async () => {
     const res = await validateReservation(base);

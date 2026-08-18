@@ -9,6 +9,7 @@ import type { Lead } from '@/lib/emails/lead';
 import type { LeadResult } from '@/app/reparation/actions';
 
 export type LavageInput = {
+  marketingOptIn?: boolean;
   prenom: string;
   nom: string;
   email: string;
@@ -102,6 +103,7 @@ export async function submitLavage(input: LavageInput): Promise<LeadResult> {
       email: input.email.trim(),
       telephone: input.tel.trim(),
       message: messageFull,
+      marketingOptIn: Boolean(input.marketingOptIn),
       // RDV structuré → blocage 1-tap du créneau au BO.
       ...(isDateKey(input.date) ? { rdvDate: input.date, rdvCreneau: input.creneau } : {}),
       createdAt: nowIso,

@@ -397,6 +397,14 @@ export function LegalSections({
                         '13 mois',
                       ],
                       [
+                        'Préférence offres marketing (case facultative)',
+                        'Vous envoyer nos offres si vous l’avez demandé',
+                        <Tag key="t" tone="ok">
+                          Consentement
+                        </Tag>,
+                        'jusqu’au retrait',
+                      ],
+                      [
                         'Preuve de consentement cookies',
                         'Prouver que vous avez choisi',
                         <Tag key="t" tone="req">

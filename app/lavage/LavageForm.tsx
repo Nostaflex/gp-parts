@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { CpRgpdNotice } from '@/components/cp/CpRgpdNotice';
+import { CpMarketingOptIn } from '@/components/cp/CpMarketingOptIn';
 import { formatPrice } from '@/lib/utils';
 import { CRENEAUX_LAVAGE, niveauRemplissage, prochainCreneau } from '@/lib/lavage-creneaux';
 import { submitLavage } from './actions';
@@ -69,6 +70,7 @@ export function LavageForm({
   feries?: Record<string, string>;
   initialFormule?: string;
 }) {
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [website, setWebsite] = useState(''); // honeypot anti-spam
   const [done, setDone] = useState(false);
   const [ref, setRef] = useState('');
@@ -144,7 +146,7 @@ export function LavageForm({
     if (!validate()) return;
     setSubmitting(true);
     setSubmitError(null);
-    const res = await submitLavage({ ...data, website });
+    const res = await submitLavage({ ...data, marketingOptIn, website });
     setSubmitting(false);
     if (!res.ok) {
       setSubmitError(res.error);
@@ -519,6 +521,7 @@ export function LavageForm({
             {submitError}
           </p>
         )}
+        <CpMarketingOptIn checked={marketingOptIn} onChange={setMarketingOptIn} />
         <CpRgpdNotice />
       </div>
     </div>

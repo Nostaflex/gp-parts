@@ -7,6 +7,7 @@ import type { LocationSettings } from '@/lib/location-settings';
 import { LLD_SEUIL_JOURS } from '@/lib/reservations';
 import { formatPrice, localDateISO } from '@/lib/utils';
 import { CpRgpdNotice } from '@/components/cp/CpRgpdNotice';
+import { CpMarketingOptIn } from '@/components/cp/CpMarketingOptIn';
 import { checkDispo, submitDevisLLD } from './actions';
 import { PitLaneBooking } from './PitLaneBooking';
 
@@ -302,6 +303,7 @@ function DevisLLDSection({
     consent: false,
   });
   const [website, setWebsite] = useState('');
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [done, setDone] = useState(false);
   const [sending, setSending] = useState(false);
@@ -314,7 +316,7 @@ function DevisLLDSection({
   const submit = async () => {
     if (sending) return;
     setSending(true);
-    const res = await submitDevisLLD({ ...data, website });
+    const res = await submitDevisLLD({ ...data, marketingOptIn, website });
     setSending(false);
     if (!res.success) {
       setErrors(res.errors);
@@ -509,6 +511,7 @@ function DevisLLDSection({
               </label>
             </div>
             {e('consent')}
+            <CpMarketingOptIn checked={marketingOptIn} onChange={setMarketingOptIn} />
             <div className="flex gap-3 mt-2">
               <button
                 type="button"

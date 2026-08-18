@@ -51,6 +51,7 @@ export async function validateReservation(input: {
   adresseCodePostal?: string;
   adresseVille?: string;
   cgl?: boolean;
+  marketingOptIn?: boolean;
 }): Promise<ReservationValidationResult> {
   // Honeypot : un humain ne remplit jamais ce champ → succès factice, rien créé.
   if (input.website && input.website.trim() !== '') {
@@ -177,6 +178,7 @@ export async function validateReservation(input: {
     ...(heureRetour ? { heureRetour } : {}),
     cautionEnCents,
     cglAcceptedAt: now,
+    marketingOptIn: Boolean(input.marketingOptIn),
     createdAt: now,
     updatedAt: now,
     expiresAt: Date.now() + TTL_MS,
@@ -202,6 +204,7 @@ export async function submitDevisLLD(input: {
   telephone: string;
   consent: boolean;
   website?: string;
+  marketingOptIn?: boolean;
 }): Promise<{ success: boolean; errors: Record<string, string> }> {
   if (input.website && input.website.trim() !== '') return { success: true, errors: {} };
 
@@ -237,6 +240,7 @@ export async function submitDevisLLD(input: {
       (kmParMois ? ` · Km/mois : ${kmParMois}` : '') +
       (categorie ? ` · Catégorie : ${categorie}` : '') +
       (budgetMensuel ? ` · Budget : ${budgetMensuel} €/mois` : ''),
+    marketingOptIn: Boolean(input.marketingOptIn),
     createdAt: nowIso,
     updatedAt: nowIso,
     expiresAt: demandeExpiry(nowMs),

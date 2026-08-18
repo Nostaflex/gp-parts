@@ -6,6 +6,7 @@ import { demandeExpiry } from '@/lib/demandes';
 import type { Lead } from '@/lib/emails/lead';
 
 export type RdvInput = {
+  marketingOptIn?: boolean;
   prenom: string;
   nom: string;
   email: string;
@@ -108,6 +109,7 @@ export async function submitRdv(input: RdvInput): Promise<LeadResult> {
       email: input.email.trim(),
       telephone: input.tel.trim(),
       message: messageFull,
+      marketingOptIn: Boolean(input.marketingOptIn),
       createdAt: nowIso,
       updatedAt: nowIso,
       expiresAt: demandeExpiry(now),

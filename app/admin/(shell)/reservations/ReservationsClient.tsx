@@ -61,7 +61,8 @@ function Row({ reservation }: { reservation: Reservation }) {
           </p>
           <p className="text-sm" style={{ color: 'rgba(28,28,30,0.6)' }}>
             {reservation.customer.prenom} {reservation.customer.nom} · {reservation.customer.email}{' '}
-            · {reservation.customer.telephone} · permis {reservation.customer.permis}
+            · {reservation.customer.telephone} · permis {reservation.customer.permis} · offres
+            marketing : {reservation.marketingOptIn ? 'OUI' : 'non'}
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">

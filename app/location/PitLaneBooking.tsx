@@ -28,6 +28,7 @@ import {
   maxSideNote,
 } from '@/lib/pitlane';
 import { CpRgpdNotice } from '@/components/cp/CpRgpdNotice';
+import { CpMarketingOptIn } from '@/components/cp/CpMarketingOptIn';
 import { CpBridge } from '@/components/cp/CpBridge';
 import { validateReservation, checkDispo, getDispoParJour, type DispoJour } from './actions';
 
@@ -87,6 +88,7 @@ export function PitLaneBooking({
   const [dispoJours, setDispoJours] = useState<DispoJour[] | null>(null);
   const [dispoFailed, setDispoFailed] = useState(false);
   const [website, setWebsite] = useState(''); // honeypot anti-spam
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [done, setDone] = useState(false);
   const [reference, setReference] = useState('');
   const [sending, setSending] = useState(false);
@@ -254,6 +256,7 @@ export function PitLaneBooking({
         adresseVille: formData.adresseVille,
         consent: formData.consent,
         cgl: formData.cgl,
+        marketingOptIn,
         website,
       });
       setSending(false);
@@ -893,6 +896,11 @@ export function PitLaneBooking({
                       </label>
                     </div>
                     {err('consent')}
+                    <CpMarketingOptIn
+                      checked={marketingOptIn}
+                      onChange={setMarketingOptIn}
+                      tone="dark"
+                    />
                   </div>
                   <CpRgpdNotice className="mt-4" tone="dark" />
                 </div>
