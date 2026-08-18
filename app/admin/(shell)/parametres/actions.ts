@@ -6,6 +6,7 @@ import { writeAuditLog } from '@/lib/admin/audit';
 import { getAdminFirestore } from '@/lib/firebase-admin';
 import type { FeatureFlags } from '@/lib/feature-flags';
 import { ContactInfoSchema } from '@/lib/contact-info';
+import { LegalInfoSchema } from '@/lib/legal-info';
 import { normalizeLocationSettings } from '@/lib/location-settings';
 import type { FormActionState } from '@/components/admin/FormShell';
 
@@ -133,4 +134,40 @@ export async function updateContactInfo(
   revalidateTag('contact-info');
   revalidatePath('/', 'layout');
   return { ok: true, message: 'Coordonnées mises à jour.' };
+}
+
+// Fiche d'identité légale (arbitrage A6) : TVA, médiateur, RC pro saisis par
+// Stéphane quand il les obtient — la page légale bascule alors d'elle-même
+// de « à fournir » à la vraie valeur.
+export async function updateLegalInfo(
+  _prev: FormActionState,
+  formData: FormData
+): Promise<FormActionState> {
+  const session = await requireAdmin();
+
+  const str = (k: string) => String(formData.get(k) ?? '').trim();
+  const parsed = LegalInfoSchema.safeParse({
+    tvaIntracom: str('tvaIntracom'),
+    mediateurNom: str('mediateurNom'),
+    mediateurUrl: str('mediateurUrl'),
+    rcPro: str('rcPro'),
+  });
+  if (!parsed.success) {
+    return { errors: parsed.error.flatten().fieldErrors };
+  }
+
+  const db = getAdminFirestore();
+  await db
+    .doc('meta/legalInfo')
+    .set({ ...parsed.data, updatedAt: Date.now(), updatedBy: session.email }, { merge: true });
+
+  await writeAuditLog({
+    actor: session.email,
+    action: 'update',
+    resourceType: 'legal-info',
+    resourceId: 'legalInfo',
+  });
+
+  revalidatePath('/mentions-legales');
+  return { ok: true, message: 'Fiche légale mise à jour.' };
 }

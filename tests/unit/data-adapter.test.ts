@@ -114,6 +114,12 @@ describe('getAdapter', () => {
         lavage: true,
         avis: true,
       }),
+      getLegalInfo: async () => ({
+        tvaIntracom: '',
+        mediateurNom: '',
+        mediateurUrl: '',
+        rcPro: '',
+      }),
       getContactInfo: async () => ({
         phone: '+590690112233',
         phoneDisplay: '0690 11 22 33',
@@ -431,6 +437,12 @@ describe('StaticAdapter — soft-delete exclusion', () => {
         reparation: true,
         lavage: true,
         avis: true,
+      }),
+      getLegalInfo: async () => ({
+        tvaIntracom: '',
+        mediateurNom: '',
+        mediateurUrl: '',
+        rcPro: '',
       }),
       getContactInfo: async () => ({
         phone: '+590690112233',

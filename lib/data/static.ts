@@ -12,6 +12,8 @@ import { DEFAULT_FEATURE_FLAGS } from '@/lib/feature-flags';
 import type { FeatureFlags } from '@/lib/feature-flags';
 import { DEFAULT_CONTACT_INFO } from '@/lib/contact-info';
 import type { ContactInfo } from '@/lib/contact-info';
+import { DEFAULT_LEGAL_INFO } from '@/lib/legal-info';
+import type { LegalInfo } from '@/lib/legal-info';
 import { applyClientFilters } from './filters';
 
 // Fixtures CRM pour le dev local sans émulateur Firebase. En production,
@@ -277,5 +279,9 @@ export class StaticAdapter implements DataAdapter {
 
   async getContactInfo(): Promise<ContactInfo> {
     return { ...DEFAULT_CONTACT_INFO };
+  }
+
+  async getLegalInfo(): Promise<LegalInfo> {
+    return { ...DEFAULT_LEGAL_INFO };
   }
 }

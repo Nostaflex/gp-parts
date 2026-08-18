@@ -13,8 +13,12 @@ export const metadata: Metadata = {
 };
 
 export default async function MentionsLegalesPage() {
-  // Coordonnées ÉDITABLES (BO contact-info) — fini le téléphone en dur.
-  const contactInfo = await (await getAdapter()).getContactInfo();
+  // Coordonnées + fiche légale ÉDITABLES au BO — fini les valeurs en dur.
+  const adapter = await getAdapter();
+  const [contactInfo, legalInfo] = await Promise.all([
+    adapter.getContactInfo(),
+    adapter.getLegalInfo(),
+  ]);
   return (
     <>
       <CpHeader darkSectionIds={['legal-hero']} />
@@ -58,7 +62,7 @@ export default async function MentionsLegalesPage() {
 
       {/* ── CONTENU ──────────────────────────── */}
       <section className="py-16 px-6 pt-24" style={{ backgroundColor: '#F8F5F0' }}>
-        <LegalSections contactInfo={contactInfo} />
+        <LegalSections contactInfo={contactInfo} legalInfo={legalInfo} />
       </section>
 
       <CpBridge fromColor="#F8F5F0" toColor="#1A0F06" />

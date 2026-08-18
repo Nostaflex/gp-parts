@@ -26,6 +26,7 @@ export type AuditResourceType =
   | 'location-car'
   | 'reservation'
   | 'feature-flags'
+  | 'legal-info'
   | 'contact-info'
   | 'location-settings'
   | 'lavage-settings'

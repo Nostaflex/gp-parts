@@ -14,6 +14,7 @@ import type { LocationCar } from '@/lib/location-cars';
 import type { Reservation, ReservationStatus } from '@/lib/reservations';
 import type { FeatureFlags } from '@/lib/feature-flags';
 import type { ContactInfo } from '@/lib/contact-info';
+import type { LegalInfo } from '@/lib/legal-info';
 
 export interface ProductFilters {
   category?: ProductCategory;
@@ -79,4 +80,8 @@ export interface DataAdapter {
   // Coordonnées de contact (configurables au BO). Écriture via Server Action
   // updateContactInfo (Admin SDK).
   getContactInfo(): Promise<ContactInfo>;
+
+  // Fiche d'identité légale (TVA, médiateur, RC pro — configurable au BO,
+  // arbitrage A6). Écriture via Server Action updateLegalInfo (Admin SDK).
+  getLegalInfo(): Promise<LegalInfo>;
 }

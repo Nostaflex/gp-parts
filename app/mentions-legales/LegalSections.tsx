@@ -8,6 +8,7 @@
 
 import { useState, useEffect } from 'react';
 import type { ContactInfo } from '@/lib/contact-info';
+import { DEFAULT_LEGAL_INFO, type LegalInfo } from '@/lib/legal-info';
 import { CookiePrefsCenter } from '@/components/gdpr/CookiePrefsCenter';
 
 /** Date de mise à jour VERSIONNÉE — à incrémenter à chaque évolution du texte. */
@@ -87,7 +88,14 @@ function TitreSection({ num, children }: { num: string; children: React.ReactNod
   );
 }
 
-export function LegalSections({ contactInfo }: { contactInfo: ContactInfo }) {
+export function LegalSections({
+  contactInfo,
+  legalInfo = DEFAULT_LEGAL_INFO,
+}: {
+  contactInfo: ContactInfo;
+  /** Fiche contribuable BO (meta/legalInfo) — champs vides = « à fournir ». */
+  legalInfo?: LegalInfo;
+}) {
   const [active, setActive] = useState<string>('editeur');
 
   // Scroll-spy : la section la plus visible allume son entrée de sommaire.
@@ -162,7 +170,11 @@ export function LegalSections({ contactInfo }: { contactInfo: ContactInfo }) {
               {/* SIRET réel fourni par Stéphane le 2026-08-16 (réponse S4). */}
               <IdRow label="SIRET" value="102 854 023 00011" />
               <IdRow label="RCS" value="102 854 023" />
-              <IdRow label="TVA intracommunautaire" value="N° TVA" aFournir />
+              <IdRow
+                label="TVA intracommunautaire"
+                value={legalInfo.tvaIntracom || 'N° TVA'}
+                aFournir={!legalInfo.tvaIntracom}
+              />
               <IdRow
                 label="Siège social"
                 value={adresse || 'Adresse complète'}
@@ -172,8 +184,16 @@ export function LegalSections({ contactInfo }: { contactInfo: ContactInfo }) {
               <IdRow label="Email" value={email} />
               <IdRow label="Directeur de la publication" value="Stéphane M., gérant" />
               <IdRow label="Hébergeur" value="Vercel Inc. — Covina, CA, États-Unis" />
-              <IdRow label="Médiateur de la consommation" value="Adhésion" aFournir />
-              <IdRow label="Assurance RC professionnelle" value="Assureur & police" aFournir />
+              <IdRow
+                label="Médiateur de la consommation"
+                value={legalInfo.mediateurNom || 'Adhésion'}
+                aFournir={!legalInfo.mediateurNom}
+              />
+              <IdRow
+                label="Assurance RC professionnelle"
+                value={legalInfo.rcPro || 'Assureur & police'}
+                aFournir={!legalInfo.rcPro}
+              />
             </div>
             <div className="mt-4">
               <h4 className="mb-1.5 text-[0.92rem] font-semibold text-cp-ink">

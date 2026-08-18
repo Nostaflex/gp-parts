@@ -34,6 +34,8 @@ import { normalizeFeatureFlags } from '@/lib/feature-flags';
 import type { FeatureFlags } from '@/lib/feature-flags';
 import { normalizeContactInfo } from '@/lib/contact-info';
 import type { ContactInfo } from '@/lib/contact-info';
+import { normalizeLegalInfo } from '@/lib/legal-info';
+import type { LegalInfo } from '@/lib/legal-info';
 import { applyClientFilters } from './filters';
 
 /**
@@ -363,6 +365,17 @@ export class FirebaseAdapter implements DataAdapter {
     } catch (err) {
       console.error('[contact-info] lecture meta/contactInfo échouée, défauts appliqués:', err);
       return normalizeContactInfo(null);
+    }
+  }
+
+  async getLegalInfo(): Promise<LegalInfo> {
+    // Fail-open : champs vides → la page légale affiche « à fournir ».
+    try {
+      const snap = await getDoc(doc(db, 'meta', 'legalInfo'));
+      return normalizeLegalInfo(snap.exists() ? (snap.data() as Partial<LegalInfo>) : null);
+    } catch (err) {
+      console.error('[legal-info] lecture meta/legalInfo échouée, défauts appliqués:', err);
+      return normalizeLegalInfo(null);
     }
   }
 }

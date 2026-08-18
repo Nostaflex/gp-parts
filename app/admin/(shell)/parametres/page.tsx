@@ -6,9 +6,12 @@ import { normalizeContactInfo } from '@/lib/contact-info';
 import type { ContactInfo } from '@/lib/contact-info';
 import { normalizeLocationSettings } from '@/lib/location-settings';
 import type { LocationSettings } from '@/lib/location-settings';
+import { normalizeLegalInfo } from '@/lib/legal-info';
+import type { LegalInfo } from '@/lib/legal-info';
 import { FeatureFlagsForm } from '@/components/admin/FeatureFlagsForm';
 import { ContactInfoForm } from '@/components/admin/ContactInfoForm';
 import { LocationSettingsForm } from '@/components/admin/LocationSettingsForm';
+import { LegalInfoForm } from '@/components/admin/LegalInfoForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,10 +20,11 @@ export default async function ParametresPage() {
   // Les 3 lectures meta/* sont indépendantes : Promise.all évite 3 allers-
   // retours Firestore séquentiels (~150-350 ms) sur chaque ouverture.
   const db = getAdminFirestore();
-  const [snap, ciSnap, lsSnap] = await Promise.all([
+  const [snap, ciSnap, lsSnap, liSnap] = await Promise.all([
     db.doc('meta/featureFlags').get(),
     db.doc('meta/contactInfo').get(),
     db.doc('meta/locationSettings').get(),
+    db.doc('meta/legalInfo').get(),
   ]);
   const initial: FeatureFlags = normalizeFeatureFlags(
     snap.exists ? (snap.data() as Partial<FeatureFlags>) : null
@@ -30,6 +34,9 @@ export default async function ParametresPage() {
   );
   const locationSettings: LocationSettings = normalizeLocationSettings(
     lsSnap.exists ? lsSnap.data() : null
+  );
+  const legalInfo: LegalInfo = normalizeLegalInfo(
+    liSnap.exists ? (liSnap.data() as Partial<LegalInfo>) : null
   );
 
   return (
@@ -64,6 +71,17 @@ export default async function ParametresPage() {
         </p>
       </div>
       <LocationSettingsForm initial={locationSettings} />
+
+      <div className="pt-4">
+        <h2 className="font-title text-h3" style={{ color: 'var(--text)' }}>
+          Identité légale
+        </h2>
+        <p className="text-body-sm" style={{ color: 'rgba(28, 28, 30, 0.6)' }}>
+          TVA intracommunautaire, médiateur de la consommation et RC pro — publiés sur la page
+          mentions légales dès qu&apos;ils sont renseignés.
+        </p>
+      </div>
+      <LegalInfoForm initial={legalInfo} />
     </section>
   );
 }
