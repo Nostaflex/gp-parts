@@ -28,6 +28,7 @@ export type AuditResourceType =
   | 'reservation'
   | 'feature-flags'
   | 'legal-info'
+  | 'maintenance'
   | 'contact-info'
   | 'location-settings'
   | 'lavage-settings'

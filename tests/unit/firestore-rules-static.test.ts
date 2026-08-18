@@ -24,6 +24,12 @@ describe('firestore.rules — invariants (garde statique)', () => {
     expect(bloc).toMatch(/allow write: if isAdmin\(\)/);
   });
 
+  it('meta/maintenance : lecture publique (middleware Edge), écriture admin', () => {
+    const bloc = blocDe('meta/maintenance');
+    expect(bloc).toMatch(/allow read;/);
+    expect(bloc).toMatch(/allow write: if isAdmin\(\)/);
+  });
+
   it('meta/contactInfo : même contrat que legalInfo', () => {
     const bloc = blocDe('meta/contactInfo');
     expect(bloc).toMatch(/allow read;/);
