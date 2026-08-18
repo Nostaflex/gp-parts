@@ -94,6 +94,14 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Mode maintenance : lecture publique (le middleware Edge et la page
+    // /maintenance le lisent sans auth), écriture admin. Règle posée AVEC le
+    // pattern (leçon audit 2026-08-18 : jamais cloner un doc meta sans sa règle).
+    match /meta/maintenance {
+      allow read;
+      allow write: if isAdmin();
+    }
+
     // Meta (whitelist admins + config): admin only
     // Note: meta/admins contient PII (emails admins), pas lecture publique
     match /meta/{doc=**} {

@@ -6,9 +6,12 @@ import { normalizeContactInfo } from '@/lib/contact-info';
 import type { ContactInfo } from '@/lib/contact-info';
 import { normalizeLocationSettings } from '@/lib/location-settings';
 import type { LocationSettings } from '@/lib/location-settings';
+import { normalizeMaintenance } from '@/lib/maintenance';
+import type { MaintenanceConfig } from '@/lib/maintenance';
 import { FeatureFlagsForm } from '@/components/admin/FeatureFlagsForm';
 import { ContactInfoForm } from '@/components/admin/ContactInfoForm';
 import { LocationSettingsForm } from '@/components/admin/LocationSettingsForm';
+import { MaintenanceForm } from '@/components/admin/MaintenanceForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,10 +20,11 @@ export default async function ParametresPage() {
   // Les 3 lectures meta/* sont indépendantes : Promise.all évite 3 allers-
   // retours Firestore séquentiels (~150-350 ms) sur chaque ouverture.
   const db = getAdminFirestore();
-  const [snap, ciSnap, lsSnap] = await Promise.all([
+  const [snap, ciSnap, lsSnap, mSnap] = await Promise.all([
     db.doc('meta/featureFlags').get(),
     db.doc('meta/contactInfo').get(),
     db.doc('meta/locationSettings').get(),
+    db.doc('meta/maintenance').get(),
   ]);
   const initial: FeatureFlags = normalizeFeatureFlags(
     snap.exists ? (snap.data() as Partial<FeatureFlags>) : null
@@ -31,13 +35,25 @@ export default async function ParametresPage() {
   const locationSettings: LocationSettings = normalizeLocationSettings(
     lsSnap.exists ? lsSnap.data() : null
   );
+  const maintenance: MaintenanceConfig = normalizeMaintenance(mSnap.exists ? mSnap.data() : null);
 
   return (
     <section className="flex flex-col gap-4 max-w-xl">
       <div>
         <h1 className="font-title text-h2" style={{ color: 'var(--text)' }}>
-          Visibilité des sections
+          Mode maintenance
         </h1>
+        <p className="text-body-sm" style={{ color: 'rgba(28, 28, 30, 0.6)' }}>
+          Écran d&apos;attente qui remplace tout le site public — pour la période d&apos;avant
+          lancement ou une intervention.
+        </p>
+      </div>
+      <MaintenanceForm initial={maintenance} />
+
+      <div className="pt-4">
+        <h2 className="font-title text-h3" style={{ color: 'var(--text)' }}>
+          Visibilité des sections
+        </h2>
         <p className="text-body-sm" style={{ color: 'rgba(28, 28, 30, 0.6)' }}>
           Activez ou désactivez les sections publiques du site. Effet immédiat, sans redéploiement.
         </p>

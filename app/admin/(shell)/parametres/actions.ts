@@ -7,6 +7,7 @@ import { getAdminFirestore } from '@/lib/firebase-admin';
 import type { FeatureFlags } from '@/lib/feature-flags';
 import { ContactInfoSchema } from '@/lib/contact-info';
 import { LegalInfoSchema } from '@/lib/legal-info';
+import { z } from 'zod';
 import { normalizeLocationSettings } from '@/lib/location-settings';
 import type { FormActionState } from '@/components/admin/FormShell';
 
@@ -170,4 +171,48 @@ export async function updateLegalInfo(
 
   revalidatePath('/mentions-legales');
   return { ok: true, message: 'Fiche légale mise à jour.' };
+}
+
+// Mode maintenance : le middleware (cache 30 s) et /maintenance lisent
+// meta/maintenance — bascule effective en ≤ 30 s sur tout le site public.
+const MaintenanceSchema = z.object({
+  enabled: z.boolean(),
+  titre: z.string().max(80),
+  message: z.string().max(500),
+});
+
+export async function updateMaintenance(
+  _prev: FormActionState,
+  formData: FormData
+): Promise<FormActionState> {
+  const session = await requireAdmin();
+
+  const parsed = MaintenanceSchema.safeParse({
+    enabled: formData.get('enabled') === 'on',
+    titre: String(formData.get('titre') ?? '').trim(),
+    message: String(formData.get('message') ?? '').trim(),
+  });
+  if (!parsed.success) {
+    return { errors: parsed.error.flatten().fieldErrors };
+  }
+
+  const db = getAdminFirestore();
+  await db
+    .doc('meta/maintenance')
+    .set({ ...parsed.data, updatedAt: Date.now(), updatedBy: session.email }, { merge: true });
+
+  await writeAuditLog({
+    actor: session.email,
+    action: 'update',
+    resourceType: 'maintenance',
+    resourceId: 'maintenance',
+  });
+
+  revalidatePath('/', 'layout');
+  return {
+    ok: true,
+    message: parsed.data.enabled
+      ? 'Mode maintenance ACTIVÉ — le site public bascule sous 30 secondes.'
+      : 'Mode maintenance désactivé — le site public revient sous 30 secondes.',
+  };
 }
