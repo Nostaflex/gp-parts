@@ -3,11 +3,16 @@
 import { generateReservationReference } from '@/lib/utils';
 import { getAdapter } from '@/lib/data';
 import { createReservationIntake, createDemandeIntake } from '@/lib/server/intake';
-import { getBusyRangesForCar, getUnavailableCarIds } from '@/lib/server/availability';
+import {
+  getBusyRangesForCar,
+  getUnavailableCarIds,
+  getAllBusyRanges,
+} from '@/lib/server/availability';
 import { getLocationSettings } from '@/lib/server/location-settings';
 import { cautionPourVoiture } from '@/lib/location-settings';
 import { sendReservationEmails } from '@/lib/emails/send';
 import { rangesOverlap, ageAtDate, yearsBetween, LLD_SEUIL_JOURS } from '@/lib/reservations';
+import { joursBande } from '@/lib/pitlane';
 import { demandeExpiry } from '@/lib/demandes';
 import type { Reservation } from '@/lib/reservations';
 
@@ -237,6 +242,31 @@ export async function submitDevisLLD(input: {
     expiresAt: demandeExpiry(nowMs),
   });
   return { success: true, errors: {} };
+}
+
+// ── Pit Lane : disponibilité par jour (bande de 6 jours, étape 2) ─────────
+// Une seule lecture Firestore pour les 6 jours. Sortie sans PII : des
+// comptes. Best-effort comme checkDispo — la garde finale reste serveur
+// au moment de la réservation.
+export type DispoJour = { jour: string; libres: number; total: number };
+
+export async function getDispoParJour(fromDate: string): Promise<DispoJour[]> {
+  const from = sanitize(fromDate);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || Number.isNaN(Date.parse(from))) return [];
+
+  const adapter = await getAdapter();
+  const cars = (await adapter.getLocationCars()).filter((c) => c.disponible);
+  const busy = await getAllBusyRanges();
+
+  return joursBande(from).map((jour) => {
+    const libres = cars.filter(
+      (c) =>
+        !busy.some(
+          (r) => r.locationCarId === c.id && rangesOverlap(jour, jour, r.dateDepart, r.dateRetour)
+        )
+    ).length;
+    return { jour, libres, total: cars.length };
+  });
 }
 
 // Pré-filtre UI : IDs des voitures indisponibles sur la plage demandée.
