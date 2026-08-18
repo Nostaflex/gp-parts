@@ -48,16 +48,30 @@ export async function getOrderByIdAdmin(id: string): Promise<Order | null> {
   return docToOrder(id, snap.data() as Record<string, unknown>);
 }
 
-export async function updateOrderPaymentAdmin(
+/**
+ * Règlement TRANSACTIONNEL du paiement (audit 2026-08-18) : le check-then-act
+ * « déjà paid ? » vivait hors transaction — deux traitements concurrents du
+ * même paiement pouvaient tous deux passer et envoyer deux emails. Ici le
+ * test et l'écriture sont atomiques : un seul appelant obtient 'applied'.
+ */
+export async function settlePaymentAdmin(
   id: string,
   patch: { paymentStatus: PaymentStatus; stripePaymentIntentId?: string }
-): Promise<void> {
-  const update: Record<string, unknown> = {
-    paymentStatus: patch.paymentStatus,
-    updatedAt: new Date().toISOString(),
-  };
-  if (patch.stripePaymentIntentId) update.stripePaymentIntentId = patch.stripePaymentIntentId;
-  await getAdminFirestore().collection('orders').doc(id).update(update);
+): Promise<'applied' | 'already' | 'not_found'> {
+  const db = getAdminFirestore();
+  const ref = db.collection('orders').doc(id);
+  return db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) return 'not_found';
+    if ((snap.data() as Order).paymentStatus === patch.paymentStatus) return 'already';
+    const update: Record<string, unknown> = {
+      paymentStatus: patch.paymentStatus,
+      updatedAt: new Date().toISOString(),
+    };
+    if (patch.stripePaymentIntentId) update.stripePaymentIntentId = patch.stripePaymentIntentId;
+    tx.update(ref, update);
+    return 'applied';
+  });
 }
 
 export async function updateOrderStatusAdmin(id: string, status: OrderStatus): Promise<void> {

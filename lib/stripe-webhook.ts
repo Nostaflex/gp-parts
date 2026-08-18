@@ -3,26 +3,30 @@ import type { Order, PaymentStatus } from '@/lib/types';
 
 /**
  * Dépendances injectées du handler webhook (testabilité : pas d'I/O réel en
- * test). En prod : `getAdapter()` + envoi Resend.
+ * test). En prod : Admin SDK (orders-server, stripe-events) + envoi Resend.
  */
 export interface StripeWebhookDeps {
+  /** Revendique l'event (ledger, doc id = event.id). false = déjà traité. */
+  claimEvent(eventId: string, type: string): Promise<boolean>;
   getOrderById(id: string): Promise<Order | null>;
-  updateOrderPayment(
+  /** Règlement TRANSACTIONNEL : un seul appelant obtient 'applied'. */
+  settlePayment(
     id: string,
     patch: { paymentStatus: PaymentStatus; stripePaymentIntentId?: string }
-  ): Promise<void>;
+  ): Promise<'applied' | 'already' | 'not_found'>;
   sendOrderEmails(order: Order): void;
 }
 
 /**
  * Traite un event Stripe. Le webhook est la **source de vérité** du paiement.
  *
- * - `payment_intent.succeeded` → commande `paid` + stockage du PaymentIntent id
- *   + envoi des emails (confirmation client + notif gérant).
- * - `payment_intent.payment_failed` → commande `failed`.
- *
- * **Idempotent** : Stripe peut rejouer un event. On vérifie `paymentStatus`
- * avant de muter / d'envoyer les mails — jamais 2× les emails.
+ * Durci suite à l'audit 2026-08-18 :
+ * 1. **Ledger d'events** : Stripe peut livrer le même event deux fois, y
+ *    compris en concurrence — seul le premier `claimEvent` traite.
+ * 2. **Validation montant/devise** : un PaymentIntent qui ne correspond pas
+ *    au total serveur de la commande ne la marque JAMAIS payée.
+ * 3. **Règlement transactionnel** : le « déjà paid ? » est atomique avec
+ *    l'écriture — plus de double email en cas de course.
  */
 export async function handleStripeEvent(
   event: Stripe.Event,
@@ -36,15 +40,31 @@ export async function handleStripeEvent(
   const orderId = intent.metadata?.orderId;
   if (!orderId) return;
 
+  // Idempotence forte inter-instances : premier arrivé, seul servi.
+  const claimed = await deps.claimEvent(event.id, event.type);
+  if (!claimed) return;
+
   const order = await deps.getOrderById(orderId);
   if (!order) return; // commande introuvable : no-op
 
   if (event.type === 'payment_intent.succeeded') {
-    if (order.paymentStatus === 'paid') return; // déjà traité : idempotent
-    await deps.updateOrderPayment(orderId, {
+    // Le montant payé doit être EXACTEMENT le total recalculé serveur, en
+    // euros. Mismatch = on ne marque rien payé ; la commande reste 'pending'
+    // pour inspection humaine (200 renvoyé : rejouer ne changerait rien).
+    if (intent.amount !== order.totalInCents || intent.currency !== 'eur') {
+      console.error(
+        `[stripe-webhook] MISMATCH montant/devise sur ${orderId} : ` +
+          `intent ${intent.amount} ${intent.currency} ≠ commande ${order.totalInCents} eur — ` +
+          `commande laissée '${order.paymentStatus}', intervention manuelle requise.`
+      );
+      return;
+    }
+
+    const settled = await deps.settlePayment(orderId, {
       paymentStatus: 'paid',
       stripePaymentIntentId: intent.id,
     });
+    if (settled !== 'applied') return; // déjà réglé par un autre chemin : pas de 2e email
     deps.sendOrderEmails({
       ...order,
       paymentStatus: 'paid',
@@ -53,7 +73,7 @@ export async function handleStripeEvent(
     return;
   }
 
-  // payment_intent.payment_failed
-  if (order.paymentStatus === 'failed') return; // idempotent
-  await deps.updateOrderPayment(orderId, { paymentStatus: 'failed' });
+  // payment_intent.payment_failed — ne jamais écraser un paiement réussi.
+  if (order.paymentStatus === 'paid') return;
+  await deps.settlePayment(orderId, { paymentStatus: 'failed' });
 }

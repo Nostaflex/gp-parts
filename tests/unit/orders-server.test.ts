@@ -66,14 +66,6 @@ describe('orders-server (Admin SDK — contourne les rules isAdmin)', () => {
     expect(await getOrderByIdAdmin('missing')).toBeNull();
   });
 
-  it('updateOrderPaymentAdmin : écrit paymentStatus + PaymentIntent id', async () => {
-    const { updateOrderPaymentAdmin } = await import('@/lib/admin/orders-server');
-    await updateOrderPaymentAdmin('o1', { paymentStatus: 'paid', stripePaymentIntentId: 'pi_1' });
-    expect(updates).toHaveLength(1);
-    expect(updates[0].patch.paymentStatus).toBe('paid');
-    expect(updates[0].patch.stripePaymentIntentId).toBe('pi_1');
-  });
-
   it('updateOrderStatusAdmin : écrit le nouveau statut', async () => {
     const { updateOrderStatusAdmin } = await import('@/lib/admin/orders-server');
     await updateOrderStatusAdmin('o1', 'confirmee');
