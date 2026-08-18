@@ -21,6 +21,7 @@ import {
   X,
   Droplets,
   Star,
+  Scale,
 } from 'lucide-react';
 
 import type { LucideIcon } from 'lucide-react';
@@ -76,6 +77,7 @@ const SECTIONS: NavSection[] = [
   {
     title: 'Système',
     items: [
+      { href: '/admin/legal', label: 'Légal & RGPD', icon: Scale, enabled: true },
       { href: '/admin/parametres', label: 'Paramètres', icon: SlidersHorizontal, enabled: true },
       { href: '/admin/audit', label: 'Journal audit', icon: ScrollText, enabled: false },
     ],

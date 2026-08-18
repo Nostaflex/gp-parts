@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { updateDemandeStatus, saveDemandeNote } from '@/app/admin/(shell)/demandes/actions';
 import { reserveCreneauDemande } from '@/app/admin/(shell)/lavage/actions';
 import type { Demande, DemandeStatus } from '@/lib/types';
+import { joursRestantsRgpd, echeanceRgpd } from '@/lib/rgpd';
 
 const STATUSES: { key: DemandeStatus | 'all'; label: string }[] = [
   { key: 'all', label: 'Toutes' },
@@ -21,6 +22,7 @@ const TYPE_LABEL: Record<string, string> = {
   reparation: 'Réparation',
   lavage: 'Lavage',
   location: 'Location LLD',
+  rgpd: 'RGPD · droits',
 };
 
 export function DemandesClient({ demandes }: { demandes: Demande[] }) {
@@ -135,6 +137,22 @@ function DemandeRow({ d }: { d: Demande }) {
           · {TYPE_LABEL[d.type] ?? d.type} · {new Date(d.createdAt).toLocaleDateString('fr-FR')} ·{' '}
           {d.status}
         </span>
+        {d.type === 'rgpd' && d.status !== 'traitee' && (
+          <span
+            className="ml-2 rounded-full px-2 py-0.5 text-caption font-medium"
+            style={
+              joursRestantsRgpd(d.createdAt, Date.now()) <= 7
+                ? { background: 'rgba(255,59,48,0.12)', color: 'var(--red)' }
+                : { background: 'rgba(0,122,255,0.1)', color: 'var(--blue)' }
+            }
+          >
+            {(() => {
+              const j = joursRestantsRgpd(d.createdAt, Date.now());
+              const lim = echeanceRgpd(d.createdAt).toLocaleDateString('fr-FR');
+              return j < 0 ? `délai légal DÉPASSÉ (${lim})` : `à répondre avant le ${lim} (J-${j})`;
+            })()}
+          </span>
+        )}
       </button>
 
       {open && (

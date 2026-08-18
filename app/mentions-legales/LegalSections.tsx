@@ -9,7 +9,9 @@
 import { useState, useEffect } from 'react';
 import type { ContactInfo } from '@/lib/contact-info';
 import { DEFAULT_LEGAL_INFO, type LegalInfo } from '@/lib/legal-info';
+import { DROITS_RGPD, droitLabel, type DroitRgpd } from '@/lib/rgpd';
 import { CookiePrefsCenter } from '@/components/gdpr/CookiePrefsCenter';
+import { submitDemandeDroit } from './actions';
 
 /** Date de mise à jour VERSIONNÉE — à incrémenter à chaque évolution du texte. */
 export const LEGAL_UPDATED_AT = '18 août 2026';
@@ -97,6 +99,14 @@ export function LegalSections({
   legalInfo?: LegalInfo;
 }) {
   const [active, setActive] = useState<string>('editeur');
+
+  // Formulaire d'exercice de droits (section 04) — la demande part au BO.
+  const [droitChoisi, setDroitChoisi] = useState<DroitRgpd | null>(null);
+  const [droitForm, setDroitForm] = useState({ nom: '', email: '', telephone: '', message: '' });
+  const [droitWebsite, setDroitWebsite] = useState(''); // honeypot anti-spam
+  const [droitErrors, setDroitErrors] = useState<Record<string, string>>({});
+  const [droitEnvoye, setDroitEnvoye] = useState(false);
+  const [droitEnvoiEnCours, setDroitEnvoiEnCours] = useState(false);
 
   // Scroll-spy : la section la plus visible allume son entrée de sommaire.
   useEffect(() => {
@@ -422,69 +432,37 @@ export function LegalSections({
           <Bloc>
             <TitreSection num="04">Exercer vos droits</TitreSection>
             <p className="mb-4 text-[0.86rem] text-cp-ink/55">
-              Un clic ouvre un message pré-rempli. Nous répondons sous 30 jours — c&apos;est le
-              délai légal, et nous le tenons.
+              Choisissez un droit : votre demande arrive directement dans notre outil de suivi — pas
+              dans une boîte mail perdue. Nous répondons sous 30 jours, c&apos;est le délai légal,
+              et nous le tenons.
             </p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {(
-                [
-                  [
-                    'Droit 01',
-                    'Accès',
-                    'Recevoir la copie de tout ce que nous avons sur vous.',
-                    'Demander mes données',
-                    '[RGPD] Demande d’accès à mes données',
-                  ],
-                  [
-                    'Droit 02',
-                    'Rectification',
-                    'Corriger une adresse, un numéro, une erreur.',
-                    'Corriger une donnée',
-                    '[RGPD] Demande de rectification',
-                  ],
-                  [
-                    'Droit 03',
-                    'Effacement',
-                    'Tout supprimer, sauf ce que la comptabilité oblige à garder.',
-                    'Demander l’effacement',
-                    '[RGPD] Demande d’effacement',
-                  ],
-                  [
-                    'Droit 04',
-                    'Portabilité',
-                    'Récupérer vos données dans un fichier réutilisable.',
-                    'Exporter mes données',
-                    '[RGPD] Demande de portabilité',
-                  ],
-                  [
-                    'Droit 05',
-                    'Opposition',
-                    'Refuser un usage précis, par exemple la mesure d’audience.',
-                    'M’opposer',
-                    '[RGPD] Opposition à un traitement',
-                  ],
-                ] as const
-              ).map(([n, titre, desc, cta, sujet]) => (
+              {DROITS_RGPD.map((d, i) => (
                 <div
-                  key={n}
-                  className="flex flex-col gap-1.5 rounded-2xl border border-[#E5DDD3] bg-white p-4"
+                  key={d.key}
+                  className={`flex flex-col gap-1.5 rounded-2xl border bg-white p-4 transition-colors ${droitChoisi === d.key ? 'border-cp-red' : 'border-[#E5DDD3]'}`}
                 >
                   <span className="cp-mono text-[0.64rem] uppercase tracking-[0.14em] text-cp-ink/45">
-                    {n}
+                    Droit 0{i + 1}
                   </span>
                   <h4 className="cp-title text-lg font-black uppercase leading-none text-cp-ink">
-                    {titre}
+                    {d.label}
                   </h4>
-                  <p className="text-[0.8rem] text-cp-ink/55">{desc}</p>
-                  <a
-                    href={mailto(
-                      sujet,
-                      'Bonjour,\n\nJe souhaite exercer ce droit sur mes données personnelles.\n\nNom, prénom :\nEmail ou téléphone utilisé chez vous :\n\nMerci.'
-                    )}
-                    className="cp-tap mt-auto inline-flex items-center self-start rounded-xl border border-[#E5DDD3] px-4 py-2.5 text-[0.78rem] font-semibold text-cp-ink transition-colors hover:border-cp-red hover:text-cp-mango"
+                  <p className="text-[0.8rem] text-cp-ink/55">{d.description}</p>
+                  <button
+                    type="button"
+                    aria-pressed={droitChoisi === d.key}
+                    onClick={() => {
+                      setDroitChoisi(d.key);
+                      setDroitEnvoye(false);
+                      document
+                        .getElementById('form-droit')
+                        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }}
+                    className={`cp-tap mt-auto inline-flex items-center self-start rounded-xl px-4 py-2.5 text-[0.78rem] font-semibold transition-colors ${droitChoisi === d.key ? 'bg-cp-ink text-cp-cream' : 'border border-[#E5DDD3] text-cp-ink hover:border-cp-red hover:text-cp-mango'}`}
                   >
-                    {cta}
-                  </a>
+                    Faire ma demande
+                  </button>
                 </div>
               ))}
               <div className="flex flex-col gap-1.5 rounded-2xl border border-dashed border-[#E5DDD3] bg-cp-cream p-4">
@@ -506,6 +484,160 @@ export function LegalSections({
                   cnil.fr/plaintes →
                 </a>
               </div>
+            </div>
+
+            {/* Formulaire d'exercice — la demande devient une Demande BO */}
+            <div id="form-droit" className="mt-5 scroll-mt-24">
+              {droitEnvoye ? (
+                <div
+                  className="rounded-2xl border p-4"
+                  style={{ background: 'rgba(82,200,138,0.1)', borderColor: 'rgba(42,92,69,0.24)' }}
+                  role="status"
+                >
+                  <b className="block text-[0.92rem] text-[#1D3B2C]">Demande envoyée.</b>
+                  <p className="m-0 mt-1 text-[0.84rem] text-[#1D3B2C]">
+                    Elle est datée et suivie ; nous vous répondons à l&apos;adresse indiquée sous 30
+                    jours. Pour un droit d&apos;accès ou d&apos;effacement, nous vérifierons
+                    d&apos;abord votre identité.
+                  </p>
+                </div>
+              ) : droitChoisi ? (
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    if (droitEnvoiEnCours) return;
+                    setDroitEnvoiEnCours(true);
+                    const res = await submitDemandeDroit({
+                      droit: droitChoisi,
+                      nom: droitForm.nom,
+                      email: droitForm.email,
+                      telephone: droitForm.telephone,
+                      message: droitForm.message,
+                      website: droitWebsite,
+                    });
+                    setDroitEnvoiEnCours(false);
+                    if (!res.success) {
+                      setDroitErrors(res.errors);
+                      return;
+                    }
+                    setDroitErrors({});
+                    setDroitEnvoye(true);
+                  }}
+                  className="rounded-2xl border border-[#E5DDD3] bg-white p-4"
+                >
+                  <p className="cp-mono mb-3 text-[0.62rem] uppercase tracking-[0.14em] text-cp-ink/55">
+                    Demande · droit {droitLabel(droitChoisi)}
+                  </p>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div>
+                      <label htmlFor="droit-nom" className={k}>
+                        Nom, prénom *
+                      </label>
+                      <input
+                        id="droit-nom"
+                        type="text"
+                        autoComplete="name"
+                        value={droitForm.nom}
+                        onChange={(e) => setDroitForm((f) => ({ ...f, nom: e.target.value }))}
+                        className="mt-1 w-full rounded-xl border border-[#E5DDD3] px-3.5 py-2.5 text-sm text-cp-ink outline-none transition-colors focus:border-cp-red"
+                      />
+                      {droitErrors.nom && (
+                        <p className="mt-1 text-[0.75rem] text-[#B81F20]">{droitErrors.nom}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label htmlFor="droit-email" className={k}>
+                        Email utilisé chez nous *
+                      </label>
+                      <input
+                        id="droit-email"
+                        type="email"
+                        autoComplete="email"
+                        value={droitForm.email}
+                        onChange={(e) => setDroitForm((f) => ({ ...f, email: e.target.value }))}
+                        className="mt-1 w-full rounded-xl border border-[#E5DDD3] px-3.5 py-2.5 text-sm text-cp-ink outline-none transition-colors focus:border-cp-red"
+                      />
+                      {droitErrors.email && (
+                        <p className="mt-1 text-[0.75rem] text-[#B81F20]">{droitErrors.email}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label htmlFor="droit-tel" className={k}>
+                        Téléphone (facultatif)
+                      </label>
+                      <input
+                        id="droit-tel"
+                        type="tel"
+                        autoComplete="tel"
+                        value={droitForm.telephone}
+                        onChange={(e) => setDroitForm((f) => ({ ...f, telephone: e.target.value }))}
+                        className="mt-1 w-full rounded-xl border border-[#E5DDD3] px-3.5 py-2.5 text-sm text-cp-ink outline-none transition-colors focus:border-cp-red"
+                      />
+                      {droitErrors.telephone && (
+                        <p className="mt-1 text-[0.75rem] text-[#B81F20]">
+                          {droitErrors.telephone}
+                        </p>
+                      )}
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label htmlFor="droit-message" className={k}>
+                        Précisions (facultatif)
+                      </label>
+                      <textarea
+                        id="droit-message"
+                        rows={3}
+                        value={droitForm.message}
+                        onChange={(e) => setDroitForm((f) => ({ ...f, message: e.target.value }))}
+                        className="mt-1 w-full rounded-xl border border-[#E5DDD3] px-3.5 py-2.5 text-sm text-cp-ink outline-none transition-colors focus:border-cp-red"
+                      />
+                    </div>
+                  </div>
+                  {/* Honeypot anti-spam : invisible pour un humain. */}
+                  <input
+                    type="text"
+                    name="website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    value={droitWebsite}
+                    onChange={(e) => setDroitWebsite(e.target.value)}
+                    style={{
+                      position: 'absolute',
+                      left: '-9999px',
+                      width: '1px',
+                      height: '1px',
+                      opacity: 0,
+                    }}
+                  />
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                    <button
+                      type="submit"
+                      disabled={droitEnvoiEnCours}
+                      className="cp-tap rounded-xl bg-cp-ink px-5 py-3 text-sm font-semibold text-cp-cream transition-colors hover:bg-cp-red disabled:opacity-60"
+                    >
+                      {droitEnvoiEnCours ? 'Envoi…' : 'Envoyer ma demande'}
+                    </button>
+                    <a
+                      href={mailto(
+                        `[RGPD] ${droitLabel(droitChoisi)}`,
+                        'Bonjour,\n\nJe souhaite exercer ce droit sur mes données personnelles.\n\nNom, prénom :\nEmail ou téléphone utilisé chez vous :\n\nMerci.'
+                      )}
+                      className="text-[0.78rem] text-cp-ink/50 underline underline-offset-4 transition-colors hover:text-cp-mango"
+                    >
+                      ou par email
+                    </a>
+                  </div>
+                  <p className="mt-3 text-[0.7rem] leading-relaxed text-cp-ink/45">
+                    Ces informations servent uniquement à traiter votre demande (conservées 13
+                    mois). Pour un droit d&apos;accès, d&apos;effacement ou de portabilité, nous
+                    vérifions votre identité avant de répondre.
+                  </p>
+                </form>
+              ) : (
+                <p className="text-[0.8rem] text-cp-ink/45">
+                  Sélectionnez un droit ci-dessus pour ouvrir le formulaire.
+                </p>
+              )}
             </div>
           </Bloc>
         </section>

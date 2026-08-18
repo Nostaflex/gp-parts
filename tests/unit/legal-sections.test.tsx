@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { LegalSections } from '../../app/mentions-legales/LegalSections';
 import { DEFAULT_CONTACT_INFO } from '@/lib/contact-info';
 
@@ -33,12 +33,20 @@ describe('LegalSections — page légale cp-v6', () => {
     expect(container.textContent).toContain('L111-4');
   });
 
-  it('les 6 droits sont actionnables (5 mailto pré-remplis + recours CNIL)', () => {
+  it('les 5 droits ouvrent le formulaire BO (mailto en secours) + recours CNIL', () => {
     render(<LegalSections contactInfo={DEFAULT_CONTACT_INFO} />);
-    const mailtos = screen
+    const boutons = screen.getAllByRole('button', { name: 'Faire ma demande' });
+    expect(boutons).toHaveLength(5);
+    // Aucun formulaire tant qu'aucun droit n'est choisi.
+    expect(screen.queryByRole('button', { name: /Envoyer ma demande/ })).toBeNull();
+    fireEvent.click(boutons[0]);
+    // Le formulaire s'ouvre : la demande partira au BO, l'email n'est qu'un secours.
+    expect(screen.getByRole('button', { name: /Envoyer ma demande/ })).toBeInTheDocument();
+    expect(screen.getByLabelText(/Email utilisé chez nous/)).toBeInTheDocument();
+    const secours = screen
       .getAllByRole('link')
-      .filter((a) => (a as HTMLAnchorElement).href.startsWith('mailto:'));
-    expect(mailtos.length).toBeGreaterThanOrEqual(5);
+      .find((a) => (a as HTMLAnchorElement).href.startsWith('mailto:'));
+    expect(secours).toBeTruthy();
     const cnil = screen
       .getAllByRole('link')
       .find((a) => (a as HTMLAnchorElement).href.includes('cnil.fr'));

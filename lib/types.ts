@@ -151,7 +151,8 @@ export type DemandeType =
   | 'financement'
   | 'reparation'
   | 'lavage'
-  | 'location'; // devis longue durée (funnel v2)
+  | 'location' // devis longue durée (funnel v2)
+  | 'rgpd'; // exercice de droits déposé depuis /mentions-legales (lot 6)
 
 export type DemandeStatus = 'nouvelle' | 'en_cours' | 'traitee' | 'deleted';
 
