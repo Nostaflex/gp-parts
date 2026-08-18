@@ -53,6 +53,12 @@ const nextConfig = {
             value: [
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline'",
+              // Audit 2026-08-18 — étape 1 (sans nonce : incompatible ISR/SSG,
+              // cf. learnings Next 15) : neutralise plugins/objets, détourne
+              // les <base> injectés et cadenasse les cibles de formulaires.
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https://images.unsplash.com https://firebasestorage.googleapis.com https://*.firebasestorage.app https://res.cloudinary.com",
               "font-src 'self' https://fonts.gstatic.com",

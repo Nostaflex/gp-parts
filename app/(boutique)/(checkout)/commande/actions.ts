@@ -3,6 +3,7 @@
 import { generateOrderNumber } from '@/lib/utils';
 import { getAdapter } from '@/lib/data';
 import { createOrderIntake, StockInsuffisantError } from '@/lib/server/intake';
+import { checkRateLimit } from '@/lib/server/rate-limit';
 import { sendOrderEmails } from '@/lib/emails/send';
 import { createOrderPaymentIntent } from '@/lib/stripe';
 import { getDeliveryPrice } from '@/lib/config';
@@ -52,6 +53,9 @@ export async function validateCheckout(formData: {
   // Clé générée côté client au premier clic — un retry ne crée pas de doublon.
   idempotencyKey?: string;
 }): Promise<CheckoutValidationResult> {
+  const rl = await checkRateLimit('checkout');
+  if (!rl.ok) return { success: false, errors: { _form: rl.message } };
+
   const errors: Record<string, string> = {};
 
   // Défaut 'on_site' : rétro-compat des appels sans paymentMethod (= comportement

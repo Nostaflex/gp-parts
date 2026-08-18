@@ -1,6 +1,7 @@
 'use server';
 
 import { createDemandeIntake } from '@/lib/server/intake';
+import { checkRateLimit } from '@/lib/server/rate-limit';
 import { sendLeadEmails } from '@/lib/emails/send';
 import { demandeTypeFromSujet, demandeExpiry } from '@/lib/demandes';
 import type { Lead } from '@/lib/emails/lead';
@@ -30,6 +31,8 @@ function genRef(prefix: string): string {
 
 /** Server action : persiste + notifie un message de contact. */
 export async function submitContact(input: ContactInput): Promise<ContactResult> {
+  const rl = await checkRateLimit('contact');
+  if (!rl.ok) return { ok: false, error: rl.message };
   // Honeypot : un humain ne remplit jamais ce champ → drop silencieux.
   if (input.website && input.website.trim() !== '') {
     return { ok: true, ref: genRef('MSG-CP'), emailed: false };

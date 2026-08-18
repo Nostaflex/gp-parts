@@ -13,6 +13,7 @@ import { cautionPourVoiture } from '@/lib/location-settings';
 import { sendReservationEmails } from '@/lib/emails/send';
 import { rangesOverlap, ageAtDate, yearsBetween, LLD_SEUIL_JOURS } from '@/lib/reservations';
 import { joursBande } from '@/lib/pitlane';
+import { checkRateLimit } from '@/lib/server/rate-limit';
 import { demandeExpiry } from '@/lib/demandes';
 import type { Reservation } from '@/lib/reservations';
 
@@ -53,6 +54,8 @@ export async function validateReservation(input: {
   cgl?: boolean;
   marketingOptIn?: boolean;
 }): Promise<ReservationValidationResult> {
+  const rl = await checkRateLimit('reservation');
+  if (!rl.ok) return { success: false, errors: { _form: rl.message } };
   // Honeypot : un humain ne remplit jamais ce champ → succès factice, rien créé.
   if (input.website && input.website.trim() !== '') {
     return { success: true, errors: {} };
@@ -206,6 +209,8 @@ export async function submitDevisLLD(input: {
   website?: string;
   marketingOptIn?: boolean;
 }): Promise<{ success: boolean; errors: Record<string, string> }> {
+  const rl = await checkRateLimit('devis-lld');
+  if (!rl.ok) return { success: false, errors: { _form: rl.message } };
   if (input.website && input.website.trim() !== '') return { success: true, errors: {} };
 
   const errors: Record<string, string> = {};

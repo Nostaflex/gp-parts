@@ -6,6 +6,7 @@
 // sanitize + honeypot + TTL.
 
 import { createDemandeIntake } from '@/lib/server/intake';
+import { checkRateLimit } from '@/lib/server/rate-limit';
 import { demandeExpiry } from '@/lib/demandes';
 import { DROITS_RGPD, droitLabel } from '@/lib/rgpd';
 
@@ -22,6 +23,8 @@ export async function submitDemandeDroit(input: {
   message?: string;
   website?: string;
 }): Promise<{ success: boolean; errors: Record<string, string> }> {
+  const rl = await checkRateLimit('rgpd');
+  if (!rl.ok) return { success: false, errors: { _form: rl.message } };
   // Honeypot : un humain ne remplit jamais ce champ → succès factice, rien créé.
   if (input.website && input.website.trim() !== '') return { success: true, errors: {} };
 

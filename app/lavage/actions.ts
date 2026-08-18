@@ -1,6 +1,7 @@
 'use server';
 
 import { createDemandeIntake } from '@/lib/server/intake';
+import { checkRateLimit } from '@/lib/server/rate-limit';
 import { sendLeadEmails } from '@/lib/emails/send';
 import { demandeExpiry } from '@/lib/demandes';
 import { isDateKey } from '@/lib/lavage-creneaux';
@@ -35,6 +36,8 @@ function genRef(): string {
 
 /** Server action : persiste + notifie une demande de RDV lavage. */
 export async function submitLavage(input: LavageInput): Promise<LeadResult> {
+  const rl = await checkRateLimit('lavage');
+  if (!rl.ok) return { ok: false, error: rl.message };
   // Honeypot : un humain ne remplit jamais ce champ → drop silencieux.
   if (input.website && input.website.trim() !== '') {
     return { ok: true, ref: genRef(), emailed: false };

@@ -24,6 +24,8 @@
   "dependencies": {
     "@stripe/react-stripe-js": "^6.5.0",
     "@stripe/stripe-js": "^9.7.0",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.38.2",
     "browser-image-compression": "^2.0.2",
     "firebase": "^12.11.0",
     "firebase-admin": "^13.7.0",
