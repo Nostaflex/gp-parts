@@ -29,9 +29,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Commandes: création publique (checkout), lecture/update admin, jamais delete
+    // Commandes : création EXCLUSIVEMENT via Admin SDK (Server Action
+    // checkout, audit 2026-08-18 — l'ancien `allow create` public permettait
+    // spam, statuts arbitraires et documents malformés). Lecture/update
+    // admin, jamais delete.
     match /orders/{doc} {
-      allow create;
+      allow create: if false;
       allow read, update: if isAdmin();
       allow delete: if false;
     }
@@ -78,6 +81,15 @@ service cloud.firestore {
     // Coordonnées de contact : lecture publique (storefront + JSON-LD),
     // écriture admin seulement.
     match /meta/contactInfo {
+      allow read;
+      allow write: if isAdmin();
+    }
+
+    // Fiche d'identité légale (TVA, médiateur, RC pro) : lecture publique —
+    // la page /mentions-legales l'affiche. Leçon audit 2026-08-18 : cloner un
+    // pattern de données = cloner AUSSI sa règle (le lot 6 avait cloné le code
+    // de contactInfo sans cette règle → fail-open silencieux vers les défauts).
+    match /meta/legalInfo {
       allow read;
       allow write: if isAdmin();
     }

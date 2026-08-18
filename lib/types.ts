@@ -151,7 +151,8 @@ export type DemandeType =
   | 'financement'
   | 'reparation'
   | 'lavage'
-  | 'location'; // devis longue durée (funnel v2)
+  | 'location' // devis longue durée (funnel v2)
+  | 'rgpd'; // exercice de droits déposé depuis /mentions-legales (lot 6)
 
 export type DemandeStatus = 'nouvelle' | 'en_cours' | 'traitee' | 'deleted';
 
@@ -169,6 +170,9 @@ export interface Demande {
   // créneau au BO sans parser le message texte.
   rdvDate?: string; // YYYY-MM-DD
   rdvCreneau?: string;
+  // Case marketing FACULTATIVE, jamais pré-cochée (CNIL, lot 6) : true
+  // seulement si le client l'a cochée. Absent = formulaires antérieurs.
+  marketingOptIn?: boolean;
   // Notes internes ajoutées par l'admin (jamais exposées côté public)
   notes?: string;
   createdAt: string; // ISO date

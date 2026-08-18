@@ -1,6 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
 
 // Mock Stripe : le chemin carte ne doit pas toucher le réseau réel en test.
+vi.mock('@/lib/server/intake', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/server/intake')>()),
+  createOrderIntake: vi.fn(async () => ({ id: 'mock-id', existed: false })),
+}));
+vi.mock('@/lib/emails/send', () => ({ sendOrderEmails: vi.fn() }));
+
 vi.mock('@/lib/stripe', () => ({
   createOrderPaymentIntent: vi.fn(async () => ({
     clientSecret: 'pi_test_secret_xyz',
@@ -189,5 +195,81 @@ describe('validateCheckout — numéro de commande', () => {
     const r1 = await validateCheckout(validData);
     const r2 = await validateCheckout(validData);
     expect(r1.orderNumber).not.toBe(r2.orderNumber);
+  });
+});
+
+// ─── Idempotence (audit 2026-08-18) ──────────────────────────────────
+import { createOrderIntake } from '@/lib/server/intake';
+import { sendOrderEmails } from '@/lib/emails/send';
+
+describe('validateCheckout — idempotence', () => {
+  it('clé déjà vue → commande existante renvoyée, AUCUN nouvel email', async () => {
+    vi.mocked(createOrderIntake).mockResolvedValueOnce({
+      id: 'mock-id',
+      existed: true,
+      existingOrderNumber: 'GP-EXISTANTE',
+    });
+    vi.mocked(sendOrderEmails).mockClear();
+    const result = await validateCheckout({
+      ...validData,
+      idempotencyKey: '3f2b8c1e-aaaa-bbbb-cccc-1234567890ab',
+    });
+    expect(result.success).toBe(true);
+    expect(result.orderNumber).toBe('GP-EXISTANTE');
+    expect(sendOrderEmails).not.toHaveBeenCalled();
+  });
+
+  it('la clé du client est transmise à l’intake (doc id = clé)', async () => {
+    vi.mocked(createOrderIntake).mockClear();
+    await validateCheckout({
+      ...validData,
+      idempotencyKey: '3f2b8c1e-aaaa-bbbb-cccc-1234567890ab',
+    });
+    expect(vi.mocked(createOrderIntake).mock.calls[0][1]).toBe(
+      '3f2b8c1e-aaaa-bbbb-cccc-1234567890ab'
+    );
+  });
+
+  it('clé malformée → ignorée (fallback add), la commande passe quand même', async () => {
+    vi.mocked(createOrderIntake).mockClear();
+    const result = await validateCheckout({ ...validData, idempotencyKey: '<script>' });
+    expect(result.success).toBe(true);
+    expect(vi.mocked(createOrderIntake).mock.calls[0][1]).toBeUndefined();
+  });
+});
+
+describe('validateCheckout — stock (audit S2-3)', () => {
+  it('rupture de stock → refus EXPLICITE, plus de quantité forcée à 1', async () => {
+    // prod-001 du StaticAdapter a du stock ; on demande plus que disponible.
+    const result = await validateCheckout({
+      ...validData,
+      items: [{ ...validItems[0], quantity: 9999 }],
+    });
+    expect(result.success).toBe(false);
+    expect(result.errors._items).toMatch(/stock/i);
+  });
+
+  it('doublons consolidés : deux lignes du même produit = une seule ligne sommée', async () => {
+    vi.mocked(createOrderIntake).mockClear();
+    const result = await validateCheckout({
+      ...validData,
+      items: [
+        { ...validItems[0], quantity: 1 },
+        { ...validItems[0], quantity: 1 },
+      ],
+    });
+    expect(result.success).toBe(true);
+    const written = vi.mocked(createOrderIntake).mock.calls[0][0];
+    expect(written.items).toHaveLength(1);
+    expect(written.items[0].quantity).toBe(2);
+  });
+
+  it('course perdue (StockInsuffisantError dans la transaction) → erreur propre', async () => {
+    const { StockInsuffisantError } =
+      await vi.importActual<typeof import('@/lib/server/intake')>('@/lib/server/intake');
+    vi.mocked(createOrderIntake).mockRejectedValueOnce(new StockInsuffisantError('prod-001', 0));
+    const result = await validateCheckout({ ...validData });
+    expect(result.success).toBe(false);
+    expect(result.errors._items).toMatch(/stock/i);
   });
 });

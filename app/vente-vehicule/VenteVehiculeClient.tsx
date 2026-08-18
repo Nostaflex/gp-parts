@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { Vehicule, Disponibilite } from '@/lib/vehicules';
 import { DispoRibbon } from '@/components/cp/DispoRibbon';
+import { WHATSAPP_URL } from '@/lib/config';
 
 // Tri des cartes : la vitrine montre d'abord ce qui s'achète encore.
 const DISPO_ORDRE: Record<Disponibilite, number> = { disponible: 0, reserve: 1, vendu: 2 };
@@ -91,7 +92,7 @@ export function VenteVehiculeClient({ vehicules }: { vehicules: Vehicule[] }) {
                     onClick={() => setTypeFiltre(t)}
                     className={`text-xs px-4 py-2 rounded-full border transition-all ${typeFiltre === t ? 'bg-cp-red border-cp-red text-cp-cream' : 'border-[#E5DDD3] text-cp-ink/50 hover:border-cp-red hover:text-cp-mango'}`}
                   >
-                    {t}
+                    {t === 'Neuf' ? 'Neuf sur commande' : t}
                   </button>
                 ))}
               </div>
@@ -174,6 +175,31 @@ export function VenteVehiculeClient({ vehicules }: { vehicules: Vehicule[] }) {
               )}
             </div>
           )}
+
+          {/* Bandeau contact — Max organise l'essai (handoff §5 : jamais de
+              mascotte dans le hero vente, elle vit ici, au contact) */}
+          <div className="relative mt-10 flex flex-wrap items-center gap-5 overflow-hidden rounded-2xl bg-cp-ink px-6 py-5 sm:flex-nowrap">
+            <Image
+              src="/images/mascottes/max-iso.webp"
+              alt=""
+              width={118}
+              height={242}
+              className="h-[118px] w-auto shrink-0 -my-9"
+              style={{ filter: 'drop-shadow(0 10px 18px rgba(0,0,0,0.5))' }}
+            />
+            <p className="max-w-[52ch] text-[0.92rem] leading-relaxed text-cp-cream">
+              «&nbsp;J&apos;ouvre le capot avec vous avant que vous signiez.&nbsp;» — Max Explorer
+              organise l&apos;essai et répond sur WhatsApp.
+            </p>
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cp-tap shrink-0 rounded-xl bg-cp-red px-5 py-3 text-sm font-semibold text-cp-cream transition-colors hover:bg-[#B81F20] sm:ml-auto"
+            >
+              Écrire sur WhatsApp
+            </a>
+          </div>
         </div>
       </section>
 

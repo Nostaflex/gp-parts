@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminAuth } from '@/lib/firebase-admin';
 
-// Durée de vie du session cookie : 5 jours (max Firebase : 14 jours)
-const SESSION_DURATION_MS = 5 * 24 * 60 * 60 * 1000;
+// Durée de vie du session cookie : 72 h (audit 2026-08-18, décision
+// Djemil — un cookie volé vivait 5 jours). Max Firebase : 14 jours.
+const SESSION_DURATION_MS = 72 * 60 * 60 * 1000;
 
 const COOKIE_OPTIONS = {
   httpOnly: true,

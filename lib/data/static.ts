@@ -12,6 +12,8 @@ import { DEFAULT_FEATURE_FLAGS } from '@/lib/feature-flags';
 import type { FeatureFlags } from '@/lib/feature-flags';
 import { DEFAULT_CONTACT_INFO } from '@/lib/contact-info';
 import type { ContactInfo } from '@/lib/contact-info';
+import { DEFAULT_LEGAL_INFO } from '@/lib/legal-info';
+import type { LegalInfo } from '@/lib/legal-info';
 import { applyClientFilters } from './filters';
 
 // Fixtures CRM pour le dev local sans émulateur Firebase. En production,
@@ -82,7 +84,6 @@ function warnDevFallback(method: string): void {
  */
 // In-memory store pour les tests et le mode statique
 const ORDERS_STORE: Order[] = [];
-let orderIdCounter = 1;
 
 const RESERVATIONS_STORE: Reservation[] = [];
 let reservationIdCounter = 1;
@@ -160,12 +161,6 @@ export class StaticAdapter implements DataAdapter {
       });
     });
     return Array.from(brands).sort();
-  }
-
-  async createOrder(order: Omit<Order, 'id'>): Promise<string> {
-    const id = `static-order-${orderIdCounter++}`;
-    ORDERS_STORE.push({ ...order, id });
-    return id;
   }
 
   async getOrders(filters?: OrderFilters): Promise<Order[]> {
@@ -277,5 +272,9 @@ export class StaticAdapter implements DataAdapter {
 
   async getContactInfo(): Promise<ContactInfo> {
     return { ...DEFAULT_CONTACT_INFO };
+  }
+
+  async getLegalInfo(): Promise<LegalInfo> {
+    return { ...DEFAULT_LEGAL_INFO };
   }
 }

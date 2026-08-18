@@ -27,20 +27,26 @@ export default async function VenteVehiculePage() {
   const vehicules = await getCachedVehicules();
   // Le stock annoncé au hero = les VRAIS disponibles (ni réservés ni vendus).
   const nbDisponibles = vehicules.filter((v) => v.disponibilite === 'disponible').length;
+  const nbReserves = vehicules.filter((v) => v.disponibilite === 'reserve').length;
+  const nbVendus = vehicules.filter((v) => v.disponibilite === 'vendu').length;
 
   return (
     <>
       <CpHeader darkSectionIds={['vo-hero']} />
 
-      {/* ── HERO ─────────────────────────────── */}
+      {/* ── HERO — BLANC (handoff §5 : le rouge plein est anxiogène sur un
+          achat à 8 000 € ; le rouge ne sert plus que d'accent) ──────────── */}
       <section
         id="vo-hero"
+        data-cp-light="true"
         className="relative pt-20 overflow-hidden"
-        style={{ backgroundColor: '#1E0E04' }}
+        style={{ backgroundColor: '#FFFFFF' }}
       >
-        {/* Fond plein cadre — vraie photo d'un véhicule français (Peugeot 308),
-            étalonnée chaud/sombre + dégradés multi-bords pour fondre dans le
-            #1E0E04 sans rectangle. Masqué en mobile (lisibilité du texte). */}
+        {/* Photo : UNE seule voiture (le coupé droit du triptyque, recadré),
+            virée aux TONS BLEUS par filtre CSS — dépannage assumé par la
+            maquette cp-v4. TODO Djemil/Stéphane : vraie photo d'une berline
+            bleue, seule, sur fond clair. Masquée en mobile : la photo devient
+            un bandeau sous le texte (le contraste ne tient pas autrement). */}
         <div aria-hidden="true" className="absolute inset-0 hidden md:block">
           <Image
             src="/images/hero-vente-vehicule.webp"
@@ -48,46 +54,52 @@ export default async function VenteVehiculePage() {
             fill
             priority
             sizes="(max-width: 768px) 0px, 100vw"
-            className="object-cover object-[60%_center]"
+            className="object-cover"
+            style={{
+              objectPosition: 'center',
+              transform: 'scale(1.25)',
+              transformOrigin: '85% 60%',
+              filter: 'brightness(1.18) contrast(0.96) hue-rotate(196deg) saturate(0.78)',
+            }}
           />
-          {/* Scrim gauche → texte lisible ; la voiture émerge à droite */}
+          {/* Plateau blanc opaque jusqu'à 58 % — aucun texte sur zone < .9 */}
           <div
             className="absolute inset-0"
             style={{
               background:
-                'linear-gradient(to right, #1E0E04 0%, rgba(30,14,4,0.82) 32%, rgba(30,14,4,0.12) 68%, rgba(30,14,4,0) 100%)',
+                'linear-gradient(to right, #FFFFFF 0%, #FFFFFF 58%, rgba(255,255,255,0.92) 72%, rgba(255,255,255,0.3) 88%, rgba(255,255,255,0) 100%)',
             }}
           />
-          {/* Fondu haut + bas vers la couleur de section (zéro arête) */}
+          {/* Fondu haut + bas vers le blanc de section (zéro arête) */}
           <div
             className="absolute inset-0"
             style={{
               background:
-                'linear-gradient(to bottom, #1E0E04 0%, transparent 22%, transparent 68%, #1E0E04 100%)',
+                'linear-gradient(to bottom, #FFFFFF 0%, transparent 26%, transparent 62%, rgba(255,255,255,0.9) 92%, #FFFFFF 100%)',
             }}
           />
-          {/* Halo chaud discret bas-droite — remplace l'aplat jaune qui jurait */}
+          {/* Orbe rouge discret bas-droite — le rouge reste un accent */}
           <div
             className="absolute pointer-events-none rounded-full"
             style={{
               width: '520px',
               height: '520px',
-              bottom: '-10%',
-              right: '3%',
+              bottom: '-14%',
+              right: '2%',
               background: 'radial-gradient(circle, rgba(217,38,39,0.10) 0%, transparent 70%)',
             }}
           />
         </div>
 
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-0 items-end min-h-[75vh] relative z-10">
-          {/* Texte */}
+          {/* Texte — encre sur blanc, colonne ≤ 50 % */}
           <div className="py-16 md:py-24">
             <nav
               aria-label="Fil d'Ariane"
               className="flex items-center gap-2 text-xs mb-8"
-              style={{ color: 'rgba(248,237,216,0.3)' }}
+              style={{ color: 'rgba(26,15,6,0.4)' }}
             >
-              <Link href="/" className="hover:text-[#E9C46A] transition-colors">
+              <Link href="/" className="hover:text-[#B81F20] transition-colors">
                 Accueil
               </Link>
               <svg
@@ -101,18 +113,18 @@ export default async function VenteVehiculePage() {
               >
                 <path d="m9 18 6-6-6-6" />
               </svg>
-              <span style={{ color: 'rgba(248,237,216,0.6)' }}>Vente véhicule</span>
+              <span style={{ color: 'rgba(26,15,6,0.7)' }}>Vente véhicule</span>
             </nav>
 
             <p
               className="cp-mono text-xs tracking-widest uppercase mb-5"
-              style={{ color: '#E9C46A' }}
+              style={{ color: '#D92627' }}
             >
               Véhicules contrôlés · Garantie incluse
             </p>
             <h1
               className="cp-title font-black leading-none mb-6"
-              style={{ color: '#F8EDD8', fontSize: 'clamp(3rem, 7vw, 7rem)' }}
+              style={{ color: '#1A0F06', fontSize: 'clamp(3rem, 7vw, 7rem)' }}
             >
               VENTE
               <br />
@@ -120,13 +132,13 @@ export default async function VenteVehiculePage() {
             </h1>
             <p
               className="text-base leading-relaxed max-w-md mb-8"
-              style={{ color: 'rgba(192,144,96,0.9)' }}
+              style={{ color: 'rgba(26,15,6,0.62)' }}
             >
               Chaque véhicule est contrôlé par nos techniciens, garanti 12 mois et prêt à rouler.
               Financement sur mesure disponible.
             </p>
 
-            {/* Garanties pills */}
+            {/* Garanties pills — rouges en contour, jamais en aplat */}
             <div className="flex flex-wrap gap-2 mb-8">
               {[
                 'Contrôlé par nos techniciens',
@@ -138,9 +150,9 @@ export default async function VenteVehiculePage() {
                   key={g}
                   className="cp-mono text-xs px-3 py-1.5 rounded-full"
                   style={{
-                    background: 'rgba(233,196,106,0.08)',
-                    border: '1px solid rgba(233,196,106,0.15)',
-                    color: 'rgba(192,144,96,0.9)',
+                    background: 'rgba(217,38,39,0.07)',
+                    border: '1px solid rgba(217,38,39,0.22)',
+                    color: '#B81F20',
                   }}
                 >
                   {g}
@@ -148,29 +160,51 @@ export default async function VenteVehiculePage() {
               ))}
             </div>
 
-            {/* Badge stock */}
+            {/* Badge stock — carte blanche, disponibilité ÉCRITE */}
             <div
-              className="inline-flex flex-col rounded-2xl p-4"
+              className="inline-flex flex-col rounded-2xl p-4 bg-white"
               style={{
-                background: 'rgba(28,14,4,0.85)',
-                backdropFilter: 'blur(16px)',
-                border: '1px solid rgba(233,196,106,0.18)',
+                border: '1px solid rgba(217,38,39,0.18)',
+                boxShadow: '0 16px 32px -18px rgba(26,15,6,0.25)',
               }}
             >
               <p
-                className="cp-mono text-[0.65rem] tracking-widest uppercase"
-                style={{ color: '#E9C46A' }}
+                className="cp-mono text-[0.65rem] tracking-widest uppercase flex items-center gap-2"
+                style={{ color: '#B81F20' }}
               >
+                <span
+                  aria-hidden="true"
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ background: '#D92627' }}
+                />
                 Stock disponible
               </p>
-              <p className="cp-title font-black text-xl mt-1" style={{ color: '#F8EDD8' }}>
+              <p className="cp-title font-black text-xl mt-1" style={{ color: '#1A0F06' }}>
                 {nbDisponibles > 0
                   ? `${nbDisponibles} véhicule${nbDisponibles > 1 ? 's' : ''}`
                   : 'Arrivages en cours'}
               </p>
-              <p className="text-xs mt-0.5" style={{ color: 'rgba(128,96,64,0.9)' }}>
-                Mis à jour régulièrement
+              <p className="text-xs mt-0.5" style={{ color: 'rgba(26,15,6,0.45)' }}>
+                sur {vehicules.length} annonce{vehicules.length > 1 ? 's' : ''}
+                {nbReserves > 0 ? ` · ${nbReserves} réservé${nbReserves > 1 ? 's' : ''}` : ''}
+                {nbVendus > 0 ? ` · ${nbVendus} vendu${nbVendus > 1 ? 's' : ''}` : ''}
               </p>
+            </div>
+
+            {/* Mobile : la photo SORT du fond — bandeau sous le texte (cp-v5) */}
+            <div className="md:hidden mt-8 relative h-[180px] rounded-2xl overflow-hidden">
+              <Image
+                src="/images/hero-vente-vehicule.webp"
+                alt="Véhicule d'occasion contrôlé — Car Performance Guadeloupe"
+                fill
+                sizes="100vw"
+                className="object-cover"
+                style={{
+                  transform: 'scale(2.3)',
+                  transformOrigin: '76% 55%',
+                  filter: 'brightness(1.12) contrast(0.96) hue-rotate(196deg) saturate(0.78)',
+                }}
+              />
             </div>
           </div>
 
@@ -178,7 +212,7 @@ export default async function VenteVehiculePage() {
         </div>
       </section>
 
-      <CpBridge fromColor="#1E0E04" toColor="#F4EDE0" />
+      <CpBridge fromColor="#FFFFFF" toColor="#F4EDE0" accentColor="#D92627" />
 
       {/* ── CLIENT COMPONENT (catalogue + financement) ── */}
       <VenteVehiculeClient vehicules={vehicules} />

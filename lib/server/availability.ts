@@ -25,6 +25,26 @@ export async function getBusyRangesForCar(carId: string): Promise<BusyRange[]> {
   }
 }
 
+export type CarBusyRange = BusyRange & { locationCarId: string };
+
+/** Toutes les plages bloquantes du parc en UNE lecture — pour la bande de
+ * 6 jours du Pit Lane (compter par jour sans relire Firestore 6 fois). */
+export async function getAllBusyRanges(): Promise<CarBusyRange[]> {
+  try {
+    const snap = await getAdminFirestore()
+      .collection('reservations')
+      .where('status', 'in', BLOCKING_STATUSES)
+      .get();
+    return snap.docs.map((d) => {
+      const r = d.data() as Pick<Reservation, 'locationCarId' | 'dateDepart' | 'dateRetour'>;
+      return { locationCarId: r.locationCarId, dateDepart: r.dateDepart, dateRetour: r.dateRetour };
+    });
+  } catch (err) {
+    console.warn('[availability] lecture réservations échouée (fail-open):', err);
+    return [];
+  }
+}
+
 export async function getUnavailableCarIds(
   dateDepart: string,
   dateRetour: string

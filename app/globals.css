@@ -31,6 +31,14 @@
   --u-amber: #1e0e04;
   --u-craft: #f8f5f0;
   --u-dusk: #1a1208;
+  --u-splash: #062730;
+
+  /* Handoff design 2026-08-17 — lagon-vif = accent vif (que le README du
+     handoff nomme --lagon-l ; cp.lagon-l fond clair préexiste, sens conservé).
+     lab-* : labels < 14 px, contraste AA — jamais d'alpha .4/.45 en dessous. */
+  --lagon-vif: #3cc5de;
+  --lab-d: rgba(244, 237, 224, 0.7);
+  --lab-l: rgba(26, 15, 6, 0.62);
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -93,6 +101,13 @@
 
 /* ─── Car Performance — utilitaires ──────────── */
 @layer utilities {
+  /* Cible tactile ≥ 48 px (handoff 2026-08-17) : s'applique à TOUT contrôle —
+     le glyphe peut rester petit, la zone cliquable non. */
+  .cp-tap {
+    min-height: 48px;
+    min-width: 48px;
+  }
+
   /* Scroll reveal */
   .cp-reveal {
     opacity: 0;
@@ -140,5 +155,399 @@
   }
   .cp-mono {
     font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* ─── Pit Lane (handoff 2026-08-17, README §4 + maquette cp-v4) ───────────
+   Parcours de réservation 3 étapes sur fond cinéma. L'accent vient de la
+   variable --acc posée par le composant (vert location, bleu lavage) — le
+   même CSS sert aux deux univers. Bascule mobile au seuil de 700 px de
+   CONTENEUR (container queries), pas de viewport. */
+.cp-pl {
+  container-type: inline-size;
+  color: var(--cream);
+}
+
+/* Rail d'étapes : pastilles 26 px (zone tactile 48 px via .cp-tap), lignes
+   qui se remplissent dans le sens de la progression. */
+.cp-pl-rail {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.cp-pl-nd {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: none;
+  border: 0;
+  color: inherit;
+  padding: 0;
+  cursor: pointer;
+}
+.cp-pl-nd i {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(244, 237, 224, 0.08);
+  border: 1px solid rgba(244, 237, 224, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-style: normal;
+  font-size: 0.68rem;
+  color: rgba(244, 237, 224, 0.6);
+  transition:
+    background-color 300ms,
+    border-color 300ms,
+    color 300ms,
+    transform 300ms;
+}
+.cp-pl-nd b {
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 1.05rem;
+  color: rgba(244, 237, 224, 0.45);
+  transition: color 300ms;
+}
+.cp-pl-nd.done i {
+  background: var(--acc);
+  border-color: var(--acc);
+  color: var(--acc-ink);
+}
+.cp-pl-nd.done b {
+  color: rgba(244, 237, 224, 0.8);
+}
+.cp-pl-nd.cur i {
+  background: var(--mango);
+  border-color: var(--mango);
+  color: #1a0f06;
+  transform: scale(1.12);
+}
+.cp-pl-nd.cur b {
+  color: var(--cream);
+}
+.cp-pl-ln {
+  flex: 1;
+  height: 2px;
+  background: rgba(244, 237, 224, 0.12);
+  margin: 0 12px;
+  position: relative;
+  overflow: hidden;
+}
+.cp-pl-ln s {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 0;
+  background: var(--acc);
+  transition: width 500ms var(--ease-out);
+}
+.cp-pl-ln.fill s {
+  width: 100%;
+}
+
+/* Grille scène | récap — colonne unique sous 700 px de conteneur. */
+.cp-pl-body {
+  display: grid;
+  grid-template-columns: 1.35fr 0.65fr;
+  min-height: 400px;
+  margin-top: 14px;
+  border-top: 1px solid rgba(244, 237, 224, 0.08);
+}
+.cp-pl-stage {
+  padding: 22px 24px 26px 32px;
+  border-right: 1px solid rgba(244, 237, 224, 0.08);
+}
+.cp-pl-side {
+  padding: 22px 32px 26px 24px;
+  display: flex;
+  flex-direction: column;
+}
+.cp-pl-pane {
+  animation: cp-pl-slidein 400ms var(--ease-out) both;
+}
+@keyframes cp-pl-slidein {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Narration de Max */
+.cp-pl-story {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(244, 237, 224, 0.05);
+  border: 1px solid rgba(244, 237, 224, 0.1);
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+.cp-pl-ava {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid var(--acc);
+  overflow: hidden;
+  flex-shrink: 0;
+  background: rgba(244, 237, 224, 0.08);
+}
+/* max.webp est un plein pied 409×840 : on zoome pour ne cadrer que la TÊTE
+   dans le cercle (retour Djemil 2026-08-18 — la tête, pas le corps). */
+.cp-pl-ava img {
+  width: 190%;
+  height: auto;
+  max-width: none;
+  margin: -8% 0 0 -45%;
+}
+
+/* Cartes radio véhicule */
+.cp-pl-opt {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  background: rgba(244, 237, 224, 0.04);
+  border: 1px solid rgba(244, 237, 224, 0.1);
+  border-radius: 14px;
+  padding: 12px 13px;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  transition:
+    border-color 220ms,
+    background-color 220ms,
+    transform 150ms;
+}
+.cp-pl-opt:hover {
+  border-color: rgba(244, 237, 224, 0.3);
+}
+.cp-pl-opt:active {
+  transform: scale(0.99);
+}
+.cp-pl-opt.on {
+  border-color: var(--acc);
+  background: rgba(82, 200, 138, 0.1);
+}
+.cp-pl-opt.off {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.cp-pl-opt > i {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(244, 237, 224, 0.28);
+  flex-shrink: 0;
+  transition:
+    background-color 220ms,
+    border-color 220ms,
+    box-shadow 220ms;
+}
+.cp-pl-opt.on > i {
+  border-color: var(--acc);
+  background: var(--acc);
+  box-shadow: inset 0 0 0 3px #14100a;
+}
+
+/* Bande de 6 jours : jauge de remplissage ET libellé écrit. */
+.cp-pl-days {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+.cp-pl-dd {
+  background: rgba(244, 237, 224, 0.04);
+  border: 1px solid rgba(244, 237, 224, 0.1);
+  border-radius: 14px;
+  padding: 11px 6px;
+  text-align: center;
+  cursor: pointer;
+  color: inherit;
+  transition:
+    background-color 250ms,
+    border-color 250ms,
+    color 250ms,
+    transform 200ms;
+}
+.cp-pl-dd:hover {
+  border-color: rgba(244, 237, 224, 0.3);
+}
+.cp-pl-dd.on {
+  background: var(--cream);
+  border-color: var(--cream);
+  color: var(--ink);
+  transform: translateY(-3px);
+}
+.cp-pl-dd.full {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+.cp-pl-g {
+  height: 4px;
+  border-radius: 3px;
+  background: rgba(244, 237, 224, 0.14);
+  margin-top: 7px;
+  overflow: hidden;
+  display: block;
+}
+.cp-pl-dd.on .cp-pl-g {
+  background: rgba(26, 15, 6, 0.14);
+}
+.cp-pl-g i {
+  display: block;
+  height: 100%;
+  transition: width 500ms var(--ease-out);
+}
+
+/* Durées 2/3/5/7 j */
+.cp-pl-durs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.cp-pl-du {
+  background: rgba(244, 237, 224, 0.04);
+  border: 1px solid rgba(244, 237, 224, 0.1);
+  border-radius: 14px;
+  padding: 12px 0;
+  text-align: center;
+  cursor: pointer;
+  color: inherit;
+  transition:
+    background-color 250ms,
+    border-color 250ms,
+    color 250ms;
+}
+.cp-pl-du:hover {
+  border-color: rgba(244, 237, 224, 0.3);
+}
+.cp-pl-du.on {
+  background: var(--acc);
+  border-color: var(--acc);
+  color: var(--acc-ink);
+  font-weight: 700;
+}
+.cp-pl-legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.56rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(244, 237, 224, 0.4);
+}
+.cp-pl-legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cp-pl-legend i {
+  width: 8px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+/* Carte mascotte + ticket récap */
+.cp-pl-mascard {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(244, 237, 224, 0.05);
+  border: 1px solid rgba(244, 237, 224, 0.1);
+}
+.cp-pl-mascotte {
+  height: 96px;
+  width: auto;
+  margin: -18px -6px -22px 0;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.5));
+}
+.cp-pl-tk {
+  background: rgba(244, 237, 224, 0.05);
+  border: 1px dashed rgba(244, 237, 224, 0.22);
+  border-radius: 16px;
+  padding: 16px;
+}
+.cp-pl-tr {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.74rem;
+  padding: 5px 0;
+  color: rgba(244, 237, 224, 0.72);
+}
+.cp-pl-tr.dim {
+  color: rgba(244, 237, 224, 0.42);
+}
+.cp-pl-tr.tt {
+  border-top: 1px dashed rgba(244, 237, 224, 0.22);
+  margin-top: 9px;
+  padding-top: 11px;
+  font-size: 0.86rem;
+  color: var(--cream);
+  align-items: baseline;
+}
+.cp-pl-tr.tt b {
+  color: var(--mango);
+  font-size: 1.25rem;
+  font-family: 'Big Shoulders Display', sans-serif;
+  font-weight: 900;
+  transition: opacity 200ms;
+}
+.cp-pl-tr.tt b.flash {
+  opacity: 0.25;
+}
+
+/* Barre collante mobile — n'existe que sous 700 px de conteneur. */
+.cp-pl-sticky {
+  display: none;
+}
+
+@container (max-width: 699px) {
+  .cp-pl-body {
+    grid-template-columns: 1fr;
+  }
+  .cp-pl-stage {
+    border-right: 0;
+    padding: 18px 20px 22px;
+  }
+  .cp-pl-side {
+    display: none;
+  }
+  .cp-pl-nd b {
+    display: none; /* libellés du rail masqués, pastilles seules */
+  }
+  .cp-pl-days {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .cp-pl-durs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .cp-pl-sticky {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    background: rgba(13, 9, 5, 0.97);
+    border-top: 1px solid rgba(244, 237, 224, 0.1);
+    padding: 10px 16px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
   }
 }

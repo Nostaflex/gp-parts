@@ -81,7 +81,8 @@ describe('requireAdmin (production)', () => {
     expect(result).toEqual({ uid: 'u1', email: 'djemil.david@gmail.com' });
     // checkRevoked=false depuis le lot Fondations 2026-08-13 : vérification
     // cryptographique seule, fenêtre de révocation = TTL cookie (5 j).
-    expect(verifySessionCookieMock).toHaveBeenCalledWith('ok-cookie', false);
+    // checkRevoked=true depuis l'audit 2026-08-18 : révocation immédiate honorée.
+    expect(verifySessionCookieMock).toHaveBeenCalledWith('ok-cookie', true);
   });
 
   it('AdminError expose message et status', () => {

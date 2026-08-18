@@ -31,9 +31,10 @@ jobs:
         run: npm ci
 
       - name: Security audit
-        run: npm audit --audit-level=critical || true
-        # Note: --audit-level=critical pour ne pas bloquer sur des vulns transitives
-        # sans fix disponible. Passer à --audit-level=high quand les deps upstream corrigent.
+        # BLOQUANT sur high/critical (audit 2026-08-18 : le « || true »
+        # historique avalait même les critiques). Prod deps seulement ;
+        # 8 modérées transitives connues restent tolérées.
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Lint
         run: npm run lint

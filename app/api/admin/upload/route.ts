@@ -34,9 +34,31 @@ const EXT: Record<string, string> = {
   'image/png': 'png',
 };
 
-const MAX_BYTES = 25 * 1024 * 1024; // garde serveur (le blob POSTé est déjà compressé)
+// 8 Mo (audit 2026-08-18 — le client compresse en WebP ≲ 2 Mo ; 25 Mo
+// laissait passer des images pathologiques).
+const MAX_BYTES = 8 * 1024 * 1024;
 const MAX_INDEX = 8; // borne large (forms : max 5/8) — anti-path-flood
 const ENTITY_ID_RE = /^[a-zA-Z0-9_-]+$/; // anti path-traversal (pas de / ni ..)
+
+/** Signatures binaires des trois formats acceptés. */
+function magicBytesMatch(buf: Buffer, mime: string): boolean {
+  if (buf.length < 12) return false;
+  switch (mime) {
+    case 'image/jpeg':
+      return buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff;
+    case 'image/png':
+      return buf
+        .subarray(0, 8)
+        .equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+    case 'image/webp':
+      return (
+        buf.subarray(0, 4).toString('ascii') === 'RIFF' &&
+        buf.subarray(8, 12).toString('ascii') === 'WEBP'
+      );
+    default:
+      return false;
+  }
+}
 
 function bad(message: string) {
   return NextResponse.json({ error: message }, { status: 400 });
@@ -68,9 +90,14 @@ export async function POST(request: NextRequest) {
   if (file.size === 0) return bad('fichier vide');
   if (file.size > MAX_BYTES) return bad('fichier trop volumineux');
 
-  // 3) Écriture Admin SDK — chemin déterministe (pas d'orphelins) + token download
-  const path = `${folder}/${entityId}/photo-${index}.${ext}`;
+  // 3) Le MIME déclaré ne suffit pas (audit 2026-08-18) : vérification des
+  // MAGIC BYTES réels — un polyglotte déguisé en image est refusé.
   const buffer = Buffer.from(await file.arrayBuffer());
+  if (!magicBytesMatch(buffer, file.type))
+    return bad('contenu ne correspond pas au format déclaré');
+
+  // 4) Écriture Admin SDK — chemin déterministe (pas d'orphelins) + token download
+  const path = `${folder}/${entityId}/photo-${index}.${ext}`;
   const token = randomUUID();
 
   const bucket = getAdminStorage().bucket();

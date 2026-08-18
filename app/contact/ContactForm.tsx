@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { CheckCircle, Upload, X } from 'lucide-react';
 import { CpRgpdNotice } from '@/components/cp/CpRgpdNotice';
+import { CpMarketingOptIn } from '@/components/cp/CpMarketingOptIn';
 import { submitContact } from './actions';
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 Mo
@@ -42,6 +43,7 @@ const lbl = 'block text-xs font-semibold text-cp-vert-l/70 uppercase tracking-wi
 
 export function ContactForm() {
   const searchParams = useSearchParams();
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [website, setWebsite] = useState(''); // honeypot anti-spam
   const [done, setDone] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -138,6 +140,7 @@ export function ContactForm() {
       message: data.message,
       filesCount: data.files.length,
       ref: searchParams.get('ref') ?? undefined,
+      marketingOptIn,
       website,
     });
     setSubmitting(false);
@@ -377,6 +380,7 @@ export function ContactForm() {
           </label>
         </div>
         {err('consent')}
+        <CpMarketingOptIn checked={marketingOptIn} onChange={setMarketingOptIn} tone="dark" />
 
         {/* Honeypot anti-spam : invisible pour un humain, rempli par les bots. */}
         <input

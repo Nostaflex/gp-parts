@@ -1,4 +1,5 @@
 import { getAdminFirestore } from '@/lib/firebase-admin';
+import { ttlMillis } from '@/lib/ttl';
 import { parseReservation } from '@/lib/schemas/reservation';
 
 import type { Reservation, ReservationStatus } from '@/lib/reservations';
@@ -28,13 +29,17 @@ export async function getReservationsAdmin(opts?: {
   if (opts?.limit) q = q.limit(opts.limit);
 
   const snap = await q.get();
-  return snap.docs.map((d) => parseReservation({ ...d.data(), id: d.id }));
+  return snap.docs.map((d) => {
+    const data = d.data();
+    return parseReservation({ ...data, expiresAt: ttlMillis(data.expiresAt), id: d.id });
+  });
 }
 
 export async function getReservationByIdAdmin(id: string): Promise<Reservation | null> {
   const snap = await getAdminFirestore().collection('reservations').doc(id).get();
   if (!snap.exists) return null;
-  return parseReservation({ ...snap.data(), id: snap.id });
+  const data = snap.data() ?? {};
+  return parseReservation({ ...data, expiresAt: ttlMillis(data.expiresAt), id: snap.id });
 }
 
 export type TransitionResult =

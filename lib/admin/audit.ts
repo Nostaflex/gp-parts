@@ -12,6 +12,7 @@
  * Node.js runtime uniquement (Admin SDK). Ne pas importer côté client/Edge.
  */
 import { getAdminFirestore } from '@/lib/firebase-admin';
+import { ttlTimestamp } from '@/lib/server/ttl';
 
 const TTL_MS = 365 * 24 * 60 * 60 * 1000; // 12 mois
 
@@ -26,6 +27,7 @@ export type AuditResourceType =
   | 'location-car'
   | 'reservation'
   | 'feature-flags'
+  | 'legal-info'
   | 'contact-info'
   | 'location-settings'
   | 'lavage-settings'
@@ -54,13 +56,16 @@ export interface WriteAuditLogInput {
 export async function writeAuditLog(input: WriteAuditLogInput): Promise<void> {
   const timestamp = Date.now();
 
-  const entry: AuditLogEntry = {
+  // Type d'ÉCRITURE : expiresAt devient un Timestamp natif au moment du
+  // write (la lecture, si un jour activée, repasse par ttlMillis).
+  const entry: Omit<AuditLogEntry, 'expiresAt'> & { expiresAt: ReturnType<typeof ttlTimestamp> } = {
     timestamp,
     actor: input.actor,
     action: input.action,
     resourceType: input.resourceType,
     resourceId: input.resourceId,
-    expiresAt: timestamp + TTL_MS,
+    // Timestamp natif : sans lui, la policy TTL n'expire jamais le doc.
+    expiresAt: ttlTimestamp(timestamp + TTL_MS),
   };
 
   // RGPD : jamais de diff PII pour les demandes. Sinon, n'ajouter la clé

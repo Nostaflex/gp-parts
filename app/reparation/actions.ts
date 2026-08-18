@@ -1,11 +1,13 @@
 'use server';
 
 import { createDemandeIntake } from '@/lib/server/intake';
+import { checkRateLimit } from '@/lib/server/rate-limit';
 import { sendLeadEmails } from '@/lib/emails/send';
 import { demandeExpiry } from '@/lib/demandes';
 import type { Lead } from '@/lib/emails/lead';
 
 export type RdvInput = {
+  marketingOptIn?: boolean;
   prenom: string;
   nom: string;
   email: string;
@@ -43,6 +45,8 @@ function genRef(prefix: string): string {
 
 /** Server action : persiste + notifie une demande de RDV réparation. */
 export async function submitRdv(input: RdvInput): Promise<LeadResult> {
+  const rl = await checkRateLimit('reparation');
+  if (!rl.ok) return { ok: false, error: rl.message };
   // Honeypot : un humain ne remplit jamais ce champ → drop silencieux.
   if (input.website && input.website.trim() !== '') {
     return { ok: true, ref: genRef('RDV-CP'), emailed: false };
@@ -108,6 +112,7 @@ export async function submitRdv(input: RdvInput): Promise<LeadResult> {
       email: input.email.trim(),
       telephone: input.tel.trim(),
       message: messageFull,
+      marketingOptIn: Boolean(input.marketingOptIn),
       createdAt: nowIso,
       updatedAt: nowIso,
       expiresAt: demandeExpiry(now),

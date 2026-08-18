@@ -3,11 +3,17 @@
 import { generateReservationReference } from '@/lib/utils';
 import { getAdapter } from '@/lib/data';
 import { createReservationIntake, createDemandeIntake } from '@/lib/server/intake';
-import { getBusyRangesForCar, getUnavailableCarIds } from '@/lib/server/availability';
+import {
+  getBusyRangesForCar,
+  getUnavailableCarIds,
+  getAllBusyRanges,
+} from '@/lib/server/availability';
 import { getLocationSettings } from '@/lib/server/location-settings';
 import { cautionPourVoiture } from '@/lib/location-settings';
 import { sendReservationEmails } from '@/lib/emails/send';
 import { rangesOverlap, ageAtDate, yearsBetween, LLD_SEUIL_JOURS } from '@/lib/reservations';
+import { joursBande } from '@/lib/pitlane';
+import { checkRateLimit } from '@/lib/server/rate-limit';
 import { demandeExpiry } from '@/lib/demandes';
 import type { Reservation } from '@/lib/reservations';
 
@@ -46,7 +52,10 @@ export async function validateReservation(input: {
   adresseCodePostal?: string;
   adresseVille?: string;
   cgl?: boolean;
+  marketingOptIn?: boolean;
 }): Promise<ReservationValidationResult> {
+  const rl = await checkRateLimit('reservation');
+  if (!rl.ok) return { success: false, errors: { _form: rl.message } };
   // Honeypot : un humain ne remplit jamais ce champ → succès factice, rien créé.
   if (input.website && input.website.trim() !== '') {
     return { success: true, errors: {} };
@@ -172,6 +181,7 @@ export async function validateReservation(input: {
     ...(heureRetour ? { heureRetour } : {}),
     cautionEnCents,
     cglAcceptedAt: now,
+    marketingOptIn: Boolean(input.marketingOptIn),
     createdAt: now,
     updatedAt: now,
     expiresAt: Date.now() + TTL_MS,
@@ -197,7 +207,10 @@ export async function submitDevisLLD(input: {
   telephone: string;
   consent: boolean;
   website?: string;
+  marketingOptIn?: boolean;
 }): Promise<{ success: boolean; errors: Record<string, string> }> {
+  const rl = await checkRateLimit('devis-lld');
+  if (!rl.ok) return { success: false, errors: { _form: rl.message } };
   if (input.website && input.website.trim() !== '') return { success: true, errors: {} };
 
   const errors: Record<string, string> = {};
@@ -232,11 +245,37 @@ export async function submitDevisLLD(input: {
       (kmParMois ? ` · Km/mois : ${kmParMois}` : '') +
       (categorie ? ` · Catégorie : ${categorie}` : '') +
       (budgetMensuel ? ` · Budget : ${budgetMensuel} €/mois` : ''),
+    marketingOptIn: Boolean(input.marketingOptIn),
     createdAt: nowIso,
     updatedAt: nowIso,
     expiresAt: demandeExpiry(nowMs),
   });
   return { success: true, errors: {} };
+}
+
+// ── Pit Lane : disponibilité par jour (bande de 6 jours, étape 2) ─────────
+// Une seule lecture Firestore pour les 6 jours. Sortie sans PII : des
+// comptes. Best-effort comme checkDispo — la garde finale reste serveur
+// au moment de la réservation.
+export type DispoJour = { jour: string; libres: number; total: number };
+
+export async function getDispoParJour(fromDate: string): Promise<DispoJour[]> {
+  const from = sanitize(fromDate);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || Number.isNaN(Date.parse(from))) return [];
+
+  const adapter = await getAdapter();
+  const cars = (await adapter.getLocationCars()).filter((c) => c.disponible);
+  const busy = await getAllBusyRanges();
+
+  return joursBande(from).map((jour) => {
+    const libres = cars.filter(
+      (c) =>
+        !busy.some(
+          (r) => r.locationCarId === c.id && rangesOverlap(jour, jour, r.dateDepart, r.dateRetour)
+        )
+    ).length;
+    return { jour, libres, total: cars.length };
+  });
 }
 
 // Pré-filtre UI : IDs des voitures indisponibles sur la plage demandée.

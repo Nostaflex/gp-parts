@@ -1,6 +1,7 @@
 'use server';
 
 import { createDemandeIntake } from '@/lib/server/intake';
+import { checkRateLimit } from '@/lib/server/rate-limit';
 import { sendLeadEmails } from '@/lib/emails/send';
 import { demandeExpiry } from '@/lib/demandes';
 import { isDateKey } from '@/lib/lavage-creneaux';
@@ -9,6 +10,7 @@ import type { Lead } from '@/lib/emails/lead';
 import type { LeadResult } from '@/app/reparation/actions';
 
 export type LavageInput = {
+  marketingOptIn?: boolean;
   prenom: string;
   nom: string;
   email: string;
@@ -34,6 +36,8 @@ function genRef(): string {
 
 /** Server action : persiste + notifie une demande de RDV lavage. */
 export async function submitLavage(input: LavageInput): Promise<LeadResult> {
+  const rl = await checkRateLimit('lavage');
+  if (!rl.ok) return { ok: false, error: rl.message };
   // Honeypot : un humain ne remplit jamais ce champ → drop silencieux.
   if (input.website && input.website.trim() !== '') {
     return { ok: true, ref: genRef(), emailed: false };
@@ -102,6 +106,7 @@ export async function submitLavage(input: LavageInput): Promise<LeadResult> {
       email: input.email.trim(),
       telephone: input.tel.trim(),
       message: messageFull,
+      marketingOptIn: Boolean(input.marketingOptIn),
       // RDV structuré → blocage 1-tap du créneau au BO.
       ...(isDateKey(input.date) ? { rdvDate: input.date, rdvCreneau: input.creneau } : {}),
       createdAt: nowIso,

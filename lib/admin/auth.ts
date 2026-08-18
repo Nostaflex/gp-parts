@@ -62,12 +62,12 @@ export const requireAdmin = cache(async function requireAdmin(): Promise<AdminSe
     }
   } else {
     // Production : session cookie opaque signé par Google.
-    // checkRevoked=false : la vérification reste cryptographique (signature +
-    // expiration) mais épargne un aller-retour réseau Firebase Auth (~50-200 ms)
-    // par requête. Fenêtre de révocation acceptée = TTL du cookie (5 j) ;
-    // une révocation immédiate passe par la rotation de la whitelist meta/admins.
+    // checkRevoked=true (audit 2026-08-18, décision Djemil) : la révocation
+    // Firebase (revokeRefreshTokens / désactivation du compte) invalide la
+    // session immédiatement, au prix d'un aller-retour Firebase Auth par
+    // requête admin (~50-200 ms) — acceptable pour un BO mono-admin.
     try {
-      const decoded = await getAdminAuth().verifySessionCookie(sessionCookie, false);
+      const decoded = await getAdminAuth().verifySessionCookie(sessionCookie, true);
       uid = decoded.uid;
       email = decoded.email;
       emailVerified = decoded.email_verified === true;

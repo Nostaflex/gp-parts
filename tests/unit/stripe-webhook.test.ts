@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 
 import { handleStripeEvent } from '@/lib/stripe-webhook';
-import type { Order } from '@/lib/types';
+import type { Order, PaymentStatus } from '@/lib/types';
 
 function makeOrder(overrides: Partial<Order> = {}): Order {
   return {
@@ -32,21 +32,48 @@ function makeOrder(overrides: Partial<Order> = {}): Order {
   };
 }
 
-// Faux event Stripe minimal.
-function event(type: string, piId = 'pi_test_1', orderId = 'order-001') {
+// Faux event Stripe minimal — montant/devise alignés sur makeOrder par défaut
+// (le webhook durci les valide, audit 2026-08-18).
+function event(
+  type: string,
+  opts: {
+    piId?: string;
+    orderId?: string;
+    amount?: number;
+    currency?: string;
+    eventId?: string;
+  } = {}
+) {
   return {
+    id: opts.eventId ?? 'evt_test_1',
     type,
-    data: { object: { id: piId, metadata: { orderId } } },
+    data: {
+      object: {
+        id: opts.piId ?? 'pi_test_1',
+        amount: opts.amount ?? 5980,
+        currency: opts.currency ?? 'eur',
+        metadata: { orderId: opts.orderId ?? 'order-001' },
+      },
+    },
   } as never;
 }
 
-function makeDeps(initialOrder: Order | null) {
+function makeDeps(initialOrder: Order | null, opts: { claimed?: boolean } = {}) {
   let stored = initialOrder;
   return {
+    claimEvent: vi.fn(async () => opts.claimed ?? true),
     getOrderById: vi.fn(async () => stored),
-    updateOrderPayment: vi.fn(async (_id: string, patch: Partial<Order>) => {
-      if (stored) stored = { ...stored, ...patch };
-    }),
+    settlePayment: vi.fn(
+      async (
+        _id: string,
+        patch: { paymentStatus: PaymentStatus }
+      ): Promise<'applied' | 'already' | 'not_found'> => {
+        if (!stored) return 'not_found';
+        if (stored.paymentStatus === patch.paymentStatus) return 'already';
+        stored = { ...stored, ...patch };
+        return 'applied';
+      }
+    ),
     sendOrderEmails: vi.fn(),
   };
 }
@@ -54,25 +81,46 @@ function makeDeps(initialOrder: Order | null) {
 describe('handleStripeEvent — payment_intent.succeeded', () => {
   it('passe la commande à paid + stocke le PaymentIntent id + envoie les emails', async () => {
     const deps = makeDeps(makeOrder());
-    await handleStripeEvent(event('payment_intent.succeeded', 'pi_abc'), deps);
-    expect(deps.updateOrderPayment).toHaveBeenCalledWith('order-001', {
+    await handleStripeEvent(event('payment_intent.succeeded', { piId: 'pi_abc' }), deps);
+    expect(deps.settlePayment).toHaveBeenCalledWith('order-001', {
       paymentStatus: 'paid',
       stripePaymentIntentId: 'pi_abc',
     });
     expect(deps.sendOrderEmails).toHaveBeenCalledTimes(1);
   });
 
-  it('idempotent : un 2e event succeeded sur une commande déjà payée ne renvoie pas les emails', async () => {
+  it('idempotent (CAS) : commande déjà payée → settle « already », zéro email', async () => {
     const deps = makeDeps(makeOrder({ paymentStatus: 'paid' }));
     await handleStripeEvent(event('payment_intent.succeeded'), deps);
     expect(deps.sendOrderEmails).not.toHaveBeenCalled();
-    expect(deps.updateOrderPayment).not.toHaveBeenCalled();
+  });
+
+  it('ledger : event déjà revendiqué par une autre instance → AUCUN traitement', async () => {
+    const deps = makeDeps(makeOrder(), { claimed: false });
+    await handleStripeEvent(event('payment_intent.succeeded'), deps);
+    expect(deps.getOrderById).not.toHaveBeenCalled();
+    expect(deps.settlePayment).not.toHaveBeenCalled();
+    expect(deps.sendOrderEmails).not.toHaveBeenCalled();
+  });
+
+  it('MISMATCH montant : la commande n’est JAMAIS marquée payée', async () => {
+    const deps = makeDeps(makeOrder());
+    await handleStripeEvent(event('payment_intent.succeeded', { amount: 100 }), deps);
+    expect(deps.settlePayment).not.toHaveBeenCalled();
+    expect(deps.sendOrderEmails).not.toHaveBeenCalled();
+  });
+
+  it('MISMATCH devise : idem', async () => {
+    const deps = makeDeps(makeOrder());
+    await handleStripeEvent(event('payment_intent.succeeded', { currency: 'usd' }), deps);
+    expect(deps.settlePayment).not.toHaveBeenCalled();
+    expect(deps.sendOrderEmails).not.toHaveBeenCalled();
   });
 
   it('commande introuvable : no-op (pas de crash, pas d’email)', async () => {
     const deps = makeDeps(null);
     await handleStripeEvent(event('payment_intent.succeeded'), deps);
-    expect(deps.updateOrderPayment).not.toHaveBeenCalled();
+    expect(deps.settlePayment).not.toHaveBeenCalled();
     expect(deps.sendOrderEmails).not.toHaveBeenCalled();
   });
 });
@@ -81,18 +129,22 @@ describe('handleStripeEvent — payment_intent.payment_failed', () => {
   it('passe la commande à failed, sans email', async () => {
     const deps = makeDeps(makeOrder());
     await handleStripeEvent(event('payment_intent.payment_failed'), deps);
-    expect(deps.updateOrderPayment).toHaveBeenCalledWith('order-001', {
-      paymentStatus: 'failed',
-    });
+    expect(deps.settlePayment).toHaveBeenCalledWith('order-001', { paymentStatus: 'failed' });
     expect(deps.sendOrderEmails).not.toHaveBeenCalled();
+  });
+
+  it('n’écrase JAMAIS un paiement déjà réussi', async () => {
+    const deps = makeDeps(makeOrder({ paymentStatus: 'paid' }));
+    await handleStripeEvent(event('payment_intent.payment_failed'), deps);
+    expect(deps.settlePayment).not.toHaveBeenCalled();
   });
 });
 
 describe('handleStripeEvent — event ignoré', () => {
-  it('type inconnu : no-op', async () => {
+  it('type inconnu : no-op, même pas de claim (le ledger ne gonfle pas)', async () => {
     const deps = makeDeps(makeOrder());
     await handleStripeEvent(event('charge.refunded'), deps);
-    expect(deps.updateOrderPayment).not.toHaveBeenCalled();
-    expect(deps.sendOrderEmails).not.toHaveBeenCalled();
+    expect(deps.claimEvent).not.toHaveBeenCalled();
+    expect(deps.settlePayment).not.toHaveBeenCalled();
   });
 });

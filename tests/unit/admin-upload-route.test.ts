@@ -63,7 +63,12 @@ function reqWith(fields: Record<string, unknown>) {
 }
 
 function webp(bytes = 32) {
-  return new File([new Uint8Array(bytes)], 'photo.webp', { type: 'image/webp' });
+  // En-tête RIFF/WEBP réel : le route vérifie les MAGIC BYTES (audit
+  // 2026-08-18), un contenu arbitraire déguisé en image est refusé.
+  const buf = new Uint8Array(Math.max(bytes, 12));
+  buf.set([0x52, 0x49, 0x46, 0x46], 0); // 'RIFF'
+  buf.set([0x57, 0x45, 0x42, 0x50], 8); // 'WEBP'
+  return new File([buf], 'photo.webp', { type: 'image/webp' });
 }
 
 beforeEach(() => {
@@ -174,5 +179,20 @@ describe('POST /api/admin/upload — success (authenticated)', () => {
     expect(opts.contentType).toBe('image/webp');
     const meta = opts.metadata as { metadata?: { firebaseStorageDownloadTokens?: string } };
     expect(meta.metadata?.firebaseStorageDownloadTokens).toBeTruthy();
+  });
+});
+
+describe('POST /api/admin/upload — magic bytes (audit 2026-08-18)', () => {
+  it('contenu arbitraire déclaré image/webp → 400, rien écrit', async () => {
+    const { POST } = await import('@/app/api/admin/upload/route');
+    const res = await POST(
+      reqWith({
+        file: new File([new Uint8Array(32)], 'x.webp', { type: 'image/webp' }),
+        folder: 'vehicules',
+        entityId: 'vehicule-abc',
+        index: '1',
+      })
+    );
+    expect(res.status).toBe(400);
   });
 });

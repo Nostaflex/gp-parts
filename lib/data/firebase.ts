@@ -34,7 +34,10 @@ import { normalizeFeatureFlags } from '@/lib/feature-flags';
 import type { FeatureFlags } from '@/lib/feature-flags';
 import { normalizeContactInfo } from '@/lib/contact-info';
 import type { ContactInfo } from '@/lib/contact-info';
+import { normalizeLegalInfo } from '@/lib/legal-info';
+import type { LegalInfo } from '@/lib/legal-info';
 import { applyClientFilters } from './filters';
+import { ttlMillis } from '@/lib/ttl';
 
 /**
  * FirebaseAdapter — Implements DataAdapter using Firestore.
@@ -190,15 +193,6 @@ export class FirebaseAdapter implements DataAdapter {
     return Array.from(brands).sort();
   }
 
-  async createOrder(order: Omit<Order, 'id'>): Promise<string> {
-    const docRef = await addDoc(this.ordersRef, {
-      ...order,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
-    return docRef.id;
-  }
-
   async getOrders(filters?: OrderFilters): Promise<Order[]> {
     let q = query(this.ordersRef, orderBy('createdAt', 'desc'));
     if (filters?.status) {
@@ -334,7 +328,10 @@ export class FirebaseAdapter implements DataAdapter {
       q = query(q, firestoreLimit(filters.limit));
     }
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }) as Demande);
+    return snapshot.docs.map((d) => {
+      const data = d.data();
+      return { ...data, expiresAt: ttlMillis(data.expiresAt), id: d.id } as Demande;
+    });
   }
 
   async createDemande(data: Omit<Demande, 'id'>): Promise<string> {
@@ -363,6 +360,17 @@ export class FirebaseAdapter implements DataAdapter {
     } catch (err) {
       console.error('[contact-info] lecture meta/contactInfo échouée, défauts appliqués:', err);
       return normalizeContactInfo(null);
+    }
+  }
+
+  async getLegalInfo(): Promise<LegalInfo> {
+    // Fail-open : champs vides → la page légale affiche « à fournir ».
+    try {
+      const snap = await getDoc(doc(db, 'meta', 'legalInfo'));
+      return normalizeLegalInfo(snap.exists() ? (snap.data() as Partial<LegalInfo>) : null);
+    } catch (err) {
+      console.error('[legal-info] lecture meta/legalInfo échouée, défauts appliqués:', err);
+      return normalizeLegalInfo(null);
     }
   }
 }

@@ -13,13 +13,25 @@ describe('intake (Admin SDK)', () => {
   });
 
   it('createDemandeIntake add + renvoie id', async () => {
-    const id = await createDemandeIntake({ type: 'contact' } as never);
-    expect(addMock).toHaveBeenCalledWith({ type: 'contact' });
+    const id = await createDemandeIntake({
+      type: 'contact',
+      expiresAt: Date.now() + 1000,
+    } as never);
+    // Nouveau contrat TTL : expiresAt écrit en Timestamp natif Firestore.
+    const written = (addMock.mock.calls as unknown[][])[0][0] as {
+      type: string;
+      expiresAt: { toMillis: () => number };
+    };
+    expect(written.type).toBe('contact');
+    expect(typeof written.expiresAt.toMillis).toBe('function');
     expect(id).toBe('new-id');
   });
 
   it('createReservationIntake add + renvoie id', async () => {
-    const id = await createReservationIntake({ locationCarId: 'x' } as never);
+    const id = await createReservationIntake({
+      locationCarId: 'x',
+      expiresAt: Date.now() + 1000,
+    } as never);
     expect(addMock).toHaveBeenCalled();
     expect(id).toBe('new-id');
   });

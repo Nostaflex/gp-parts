@@ -2,6 +2,8 @@
 
 import { generateOrderNumber } from '@/lib/utils';
 import { getAdapter } from '@/lib/data';
+import { createOrderIntake, StockInsuffisantError } from '@/lib/server/intake';
+import { checkRateLimit } from '@/lib/server/rate-limit';
 import { sendOrderEmails } from '@/lib/emails/send';
 import { createOrderPaymentIntent } from '@/lib/stripe';
 import { getDeliveryPrice } from '@/lib/config';
@@ -48,7 +50,12 @@ export async function validateCheckout(formData: {
   items: CartItem[];
   subtotalInCents: number;
   paymentMethod?: PaymentMethod;
+  // Clé générée côté client au premier clic — un retry ne crée pas de doublon.
+  idempotencyKey?: string;
 }): Promise<CheckoutValidationResult> {
+  const rl = await checkRateLimit('checkout');
+  if (!rl.ok) return { success: false, errors: { _form: rl.message } };
+
   const errors: Record<string, string> = {};
 
   // Défaut 'on_site' : rétro-compat des appels sans paymentMethod (= comportement
@@ -129,7 +136,15 @@ export async function validateCheckout(formData: {
   let serverSubtotal = 0;
   const validatedItems: Order['items'] = [];
 
-  for (const clientItem of formData.items) {
+  // Consolidation : deux lignes du même produit fusionnent (audit S2-3 —
+  // les doublons contournaient le plafonnement par le stock).
+  const consolidated = new Map<string, CartItem>();
+  for (const it of formData.items) {
+    const prev = consolidated.get(it.productId);
+    consolidated.set(it.productId, prev ? { ...prev, quantity: prev.quantity + it.quantity } : it);
+  }
+
+  for (const clientItem of consolidated.values()) {
     const product = await adapter.getProductById(clientItem.productId);
 
     if (!product) {
@@ -137,10 +152,17 @@ export async function validateCheckout(formData: {
       return { success: false, errors };
     }
 
-    const qty = Math.max(
-      1,
-      Math.min(Math.floor(clientItem.quantity), product.stock > 0 ? product.stock : 1)
-    );
+    // Refus hors stock EXPLICITE — fini le « stock 0 ⇒ quantité 1 »
+    // silencieux. La garde finale (concurrence) vit dans la transaction
+    // de createOrderIntake.
+    const qty = Math.max(1, Math.floor(clientItem.quantity));
+    if (product.stock < qty) {
+      errors._items =
+        product.stock <= 0
+          ? `« ${product.name} » est en rupture de stock.`
+          : `« ${product.name} » : seulement ${product.stock} en stock.`;
+      return { success: false, errors };
+    }
     serverSubtotal += product.price * qty;
 
     validatedItems.push({
@@ -179,7 +201,47 @@ export async function validateCheckout(formData: {
     updatedAt: now,
   };
 
-  const orderId = await adapter.createOrder(orderData);
+  // Écriture via Admin SDK EXCLUSIVEMENT (audit 2026-08-18) : les règles
+  // Firestore refusent désormais toute création client d'orders.
+  const rawKey = sanitize(formData.idempotencyKey);
+  const idemKey = /^[0-9a-zA-Z-]{16,64}$/.test(rawKey) ? rawKey : undefined;
+  let intake;
+  try {
+    intake = await createOrderIntake(orderData, idemKey);
+  } catch (err) {
+    if (err instanceof StockInsuffisantError) {
+      // Course perdue : un autre client a pris le stock entre la validation
+      // et la transaction.
+      return {
+        success: false,
+        errors: {
+          _items: 'Un article vient de partir — le stock a été mis à jour, vérifiez votre panier.',
+        },
+      };
+    }
+    throw err;
+  }
+  const orderId = intake.id;
+
+  // Re-soumission (double-clic, retry réseau) : la commande existe déjà —
+  // ni doublon, ni second email.
+  if (intake.existed) {
+    const existingNumber = intake.existingOrderNumber || orderNumber;
+    if (paymentMethod === 'card') {
+      try {
+        const { clientSecret } = await createOrderPaymentIntent({
+          id: orderId,
+          orderNumber: existingNumber,
+          totalInCents: orderData.totalInCents,
+        });
+        return { success: true, errors: {}, orderNumber: existingNumber, orderId, clientSecret };
+      } catch (err) {
+        console.error('[checkout] Recréation PaymentIntent échouée:', err);
+        return { success: false, errors: { _payment: 'Paiement indisponible, réessayez.' } };
+      }
+    }
+    return { success: true, errors: {}, orderNumber: existingNumber };
+  }
 
   // ── Chemin carte ──────────────────────────────────────────────────
   // La commande est créée 'pending'. On crée le PaymentIntent (montant =

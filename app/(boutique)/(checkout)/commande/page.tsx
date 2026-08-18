@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, Truck, Store, AlertCircle, CreditCard, Banknote } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
@@ -25,6 +25,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { items, totalPrice, clearCart, isReady } = useCart();
   const { showToast } = useToast();
+  const idempotencyKeyRef = useRef<string | null>(null);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [form, setForm] = useState<OrderInfo>({
     firstName: '',
@@ -96,6 +97,8 @@ export default function CheckoutPage() {
     }
 
     setOrderPlaced(true);
+    // Commande aboutie : la prochaine commande légitime doit avoir SA clé.
+    idempotencyKeyRef.current = null;
     clearCart();
     router.push('/commande/confirmation');
   };
@@ -115,7 +118,11 @@ export default function CheckoutPage() {
     setSubmitting(true);
 
     try {
+      // Clé d'idempotence : générée au PREMIER clic, stable pour les
+      // retries — un double-clic ne crée pas deux commandes.
+      if (!idempotencyKeyRef.current) idempotencyKeyRef.current = crypto.randomUUID();
       const result = await validateCheckout({
+        idempotencyKey: idempotencyKeyRef.current,
         firstName: form.firstName,
         lastName: form.lastName,
         email: form.email,

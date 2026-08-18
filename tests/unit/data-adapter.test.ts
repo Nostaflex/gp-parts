@@ -90,7 +90,6 @@ describe('getAdapter', () => {
       getFeaturedProducts: async () => [],
       getCategories: async () => [],
       getBrands: async () => [],
-      createOrder: async () => 'mock-id',
       getOrders: async () => [],
       getOrderById: async () => null,
       updateOrderStatus: async () => {},
@@ -113,6 +112,12 @@ describe('getAdapter', () => {
         reparation: true,
         lavage: true,
         avis: true,
+      }),
+      getLegalInfo: async () => ({
+        tvaIntracom: '',
+        mediateurNom: '',
+        mediateurUrl: '',
+        rcPro: '',
       }),
       getContactInfo: async () => ({
         phone: '+590690112233',
@@ -408,7 +413,6 @@ describe('StaticAdapter — soft-delete exclusion', () => {
       getFeaturedProducts: async () => [],
       getCategories: async () => [],
       getBrands: async () => [],
-      createOrder: async () => 'mock-id',
       getOrders: async () => [],
       getOrderById: async () => null,
       updateOrderStatus: async () => {},
@@ -431,6 +435,12 @@ describe('StaticAdapter — soft-delete exclusion', () => {
         reparation: true,
         lavage: true,
         avis: true,
+      }),
+      getLegalInfo: async () => ({
+        tvaIntracom: '',
+        mediateurNom: '',
+        mediateurUrl: '',
+        rcPro: '',
       }),
       getContactInfo: async () => ({
         phone: '+590690112233',
