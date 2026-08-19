@@ -3,9 +3,14 @@
 // instances serverless. Ici : sliding window partagé entre instances,
 // par IP + par formulaire (bucket).
 //
-// FAIL-OPEN mais JAMAIS muet (doctrine) : sans UPSTASH_REDIS_REST_URL /
-// UPSTASH_REDIS_REST_TOKEN, les soumissions passent et un WARN est émis une
-// fois par process — le site ne casse pas pendant que les clés se créent.
+// FAIL-OPEN mais JAMAIS muet (doctrine) : sans credentials Redis, les
+// soumissions passent et un WARN est émis une fois par process — le site ne
+// casse pas pendant que les clés se créent.
+//
+// Credentials : UPSTASH_REDIS_REST_URL/TOKEN d'abord, sinon KV_REST_API_URL/
+// TOKEN — les noms qu'injecte (et fait tourner) le marketplace Vercel. Sans
+// ce fallback, une rotation Upstash rendrait les miroirs UPSTASH_* obsolètes
+// et éteindrait le rate limiting en silence.
 import { headers } from 'next/headers';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
@@ -20,19 +25,29 @@ const LIMITS: Record<string, number> = {
   reservation: 8,
   'devis-lld': 8,
   rgpd: 8,
+  // Proxy NHTSA : quelques essais légitimes par formulaire, jamais un tunnel.
+  'decode-vin': 20,
 };
 const DEFAULT_LIMIT = 8;
 
 let warned = false;
 const limiters = new Map<string, Ratelimit>();
 
+function redisCredentials(): { url: string; token: string } | null {
+  const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
+  return url && token ? { url, token } : null;
+}
+
 function getLimiter(bucket: string): Ratelimit | null {
-  if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+  const credentials = redisCredentials();
+  if (!credentials) {
     if (!warned) {
       warned = true;
       console.warn(
-        '[rate-limit] UPSTASH_REDIS_REST_URL/TOKEN absents : rate limiting ' +
-          'INACTIF (fail-open). Créer la base Upstash et poser les 2 env vars.'
+        '[rate-limit] Credentials Redis absents (ni UPSTASH_REDIS_REST_URL/' +
+          'TOKEN ni KV_REST_API_URL/TOKEN) : rate limiting INACTIF (fail-open). ' +
+          'Créer la base Upstash et poser les env vars.'
       );
     }
     return null;
@@ -40,7 +55,7 @@ function getLimiter(bucket: string): Ratelimit | null {
   let limiter = limiters.get(bucket);
   if (!limiter) {
     limiter = new Ratelimit({
-      redis: Redis.fromEnv(),
+      redis: new Redis(credentials),
       limiter: Ratelimit.slidingWindow(LIMITS[bucket] ?? DEFAULT_LIMIT, WINDOW),
       prefix: `rl:${bucket}`,
     });

@@ -15,6 +15,8 @@
  */
 import { NextResponse } from 'next/server';
 
+import { checkRateLimit } from '@/lib/server/rate-limit';
+
 const NHTSA_BASE = 'https://vpic.nhtsa.dot.gov/api/vehicles/decodevinvalues';
 
 type NhtsaResultRow = {
@@ -86,6 +88,14 @@ function safeInt(raw?: string): number | null {
 }
 
 export async function GET(request: Request): Promise<NextResponse<VinDecodeResponse>> {
+  const verdict = await checkRateLimit('decode-vin');
+  if (!verdict.ok) {
+    return NextResponse.json(
+      { ok: false, error: verdict.message },
+      { status: 429, headers: { 'Retry-After': '600' } }
+    );
+  }
+
   const url = new URL(request.url);
   const vin = (url.searchParams.get('vin') ?? '').trim().toUpperCase();
 
