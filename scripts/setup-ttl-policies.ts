@@ -1,10 +1,13 @@
 /**
  * Phase 0 — Setup TTL policies Firestore (purge automatique native).
  *
- * Spec admin CMS v3 §5 / §10 :
- *   - audit_log.expiresAt        → purge 12 mois
- *   - demandes.expiresAt         → purge 24 mois après dernier contact
- *   - leboncoin_drafts.expiresAt → purge 24 mois après création
+ * Collections avec expiresAt (audit 2026-08-18 + sync 2026-08-19) :
+ *   - audit_log.expiresAt       → purge 12 mois
+ *   - demandes.expiresAt        → purge 24 mois après dernier contact
+ *   - reservations.expiresAt    → purge après conservation légale
+ *   - lavage-blocages.expiresAt → purge après la date bloquée
+ *   - stripe_events.expiresAt   → purge du ledger idempotence Stripe
+ *   (leboncoin_drafts n'écrit plus expiresAt — retiré de la liste.)
  *
  * Le champ `expiresAt` doit contenir un Timestamp Firestore. Quand il est
  * dépassé, Firestore supprime le document automatiquement (zéro Cloud Function).
@@ -42,8 +45,14 @@ const adminClient = new v1.FirestoreAdminClient({
   projectId,
 });
 
-// Collections où expiresAt doit déclencher la purge native (spec v3 §10).
-const TTL_COLLECTIONS = ['audit_log', 'demandes', 'leboncoin_drafts'] as const;
+// Collections où expiresAt doit déclencher la purge native (audit 2026-08-18).
+const TTL_COLLECTIONS = [
+  'audit_log',
+  'demandes',
+  'reservations',
+  'lavage-blocages',
+  'stripe_events',
+] as const;
 const TTL_FIELD = 'expiresAt';
 
 function fieldPath(collectionGroup: string): string {
