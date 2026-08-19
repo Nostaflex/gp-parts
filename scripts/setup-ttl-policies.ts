@@ -5,7 +5,7 @@
  *   - audit_log.expiresAt       → purge 12 mois
  *   - demandes.expiresAt        → purge 24 mois après dernier contact
  *   - reservations.expiresAt    → purge après conservation légale
- *   - lavage-blocages.expiresAt → purge après la date bloquée
+ *   - lavageDispos.expiresAt → purge après la date bloquée
  *   - stripe_events.expiresAt   → purge du ledger idempotence Stripe
  *   (leboncoin_drafts n'écrit plus expiresAt — retiré de la liste.)
  *
@@ -50,7 +50,7 @@ const TTL_COLLECTIONS = [
   'audit_log',
   'demandes',
   'reservations',
-  'lavage-blocages',
+  'lavageDispos',
   'stripe_events',
 ] as const;
 const TTL_FIELD = 'expiresAt';
