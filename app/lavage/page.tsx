@@ -13,7 +13,7 @@ import { formatPrice, localDateISO } from '@/lib/utils';
 import type { PrisParDate } from '@/lib/lavage-creneaux';
 import { CpBulle } from '@/components/cp/CpBulle';
 import { FormulesGabarit } from './FormulesGabarit';
-import { LavageForm } from './LavageForm';
+import { SplashLane } from './SplashLane';
 
 // Fraîcheur des disponibilités servies au premier rendu (le client re-vérifie
 // au focus, le serveur re-vérifie au submit — 60 s suffisent ici).
@@ -118,7 +118,7 @@ export default async function LavagePage() {
               de véhicule. Choisissez votre formule et votre créneau — notre équipe vous confirme
               sous 24 h en jours ouvrés.
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 mb-8">
               {['Sur rendez-vous', 'Produits professionnels', 'Intérieur & extérieur'].map(
                 (pill) => (
                   <span
@@ -130,6 +130,14 @@ export default async function LavagePage() {
                 )
               )}
             </div>
+            {/* CTA maquette cp-v4 (« Réserver un créneau », mangue) → ancre
+                de la Splash Lane en bas de page. */}
+            <a
+              href="#splash-lane"
+              className="cp-tap inline-flex items-center rounded-full bg-cp-mango px-6 py-3 text-sm font-semibold text-cp-ink transition-[background-color,transform] hover:bg-[#FF8C1F] active:scale-[0.98]"
+            >
+              Réserver un créneau
+            </a>
           </div>
 
           {/* Splash en hôte : bulle TOUJOURS au-dessus, pointe vers la tête.
@@ -205,59 +213,18 @@ export default async function LavagePage() {
               </div>
             ))}
           </div>
-
-          {/* ── RDV ────────────────────────────── */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-            <div>
-              <p className="cp-mono text-cp-ink/35 text-xs tracking-widest uppercase mb-4">
-                Prise de rendez-vous
-              </p>
-              <h2
-                className="cp-title font-black text-cp-ink leading-none mb-8"
-                style={{ fontSize: 'clamp(2.5rem, 5vw, 5rem)' }}
-              >
-                RÉSERVEZ
-                <br />
-                {/* Accent lagon — rester dans l'univers bleu de Splash (retour Djemil). */}
-                <em className="text-cp-lagon not-italic">VOTRE CRÉNEAU.</em>
-              </h2>
-              <p className="text-cp-ink/60 text-base leading-relaxed mb-8 max-w-md">
-                Un rendez-vous dédié à l&apos;esthétique, distinct de l&apos;atelier : choisissez
-                votre formule, le gabarit de votre véhicule, votre date et votre créneau. Notre
-                équipe vous confirme sous 24 h en jours ouvrés.
-              </p>
-              {/* Réassurance SPLASH — visuel validé par Stéphane (référence
-                  officielle, recadrée en médaillon, jamais redessinée). */}
-              <div className="flex items-center gap-4 mb-10">
-                <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-cp-mango flex-shrink-0">
-                  <Image
-                    src="/images/splash/splash-sans-gant.png"
-                    alt="Splash, la mascotte de l'esthétique automobile Car Performance"
-                    fill
-                    sizes="80px"
-                    className="object-cover object-top"
-                  />
-                </div>
-                <div>
-                  <p className="cp-title font-black text-cp-ink text-lg leading-tight">SPLASH</p>
-                  <p className="text-cp-ink/55 text-sm leading-snug">
-                    L&apos;expert de l&apos;entretien auto — votre véhicule est entre de bonnes
-                    mains.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <LavageForm
-              formules={formules.map((f) => ({ nom: f.nom, tarifs: f.tarifs }))}
-              dates={dates}
-              initialPris={initialPris}
-              feries={feries}
-            />
-          </div>
         </div>
       </section>
 
-      <CpBridge fromColor="#F4EDE0" toColor="#1A0F06" />
+      {/* ── SPLASH LANE — le Pit Lane de l'esthétique, accent bleu (maquette
+          cp-v4-univers-standalone §2). Les bridges vivent dans le composant :
+          l'écran de confirmation est crème, le pont change avec l'état. ── */}
+      <SplashLane
+        formules={formules.map((f) => ({ nom: f.nom, tarifs: f.tarifs }))}
+        dates={dates}
+        initialPris={initialPris}
+        feries={feries}
+      />
       <CpFooter />
     </>
   );
