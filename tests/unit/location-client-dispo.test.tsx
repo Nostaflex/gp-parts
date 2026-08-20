@@ -5,6 +5,7 @@ vi.mock('../../app/location/actions', () => ({
   validateReservation: vi.fn(async () => ({ success: true, errors: {}, reference: 'LOC-TEST' })),
   checkDispo: vi.fn(async () => ({ unavailableIds: [] })),
   submitDevisLLD: vi.fn(async () => ({ success: true, errors: {} })),
+  getBusyRanges: vi.fn(async () => []),
 }));
 
 import { checkDispo } from '../../app/location/actions';
@@ -37,7 +38,7 @@ beforeEach(() => {
 
 describe('LocationClient — dispo par dates', () => {
   it('sans dates : aucun appel checkDispo, bouton Réserver actif', () => {
-    render(<LocationClient cars={cars} settings={DEFAULT_LOCATION_SETTINGS} />);
+    render(<LocationClient cars={cars} settings={DEFAULT_LOCATION_SETTINGS} initialBusy={[]} />);
     expect(checkDispo).not.toHaveBeenCalled();
     expect(screen.getByRole('button', { name: 'Réserver' })).toBeEnabled();
   });
@@ -45,7 +46,7 @@ describe('LocationClient — dispo par dates', () => {
   it('dates choisies + véhicule occupé → badge « Indisponible à ces dates » + bouton désactivé', async () => {
     vi.mocked(checkDispo).mockResolvedValue({ unavailableIds: ['clio-v'] });
     const { container } = render(
-      <LocationClient cars={cars} settings={DEFAULT_LOCATION_SETTINGS} />
+      <LocationClient cars={cars} settings={DEFAULT_LOCATION_SETTINGS} initialBusy={[]} />
     );
     const dateInputs = container.querySelectorAll('input[type="date"]');
     fireEvent.change(dateInputs[0], { target: { value: '2099-07-01' } });
@@ -60,7 +61,7 @@ describe('LocationClient — dispo par dates', () => {
 
   it('dates choisies + véhicule libre → badge « Disponible », bouton actif', async () => {
     const { container } = render(
-      <LocationClient cars={cars} settings={DEFAULT_LOCATION_SETTINGS} />
+      <LocationClient cars={cars} settings={DEFAULT_LOCATION_SETTINGS} initialBusy={[]} />
     );
     const dateInputs = container.querySelectorAll('input[type="date"]');
     fireEvent.change(dateInputs[0], { target: { value: '2099-07-01' } });

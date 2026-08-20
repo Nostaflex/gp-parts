@@ -10,6 +10,7 @@ import { notFound } from 'next/navigation';
 import { getAdapter } from '@/lib/data';
 import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
 import { getLocationSettings } from '@/lib/server/location-settings';
+import { getAllBusyRanges } from '@/lib/server/availability';
 import { LocationClient } from './LocationClient';
 
 export const metadata: Metadata = {
@@ -27,6 +28,9 @@ export default async function LocationPage() {
   const adapter = await getAdapter();
   const cars = (await adapter.getLocationCars()).filter((c) => c.disponible);
   const settings = await getLocationSettings();
+  // Plages bloquantes du parc en UNE lecture, SANS PII — tout le calendrier
+  // Loca Lane se calcule côté client sans re-fetch (spec D1, leçon C3 lavage).
+  const busy = await getAllBusyRanges();
   return (
     <>
       <CpHeader darkSectionIds={['loc-hero']} />
@@ -211,7 +215,7 @@ export default async function LocationPage() {
       <CpBridge fromColor="#F6F2EA" toColor="#F4EDE0" accentColor="#52C88A" />
 
       {/* ── CLIENT COMPONENT (search + catalogue + form) ── */}
-      <LocationClient cars={cars} settings={settings} />
+      <LocationClient cars={cars} settings={settings} initialBusy={busy} />
 
       <CpUniversStrip current="location" />
       <CpBridge fromColor="#F4EDE0" toColor="#1A0F06" />

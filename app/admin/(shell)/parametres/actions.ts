@@ -9,6 +9,7 @@ import { ContactInfoSchema } from '@/lib/contact-info';
 import { LegalInfoSchema } from '@/lib/legal-info';
 import { z } from 'zod';
 import { normalizeLocationSettings } from '@/lib/location-settings';
+import { LocationNarrationSchema } from '@/lib/schemas/location';
 import type { FormActionState } from '@/components/admin/FormShell';
 
 export async function updateLocationSettings(
@@ -34,9 +35,39 @@ export async function updateLocationSettings(
     },
   });
 
+  // Narration de Max (Loca Lane) — même doc, champ `narration`. GARDE-FOU :
+  // normalize a rempli `narration` avec les défauts ; sans le retirer, chaque
+  // save des cautions écraserait les textes personnalisés. On n'écrit la
+  // narration QUE si le formulaire l'a envoyée (champ vide accepté = retour
+  // au défaut côté public).
+  const { narration: _defauts, ...settingsSansNarration } = settings;
+  let narrationEcrite: Record<string, string> | null = null;
+  const narrationRaw = formData.get('narrationJson');
+  if (narrationRaw != null) {
+    let candidate: unknown;
+    try {
+      candidate = JSON.parse(String(narrationRaw));
+    } catch {
+      return { errors: { _form: ['Narration illisible — recharge la page et réessaie.'] } };
+    }
+    const parsed = LocationNarrationSchema.safeParse(candidate);
+    if (!parsed.success) {
+      return { errors: { _form: [...new Set(parsed.error.issues.map((i) => i.message))] } };
+    }
+    narrationEcrite = parsed.data;
+  }
+
   await getAdminFirestore()
     .doc('meta/locationSettings')
-    .set({ ...settings, updatedAt: Date.now(), updatedBy: session.email }, { merge: true });
+    .set(
+      {
+        ...settingsSansNarration,
+        ...(narrationEcrite ? { narration: narrationEcrite } : {}),
+        updatedAt: Date.now(),
+        updatedBy: session.email,
+      },
+      { merge: true }
+    );
 
   await writeAuditLog({
     actor: session.email,

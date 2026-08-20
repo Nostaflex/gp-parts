@@ -9,7 +9,8 @@ import { formatPrice, localDateISO } from '@/lib/utils';
 import { CpRgpdNotice } from '@/components/cp/CpRgpdNotice';
 import { CpMarketingOptIn } from '@/components/cp/CpMarketingOptIn';
 import { checkDispo, submitDevisLLD } from './actions';
-import { PitLaneBooking } from './PitLaneBooking';
+import { LocaLane } from './LocaLane';
+import type { PlageOccupee } from '@/lib/loca-lane';
 
 type Categorie = 'Toutes' | 'Citadine' | 'Berline' | 'SUV' | 'Utilitaire';
 
@@ -30,17 +31,21 @@ function calcNbJours(depart: string, retour: string): number {
 export function LocationClient({
   cars,
   settings,
+  initialBusy,
 }: {
   cars: LocationCar[];
   settings: LocationSettings;
+  /** Plages bloquantes SSR (sans PII) — alimentent le calendrier Loca Lane. */
+  initialBusy: PlageOccupee[];
 }) {
   const VEHICULES = cars;
   const [categorie, setCategorie] = useState<Categorie>('Toutes');
   const [dateDepart, setDateDepart] = useState('');
   const [dateRetour, setDateRetour] = useState('');
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Vœu (spec R2) : « Réserver » sur une carte épingle le véhicule, la Loca
+  // Lane reste maîtresse des dates.
+  const [wishId, setWishId] = useState<string | null>(null);
   const formSectionRef = useRef<HTMLDivElement>(null);
-  const [showForm, setShowForm] = useState(false);
   const [unavailableIds, setUnavailableIds] = useState<string[]>([]);
   const [showDevisLLD, setShowDevisLLD] = useState(false);
 
@@ -67,11 +72,9 @@ export function LocationClient({
   const nbJoursRecherche = calcNbJours(dateDepart, dateRetour);
 
   const openReservation = (id: string) => {
-    setSelectedId(id);
-    setShowForm(true);
-    // Le Pit Lane est rendu en bas de page (après le catalogue) : sans ce
-    // scroll, le clic « Réserver » paraît sans effet. requestAnimationFrame
-    // laisse React peindre la section avant de scroller.
+    setWishId(id);
+    // La Loca Lane vit en bas de page : sans ce scroll, le clic « Réserver »
+    // paraît sans effet.
     requestAnimationFrame(() => {
       formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
@@ -259,21 +262,20 @@ export function LocationClient({
         />
       )}
 
-      {/* ── PIT LANE — parcours de réservation 3 étapes (handoff §4) ── */}
-      {showForm && selectedId && !showDevisLLD && (
+      {/* ── LOCA LANE — « le planning d'abord », toujours rendue (spec R1) :
+          le parcours commence par les dates, le catalogue n'est qu'une porte
+          d'entrée (vœu). ── */}
+      {!showDevisLLD && (
         // scroll-mt : le header fixe recouvre ~70 px, l'ancre compense.
         <div ref={formSectionRef} className="scroll-mt-[70px]">
-          <PitLaneBooking
-            key={selectedId}
+          <LocaLane
             cars={VEHICULES}
             settings={settings}
-            initialVehiculeId={selectedId}
+            initialBusy={initialBusy}
+            wishId={wishId}
+            onClearWish={() => setWishId(null)}
             initialDateDepart={dateDepart || undefined}
             initialDateRetour={dateRetour || undefined}
-            onClose={() => {
-              setShowForm(false);
-              setSelectedId(null);
-            }}
             onDevisLLD={() => setShowDevisLLD(true)}
           />
         </div>

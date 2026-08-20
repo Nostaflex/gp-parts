@@ -278,6 +278,22 @@ export async function getDispoParJour(fromDate: string): Promise<DispoJour[]> {
   });
 }
 
+/** Plages bloquantes du parc, SANS PII ({carId, dateDepart, dateRetour}) —
+ * alimente le calendrier Loca Lane. Servi en SSR au premier rendu ; cette
+ * action ne sert qu'au rafraîchissement au retour d'onglet (best-effort,
+ * fail-open [] : la garde finale reste validateReservation). */
+export async function getBusyRanges(): Promise<
+  { locationCarId: string; dateDepart: string; dateRetour: string }[]
+> {
+  const ranges = await getAllBusyRanges();
+  // Sortie explicite champ par champ : jamais un champ Firestore de plus.
+  return ranges.map((r) => ({
+    locationCarId: r.locationCarId,
+    dateDepart: r.dateDepart,
+    dateRetour: r.dateRetour,
+  }));
+}
+
 // Pré-filtre UI : IDs des voitures indisponibles sur la plage demandée.
 export async function checkDispo(
   dateDepart: string,
