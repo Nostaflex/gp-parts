@@ -1,0 +1,554 @@
+<meta charset="utf-8">
+<title>Maquette Racoon Lane</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+:root{
+  --cinema:#0D0905; --card:#17110C; --cream:#F4EDE0; --muted:rgba(244,237,224,.65);
+  --faint:rgba(244,237,224,.45); --vert:#52C88A; --vert-d:#2A5C45; --mango:#E87200;
+  --rouge:#D92627; --gold:#E9C46A; --line:rgba(244,237,224,.12);
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box}
+body{margin:0;padding:0 20px 90px;background:var(--cinema);color:var(--cream);
+  font-family:"Instrument Sans",-apple-system,sans-serif;line-height:1.55}
+main{max-width:1060px;margin:0 auto}
+.m{font-family:"JetBrains Mono",ui-monospace,monospace}
+button{font-family:inherit;color:inherit;cursor:pointer}
+header{padding:52px 0 30px}
+.kick{font-family:"JetBrains Mono",monospace;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--vert);margin:0 0 12px}
+h1{font-family:"Big Shoulders Display",sans-serif;font-weight:900;text-transform:uppercase;
+  font-size:clamp(2.6rem,7vw,4.2rem);line-height:.92;margin:0 0 12px;text-wrap:balance}
+h1 em{font-style:normal;color:var(--vert)}
+.lede{color:var(--muted);max-width:66ch;margin:0;font-size:.98rem}
+.lede b{color:var(--mango)}
+
+/* catalogue-vitrine (démo arbitrage A « véhicule = vœu ») */
+.cata{margin:34px 0 8px}
+.lbl{font-family:"JetBrains Mono",monospace;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(244,237,224,.7);margin:0 0 9px}
+.catg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:720px){.catg{grid-template-columns:1fr}}
+.catc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 15px;display:flex;align-items:center;gap:10px}
+.catc .nm{font-weight:600;font-size:.92rem}
+.catc .mt{font-family:"JetBrains Mono",monospace;font-size:.58rem;color:var(--faint)}
+.catc .pj{font-family:"JetBrains Mono",monospace;font-size:.72rem;color:var(--vert);margin-left:auto;text-align:right}
+.catc button{background:var(--vert);border:0;border-radius:999px;color:#06231A;font-weight:700;font-size:.74rem;padding:8px 13px;flex-shrink:0}
+.catc button:hover{filter:brightness(1.08)}
+
+/* le Pit Lane jouable */
+.pl{background:var(--card);border:1px solid var(--line);border-radius:20px;margin-top:26px;overflow:hidden}
+.plhd{padding:20px 26px 0}
+.plhd .eyb{font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--vert);margin:0 0 6px}
+.plhd h2{font-family:"Big Shoulders Display",sans-serif;font-weight:900;text-transform:uppercase;font-size:1.9rem;margin:0 0 16px;line-height:1}
+.wish{display:inline-flex;align-items:center;gap:8px;background:rgba(82,200,138,.12);border:1px solid rgba(82,200,138,.4);border-radius:999px;padding:4px 12px;font-family:"JetBrains Mono",monospace;font-size:.64rem;color:var(--vert);margin-left:12px;vertical-align:middle}
+.wish button{background:none;border:0;color:var(--faint);font-size:.8rem;padding:0}
+.rail{display:flex;align-items:center;margin-bottom:0}
+.nd{display:flex;align-items:center;gap:9px;background:none;border:0;padding:0}
+.nd i{width:26px;height:26px;border-radius:50%;background:rgba(244,237,224,.08);border:1px solid rgba(244,237,224,.18);display:flex;align-items:center;justify-content:center;font-family:"JetBrains Mono",monospace;font-style:normal;font-size:.68rem;color:rgba(244,237,224,.6);transition:all 300ms;flex-shrink:0}
+.nd b{font-family:"Big Shoulders Display",sans-serif;font-weight:900;text-transform:uppercase;font-size:1.02rem;color:rgba(244,237,224,.6);transition:color 300ms;white-space:nowrap}
+.nd.done i{background:var(--vert);border-color:var(--vert);color:#06231A}
+.nd.done b{color:rgba(244,237,224,.85)}
+.nd.cur i{background:var(--mango);border-color:var(--mango);color:#1a0f06;transform:scale(1.12)}
+.nd.cur b{color:var(--cream)}
+.ln{flex:1;height:2px;background:rgba(244,237,224,.12);margin:0 12px;position:relative;overflow:hidden}
+.ln s{position:absolute;inset:0;width:0;background:var(--vert);transition:width 500ms var(--ease)}
+.ln.fill s{width:100%}
+@media(max-width:700px){.nd b{display:none}}
+.plbody{display:grid;grid-template-columns:1.4fr .6fr;border-top:1px solid var(--line);margin-top:16px;min-height:430px}
+@media(max-width:840px){.plbody{grid-template-columns:1fr}}
+.stage{padding:20px 24px 26px 26px;border-right:1px solid var(--line);min-width:0}
+@media(max-width:840px){.stage{border-right:0}}
+.side{padding:20px 26px 24px 22px;display:flex;flex-direction:column}
+.pane{animation:slidein 420ms var(--ease) both}
+@keyframes slidein{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+.bub{display:flex;gap:11px;align-items:center;background:rgba(244,237,224,.05);border:1px solid var(--line);border-radius:14px;padding:11px 13px;margin-bottom:15px}
+.bub .av{width:46px;height:46px;border-radius:50%;background:var(--vert-d);border:2px solid var(--vert);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.3rem}
+.bub b{display:block;font-family:"JetBrains Mono",monospace;font-size:.56rem;letter-spacing:.16em;text-transform:uppercase;color:var(--vert);font-weight:400;margin-bottom:2px}
+.bub p{margin:0;font-size:.82rem;color:rgba(244,237,224,.82);line-height:1.4}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin-bottom:14px}
+@media(max-width:700px){.days{grid-template-columns:repeat(4,1fr)}}
+.dd{border:1px solid var(--line);border-radius:12px;padding:9px 4px;text-align:center;background:rgba(244,237,224,.04);transition:all 250ms}
+.dd:hover:not(:disabled){border-color:rgba(244,237,224,.32)}
+.dd.on{background:var(--cream);color:#1a0f06;border-color:var(--cream);transform:translateY(-3px)}
+.dd:disabled{opacity:.45;cursor:not-allowed}
+.dd .w{font-family:"JetBrains Mono",monospace;font-size:.54rem;text-transform:uppercase;letter-spacing:.12em;opacity:.75;display:block}
+.dd .n{font-family:"Big Shoulders Display",sans-serif;font-weight:900;font-size:1.25rem;line-height:1.15;display:block}
+.dd .g{height:4px;border-radius:2px;background:rgba(244,237,224,.14);margin-top:5px;overflow:hidden;display:block}
+.dd.on .g{background:rgba(26,15,6,.15)}
+.dd .g i{display:block;height:100%;transition:width 400ms var(--ease)}
+.dd .lg{font-family:"JetBrains Mono",monospace;font-size:.5rem;opacity:.8;display:block;margin-top:3px}
+/* Champs Départ / Retour — le champ ACTIF reçoit le clic du calendrier
+   (pattern Air France / Sixt / Airbnb : on tape le champ à corriger). */
+.slots{display:flex;align-items:center;gap:10px;margin:0 0 12px;flex-wrap:wrap}
+.slot{display:flex;flex-direction:column;gap:1px;border:1px solid var(--line);border-radius:12px;padding:8px 14px;background:rgba(244,237,224,.04);min-width:150px;text-align:left;transition:all 200ms}
+.slot b{font-family:"JetBrains Mono",monospace;font-size:.52rem;letter-spacing:.16em;text-transform:uppercase;color:rgba(244,237,224,.7);font-weight:400}
+.slot span{font-size:.86rem;font-weight:600}
+.slot.vide span{color:var(--faint);font-weight:400}
+.slot.dep.set{background:var(--cream);border-color:var(--cream)}
+.slot.dep.set b{color:rgba(26,15,6,.55)}.slot.dep.set span{color:#1a0f06}
+.slot.ret.set{background:var(--mango);border-color:var(--mango)}
+.slot.ret.set b{color:rgba(26,15,6,.55)}.slot.ret.set span{color:#1a0f06}
+.slot.actif{outline:2px solid var(--mango);outline-offset:2px}
+.slots .fleche{color:var(--faint);font-size:1rem}
+.slots .nj{font-family:"Big Shoulders Display",sans-serif;font-weight:900;font-size:1.3rem;color:var(--vert)}
+.slots .nj s{text-decoration:none;font-family:"JetBrains Mono",monospace;font-size:.55rem;color:var(--faint);display:block;letter-spacing:.1em;text-transform:uppercase}
+.slots .restart{margin-left:auto;background:none;border:0;font-family:"JetBrains Mono",monospace;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);text-decoration:underline;text-underline-offset:3px;padding:4px}
+.slots .restart:hover{color:var(--cream)}
+
+/* La PLAGE se voit : départ = BLANC (crème), jours couverts = teinte verte,
+   FIN = ORANGE (décision Djemil : la fin doit se marquer). */
+.dd.in{background:rgba(82,200,138,.13);border-color:rgba(82,200,138,.45)}
+.dd.ret{background:var(--mango);border-color:var(--mango);color:#1a0f06}
+.dd.ret .g{background:rgba(26,15,6,.18)}
+/* Calendrier mensuel — cellules compactes : numéro + barre, pas de compteur */
+.mnav{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.mnav b{font-family:"Big Shoulders Display",sans-serif;font-weight:900;text-transform:uppercase;font-size:1.1rem;letter-spacing:.02em;min-width:150px;text-align:center}
+.mnav button{background:none;border:1px solid var(--line);border-radius:999px;width:34px;height:34px;color:var(--muted);font-size:.9rem;transition:all 200ms}
+.mnav button:hover:not(:disabled){border-color:rgba(244,237,224,.35);color:var(--cream)}
+.mnav button:disabled{opacity:.3;cursor:not-allowed}
+.mnav .cap{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.days.cal{grid-template-columns:repeat(7,1fr)}
+.cal-head{font-family:"JetBrains Mono",monospace;font-size:.5rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);text-align:center;padding-bottom:1px}
+/* ZOOM OUT par défaut : objets de date MINI — le Pit Lane ne s'allonge plus */
+.days.cal{gap:4px;margin-bottom:10px}
+.days.cal .dd{padding:3px 1px;border-radius:7px;border-width:1px}
+.days.cal .dd .n{font-size:.74rem;font-family:"JetBrains Mono",monospace;font-weight:700}
+.days.cal .dd .g{height:3px;margin-top:2px}
+.days.cal .dd .mo{font-family:"JetBrains Mono",monospace;font-size:.42rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mango);display:block;line-height:1.1}
+.dd.blank{visibility:hidden}
+/* ZOOM IN après sélection : la fenêtre de la plage, en grand */
+.days.zin{grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:7px}
+.days.zin .dd{padding:9px 4px;border-radius:12px}
+.days.zin .dd .n{font-size:1.2rem}
+.zinbar{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.zinbar b{font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cream)}
+.zinbar b s{text-decoration:none;color:var(--mango)}
+.zinbar button{margin-left:auto;background:none;border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-family:"JetBrains Mono",monospace;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);transition:all 200ms}
+.zinbar button:hover{border-color:rgba(244,237,224,.35);color:var(--cream)}
+.du.libre{grid-column:span 2}
+.morebtn{background:none;border:1px dashed var(--line);border-radius:12px;padding:9px 2px;font-family:"JetBrains Mono",monospace;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);transition:all 200ms}
+.morebtn:hover{border-color:rgba(244,237,224,.35);color:var(--cream)}
+.warn{border:1px solid rgba(217,38,39,.55);background:rgba(217,38,39,.07);border-radius:12px;padding:11px 14px;font-size:.82rem;color:rgba(244,237,224,.85);margin:2px 0 12px}
+/* Carrefour du vœu : le véhicule rêvé est pris sur les dates choisies —
+   on pose la question, on n'impose rien. Entrée animée douce. */
+/* Quand Max PROPOSE, ses propositions sont des boutons sous sa réplique —
+   le dialogue est l'interface, pas une carte de plus. */
+.bacts{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;animation:slidein 420ms var(--ease) both}
+.bacts .oui{background:var(--vert);border:0;border-radius:11px;padding:9px 15px;font-size:.8rem;font-weight:700;color:#06231A;transition:all 200ms;animation:drop 1200ms var(--ease) 2}
+.bacts .oui:hover{filter:brightness(1.07)}
+.bacts .oui s{text-decoration:none;font-family:"JetBrains Mono",monospace;font-weight:400;font-size:.66rem;opacity:.8;margin-left:7px}
+.bacts .non{background:none;border:1px solid rgba(244,237,224,.22);border-radius:11px;padding:9px 14px;font-size:.8rem;font-weight:600;color:rgba(244,237,224,.75);transition:all 200ms}
+.bacts .non:hover{border-color:rgba(244,237,224,.42);color:var(--cream)}
+.bacts .tiers{background:none;border:0;font-size:.73rem;color:var(--mango);text-decoration:underline;text-underline-offset:3px;padding:3px}
+.bacts .tiers:hover{color:#FF8C1F}
+.warn .alt{background:none;border:0;font-size:.8rem;color:var(--mango);text-decoration:underline;text-underline-offset:3px;padding:0;margin-left:6px}
+.warn .alt:hover{color:#FF8C1F}
+.lld{font-size:.72rem;color:var(--faint);margin:8px 0 0}
+.lld a{color:var(--mango)}
+.hrrow{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px}
+@media(max-width:700px){.hrrow{grid-template-columns:1fr}}
+.durs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.du{border:1px solid var(--line);border-radius:12px;padding:9px 2px;text-align:center;background:rgba(244,237,224,.04);transition:all 250ms}
+.du:hover{border-color:rgba(244,237,224,.32)}
+.du.on{background:var(--vert);border-color:var(--vert);color:#06231A;font-weight:700}
+.du b{font-family:"Big Shoulders Display",sans-serif;font-weight:900;font-size:1.15rem;display:block;line-height:1}
+.du span{font-family:"JetBrains Mono",monospace;font-size:.52rem;opacity:.8}
+.legend{display:flex;gap:15px;margin-top:11px;font-family:"JetBrains Mono",monospace;font-size:.55rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(244,237,224,.6)}
+.legend i{display:inline-block;width:8px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.cats{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+.cat{font-family:"JetBrains Mono",monospace;font-size:.64rem;border-radius:999px;padding:6px 13px;border:1px solid var(--line);background:none;color:var(--muted);transition:all 200ms}
+.cat.on{background:var(--vert);border-color:var(--vert);color:#06231A;font-weight:700}
+.cat.no{color:#FF8A80;border-color:rgba(217,38,39,.5);text-decoration:line-through;cursor:not-allowed}
+.vlist{display:flex;flex-direction:column;gap:8px}
+.vc{border:1px solid var(--line);border-radius:13px;padding:11px 14px;background:rgba(244,237,224,.04);text-align:left;transition:all 220ms;width:100%}
+.vc:hover:not(.off){border-color:rgba(244,237,224,.32)}
+.vc.on{border-color:var(--vert);background:rgba(82,200,138,.09)}
+.vc .row{display:flex;align-items:baseline;gap:10px}
+.vc .nm{font-size:.9rem;font-weight:600}
+.vc .mt{font-family:"JetBrains Mono",monospace;font-size:.58rem;color:var(--faint)}
+.vc .tot{margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:.68rem;color:var(--vert);text-align:right;white-space:nowrap}
+.vc .tot b{font-family:"Big Shoulders Display",sans-serif;font-weight:900;font-size:1.15rem;color:var(--cream)}
+.vc.off{border-color:rgba(217,38,39,.55);background:rgba(217,38,39,.06);cursor:default}
+.vc.off .band{display:inline-block;font-family:"JetBrains Mono",monospace;font-size:.56rem;letter-spacing:.08em;text-transform:uppercase;color:#FF8A80;border:1px solid rgba(217,38,39,.55);border-radius:6px;padding:2px 8px;margin-top:6px}
+.vc.off .alt{display:inline-block;background:none;border:0;font-size:.72rem;color:var(--mango);margin-top:6px;margin-left:8px;text-decoration:underline;text-underline-offset:3px;padding:0}
+.vc.off .alt:hover{color:#FF8C1F}
+.hrs{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:13px}
+@media(max-width:700px){.hrs{grid-template-columns:repeat(3,1fr)}}
+.hr{font-family:"JetBrains Mono",monospace;font-size:.68rem;text-align:center;border:1px solid var(--line);border-radius:10px;padding:8px 0;background:rgba(244,237,224,.04);color:var(--muted);transition:all 200ms}
+.hr:hover{border-color:rgba(244,237,224,.32)}
+.hr.on{background:var(--vert);border-color:var(--vert);color:#06231A;font-weight:700}
+.fldg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:700px){.fldg{grid-template-columns:1fr}}
+.fld{border:1px solid var(--line);border-radius:10px;padding:8px 11px}
+.fld b{display:block;font-family:"JetBrains Mono",monospace;font-size:.54rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(244,237,224,.7);font-weight:400}
+.fld span{font-size:.78rem;color:var(--muted)}
+.fld.w2{grid-column:1/-1}
+.mascard{display:flex;align-items:center;gap:10px;background:rgba(244,237,224,.05);border:1px solid var(--line);border-radius:14px;padding:11px 13px;margin-bottom:12px}
+.mascard .av{width:40px;height:40px;border-radius:50%;background:var(--vert-d);border:2px solid var(--vert);display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0}
+.mascard p{margin:0;font-size:.74rem;color:var(--muted);line-height:1.4}
+.tk{border:1px dashed rgba(244,237,224,.25);border-radius:13px;padding:12px 14px;font-family:"JetBrains Mono",monospace}
+.tk button{display:flex;justify-content:space-between;gap:8px;width:100%;background:none;border:0;font:inherit;font-size:.68rem;color:rgba(244,237,224,.62);padding:4px 0;text-align:inherit;transition:color 200ms}
+.tk button::after{content:'✎';opacity:.25;transition:opacity 200ms;flex-shrink:0}
+.tk button:hover{color:var(--cream)}
+.tk button:hover::after{opacity:.9;color:var(--vert)}
+.tk .tt{display:flex;justify-content:space-between;border-top:1px dashed rgba(244,237,224,.25);margin-top:7px;padding-top:8px;color:var(--cream);font-size:.72rem;align-items:baseline}
+.tk .tt b{color:var(--mango);font-family:"Big Shoulders Display",sans-serif;font-weight:900;font-size:1.25rem;transition:opacity 180ms}
+.tk .tt b.flash{opacity:.25}
+.reass{font-size:.7rem;color:rgba(244,237,224,.6);line-height:1.5;margin:11px 0 0}
+.pnav{display:flex;gap:8px;margin-top:auto;padding-top:15px}
+.pnav .back{flex:1;background:none;border:1px solid rgba(244,237,224,.2);border-radius:12px;padding:11px;font-size:.82rem;font-weight:600;color:rgba(244,237,224,.7);transition:all 200ms}
+.pnav .back:hover{border-color:rgba(244,237,224,.4);color:var(--cream)}
+.pnav .go{flex:1.4;background:var(--vert);border:0;border-radius:12px;padding:11px;font-size:.82rem;font-weight:700;color:#06231A;transition:opacity 200ms}
+.pnav .go:hover{opacity:.92}
+@keyframes drop{from{box-shadow:0 0 0 0 rgba(82,200,138,.45)}to{box-shadow:0 0 0 15px rgba(0,0,0,0)}}
+.pulse{animation:drop 1200ms var(--ease) 2}
+.du.on,.dd.on,.hr.on{animation:drop 600ms var(--ease)}
+.notes{margin-top:30px;font-size:.85rem;color:var(--muted);padding-left:18px}
+.notes li{margin-bottom:6px}
+.notes li::marker{color:var(--vert)}
+.notes b{color:var(--cream)}
+:focus-visible{outline:2px solid var(--mango);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<main>
+<header>
+  <p class="kick">Car Performance · /location · maquette jouable · arbitrages A + B intégrés</p>
+  <h1>Racoon Lane <em>— le planning d'abord</em></h1>
+  <p class="lede">Tout est cliquable. Essaie dans l'ordre — ou commence par <b>« Réserver » sur le Duster</b> du catalogue : il est pris ce week-end, tu verras le vœu, le cadre rouge, la date de libération et l'alternative en un tap.</p>
+</header>
+
+<div class="cata">
+  <p class="lbl">Le catalogue au-dessus du Pit Lane — « Réserver » épingle un vœu (arbitrage A)</p>
+  <div class="catg" id="cata"></div>
+</div>
+
+<div class="pl">
+  <div class="plhd">
+    <p class="eyb">Pit Lane · Racoon</p>
+    <h2>D'abord le voyage, ensuite la monture<span id="wish-slot"></span></h2>
+    <div class="rail" id="rail"></div>
+  </div>
+  <div class="plbody">
+    <div class="stage" id="stage"></div>
+    <div class="side">
+      <div class="mascard"><span class="av">🦝</span><p id="side-note"></p></div>
+      <div class="tk" id="ticket"></div>
+      <p class="reass">Caution 400 € par empreinte CB, non débitée. Aucun paiement en ligne : Max confirme sur WhatsApp sous 24 h ouvrées. Annulation libre jusqu'à 12 h avant le retrait.</p>
+      <div class="pnav">
+        <button class="back" id="btn-back">Retour</button>
+        <button class="go" id="btn-next">Continuer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ul class="notes">
+  <li><b>Acte 1</b> — la jauge de chaque jour = véhicules libres / parc (5). Lundi 24 : le parc respire à nouveau quand le Duster et le Kangoo rentrent.</li>
+  <li><b>Acte 2</b> — le prix est le <b>TOTAL de ta plage</b>, plus jamais un « €/jour » qui cache l'addition. Les catégories à zéro sont barrées en rouge, les véhicules pris restent visibles : cadre rouge, date de libération, alternative en un tap.</li>
+  <li><b>Acte 3</b> — pastilles d'heures (zéro menu déroulant), champs du conducteur inchangés côté serveur (gates âge/permis, CGL, caution).</li>
+  <li>Le rail <b>raconte</b> les choix et chaque ligne du ticket <b>ramène</b> à son acte (✎). La narration de Max sera administrable au BO, comme celle de Splash.</li>
+</ul>
+</main>
+<script>
+(function(){
+'use strict';
+/* Parc de démo — busy = plages [début, fin) en « jours août continus »
+   (1 = 1er août 2026, 32 = 1er sept., etc. — Date() gère le débordement). */
+var FLEET=[
+ {id:'yaris', nom:'Toyota Yaris',    cat:'Citadine',  prix:35, mt:'Essence · manuelle · 5 places', busy:[[46,50]]},
+ {id:'clio',  nom:'Renault Clio',    cat:'Citadine',  prix:35, mt:'Essence · manuelle · 5 places', busy:[[25,28],[46,54]]},
+ {id:'kangoo',nom:'Renault Kangoo',  cat:'Utilitaire',prix:48, mt:'Diesel · 3 m³ · 2 places',      busy:[[20,24],[44,52]]},
+ {id:'duster',nom:'Dacia Duster',    cat:'SUV',       prix:52, mt:'Diesel · SUV · 5 places',       busy:[[20,24],[45,53]]},
+ {id:'nmax',  nom:'Yamaha NMAX 125', cat:'Scooter',   prix:28, mt:'Permis B + 3 ans · 2 casques',  busy:[[44,50]]}
+];
+var HEURES=['08:00','09:00','10:00','11:00','14:00','15:00','16:00','17:00'];
+var W=['dim','lun','mar','mer','jeu','ven','sam'];
+var MOIS=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+var MOIS_LONG=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+var AUG1=new Date(2026,7,1);
+var TODAY=20;              /* 20 août 2026 */
+var MAXD=TODAY+365;        /* horizon : 1 an */
+var S={step:1,off:0,start:null,dur:null,editing:'start',hR:'09:00',hD:'17:00',veh:null,wish:null,cat:null};
+
+function dt(d){return new Date(2026,7,d);}
+function dnum(date){return 1+Math.round((date-AUG1)/864e5);}
+function wd(d){return W[dt(d).getDay()];}
+function lab(d){var x=dt(d);return wd(d)+'. '+x.getDate()+' '+MOIS[x.getMonth()];}
+function overlap(v,a,b){return v.busy.some(function(r){return a<r[1]&&r[0]<b;});}
+function isFree(v){return !overlap(v,S.start,S.start+S.dur);}
+function libreLe(v){var m=0;v.busy.forEach(function(r){if(S.start<r[1]&&r[0]<S.start+S.dur)m=Math.max(m,r[1]);});return m;}
+function freeOnDay(d){return FLEET.filter(function(v){return !v.busy.some(function(r){return r[0]<=d&&d<r[1];});}).length;}
+/* Vœu épinglé → la jauge devient le calendrier de CE véhicule. */
+function gaugeFor(d){
+  if(S.wish){
+    var w=FLEET.find(function(v){return v.id===S.wish;});
+    var pris=w.busy.some(function(r){return r[0]<=d&&d<r[1];});
+    return pris?{pct:100,col:'var(--rouge)'}:{pct:12,col:'var(--vert)'};
+  }
+  var free=freeOnDay(d),pct=Math.round((FLEET.length-free)/FLEET.length*100);
+  return {pct:pct,col:free===0?'var(--rouge)':(pct>=60?'var(--gold)':'var(--vert)')};
+}
+/* Plage morte : premier départ (même durée) où AU MOINS un véhicule suit. */
+function nbDispoPlage(){return S.start&&S.dur?FLEET.filter(isFree).length:null;}
+function wishVeh(){return S.wish?FLEET.find(function(v){return v.id===S.wish;}):null;}
+/* Conflit : vœu posé + plage posée + le véhicule rêvé est pris dessus. */
+function conflitVoeu(){var w=wishVeh();return !!(w&&S.start&&S.dur&&!S.editing&&!isFree(w));}
+/* Le « second véhicule qui clôture le match » : libre sur LA plage —
+   même catégorie d'abord, sinon le prix le plus proche. */
+function bestAlt(){
+  var w=wishVeh();if(!w)return null;
+  var libres=FLEET.filter(function(v){return v.id!==w.id&&isFree(v);});
+  if(!libres.length)return null;
+  var cat=libres.filter(function(v){return v.cat===w.cat;});
+  if(cat.length)return cat[0];
+  libres.sort(function(a,b){return Math.abs(a.prix-w.prix)-Math.abs(b.prix-w.prix);});
+  return libres[0];
+}
+function altStart(){
+  if(!S.start||!S.dur)return null;
+  for(var s=S.start+1;s<=Math.min(S.start+60,MAXD-S.dur);s++){
+    var ok=FLEET.some(function(v){return !overlap(v,s,s+S.dur);});
+    if(ok)return s;
+  }
+  return null;
+}
+function cats(){var o={};FLEET.forEach(function(v){o[v.cat]=(o[v.cat]||0)+(isFree(v)?1:0);});return o;}
+function vehSel(){return FLEET.find(function(v){return v.id===S.veh;})||null;}
+function total(){var v=vehSel();return v&&S.dur?v.prix*S.dur:null;}
+function q(s){return document.querySelector(s);}
+
+function story(){
+  if(S.step===1){
+    if(!S.start){
+      if(S.wish){var w=FLEET.find(function(v){return v.id===S.wish;});return 'Le '+w.nom.split(' ')[1]+' te fait de l’œil ? Noté — les barres te montrent SES disponibilités. Clique ton jour de départ.';}
+      return 'D’abord, dis-moi QUAND tu pars. Les barres, c’est l’état réel du parc — et pour corriger une date, tape simplement son champ là-haut.';
+    }
+    if(S.editing==='end'||!S.dur)return 'Le '+lab(S.start)+', c’est noté. Et le retour ? Clique le jour où tu rends les clés.';
+    if(S.editing==='start')return 'On corrige le départ — clique le nouveau jour, le retour ne bouge pas.';
+    if(nbDispoPlage()===0){var s3=altStart();return 'Là, tout le parc est pris quelque part entre tes deux dates.'+(s3?' En partant le '+lab(s3)+', ça roule.':'');}
+    if(conflitVoeu()){var wa=bestAlt();return 'Ton '+wishVeh().nom+' est pris du '+lab(S.start)+' au '+lab(S.start+S.dur)+'.'+(wa?' Le '+wa.nom+' est libre sur TES dates — on part avec lui ?':' Aucun autre véhicule ne colle exactement — on regarde tout le parc ?');}
+    if(S.dur>=30)return 'Un mois ou plus : là, je te fais un devis longue durée aux petits oignons — tarif dégressif.';
+    if(S.dur>=7)return 'Une semaine ou plus : Basse-Terre, Grande-Terre, et il te reste du carburant pour la Pointe des Châteaux.';
+    return 'Départ blanc, retour orange — '+S.dur+' jour'+(S.dur>1?'s':'')+'. Choisis tes heures et on va voir le parc.';
+  }
+  if(S.step===2){
+    var w=S.wish?FLEET.find(function(v){return v.id===S.wish;}):null;
+    if(w&&!isFree(w))return 'Ton '+w.nom+' est pris sur ces dates — il rentre le '+lab(libreLe(w))+'. Glisse d’un tap, ou prends une autre monture.';
+    var n=FLEET.filter(isFree).length;
+    if(n<=2)return 'Il ne reste que '+n+' véhicules sur ta plage. Je ne te promets pas qu’ils seront encore là ce soir.';
+    return 'Pour ton départ du '+lab(S.start)+' : voilà ce qui est au local, avec le prix de TA plage — pas de surprise à la fin.';
+  }
+  return 'Empreinte CB, état des lieux photo, quinze minutes de paperasse. Je te confirme sur WhatsApp avant la fin de la journée.';
+}
+function sideNote(){
+  var v=vehSel();
+  if(S.step===1)return 'Km illimité, assurance incluse — déjà dans le prix que tu verras à l’acte 2.';
+  if(v&&v.cat==='Utilitaire')return 'Trois mètres cubes : un déménagement d’étudiant tient dedans.';
+  if(v&&v.cat==='Scooter')return 'Deux casques dans le coffre. Permis B et trois ans de route suffisent.';
+  if(S.dur>=5)return 'Km illimité — c’est au bout de cinq jours qu’on comprend pourquoi.';
+  return 'Km illimité et assurance déjà comptés. Rien à ajouter au retour.';
+}
+
+function legende(){
+  if(S.wish){
+    var w=FLEET.find(function(v){return v.id===S.wish;});
+    return '<div class="legend"><span><i style="background:var(--vert)"></i>'+w.nom.split(' ')[1]+' libre</span><span><i style="background:var(--rouge)"></i>'+w.nom.split(' ')[1]+' pris</span></div>';
+  }
+  return '<div class="legend"><span><i style="background:var(--vert)"></i>ça respire</span><span><i style="background:var(--gold)"></i>ça se remplit</span><span><i style="background:var(--rouge)"></i>complet</span></div>';
+}
+function slots(){
+  var fin=S.dur?S.start+S.dur:null;
+  var h='<div class="slots">';
+  var complet0=S.start&&S.dur&&!S.editing;
+  h+='<button class="slot dep'+(S.start?' set':' vide')+(S.editing==='start'?' actif':'')+'" data-slot="start"><b>Départ</b><span>'+(S.start?lab(S.start)+(complet0?' · '+S.hR:''):'choisis un jour')+'</span></button>';
+  h+='<span class="fleche">→</span>';
+  h+='<button class="slot ret'+(fin?' set':' vide')+(S.editing==='end'?' actif':'')+'" data-slot="end"><b>Retour</b><span>'+(fin?lab(fin)+(complet0?' · '+S.hD:''):'puis le retour')+'</span></button>';
+  if(S.dur)h+='<span class="nj">'+S.dur+' j<s>durée</s></span>';
+  if(S.start)h+='<button class="restart" data-restart>⟲ recommencer</button>';
+  h+='</div>';
+  return h;
+}
+function calendrier(){
+  var h=slots();
+  var complete=S.start&&S.dur&&!S.editing;
+  if(complete){
+    /* Récap ZOOM IN — lecture seule : l’édition passe par les champs. */
+    var fin=S.start+S.dur;
+    var a=Math.max(TODAY+1,S.start-1), b=fin+1;
+    h+='<div class="days zin">';
+    for(var d=a;d<=b;d++){
+      var gj=gaugeFor(d);
+      var cls=S.start===d?' on':(d===fin?' ret':(d>S.start&&d<fin?' in':''));
+      h+='<span class="dd'+cls+'" aria-label="'+lab(d)+'">'
+        +'<span class="w">'+wd(d)+'</span><span class="n">'+dt(d).getDate()+'</span>'
+        +'<span class="g"><i style="width:'+gj.pct+'%;background:'+gj.col+'"></i></span></span>';
+    }
+    h+='</div>';
+        if(S.dur>=30)h+='<p class="lld">30 jours et plus → <a href="#">devis longue durée</a> (tarif dégressif, contrat adapté).</p>';
+    return h;
+  }
+  /* Calendrier ACTIF : fenêtre glissante de 6 semaines depuis AUJOURD'HUI. */
+  var d0=TODAY+1+S.off;
+  var lead=(dt(d0).getDay()+6)%7;
+  var NJ=42;
+  var mA=MOIS_LONG[dt(d0).getMonth()], mB=MOIS_LONG[dt(d0+NJ-1).getMonth()];
+  h+='<div class="mnav">'
+    +'<button data-off="-28"'+(S.off<=0?' disabled':'')+' aria-label="4 semaines plus tôt">‹</button>'
+    +'<b style="min-width:210px">'+(mA===mB?mA:mA+' — '+mB)+' '+dt(d0+NJ-1).getFullYear()+'</b>'
+    +'<button data-off="28"'+(S.off>=365-NJ?' disabled':'')+' aria-label="4 semaines plus tard">›</button>'
+    +'<span class="cap">'+(S.wish?'les barres = la dispo du '+FLEET.find(function(v){return v.id===S.wish;}).nom:(S.editing==='end'?'clique ton jour de RETOUR':'6 semaines · horizon 1 an'))+'</span></div>';
+  h+='<div class="days cal">';
+  ['Lu','Ma','Me','Je','Ve','Sa','Di'].forEach(function(x){h+='<span class="cal-head">'+x+'</span>';});
+  for(var bk=0;bk<lead;bk++)h+='<span class="dd blank"></span>';
+  for(var i=0;i<NJ;i++){
+    var d=d0+i, x=dt(d);
+    var gj=gaugeFor(d), free=freeOnDay(d);
+    var off=d>MAXD||free===0;
+    var fin2=S.dur?S.start+S.dur:null;
+    var cls=S.start===d?' on':(fin2===d?' ret':(fin2&&d>S.start&&d<fin2?' in':''));
+    h+='<button class="dd'+cls+'"'+(off?' disabled':'')+' data-day="'+d+'" aria-label="'+lab(d)+(free===0?', complet':', '+free+' véhicules disponibles')+'">'
+      +(x.getDate()===1||i===0?'<span class="mo">'+MOIS[x.getMonth()]+'</span>':'')
+      +'<span class="n">'+x.getDate()+'</span><span class="g"><i style="width:'+gj.pct+'%;background:'+gj.col+'"></i></span></button>';
+  }
+  h+='</div>'+legende()+'';
+  return h;
+}
+function render(){
+  q('#wish-slot').innerHTML=S.wish?' <span class="wish">vœu : '+FLEET.find(function(v){return v.id===S.wish;}).nom+' <button title="Retirer le vœu" data-unwish>×</button></span>':'';
+  var l1=(S.start&&S.dur)?lab(S.start)+' · '+S.dur+' j':'Les dates';
+  var v=vehSel();
+  var l2=(S.step>2&&v)?v.nom+' · '+total()+' €':'Le véhicule';
+  var rail='';
+  [[1,l1],[2,l2],[3,'Le conducteur']].forEach(function(e,i){
+    if(i>0)rail+='<span class="ln'+(S.step>=e[0]?' fill':'')+'"><s></s></span>';
+    rail+='<button class="nd'+(S.step===e[0]?' cur':S.step>e[0]?' done':'')+'" data-go="'+e[0]+'"><i>'+e[0]+'</i><b>'+e[1]+'</b></button>';
+  });
+  q('#rail').innerHTML=rail;
+
+  /* Les propositions de Max = ses boutons, sous sa réplique. */
+  var acts='';
+  if(S.step===1&&S.start&&S.dur&&!S.editing){
+    if(nbDispoPlage()===0){
+      var sA=altStart();
+      if(sA)acts='<button class="oui" data-altstart="'+sA+'">Partir le '+lab(sA)+' — même durée</button>';
+    }else if(conflitVoeu()){
+      var wC=wishVeh(), aC=bestAlt(), lC=libreLe(wC);
+      var nomA=aC?aC.nom.split(' ').slice(1).join(' '):'';
+      var nomW=wC.nom.split(' ').slice(1).join(' ');
+      acts=(aC?'<button class="oui" data-accept-alt="'+aC.id+'">Oui — partir en '+nomA+'<s>'+(aC.prix*S.dur)+' € · '+S.dur+' j</s></button>':'')
+        +'<button class="non" data-drop-wish>Non — voir tout le parc, sans critère</button>'
+        +(lC?'<button class="tiers" data-keep-shift="'+lC+'">ou garder le '+nomW+' : partir le '+lab(lC)+'</button>':'');
+    }
+  }
+  var h='<div class="pane"><div class="bub"><span class="av">🦝</span><div><b>Max · acte '+S.step+' sur 3</b><p>'+story()+'</p>'+(acts?'<div class="bacts">'+acts+'</div>':'')+'</div></div>';
+  if(S.step===1){
+    h+='<p class="lbl">Jour de départ</p>'+calendrier();
+    /* Progressive disclosure : la durée n’apparaît qu’une fois le départ posé */
+    /* …et les heures une fois la durée posée */
+    if(S.start&&S.dur&&!S.editing){
+      h+='<div class="hrrow"><div><p class="lbl" style="margin-top:16px">Récupération — '+lab(S.start)+'</p><div class="hrs">';
+      HEURES.forEach(function(x){h+='<button class="hr'+(S.hR===x?' on':'')+'" data-hr-r="'+x+'">'+x+'</button>';});
+      h+='</div></div><div><p class="lbl" style="margin-top:16px">Dépose — '+lab(S.start+S.dur)+'</p><div class="hrs">';
+      HEURES.forEach(function(x){h+='<button class="hr'+(S.hD===x?' on':'')+'" data-hr-d="'+x+'">'+x+'</button>';});
+      h+='</div></div></div>';
+    }
+  }
+  if(S.step===2){
+    var C=cats();
+    h+='<p class="lbl">Catégories — '+lab(S.start)+' → '+lab(S.start+S.dur)+'</p><div class="cats">';
+    Object.keys(C).forEach(function(c){
+      var n=C[c];
+      h+='<button class="cat'+(S.cat===c?' on':'')+(n===0?' no':'')+'"'+(n===0?' disabled':'')+' data-cat="'+c+'">'+c+' · '+n+'</button>';
+    });
+    h+='</div><div class="vlist">';
+    FLEET.forEach(function(vv){
+      if(S.cat&&vv.cat!==S.cat&&isFree(vv))return;
+      if(isFree(vv)){
+        h+='<button class="vc'+(S.veh===vv.id?' on':'')+'" data-veh="'+vv.id+'"><span class="row"><span class="nm">'+vv.nom+'</span><span class="tot">'+vv.prix+' €/j × '+S.dur+' j = <b>'+(vv.prix*S.dur)+' €</b> TTC</span></span><span class="mt">'+vv.mt+'</span></button>';
+      }else{
+        if(S.cat&&vv.cat!==S.cat)return;
+        var lib=libreLe(vv);
+        h+='<div class="vc off"><span class="row"><span class="nm">'+vv.nom+'</span><span class="tot" style="color:var(--faint)">'+vv.prix+' €/j</span></span><span class="mt">'+vv.mt+'</span><br><span class="band">Réservé — libre le '+lab(lib)+'</span><button class="alt" data-alt="'+vv.id+'">→ Partir le '+dt(lib).getDate()+' ? '+S.dur+' j = '+(vv.prix*S.dur)+' €</button></div>';
+      }
+    });
+    h+='</div>';
+  }
+  if(S.step===3){
+    h+='<div class="fldg">'
+      +'<div class="fld"><b>Prénom · Nom</b><span>Marcus Trebor</span></div>'
+      +'<div class="fld"><b>WhatsApp</b><span>0690 XX XX XX</span></div>'
+      +'<div class="fld"><b>Naissance</b><span>12 / 03 / 1994</span></div>'
+      +'<div class="fld"><b>Permis — délivré le</b><span>14 / 06 / 2015</span></div>'
+      +'<div class="fld w2"><b>Adresse</b><span>12 rue des Alizés · 97122 Baie-Mahault</span></div>'
+      +'<div class="fld w2"><b>Engagements</b><span>☑ CGL · ☑ consentement · caution 400 € (empreinte, non débitée)</span></div>'
+      +'</div>';
+  }
+  h+='</div>';
+  q('#stage').innerHTML=h;
+
+  q('#side-note').textContent=sideNote();
+  var t=vehSel();
+  q('#ticket').innerHTML=
+    '<button data-go="1"><span>'+(S.start?lab(S.start).toUpperCase()+' · '+S.hR:'DÉPART —')+'</span><span>'+(S.start&&S.dur?'→ '+lab(S.start+S.dur)+' · '+S.hD:'→ retour —')+'</span></button>'
+    +'<button data-go="2"><span>'+(t?t.nom.toUpperCase():'VÉHICULE —')+'</span><span>'+(t?t.cat:'')+'</span></button>'
+    +'<div class="tt"><span>TOTAL TTC</span><b id="tot">'+(t&&total()?total()+' €':'—')+'</b></div>';
+  var complete=S.step===1?!!(S.start&&S.dur&&!S.editing&&nbDispoPlage()>0&&!conflitVoeu()):(S.step===2?!!t:true);
+  var nx=q('#btn-next');
+  nx.textContent=S.step===3?'Réserver — confirmation WhatsApp':'Continuer';
+  nx.className='go'+(complete&&S.step<3?' pulse':'');
+  q('#btn-back').style.visibility=S.step===1?'hidden':'visible';
+
+  q('#cata').innerHTML=FLEET.filter(function(v){return['yaris','duster','kangoo'].indexOf(v.id)>=0;}).map(function(v){
+    return '<div class="catc"><div><div class="nm">'+v.nom+'</div><div class="mt">'+v.mt+'</div></div><div class="pj">'+v.prix+' €<br><span style="color:var(--faint)">/ jour</span></div><button data-wish="'+v.id+'">Réserver</button></div>';
+  }).join('');
+}
+
+function flashTot(){var b=q('#tot');if(!b)return;b.classList.add('flash');setTimeout(function(){b.classList.remove('flash');},170);}
+
+document.addEventListener('click',function(e){
+  var el=e.target.closest('[data-day],[data-slot],[data-restart],[data-altstart],[data-accept-alt],[data-drop-wish],[data-keep-shift],[data-veh],[data-cat],[data-hr-r],[data-hr-d],[data-go],[data-wish],[data-alt],[data-unwish],[data-off],#btn-next,#btn-back');
+  if(!el)return;
+  if(el.dataset.off){S.off=Math.min(365-42,Math.max(0,S.off+ +el.dataset.off));}
+  else if(el.dataset.slot){
+    /* taper un champ = l’éditer ; le calendrier se centre dessus */
+    S.editing=el.dataset.slot;
+    var cible=el.dataset.slot==='end'&&S.dur?S.start+S.dur:S.start;
+    if(cible)S.off=Math.max(0,Math.min(365-42,cible-(TODAY+1)-14));
+  }
+  else if(el.hasAttribute('data-restart')){S.start=null;S.dur=null;S.editing='start';S.off=0;}
+  else if(el.dataset.altstart){S.start=+el.dataset.altstart;S.editing=null;if(vehSel()&&!isFree(vehSel()))S.veh=null;}
+  else if(el.dataset.acceptAlt){S.wish=el.dataset.acceptAlt;S.veh=el.dataset.acceptAlt;}      /* le match se clôt : le second véhicule devient le choix */
+  else if(el.hasAttribute('data-drop-wish')){S.wish=null;}                                     /* on repart sans critère — l'acte 2 montrera tout */
+  else if(el.dataset.keepShift){S.start=+el.dataset.keepShift;S.editing=null;S.veh=S.wish;}    /* on garde le vœu : les dates glissent */
+  else if(el.dataset.day){
+    var dd=+el.dataset.day;
+    if(S.editing==='start'||!S.start){
+      var finPrev=S.dur?S.start+S.dur:null;
+      S.start=dd;
+      if(finPrev&&finPrev>dd){S.dur=finPrev-dd;S.editing=null;}   /* retour conservé */
+      else{S.dur=null;S.editing='end';}                           /* au retour, ensuite */
+    }else{ /* editing 'end' */
+      if(dd>S.start){S.dur=dd-S.start;S.editing=null;}
+      else{S.start=dd;S.dur=null;S.editing='end';}                /* clic avant le départ = nouveau départ */
+    }
+    if(S.dur&&vehSel()&&!isFree(vehSel()))S.veh=null;
+  }
+  else if(el.dataset.veh){S.veh=el.dataset.veh;}
+  else if(el.dataset.cat){S.cat=S.cat===el.dataset.cat?null:el.dataset.cat;}
+  else if(el.dataset.hrR){S.hR=el.dataset.hrR;}
+  else if(el.dataset.hrD){S.hD=el.dataset.hrD;}
+  else if(el.dataset.wish){S.wish=el.dataset.wish;S.veh=null;S.step=1;S.editing=S.start?S.editing:'start';document.querySelector('.pl').scrollIntoView({behavior:'smooth',block:'start'});}
+  else if(el.dataset.alt){var v=FLEET.find(function(x){return x.id===el.dataset.alt;});S.start=libreLe(v);S.veh=v.id;S.editing=null;}
+  else if(el.hasAttribute('data-unwish')){S.wish=null;}
+  else if(el.dataset.go){var g=+el.dataset.go;if(g>1&&!(S.start&&S.dur))return;S.step=g;}
+  else if(el.id==='btn-next'){
+    if(S.step===1&&!(S.start&&S.dur&&!S.editing&&nbDispoPlage()>0))return;
+    if(S.step===2&&!S.veh)return;
+    if(S.step<3){S.step++; if(S.step===2&&S.wish){var w=FLEET.find(function(x){return x.id===S.wish;});if(isFree(w))S.veh=S.veh||w.id;}}
+  }
+  else if(el.id==='btn-back'&&S.step>1){S.step--;}
+  render();flashTot();
+});
+render();
+})();
+</script>
+</main>

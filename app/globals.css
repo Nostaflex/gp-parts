@@ -602,6 +602,462 @@ button.cp-pl-tr-edit:focus-visible::after {
   animation: cp-pl-drop 1200ms var(--ease-out) 2;
 }
 
+/* ─── Loca Lane (spec gelée 2026-08-20 — « le planning d'abord ») ─────────
+   S'appuie sur l'infra .cp-pl (conteneur, rail, ticket, sticky). Préfixe
+   cp-ll- pour l'acte 1 (calendrier, champs) et l'acte 2 (indispo). */
+
+/* Vœu épinglé (chip d'en-tête) */
+.cp-ll-wish {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(82, 200, 138, 0.12);
+  border: 1px solid rgba(82, 200, 138, 0.4);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 0.64rem;
+  color: var(--vert-l);
+  align-self: center;
+}
+.cp-ll-wish button {
+  background: none;
+  border: 0;
+  color: rgba(244, 237, 224, 0.6);
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+.cp-ll-wish button:hover {
+  color: var(--cream);
+}
+
+/* Champs Départ / Retour — le champ ACTIF reçoit le clic du calendrier
+   (spec R6, pattern Air France/Sixt). Départ = crème, Retour = mangue. */
+.cp-ll-slots {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.cp-ll-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border: 1px solid rgba(244, 237, 224, 0.14);
+  border-radius: 12px;
+  padding: 8px 14px;
+  background: rgba(244, 237, 224, 0.04);
+  min-width: 150px;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  transition:
+    background-color 200ms,
+    border-color 200ms;
+}
+.cp-ll-slot b {
+  font-size: 0.52rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lab-d);
+  font-weight: 400;
+}
+.cp-ll-slot span {
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+.cp-ll-slot:not(.set) span {
+  color: rgba(244, 237, 224, 0.55);
+  font-weight: 400;
+}
+.cp-ll-slot.dep.set {
+  background: var(--cream);
+  border-color: var(--cream);
+}
+.cp-ll-slot.ret.set {
+  background: var(--mango);
+  border-color: var(--mango);
+}
+.cp-ll-slot.set b {
+  color: rgba(26, 15, 6, 0.55);
+}
+.cp-ll-slot.set span {
+  color: #1a0f06;
+}
+.cp-ll-slot.actif {
+  outline: 2px solid var(--mango);
+  outline-offset: 2px;
+}
+.cp-ll-fleche {
+  color: rgba(244, 237, 224, 0.45);
+}
+.cp-ll-nj {
+  font-weight: 900;
+  font-size: 1.3rem;
+  color: var(--vert-l);
+  line-height: 1;
+}
+.cp-ll-nj s {
+  text-decoration: none;
+  font-size: 0.55rem;
+  color: var(--lab-d);
+  display: block;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+.cp-ll-restart {
+  margin-left: auto;
+  background: none;
+  border: 0;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lab-d);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  padding: 4px;
+}
+.cp-ll-restart:hover {
+  color: var(--cream);
+}
+
+/* Navigation de fenêtre (‹ mois ›) */
+.cp-ll-mnav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.cp-ll-mnav > b {
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 1.05rem;
+  min-width: 170px;
+  text-align: center;
+}
+.cp-ll-mnav > button {
+  background: none;
+  border: 1px solid rgba(244, 237, 224, 0.14);
+  border-radius: 999px;
+  width: 34px;
+  height: 34px;
+  color: rgba(244, 237, 224, 0.7);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition:
+    border-color 200ms,
+    color 200ms;
+}
+.cp-ll-mnav > button:hover:not(:disabled) {
+  border-color: rgba(244, 237, 224, 0.35);
+  color: var(--cream);
+}
+.cp-ll-mnav > button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.cp-ll-cap {
+  margin-left: auto;
+  font-size: 0.56rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lab-d);
+  text-align: right;
+}
+
+/* Calendrier zoom-out : 6 semaines, cellules MINI (numéro + jauge — spec R4) */
+.cp-ll-cal {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 10px;
+}
+.cp-ll-head {
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lab-d);
+  text-align: center;
+  padding-bottom: 1px;
+}
+.cp-ll-blank {
+  visibility: hidden;
+}
+.cp-ll-dd {
+  border: 1px solid rgba(244, 237, 224, 0.1);
+  border-radius: 9px;
+  text-align: center;
+  background: rgba(244, 237, 224, 0.04);
+  color: inherit;
+  transition:
+    background-color 250ms,
+    border-color 250ms,
+    color 250ms,
+    transform 200ms;
+  position: relative;
+}
+.cp-ll-mini {
+  padding: 3px 1px;
+  cursor: pointer;
+  /* cp-tap ne s'applique pas ici (7 colonnes) — cible ≥ 44 px via min-height
+     mobile plus bas ; desktop : ~34 px assumé, souris. */
+  min-height: 34px;
+}
+.cp-ll-mini:hover:not(:disabled) {
+  border-color: rgba(244, 237, 224, 0.32);
+}
+.cp-ll-dd:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.cp-ll-dd.on {
+  background: var(--cream);
+  color: #1a0f06;
+  border-color: var(--cream);
+  transform: translateY(-2px);
+  animation: cp-pl-drop 600ms var(--ease-out);
+}
+.cp-ll-dd.in {
+  background: rgba(82, 200, 138, 0.13);
+  border-color: rgba(82, 200, 138, 0.45);
+}
+.cp-ll-dd.ret {
+  background: var(--mango);
+  border-color: var(--mango);
+  color: #1a0f06;
+}
+.cp-ll-dd.ret .cp-ll-g {
+  background: rgba(26, 15, 6, 0.18);
+}
+.cp-ll-dd.on .cp-ll-g {
+  background: rgba(26, 15, 6, 0.15);
+}
+.cp-ll-mo {
+  font-size: 0.42rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mango);
+  display: block;
+  line-height: 1.1;
+}
+.cp-ll-dd.ret .cp-ll-mo {
+  color: #1a0f06;
+}
+.cp-ll-g {
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(244, 237, 224, 0.14);
+  margin: 2px 3px 0;
+  overflow: hidden;
+  display: block;
+}
+.cp-ll-g i {
+  display: block;
+  height: 100%;
+  transition: width 400ms var(--ease-out);
+}
+.cp-ll-legend {
+  display: flex;
+  gap: 15px;
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lab-d);
+}
+.cp-ll-legend i {
+  display: inline-block;
+  width: 8px;
+  height: 3px;
+  border-radius: 2px;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+/* Zoom-in : la fenêtre du séjour, en grand, lecture seule (spec R13) */
+.cp-ll-zin {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));
+  gap: 7px;
+  margin-bottom: 4px;
+}
+.cp-ll-zin .cp-ll-dd {
+  padding: 8px 4px;
+  border-radius: 12px;
+}
+
+/* Heures — deux groupes datés (spec R8) */
+.cp-ll-hrrow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.cp-ll-hrs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.cp-ll-hr {
+  font-size: 0.68rem;
+  text-align: center;
+  border: 1px solid rgba(244, 237, 224, 0.12);
+  border-radius: 10px;
+  padding: 8px 0;
+  background: rgba(244, 237, 224, 0.04);
+  color: rgba(244, 237, 224, 0.7);
+  cursor: pointer;
+  transition:
+    background-color 200ms,
+    border-color 200ms,
+    color 200ms;
+}
+.cp-ll-hr:hover {
+  border-color: rgba(244, 237, 224, 0.32);
+}
+.cp-ll-hr.on {
+  background: var(--acc);
+  border-color: var(--acc);
+  color: var(--acc-ink);
+  font-weight: 700;
+  animation: cp-pl-drop 600ms var(--ease-out);
+}
+
+/* Les propositions de Max — ses boutons, sous sa réplique (spec R12) */
+.cp-ll-bacts {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 10px;
+  animation: cp-pl-slidein 420ms var(--ease-out) both;
+}
+.cp-ll-oui {
+  background: var(--acc);
+  border: 0;
+  border-radius: 11px;
+  padding: 9px 15px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--acc-ink);
+  cursor: pointer;
+  transition: filter 200ms;
+  animation: cp-pl-drop 1200ms var(--ease-out) 2;
+}
+.cp-ll-oui:hover {
+  filter: brightness(1.07);
+}
+.cp-ll-oui s {
+  text-decoration: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 400;
+  font-size: 0.66rem;
+  opacity: 0.85;
+  margin-left: 7px;
+}
+.cp-ll-non {
+  background: none;
+  border: 1px solid rgba(244, 237, 224, 0.22);
+  border-radius: 11px;
+  padding: 9px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(244, 237, 224, 0.75);
+  cursor: pointer;
+  transition:
+    border-color 200ms,
+    color 200ms;
+}
+.cp-ll-non:hover {
+  border-color: rgba(244, 237, 224, 0.42);
+  color: var(--cream);
+}
+.cp-ll-tiers {
+  background: none;
+  border: 0;
+  font-size: 0.73rem;
+  color: var(--mango);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  padding: 3px;
+}
+.cp-ll-tiers:hover {
+  color: #ff8c1f;
+}
+
+/* Acte 2 — catégories avec compteurs, indispo visibles (spec R3) */
+.cp-ll-cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 12px;
+}
+.cp-ll-cat {
+  font-size: 0.64rem;
+  border-radius: 999px;
+  padding: 6px 13px;
+  border: 1px solid rgba(244, 237, 224, 0.14);
+  background: none;
+  color: rgba(244, 237, 224, 0.7);
+  cursor: pointer;
+  transition:
+    background-color 200ms,
+    border-color 200ms,
+    color 200ms;
+}
+.cp-ll-cat.on {
+  background: var(--acc);
+  border-color: var(--acc);
+  color: var(--acc-ink);
+  font-weight: 700;
+}
+.cp-ll-cat.no {
+  color: #ff8a80;
+  border-color: rgba(217, 38, 39, 0.5);
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+.cp-ll-off {
+  border: 1px solid rgba(217, 38, 39, 0.55);
+  border-radius: 13px;
+  padding: 11px 14px;
+  background: rgba(217, 38, 39, 0.06);
+}
+.cp-ll-off .row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.cp-ll-band {
+  display: inline-block;
+  font-size: 0.56rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ff8a80;
+  border: 1px solid rgba(217, 38, 39, 0.55);
+  border-radius: 6px;
+  padding: 2px 8px;
+  margin-top: 6px;
+}
+.cp-ll-alt {
+  display: inline-block;
+  background: none;
+  border: 0;
+  font-size: 0.72rem;
+  color: var(--mango);
+  margin-top: 6px;
+  margin-left: 8px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  padding: 0;
+}
+.cp-ll-alt:hover {
+  color: #ff8c1f;
+}
+
 /* Barre collante mobile — n'existe que sous 700 px de conteneur. */
 .cp-pl-sticky {
   display: none;
@@ -610,6 +1066,18 @@ button.cp-pl-tr-edit:focus-visible::after {
 @container (max-width: 699px) {
   .cp-pl-body {
     grid-template-columns: 1fr;
+  }
+  /* Loca Lane mobile : cibles tactiles ≥ 44 px sur les cellules du
+     calendrier (spec §4), heures sur 1 colonne de groupes. */
+  .cp-ll-mini {
+    min-height: 44px;
+    padding-top: 6px;
+  }
+  .cp-ll-hrrow {
+    grid-template-columns: 1fr;
+  }
+  .cp-ll-cap {
+    display: none;
   }
   .cp-pl-stage {
     border-right: 0;
