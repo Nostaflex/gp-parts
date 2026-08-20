@@ -77,7 +77,7 @@ const JAUGE_BLEUE = (libres: number, total: number) => {
 
 const fld =
   'w-full rounded-xl border border-[rgba(244,237,224,0.14)] bg-[rgba(244,237,224,0.05)] px-3.5 py-2.5 text-sm text-cp-cream placeholder:text-cp-cream/25 outline-none transition-colors focus:border-[var(--acc)] [color-scheme:dark]';
-const lbl = 'cp-mono block text-[0.6rem] uppercase tracking-[0.16em] text-cp-cream/40 mb-1.5';
+const lbl = 'cp-mono block text-[0.6rem] uppercase tracking-[0.16em] text-cp-cream/60 mb-1.5';
 
 export function SplashLane({
   formules,
@@ -240,6 +240,27 @@ export function SplashLane({
     return Object.keys(errs).length === 0;
   };
 
+  // Changer d'étape remonte la scène et y pose le focus ; une validation qui
+  // échoue remonte aussi — depuis la barre collante mobile, l'erreur restait
+  // hors écran (audit 2026-08-20).
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const revealStage = () => {
+    const el = stageRef.current;
+    if (!el) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+  };
+  const firstStepRender = useRef(true);
+  useEffect(() => {
+    if (firstStepRender.current) {
+      firstStepRender.current = false;
+      return;
+    }
+    revealStage();
+    stageRef.current?.focus({ preventScroll: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
+
   const goTo = (target: SplashStep) => {
     // Rail cliquable dans les deux sens ; en avant, chaque étape se valide.
     if (target <= step) {
@@ -247,13 +268,19 @@ export function SplashLane({
       return;
     }
     if (target > maxStepReached + 1) return;
-    if (!validateStep(step)) return;
+    if (!validateStep(step)) {
+      revealStage();
+      return;
+    }
     setStep(target);
     setMaxStepReached((m) => (target > m ? target : m));
   };
 
   const next = async () => {
-    if (!validateStep(step)) return;
+    if (!validateStep(step)) {
+      revealStage();
+      return;
+    }
     if (step === 3) {
       if (submitting) return;
       setSubmitting(true);
@@ -263,6 +290,7 @@ export function SplashLane({
         setErrors({ _form: res.error });
         // Collision probable → re-synchroniser les disponibilités affichées.
         refreshDispos();
+        revealStage();
         return;
       }
       setRef(res.ref);
@@ -281,7 +309,11 @@ export function SplashLane({
   };
 
   const err = (k: keyof FormData) =>
-    errors[k] ? <p className="mt-1 text-[0.75rem] text-[#FF8A80]">{errors[k]}</p> : null;
+    errors[k] ? (
+      <p role="alert" className="mt-1 text-[0.75rem] text-[#FF8A80]">
+        {errors[k]}
+      </p>
+    ) : null;
 
   // ── Écran de confirmation ────────────────────────────────────────────────
   if (done) {
@@ -429,7 +461,7 @@ export function SplashLane({
 
           <div className="cp-pl-body">
             {/* ── Scène ── */}
-            <div className="cp-pl-stage">
+            <div className="cp-pl-stage" ref={stageRef} tabIndex={-1}>
               {/* Narration de Splash — change par étape ET par choix */}
               <div className="cp-pl-story">
                 <span className="cp-pl-ava cp-pl-ava-splash">
@@ -527,7 +559,7 @@ export function SplashLane({
                             <span className="block text-[0.88rem] font-semibold text-cp-cream">
                               {f.nom}
                             </span>
-                            <small className="cp-mono block text-[0.6rem] font-normal text-cp-cream/45">
+                            <small className="cp-mono block text-[0.6rem] font-normal text-cp-cream/60">
                               {sousTitre}
                             </small>
                           </span>
@@ -551,7 +583,7 @@ export function SplashLane({
                   {prochain && (
                     <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-[rgba(244,237,224,0.14)] bg-[rgba(244,237,224,0.05)] px-4 py-3">
                       <div>
-                        <p className="cp-mono text-[0.6rem] uppercase tracking-[0.16em] text-cp-cream/45">
+                        <p className="cp-mono text-[0.6rem] uppercase tracking-[0.16em] text-cp-cream/60">
                           Prochain créneau
                         </p>
                         <p className="cp-mono text-sm text-cp-cream">
@@ -599,7 +631,7 @@ export function SplashLane({
                           }}
                           className={`cp-pl-dd cp-tap${on ? ' on' : ''}${complet ? ' full' : ''}`}
                         >
-                          <span className="cp-mono block text-[0.56rem] uppercase tracking-[0.14em] opacity-55">
+                          <span className="cp-mono block text-[0.56rem] uppercase tracking-[0.14em] opacity-70">
                             {JOUR_COURT.format(midi(d))}
                             {/* Férié : point mangue — l'info complète vit dans title/aria-label */}
                             {feries[d] && (
@@ -614,7 +646,7 @@ export function SplashLane({
                           <span className="cp-pl-g" aria-hidden="true">
                             <i style={{ width: `${jauge.pct}%`, background: jauge.couleur }} />
                           </span>
-                          <span className="cp-mono mt-1 block text-[0.52rem] opacity-60">
+                          <span className="cp-mono mt-1 block text-[0.52rem] opacity-75">
                             {libelleLibres(libres)}
                           </span>
                         </button>
@@ -869,7 +901,7 @@ export function SplashLane({
                 </div>
               </div>
 
-              <p className="mt-3 text-[0.74rem] leading-[1.5] text-cp-cream/45">
+              <p className="mt-3 text-[0.74rem] leading-[1.5] text-cp-cream/60">
                 Aucun paiement en ligne. Le tarif exact est confirmé sous 24 h en jours ouvrés — le
                 créneau est réservé à la confirmation.
               </p>
@@ -900,7 +932,7 @@ export function SplashLane({
           {/* ── Barre collante mobile (< 700 px conteneur) ── */}
           <div className="cp-pl-sticky">
             <div className="min-w-0">
-              <p className="cp-mono truncate text-[0.6rem] uppercase tracking-[0.1em] text-cp-cream/55">
+              <p className="cp-mono truncate text-[0.6rem] uppercase tracking-[0.1em] text-cp-cream/70">
                 {data.formule || 'Formule —'}
                 {data.creneau ? ` · ${data.creneau.slice(0, 5)}` : ''}
               </p>
