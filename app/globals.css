@@ -562,6 +562,38 @@
 .cp-pl-tr.tt b.flash {
   opacity: 0.25;
 }
+/* Ligne de ticket cliquable (retour 1 clic vers son étape) : reset bouton +
+   crayon qui apparaît au survol/focus. */
+button.cp-pl-tr-edit {
+  width: 100%;
+  background: none;
+  border: 0;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+  transition: color 200ms;
+}
+button.cp-pl-tr-edit::after {
+  content: '✎';
+  flex-shrink: 0;
+  opacity: 0.25;
+  transition: opacity 200ms;
+}
+button.cp-pl-tr-edit:hover,
+button.cp-pl-tr-edit:focus-visible {
+  color: var(--cream);
+}
+button.cp-pl-tr-edit:hover::after,
+button.cp-pl-tr-edit:focus-visible::after {
+  opacity: 0.9;
+  color: var(--acc);
+}
+
+/* Étape complète → Continuer pulse doucement (2 battements, jamais en
+   boucle) : guide l'œil sans avance automatique. */
+.cp-pl-pulse {
+  animation: cp-pl-drop 1200ms var(--ease-out) 2;
+}
 
 /* Barre collante mobile — n'existe que sous 700 px de conteneur. */
 .cp-pl-sticky {

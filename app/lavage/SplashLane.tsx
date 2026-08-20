@@ -15,12 +15,12 @@ import { CpMarketingOptIn } from '@/components/cp/CpMarketingOptIn';
 import { CpBridge } from '@/components/cp/CpBridge';
 import { formatPrice } from '@/lib/utils';
 import { CRENEAUX_LAVAGE, prochainCreneau } from '@/lib/lavage-creneaux';
-import { jaugeRemplissage, libelleLibres } from '@/lib/pitlane';
-import { splashStory, splashSideNote } from '@/lib/splash-lane';
+import { formatJourCourt, jaugeRemplissage, libelleLibres } from '@/lib/pitlane';
+import { splashStory, splashSideNote, gabaritsDisponibles } from '@/lib/splash-lane';
 import { submitLavage } from './actions';
 
 import type { PrisParDate } from '@/lib/lavage-creneaux';
-import type { LavageTarif } from '@/lib/lavage-settings';
+import type { LavageNarration, LavageTarif } from '@/lib/lavage-settings';
 
 type SplashStep = 1 | 2 | 3;
 
@@ -81,11 +81,14 @@ const lbl = 'cp-mono block text-[0.6rem] uppercase tracking-[0.16em] text-cp-cre
 
 export function SplashLane({
   formules,
+  narration,
   dates,
   initialPris,
   feries = {},
 }: {
   formules: SplashLaneFormule[];
+  /** Narration de Splash — administrable au BO (réglages lavage). */
+  narration: LavageNarration;
   /** Horizon du sélecteur (YYYY-MM-DD, ordre chronologique). */
   dates: string[];
   /** Créneaux pris par date, rendus côté serveur — zéro fetch au premier affichage. */
@@ -148,8 +151,13 @@ export function SplashLane({
     tarifsChoisis.length === 1
       ? tarifsChoisis[0]
       : tarifsChoisis.find((t) => t.label === data.gabarit);
-  const gabaritAffiche =
-    tarifsChoisis.length > 1 ? data.gabarit || '—' : (tarifsChoisis[0]?.label ?? '—');
+  // Gabarit d'abord : tant que la formule n'est pas choisie, le ticket montre
+  // déjà le véhicule sélectionné.
+  const gabaritAffiche = data.formule
+    ? tarifsChoisis.length > 1
+      ? data.gabarit || '—'
+      : (tarifsChoisis[0]?.label ?? '—')
+    : data.gabarit || '—';
 
   // Le total « clignote » à chaque changement (opacity .25 → 1, 160 ms).
   const [flash, setFlash] = useState(false);
@@ -167,24 +175,54 @@ export function SplashLane({
   const libresJourChoisi = data.date
     ? CRENEAUX_LAVAGE.length - prisDe(data.date).length
     : undefined;
-  const story = splashStory({
-    step,
-    formule: data.formule || undefined,
-    libresJourChoisi,
-    jourChoisi: data.date || undefined,
-    ferieJourChoisi: data.date ? feries[data.date] : undefined,
-  });
-  const sideNote = splashSideNote({
-    gabarit: data.gabarit || undefined,
-    prixEnCents: tarifChoisi?.prixTTCEnCents,
-  });
+  const story = splashStory(
+    {
+      step,
+      libresJourChoisi,
+      jourChoisi: data.date || undefined,
+      ferieJourChoisi: data.date ? feries[data.date] : undefined,
+    },
+    narration
+  );
+  const sideNote = splashSideNote(
+    {
+      gabarit: data.gabarit || undefined,
+      prixEnCents: tarifChoisi?.prixTTCEnCents,
+    },
+    narration
+  );
+
+  // Gabarits universels de l'étape 1 (gabarit d'abord — décision Djemil
+  // 2026-08-20) : union des libellés des formules multi-tarifs.
+  const gabarits = gabaritsDisponibles(formules);
+
+  // Le rail RACONTE les choix : une étape passée affiche ce qui a été choisi
+  // — cliquer dessus y retourne (retour 1 clic).
+  const resumeEtape1 = data.formule
+    ? tarifsChoisis.length > 1 && data.gabarit
+      ? `${data.formule} · ${data.gabarit}`
+      : data.formule
+    : null;
+  const resumeEtape2 =
+    data.date && data.creneau
+      ? `${formatJourCourt(data.date)} · ${data.creneau.slice(0, 5)}`
+      : null;
+
+  // L'étape courante est-elle complète ? → le bouton Continuer pulse pour
+  // guider l'œil (pas d'avance automatique : l'utilisateur garde la main).
+  const etapeComplete =
+    step === 1
+      ? Boolean(data.formule && (tarifsChoisis.length <= 1 || tarifChoisi))
+      : step === 2
+        ? Boolean(data.date && data.creneau)
+        : false;
 
   const validateStep = (s: SplashStep): boolean => {
     const errs: typeof errors = {};
     if (s === 1) {
       if (!data.formule) errs._form = 'Choisissez une formule.';
-      else if (tarifsChoisis.length > 1 && !data.gabarit)
-        errs.gabarit = 'Choisissez le type de véhicule';
+      else if (tarifsChoisis.length > 1 && !tarifsChoisis.some((t) => t.label === data.gabarit))
+        errs.gabarit = 'Choisissez votre type de véhicule';
     }
     if (s === 2) {
       if (!data.date) errs.date = 'Choisissez un jour';
@@ -364,8 +402,8 @@ export function SplashLane({
             >
               {(
                 [
-                  { n: 1 as SplashStep, label: 'La formule' },
-                  { n: 2 as SplashStep, label: 'Le créneau' },
+                  { n: 1 as SplashStep, label: resumeEtape1 ?? 'La formule' },
+                  { n: 2 as SplashStep, label: resumeEtape2 ?? 'Le créneau' },
                   { n: 3 as SplashStep, label: 'Les coordonnées' },
                 ] as const
               ).map(({ n, label }, i) => (
@@ -413,30 +451,72 @@ export function SplashLane({
                 </div>
               </div>
 
-              {/* Étape 1 — La formule */}
+              {/* Étape 1 — GABARIT D'ABORD (décision Djemil 2026-08-20) : une
+                  question universelle (« votre véhicule ? ») puis les formules
+                  affichent leur prix EXACT — jamais une fourchette. */}
               {step === 1 && (
                 <div className="cp-pl-pane">
-                  <p className={lbl}>Choisissez votre formule</p>
+                  {gabarits.length > 0 && (
+                    <>
+                      <p className={lbl}>Votre véhicule</p>
+                      <div
+                        className="cp-pl-durs mb-5"
+                        style={{
+                          gridTemplateColumns: `repeat(${Math.min(gabarits.length, 4)}, 1fr)`,
+                        }}
+                        role="group"
+                        aria-label="Choisir le type de véhicule"
+                      >
+                        {gabarits.map((g) => (
+                          <button
+                            key={g}
+                            type="button"
+                            aria-pressed={data.gabarit === g}
+                            onClick={() => set('gabarit', g)}
+                            className={`cp-pl-du cp-tap${data.gabarit === g ? ' on' : ''}`}
+                          >
+                            <b className="cp-title block text-[1.05rem] font-black leading-none">
+                              {g}
+                            </b>
+                          </button>
+                        ))}
+                      </div>
+                      {err('gabarit')}
+                    </>
+                  )}
+
+                  <p className={lbl}>Votre formule</p>
                   <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                     {formules.map((f) => {
                       const on = data.formule === f.nom;
-                      const prix =
-                        f.tarifs.length === 1
-                          ? formatPrice(f.tarifs[0].prixTTCEnCents)
-                          : `${formatPrice(Math.min(...f.tarifs.map((t) => t.prixTTCEnCents)))} – ${formatPrice(Math.max(...f.tarifs.map((t) => t.prixTTCEnCents)))}`;
+                      const multi = f.tarifs.length > 1;
+                      const tarifPourGabarit = multi
+                        ? f.tarifs.find((t) => t.label === data.gabarit)
+                        : f.tarifs[0];
+                      // Prix exact dès que le gabarit est connu ; « dès X € »
+                      // tant qu'il ne l'est pas ; « Sur devis » sans tarif.
+                      const prix = tarifPourGabarit
+                        ? formatPrice(tarifPourGabarit.prixTTCEnCents)
+                        : multi && f.tarifs.some((t) => t.prixTTCEnCents > 0)
+                          ? `dès ${formatPrice(Math.min(...f.tarifs.filter((t) => t.prixTTCEnCents > 0).map((t) => t.prixTTCEnCents)))}`
+                          : 'Sur devis';
+                      const sousTitre = multi
+                        ? tarifPourGabarit
+                          ? data.gabarit
+                          : 'Choisissez votre véhicule ci-dessus'
+                        : (f.tarifs[0]?.label ?? '');
                       return (
                         <button
                           key={f.nom}
                           type="button"
                           aria-pressed={on}
                           onClick={() => {
-                            // Changer de formule réinitialise le gabarit — les
-                            // tarifs ne se correspondent pas d'une formule à l'autre.
-                            setData((d) => ({ ...d, formule: f.nom, gabarit: '' }));
+                            // Le gabarit est UNIVERSEL : changer de formule le
+                            // conserve — le prix se recalcule simplement.
+                            setData((d) => ({ ...d, formule: f.nom }));
                             setErrors((e) => ({
                               ...e,
                               formule: undefined,
-                              gabarit: undefined,
                               _form: undefined,
                             }));
                           }}
@@ -448,13 +528,11 @@ export function SplashLane({
                               {f.nom}
                             </span>
                             <small className="cp-mono block text-[0.6rem] font-normal text-cp-cream/45">
-                              {f.tarifs.length > 1
-                                ? 'Tarif selon gabarit'
-                                : (f.tarifs[0]?.label ?? '')}
+                              {sousTitre}
                             </small>
                           </span>
                           <span className="cp-mono ml-auto shrink-0 text-right text-[0.78rem] text-[var(--acc)]">
-                            {f.tarifs.some((t) => t.prixTTCEnCents > 0) ? prix : 'Sur devis'}
+                            {prix}
                             <s className="block text-[0.56rem] text-cp-cream/35 no-underline">
                               TTC
                             </s>
@@ -463,31 +541,6 @@ export function SplashLane({
                       );
                     })}
                   </div>
-
-                  {tarifsChoisis.length > 1 && (
-                    <>
-                      <p className={`${lbl} mt-5`}>Type de véhicule</p>
-                      <div className="cp-pl-durs" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
-                        {tarifsChoisis.map((t) => (
-                          <button
-                            key={t.label}
-                            type="button"
-                            aria-pressed={data.gabarit === t.label}
-                            onClick={() => set('gabarit', t.label)}
-                            className={`cp-pl-du cp-tap${data.gabarit === t.label ? ' on' : ''}`}
-                          >
-                            <b className="cp-title block text-[1.05rem] font-black leading-none">
-                              {t.label}
-                            </b>
-                            <span className="cp-mono text-[0.56rem] opacity-70">
-                              {formatPrice(t.prixTTCEnCents)}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                      {err('gabarit')}
-                    </>
-                  )}
                 </div>
               )}
 
@@ -783,15 +836,27 @@ export function SplashLane({
                 />
               </div>
 
+              {/* Ticket : chaque ligne RACONTE un choix et y RAMÈNE en un clic
+                  (retour 1 clic — décision Djemil 2026-08-20). */}
               <div className="cp-pl-tk cp-mono" aria-live="polite">
-                <div className="cp-pl-tr">
+                <button
+                  type="button"
+                  onClick={() => goTo(1)}
+                  aria-label="Modifier la formule ou le véhicule (retour à l'étape 1)"
+                  className="cp-pl-tr cp-pl-tr-edit"
+                >
                   <span className="uppercase">{data.formule || '—'}</span>
                   <span>{gabaritAffiche}</span>
-                </div>
-                <div className="cp-pl-tr dim">
+                </button>
+                <button
+                  type="button"
+                  onClick={() => goTo(2)}
+                  aria-label="Modifier le jour ou le créneau (retour à l'étape 2)"
+                  className="cp-pl-tr cp-pl-tr-edit dim"
+                >
                   <span>{data.date ? JOUR_TICKET.format(midi(data.date)) : 'jour —'}</span>
                   <span>{data.creneau || 'créneau —'}</span>
-                </div>
+                </button>
                 <div className="cp-pl-tr tt">
                   <span>ESTIMATION TTC</span>
                   <b className={flash ? 'flash' : ''}>
@@ -823,7 +888,7 @@ export function SplashLane({
                   type="button"
                   onClick={next}
                   disabled={submitting}
-                  className="cp-tap flex-1 rounded-xl px-4 py-3 text-sm font-bold text-[var(--acc-ink)] transition-opacity hover:opacity-90 disabled:opacity-60"
+                  className={`cp-tap flex-1 rounded-xl px-4 py-3 text-sm font-bold text-[var(--acc-ink)] transition-opacity hover:opacity-90 disabled:opacity-60${etapeComplete ? ' cp-pl-pulse' : ''}`}
                   style={{ background: 'var(--acc)' }}
                 >
                   {step === 3 ? (submitting ? 'Envoi…' : 'Demander ce créneau') : 'Continuer'}
@@ -851,7 +916,7 @@ export function SplashLane({
               type="button"
               onClick={next}
               disabled={submitting}
-              className="cp-tap shrink-0 rounded-xl px-5 py-3 text-sm font-bold text-[var(--acc-ink)] disabled:opacity-60"
+              className={`cp-tap shrink-0 rounded-xl px-5 py-3 text-sm font-bold text-[var(--acc-ink)] disabled:opacity-60${etapeComplete ? ' cp-pl-pulse' : ''}`}
               style={{ background: 'var(--acc)' }}
             >
               {step === 3 ? (submitting ? 'Envoi…' : 'Demander') : 'Continuer'}

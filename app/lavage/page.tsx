@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 export default async function LavagePage() {
   const flags = await getCachedFeatureFlags();
   if (!flags.lavage) notFound();
-  const { formules } = await getCachedLavageSettings();
+  const { formules, narration } = await getCachedLavageSettings();
 
   // Indisponibilités EFFECTIVES (semaine type ∪ exceptions) de l'horizon en
   // UNE requête, rendues côté serveur — zéro fetch au premier affichage.
@@ -221,6 +221,7 @@ export default async function LavagePage() {
           l'écran de confirmation est crème, le pont change avec l'état. ── */}
       <SplashLane
         formules={formules.map((f) => ({ nom: f.nom, tarifs: f.tarifs }))}
+        narration={narration}
         dates={dates}
         initialPris={initialPris}
         feries={feries}
