@@ -1,0 +1,269 @@
+<title>Racoon Lane v2</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+:root{
+  --cinema:#0D0905; --card:#17110C; --cream:#F4EDE0; --muted:rgba(244,237,224,.65);
+  --faint:rgba(244,237,224,.42); --vert:#52C88A; --vert-d:#2A5C45; --mango:#E87200;
+  --rouge:#D92627; --line:rgba(244,237,224,.12); --gold:#E9C46A;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:0 20px 90px;background:var(--cinema);color:var(--cream);
+  font-family:"Instrument Sans",-apple-system,sans-serif;line-height:1.6}
+main{max-width:980px;margin:0 auto}
+.t{font-family:"Big Shoulders Display",sans-serif;font-weight:900;text-transform:uppercase;line-height:.95}
+.m{font-family:"JetBrains Mono",ui-monospace,monospace}
+a{color:var(--mango)}
+header{padding:58px 0 34px;border-bottom:1px solid var(--line)}
+.kick{font-family:"JetBrains Mono",monospace;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--vert);margin:0 0 14px}
+h1{font-family:"Big Shoulders Display",sans-serif;font-weight:900;text-transform:uppercase;
+  font-size:clamp(2.8rem,8.5vw,5rem);line-height:.92;margin:0 0 16px;text-wrap:balance}
+h1 em{font-style:normal;color:var(--vert)}
+.lede{color:var(--muted);max-width:64ch;margin:0;font-size:1.02rem}
+section{margin-top:62px}
+.eyb{font-family:"JetBrains Mono",monospace;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--mango);margin:0 0 10px}
+h2{font-family:"Big Shoulders Display",sans-serif;font-weight:900;text-transform:uppercase;
+  font-size:2rem;margin:0 0 8px;line-height:1;text-wrap:balance}
+.sub{color:var(--muted);max-width:70ch;margin:0 0 22px;font-size:.95rem}
+h3{font-family:"Big Shoulders Display",sans-serif;font-weight:900;text-transform:uppercase;font-size:1.15rem;margin:0 0 8px}
+.grid{display:grid;gap:14px}
+@media(min-width:720px){.grid.c2{grid-template-columns:1fr 1fr}.grid.c3{grid-template-columns:1fr 1fr 1fr}}
+.cardx{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:17px 19px}
+.cardx .who{font-family:"JetBrains Mono",monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--vert)}
+.cardx h3{font-size:1.02rem;margin:6px 0 6px;font-family:"Instrument Sans",sans-serif;font-weight:600;text-transform:none}
+.cardx p{margin:0;font-size:.87rem;color:var(--muted)}
+.cardx p b{color:var(--cream)}
+.verdict{border-left:4px solid var(--mango);background:var(--card);border-radius:0 14px 14px 0;padding:17px 21px;margin-top:20px}
+.verdict p{margin:0;color:var(--muted)}
+.verdict strong{color:var(--mango)}
+
+/* ── storyboard frames ── */
+.story3{display:grid;gap:20px;margin-top:8px}
+@media(min-width:900px){.story3{grid-template-columns:1fr 1fr 1fr;align-items:start}}
+.frame{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.fhead{display:flex;align-items:center;gap:10px;padding:12px 15px;border-bottom:1px solid var(--line)}
+.fhead i{width:24px;height:24px;border-radius:50%;background:var(--mango);color:#1a0f06;display:flex;align-items:center;justify-content:center;font-family:"JetBrains Mono",monospace;font-size:.7rem;font-style:normal;flex-shrink:0}
+.fhead b{font-family:"Big Shoulders Display",sans-serif;font-weight:900;text-transform:uppercase;font-size:1.05rem}
+.fbody{padding:14px 15px 17px}
+.lbl{font-family:"JetBrains Mono",monospace;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--lab,rgba(244,237,224,.7));margin:0 0 8px}
+.bub{display:flex;gap:9px;align-items:center;background:rgba(244,237,224,.05);border:1px solid var(--line);border-radius:12px;padding:9px 11px;margin-bottom:12px}
+.bub i{width:30px;height:30px;border-radius:50%;background:var(--vert-d);border:2px solid var(--vert);flex-shrink:0;font-style:normal;display:flex;align-items:center;justify-content:center;font-size:.9rem}
+.bub p{margin:0;font-size:.74rem;color:var(--muted);line-height:1.4}
+.days{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px}
+.dd{border:1px solid var(--line);border-radius:11px;padding:7px 4px;text-align:center;background:rgba(244,237,224,.04)}
+.dd.on{background:var(--cream);color:#1a0f06;border-color:var(--cream)}
+.dd.full{opacity:.5}
+.dd .w{font-family:"JetBrains Mono",monospace;font-size:.52rem;text-transform:uppercase;letter-spacing:.1em;opacity:.7}
+.dd .n{font-family:"Big Shoulders Display",sans-serif;font-weight:900;font-size:1.1rem;line-height:1.1}
+.dd .g{height:4px;border-radius:2px;background:rgba(244,237,224,.14);margin-top:5px;overflow:hidden}
+.dd.on .g{background:rgba(26,15,6,.15)}
+.dd .g i{display:block;height:100%}
+.dd .lg{font-family:"JetBrains Mono",monospace;font-size:.5rem;opacity:.75;display:block;margin-top:4px}
+.durs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.du{border:1px solid var(--line);border-radius:11px;padding:8px 2px;text-align:center;background:rgba(244,237,224,.04)}
+.du.on{background:var(--vert);border-color:var(--vert);color:#06231A;font-weight:700}
+.du b{font-family:"Big Shoulders Display",sans-serif;font-weight:900;font-size:1rem;display:block;line-height:1}
+.du span{font-family:"JetBrains Mono",monospace;font-size:.5rem;opacity:.75}
+.cats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:11px}
+.cat{font-family:"JetBrains Mono",monospace;font-size:.62rem;border-radius:999px;padding:5px 11px;border:1px solid var(--line);color:var(--muted)}
+.cat.on{background:var(--vert);border-color:var(--vert);color:#06231A;font-weight:700}
+.cat.no{color:var(--rouge);border-color:rgba(217,38,39,.5);text-decoration:line-through}
+.vc{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:7px;background:rgba(244,237,224,.04);position:relative}
+.vc .nm{font-size:.84rem;font-weight:600}
+.vc .mt{font-family:"JetBrains Mono",monospace;font-size:.56rem;color:var(--faint)}
+.vc .tot{font-family:"JetBrains Mono",monospace;font-size:.72rem;color:var(--vert);margin-top:4px}
+.vc .tot b{font-family:"Big Shoulders Display",sans-serif;font-weight:900;font-size:1.05rem;color:var(--cream)}
+.vc.on{border-color:var(--vert);background:rgba(82,200,138,.09)}
+.vc.off{border-color:rgba(217,38,39,.55);background:rgba(217,38,39,.07)}
+.vc.off .band{display:inline-block;font-family:"JetBrains Mono",monospace;font-size:.56rem;letter-spacing:.08em;text-transform:uppercase;color:#FF8A80;border:1px solid rgba(217,38,39,.55);border-radius:6px;padding:2px 7px;margin-top:5px}
+.vc.off .alt{display:block;font-size:.66rem;color:var(--mango);margin-top:4px}
+.hrs{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:10px}
+.hr{font-family:"JetBrains Mono",monospace;font-size:.62rem;text-align:center;border:1px solid var(--line);border-radius:9px;padding:6px 0;color:var(--muted)}
+.hr.on{background:var(--vert);border-color:var(--vert);color:#06231A;font-weight:700}
+.fld{border:1px solid var(--line);border-radius:9px;padding:6px 9px;margin-bottom:6px}
+.fld b{display:block;font-family:"JetBrains Mono",monospace;font-size:.52rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(244,237,224,.7);font-weight:400}
+.fld span{font-size:.72rem;color:var(--muted)}
+.tk{border:1px dashed rgba(244,237,224,.25);border-radius:11px;padding:10px 12px;font-family:"JetBrains Mono",monospace;margin-top:11px}
+.tk .r{display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted);padding:2px 0}
+.tk .tt{border-top:1px dashed rgba(244,237,224,.25);margin-top:6px;padding-top:6px;color:var(--cream);font-size:.68rem}
+.tk .tt b{color:var(--mango);font-family:"Big Shoulders Display",sans-serif;font-size:1rem}
+.note{font-size:.8rem;color:var(--muted);margin:10px 2px 0;padding-left:18px}
+.note li{margin-bottom:5px}
+.note li::marker{color:var(--vert)}
+/* arbitrages */
+.arb{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:14px}
+.arb .q{font-weight:600;margin:0 0 10px}
+.opt2{display:grid;gap:9px}
+@media(min-width:760px){.opt2{grid-template-columns:1fr 1fr}.opt2.three{grid-template-columns:1fr 1fr 1fr}}
+.op{border:1px solid var(--line);border-radius:11px;padding:11px 13px;font-size:.84rem;color:var(--muted)}
+.op b{display:block;color:var(--cream);margin-bottom:3px}
+.op.reco{border-color:var(--vert)}
+.op.reco b::after{content:" · recommandé";font-family:"JetBrains Mono",monospace;font-size:.6rem;color:var(--vert);text-transform:uppercase;letter-spacing:.1em}
+table{border-collapse:collapse;width:100%;font-size:.86rem}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+th{font-family:"JetBrains Mono",monospace;font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);font-weight:400}
+.chip{display:inline-block;padding:2px 9px;border-radius:999px;font-family:"JetBrains Mono",monospace;font-size:.66rem}
+.chip.keep{background:rgba(82,200,138,.14);color:var(--vert)}
+.chip.new{background:rgba(232,114,0,.14);color:var(--mango)}
+.chip.inv{background:rgba(217,38,39,.12);color:#FF8A80}
+.src{font-size:.78rem;color:var(--faint);line-height:1.9}
+.src a{color:var(--faint)}
+:focus-visible{outline:2px solid var(--mango);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<main>
+<header>
+  <p class="kick">Car Performance · /location · étude de parcours · 2026-08-20 · zéro code</p>
+  <h1>Le planning<br><em>d'abord</em></h1>
+  <p class="lede">Principe posé par Djemil : les dates ouvrent le parcours, les véhicules disponibles en découlent, les indisponibles restent visibles en rouge. Cette étude confronte ce principe à l'état de l'art de la réservation, puis propose le Pit Lane v2 qui le raconte — sans pré-paiement.</p>
+</header>
+
+<section>
+  <p class="eyb">1 · Ce que dit l'état de l'art</p>
+  <h2>Cinq règles, toutes sourcées</h2>
+  <div class="grid c2">
+    <div class="cardx"><span class="who">Sixt · loueurs pros</span><h3>Dates et lieu AVANT les véhicules</h3><p>Le standard du métier : on saisit dates + lieu, puis on voit les catégories disponibles. Le <b>prix total est toujours montré avant confirmation</b> — dates, catégorie et lieu font le prix.</p></div>
+    <div class="cardx"><span class="who">PwC 2026 · Baymard</span><h3>Le coût surprise tue la conversion</h3><p>Coûts inattendus = <b>1ʳᵉ cause d'abandon (51,3 %)</b> ; ~48 % des sorties au checkout. Afficher le <b>coût total dès la fiche</b> réduit l'abandon tardif de <b>22,4 %</b>. Un prix/jour sans total est une surprise différée.</p></div>
+    <div class="cardx"><span class="who">Baymard · out-of-stock</span><h3>Montrer l'indisponible, jamais le cacher</h3><p>Cacher un produit épuisé perd le client qui aurait attendu ou pris une alternative. Le pattern gagnant : <b>visible, grisé/marqué, avec la date de retour</b> (« libre le 24 ») — l'intention d'achat est conservée.</p></div>
+    <div class="cardx"><span class="who">Baymard · date pickers</span><h3>La disponibilité se lit dans le calendrier</h3><p>Un sélecteur de dates qui ne dit pas la disponibilité force l'utilisateur à vérifier ailleurs → frustration et abandon. Les jours complets se voient <b>sans interaction</b>.</p></div>
+    <div class="cardx"><span class="who">Turo · leçon de plateforme</span><h3>L'offre invisible = demande perdue</h3><p>Turo avait l'offre mais elle ne « sortait » pas quand les clients cherchaient leurs dates. La leçon : <b>le parcours doit partir de la demande (les dates)</b>, pas de l'inventaire.</p></div>
+    <div class="cardx"><span class="who">Études conversion location</span><h3>Peu d'étapes, un fil visible</h3><p>Flux courts, <b>indicateur de progression</b>, champs réduits, pensé mobile d'abord. Retirer l'incertitude <b>avant</b> de demander l'engagement.</p></div>
+  </div>
+  <div class="verdict"><p><strong>Verdict :</strong> le principe « dates → véhicules disponibles → le reste » n'est pas une préférence — c'est <strong>le standard du métier</strong>, et il répare les deux vraies faiblesses du parcours actuel : le prix total n'apparaît qu'après coup (véhicule choisi avant les dates), et la collision de dates se découvre à l'étape 2, après s'être attaché à une voiture.</p></div>
+</section>
+
+<section>
+  <p class="eyb">2 · La proposition</p>
+  <h2>Pit Lane v2 — trois actes, un ticket</h2>
+  <p class="sub">Même langage que la Splash Lane (rail qui raconte, ticket cliquable, narration administrable, pulse) — mais l'histoire s'inverse : <b>d'abord le voyage, ensuite la monture</b>. Max devient un loueur qui connaît son parc : « Dis-moi quand, je te dis quoi. »</p>
+  <div class="story3">
+
+    <div class="frame">
+      <div class="fhead"><i>1</i><b>Les dates</b></div>
+      <div class="fbody">
+        <div class="bub"><i>🦝</i><p>« Dis-moi quand tu pars — je te dis ce qui roule. Les barres, c'est l'état réel du parc. »</p></div>
+        <p class="lbl">Jour de départ</p>
+        <div class="days">
+          <div class="dd"><span class="w">Ven</span><span class="n">21</span><span class="g"><i style="width:30%;background:var(--vert)"></i></span><span class="lg">5 dispo</span></div>
+          <div class="dd on"><span class="w">Sam</span><span class="n">22</span><span class="g"><i style="width:66%;background:var(--mango)"></i></span><span class="lg">2 dispo</span></div>
+          <div class="dd"><span class="w">Dim</span><span class="n">23</span><span class="g"><i style="width:30%;background:var(--vert)"></i></span><span class="lg">5 dispo</span></div>
+          <div class="dd full"><span class="w">Lun</span><span class="n">24</span><span class="g"><i style="width:100%;background:var(--rouge)"></i></span><span class="lg">complet</span></div>
+          <div class="dd"><span class="w">Mar</span><span class="n">25</span><span class="g"><i style="width:15%;background:var(--vert)"></i></span><span class="lg">6 dispo</span></div>
+        </div>
+        <p class="lbl">Durée</p>
+        <div class="durs">
+          <div class="du on"><b>2 j</b><span>week-end</span></div>
+          <div class="du"><b>3 j</b><span>escapade</span></div>
+          <div class="du"><b>5 j</b><span>semaine</span></div>
+          <div class="du"><b>7 j</b><span>tour de l'île</span></div>
+        </div>
+        <ul class="note">
+          <li>La jauge d'un jour = <b>véhicules libres / parc</b> (la donnée existe déjà : <span class="m">getDispoParJour</span>).</li>
+          <li>Dates précises et longue durée : lien « autres dates » → devis LLD inchangé.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="frame">
+      <div class="fhead"><i>2</i><b>Le véhicule</b></div>
+      <div class="fbody">
+        <div class="bub"><i>🦝</i><p>« Pour ton week-end du 22 : voilà ce qui est au local. Le Duster est pris — libre le 24, si tu peux glisser d'un jour. »</p></div>
+        <p class="lbl">Catégories — sam. 22 → lun. 24</p>
+        <div class="cats"><span class="cat on">Citadine · 2</span><span class="cat">SUV · 1</span><span class="cat no">Utilitaire · 0</span><span class="cat">Scooter · 1</span></div>
+        <div class="vc on"><span class="nm">Toyota Yaris</span><div class="mt">Essence · manuelle · 5 places</div><div class="tot">35 €/j × 2 j = <b>70 € TTC</b></div></div>
+        <div class="vc"><span class="nm">Renault Clio</span><div class="mt">Essence · manuelle · 5 places</div><div class="tot">35 €/j × 2 j = <b>70 € TTC</b></div></div>
+        <div class="vc off"><span class="nm">Dacia Duster</span><div class="mt">Diesel · SUV · 5 places</div><span class="band">Réservé — libre le 24 août</span><span class="alt">→ Partir le 24 ? 2 j = 104 €</span></div>
+        <ul class="note">
+          <li><b>Prix TOTAL de la plage sur chaque carte</b> — possible uniquement parce que les dates sont déjà connues. Fini le « €/jour » qui cache l'addition.</li>
+          <li>Indisponible = <b>visible, cadre rouge, date de libération, alternative en un tap</b> — jamais caché.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="frame">
+      <div class="fhead"><i>3</i><b>Le conducteur</b></div>
+      <div class="fbody">
+        <div class="bub"><i>🦝</i><p>« Empreinte CB, état des lieux photo, quinze minutes. Je confirme sur WhatsApp — rien à payer en ligne. »</p></div>
+        <p class="lbl">Retrait · restitution — en pastilles, plus de menus</p>
+        <div class="hrs"><span class="hr">08:00</span><span class="hr on">09:00</span><span class="hr">10:00</span><span class="hr">11:00</span></div>
+        <div class="fld"><b>Identité</b><span>prénom · nom · email · WhatsApp</span></div>
+        <div class="fld"><b>Conducteur</b><span>naissance · permis + date d'obtention (gates BO)</span></div>
+        <div class="fld"><b>Adresse</b><span>rue · code postal · ville</span></div>
+        <div class="fld"><b>Engagements</b><span>CGL · consentement · caution 400 € (empreinte, non débitée)</span></div>
+        <div class="tk">
+          <div class="r"><span>TOYOTA YARIS</span><span>Citadine</span></div>
+          <div class="r"><span>sam. 22 · 09:00</span><span>→ lun. 24 · 17:00</span></div>
+          <div class="r tt"><span>TOTAL TTC</span><b>70 €</b></div>
+        </div>
+        <ul class="note">
+          <li>Rail qui raconte : « ① sam. 22 → lun. 24 — ② Yaris · 70 € — ③ Le conducteur ».</li>
+          <li>Ticket cliquable, pulse, scroll+focus, narration de Max <b>administrable au BO</b> — la parité Splash Lane v2 est embarquée d'office.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <p class="eyb">3 · Les trois arbitrages</p>
+  <h2>À trancher avant tout code</h2>
+
+  <div class="arb">
+    <p class="q">A — Le catalogue au-dessus du Pit Lane : que fait « Réserver » sur une carte véhicule ?</p>
+    <div class="opt2">
+      <div class="op reco"><b>Le véhicule est un vœu, les dates restent maîtresses</b>Le clic épingle le véhicule et ouvre l'étape 1 (dates). S'il n'est pas libre sur la plage choisie → sa carte passe en rouge à l'étape 2 avec ses dates de libération. Deux portes, une seule logique.</div>
+      <div class="op"><b>Une seule porte</b>Le catalogue devient vitrine pure (sans bouton Réserver) ; toute réservation commence par les dates. Plus simple, mais on casse un geste que les clients font déjà.</div>
+    </div>
+  </div>
+
+  <div class="arb">
+    <p class="q">B — Le traitement visuel de l'indisponible</p>
+    <div class="opt2 three">
+      <div class="op"><b>Rouge plein</b>Carte entièrement rouge. Vu de loin, mais anxiogène à l'échelle d'une liste et écrase la hiérarchie (le rouge doit rester rare).</div>
+      <div class="op reco"><b>Cadre rouge + date de libération + alternative</b>La carte reste lisible, le bandeau rouge dit « Réservé — libre le 24 », et un tap propose la plage décalée. C'est le pattern Baymard : l'intention est conservée, pas punie.</div>
+      <div class="op"><b>Masquer</b>Ne montrer que le disponible. Contre-indiqué par les sources : la demande invisible est perdue.</div>
+    </div>
+  </div>
+
+  <div class="arb">
+    <p class="q">C — Une étape « options » (sièges bébé, conducteur additionnel, assurance complémentaire…) ?</p>
+    <div class="opt2">
+      <div class="op reco"><b>Pas maintenant — question Stéphane</b>Aucune option n'existe au catalogue BO aujourd'hui. On garde 3 actes ; le champ « précisions » recueille les demandes. Si Stéphane confirme des extras payants, ils rejoindront l'acte 2 (sous le véhicule), jamais une 4ᵉ étape.</div>
+      <div class="op"><b>Prévoir l'étape dès v2</b>Structure prête mais vide — de la flexibilité spéculative, contraire à la doctrine.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <p class="eyb">4 · Ce que ça change</p>
+  <h2>Delta contre l'existant</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Brique</th><th>Sort</th><th>Détail</th></tr></thead>
+    <tbody>
+      <tr><td>Bande de jours + jauges + durées</td><td><span class="chip keep">Conservé</span></td><td>Passe de l'étape 2 à l'étape 1 ; la jauge dit désormais les véhicules libres (donnée déjà servie par <span class="m">getDispoParJour</span>).</td></tr>
+      <tr><td>Cartes véhicules</td><td><span class="chip new">Transformé</span></td><td>Filtrées par la plage (<span class="m">checkDispo</span> existe), prix <b>total</b> par carte, état rouge « libre le X » + alternative (nouvelle donnée : prochaine date libre par véhicule).</td></tr>
+      <tr><td>Heures retrait/restitution</td><td><span class="chip new">Transformé</span></td><td>Les 2 derniers <span class="m">&lt;select&gt;</span> deviennent des pastilles — le parcours tient enfin « zéro dropdown ».</td></tr>
+      <tr><td>Coordonnées, gates âge/permis, CGL, caution, honeypot, rate-limit</td><td><span class="chip keep">Conservé</span></td><td>Le serveur (<span class="m">validateReservation</span>) ne bouge pas — l'audit du jour l'a montré béton.</td></tr>
+      <tr><td>Narration de Max</td><td><span class="chip new">Transformé</span></td><td>Administrable au BO — même mécanique que Splash (textes + gabarits <span class="m">{jour}</span> <span class="m">{dispo}</span>…).</td></tr>
+      <tr><td>Ordre véhicule → dates</td><td><span class="chip inv">Inversé</span></td><td>Le cœur du chantier : machine d'étapes retournée, entrée catalogue = vœu (arbitrage A).</td></tr>
+      <tr><td>Devis LLD, confirmation, écran final</td><td><span class="chip keep">Conservé</span></td><td>Sans pré-paiement : confirmation WhatsApp sous 24 h ouvrées, inchangée.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="verdict" style="margin-top:18px"><p><strong>Coût estimé du chantier</strong> (après GO sur maquette) : ~1 j de dev — l'inversion d'étapes et l'état « libre le X » sont le vrai travail ; le reste est du réemploi Splash Lane v2. Prochain livrable si tu valides l'axe : <strong>maquette interactive</strong> (comme cp-v4) pour sentir le parcours au doigt avant toute ligne de code.</p></div>
+</section>
+
+<section>
+  <h2>Sources</h2>
+  <p class="src">
+    <a href="https://www.sixt.com/help-center/articles/car-rental-costs/">Sixt — What is included in my rental price</a> ·
+    <a href="https://www.sixt.com/help-center/articles/change-reservation/">Sixt — dates/catégorie/lieu font le prix, total montré avant confirmation</a><br>
+    <a href="https://www.amraandelma.com/checkout-abandonment-statistics/">Checkout Abandonment Statistics 2026 — PwC 51,3 % · Baymard ~48 % · −22,4 % coût total affiché tôt</a><br>
+    <a href="https://baymard.com/blog/handling-out-of-stock-products">Baymard — Let users purchase temporarily out-of-stock products</a> ·
+    <a href="https://baymard.com/ecommerce-design-examples/date-picker">Baymard — Date picker & disponibilité</a><br>
+    <a href="https://turo.com/blog/insights/getaround-vs-turo/">Turo — plateforme & disponibilité</a> ·
+    <a href="https://www.zigpoll.com/content/what-innovative-strategies-can-we-implement-to-boost-our-car-rental-booking-conversion-rates-on-both-our-website-and-mobile-app">Étude conversion location — flux courts, progression, mobile-first</a> ·
+    <a href="https://unicornplatform.com/blog/car-rental-booking-pages-in-2026/">Car Rental Booking Pages 2026 — clarté d'offre avant engagement</a>
+  </p>
+</section>
+</main>

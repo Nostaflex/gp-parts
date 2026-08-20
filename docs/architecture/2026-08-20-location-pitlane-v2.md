@@ -1,0 +1,98 @@
+# Pit Lane Location v2 — « Le planning d'abord » (SPEC GELÉE)
+
+> Contrat de dev issu de la session design du 2026-08-20 (Djemil). Les
+> retours sur la maquette interactive SONT la spec — ce document les fige.
+> Maquette jouable : `design/maquettes/location-pitlane-v2/maquette-planning-dabord.html`
+> (ouvrir en local) · étude sourcée : `etude-planning-dabord.html` (même dossier).
+> Le serveur (`validateReservation`) ne change pas — audit 2026-08-20 : béton.
+
+## 0 · Décisions ratifiées (toutes Djemil, 2026-08-20)
+
+| #   | Décision                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R1  | **Ordre inversé** : Acte 1 Les dates → Acte 2 Le véhicule → Acte 3 Le conducteur.                                                                                                                                                                                                                                                                                                                                                                   |
+| R2  | Entrée par carte catalogue = **vœu** (véhicule épinglé, les dates restent maîtresses).                                                                                                                                                                                                                                                                                                                                                              |
+| R3  | Indisponible **visible** : cadre rouge + « Réservé — libre le X » + alternative 1 tap. Jamais caché.                                                                                                                                                                                                                                                                                                                                                |
+| R4  | Calendrier **commence aujourd'hui** — zéro jour passé ; fenêtre glissante 6 semaines ; navigation ‹ › par 4 semaines ; **horizon 1 an**.                                                                                                                                                                                                                                                                                                            |
+| R5  | **Aucune suggestion de durée** — durée = calculée, affichée « N j ».                                                                                                                                                                                                                                                                                                                                                                                |
+| R6  | Sélection : clic départ → clic retour. **Correction = taper le champ** Départ ou Retour (pattern Air France/Sixt — champ actif surligné, le calendrier remplit CE champ, focus auto-avance).                                                                                                                                                                                                                                                        |
+| R7  | Couleurs de plage : départ **crème**, jours couverts **teinte verte**, retour **orange plein**. Jauge intermédiaire « ça se remplit » = **or #E9C46A** (l'orange reste exclusif fin+action).                                                                                                                                                                                                                                                        |
+| R8  | **Heures retrait + restitution à l'Acte 1** (pastilles, zéro dropdown), défauts 09:00/17:00 ; une fois posées, les champs affichent date · heure.                                                                                                                                                                                                                                                                                                   |
+| R9  | **Vœu-calendrier** : vœu épinglé → les jauges = la dispo de CE véhicule (rouge plein = pris), légende et bandeau adaptés.                                                                                                                                                                                                                                                                                                                           |
+| R10 | **Carrefour du vœu** : dates posées + vœu pris dessus → Max pose la question DANS sa bulle avec 3 boutons : Oui (meilleure alternative libre sur LA plage, prix total affiché — même catégorie d'abord, sinon prix le plus proche ; l'accepter transfère le vœu) · Non (vœu effacé, tout le parc à l'Acte 2) · lien tertiaire « garder le X : partir le {libéré} ». Continuer ne pulse pas tant que la question est ouverte (mais reste cliquable). |
+| R11 | **Plage morte** (0 véhicule sur la plage) : narrée immédiatement par Max + bouton « Partir le {altStart} — même durée » ; Continuer bloqué. Jamais découvert à l'Acte 2.                                                                                                                                                                                                                                                                            |
+| R12 | **Le dialogue est l'interface** : quand Max propose, ses propositions sont des boutons sous sa réplique. Pas de carte séparée.                                                                                                                                                                                                                                                                                                                      |
+| R13 | Zoom-in : sélection complète → le calendrier se replie sur la fenêtre du séjour (±1 j, lecture seule) ; l'édition passe par les champs.                                                                                                                                                                                                                                                                                                             |
+| R14 | Animations : UNE entrée animée (420 ms slide) + UN pulse (2 battements) à la fois ; goutte d'eau sur sélection ; `prefers-reduced-motion` global.                                                                                                                                                                                                                                                                                                   |
+| R15 | Rejeté : pill segmenté unique Départ/Retour (dilue l'identité blanc/orange) ; heuristique « bord le plus proche » (remplacée par R6).                                                                                                                                                                                                                                                                                                               |
+
+## 1 · Les trois actes
+
+### Acte 1 — Les dates
+
+- Champs `Départ` / `Retour` (chips, crème/orange une fois posés, `· HH:MM` quand complet) + « N j — durée » + « ⟲ recommencer ».
+- Calendrier fenêtre glissante (R4) : cellules mini (numéro mono + jauge 3 px), en-têtes Lu…Di, marqueur de mois dans la cellule du 1er, jours parc-complet désactivés + barre rouge.
+- Jauges : nb véhicules libres / parc → vert < 60 % occupé, **or** ≥ 60 %, rouge complet. En mode vœu : binaire vert/rouge du véhicule (R9).
+- Machine d'état : `editing: 'start' | 'end' | null`. Sélection/complétion → zoom-in (R13) + heures (R8) + carrefour/plage-morte éventuels (R10/R11).
+- Continuer pulse ssi plage posée ∧ parc vivant ∧ pas de question ouverte.
+
+### Acte 2 — Le véhicule
+
+- Chips catégories avec compteurs pour LA plage (`SUV · 1`, zéro = barré rouge, désactivé).
+- Cartes véhicules : **prix TOTAL de la plage** (`52 €/j × 3 j = 156 € TTC`).
+- Indisponibles : R3 (cadre rouge, « libre le X » = max fin des plages en collision, bouton « → Partir le X ? N j = Y € » qui décale les dates ET sélectionne).
+- Vœu libre sur la plage → présélectionné en arrivant.
+
+### Acte 3 — Le conducteur
+
+- Champs actuels du funnel v2 (identité, naissance, permis + date d'obtention, adresse, CGL, consentement, opt-in, caution affichée). **Les heures n'y sont plus** (R8).
+- Serveur inchangé : `validateReservation` (gates âge/permis BO, collision, LLD, rate-limit, honeypot).
+
+## 2 · Parité Splash Lane v2 (embarquée d'office)
+
+Rail qui raconte les choix · lignes du ticket cliquables (✎) vers leur acte ·
+scroll+focus au changement d'acte + reveal des erreurs (barre mobile) ·
+`role="alert"` sur les erreurs · pulse Continuer · **narration de Max
+administrable au BO** (même mécanique que `meta/lavageSettings.narration` :
+textes + gabarits `{jour}` `{dispo}` `{vehicule}`…, vide = défaut).
+
+## 3 · Données & serveur (seuls ajouts)
+
+- `getDispoParJour` : étendre à la fenêtre 42 j (aujourd'hui+1 → +42) et au-delà à la demande (navigation) — comptes seuls, zéro PII.
+- **Mode vœu** : plages occupées d'UN véhicule (`getBusyRangesForCar` existe, sortie sans PII : dates seules).
+- Alternative véhicule / plage morte / `altStart` : calculables client depuis `checkDispo(plage)` + plages occupées ; sinon petite action dédiée.
+- Rendu serveur initial de la fenêtre (leçon C3 : zéro fetch au premier affichage, `revalidate` 60 s).
+
+## 4 · Mobile & a11y
+
+- Container queries < 700 px (pattern `cp-pl`) : fenêtre réduite à 4 semaines, cellules ≥ 44 px de haut, barre collante (plage · total · CTA).
+- Flèches clavier sur le calendrier ; `aria-live="polite"` sur la bulle de Max ; `aria-label` complets sur les cellules (jour, dispo) — jamais la couleur seule.
+
+## 5 · Lexique
+
+**Retrait / Restitution** partout (aligné CGL). « Récupération / Dépose » de la maquette → à remplacer au dev.
+
+## 6 · Questions Stéphane (bloquantes AVANT dev de la règle, pas du chantier)
+
+1. Durée **minimum** de location (la maquette accepte 1 j) ?
+2. **Jours/horaires de retrait** réels (dimanche ? samedi après-midi ?) → pilote les pastilles d'heures et les jours proposables.
+3. Extras payants (siège bébé, conducteur additionnel…) ? Si oui : Acte 2, sous le véhicule — jamais un 4ᵉ acte.
+
+## 7 · Découpage dev (branche dédiée, estimation ~1,5 j)
+
+| Lot | Contenu                                                                                                                                 |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | Serveur : dispo fenêtre 42 j rendue SSR + plages par véhicule (sans PII)                                                                |
+| D2  | Acte 1 complet (champs, calendrier, zoom-in, vœu, carrefour, plage morte, heures) + lib pure testée (machine d'état, altStart, bestAlt) |
+| D3  | Acte 2 (catégories, totaux, indispo « libre le X » + bascule)                                                                           |
+| D4  | Acte 3 (retrait des heures) + narration Max BO + parité v2 + lexique                                                                    |
+| D5  | Tests (unit lib + composant) + vérif Playwright locale + captures                                                                       |
+
+## 8 · Critères d'acceptation
+
+1. Depuis la page nue : plage posée en 2 clics, heures par défaut visibles, total à l'Acte 2 en 1 clic de plus.
+2. Taper le champ Départ après coup change LE départ sans toucher le retour (et réciproquement).
+3. Vœu Duster + plage où il est pris → question de Max avec alternative chiffrée ; « Non » → Acte 2 complet sans critère.
+4. Plage traversant un trou parc-complet → refus narré + alternative AVANT l'Acte 2.
+5. Aucun `<select>` dans tout le parcours ; AA sur tous les libellés ; `prefers-reduced-motion` neutralise slide et pulse.
+6. `validateReservation` : zéro changement de contrat (tests existants verts).
