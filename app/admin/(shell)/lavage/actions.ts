@@ -7,7 +7,11 @@ import { getAdminFirestore } from '@/lib/firebase-admin';
 import { CRENEAUX_LAVAGE, DISPO_HORIZON_JOURS, isDateKey } from '@/lib/lavage-creneaux';
 import { normalizeSemaineType } from '@/lib/lavage-semaine';
 import { setBlocage, setJournee } from '@/lib/server/lavage-dispos';
-import { LavageSettingsSchema, SemaineTypeSchema } from '@/lib/schemas/lavage';
+import {
+  LavageNarrationSchema,
+  LavageSettingsSchema,
+  SemaineTypeSchema,
+} from '@/lib/schemas/lavage';
 import { localDateISO } from '@/lib/utils';
 
 import type { LavageBlocage } from '@/lib/lavage-creneaux';
@@ -38,9 +42,30 @@ export async function updateLavageSettings(
     return { errors: { _form: [...new Set(messages)] } };
   }
 
+  // Narration de Splash (même doc, champ `narration`) — texte vide accepté :
+  // le public retombe alors sur le texte par défaut.
+  let narrationCandidate: unknown;
+  try {
+    narrationCandidate = JSON.parse(String(formData.get('narrationJson') ?? '{}'));
+  } catch {
+    return { errors: { _form: ['Narration illisible — recharge la page et réessaie.'] } };
+  }
+  const narration = LavageNarrationSchema.safeParse(narrationCandidate);
+  if (!narration.success) {
+    return { errors: { _form: [...new Set(narration.error.issues.map((i) => i.message))] } };
+  }
+
   await getAdminFirestore()
     .doc('meta/lavageSettings')
-    .set({ ...parsed.data, updatedAt: Date.now(), updatedBy: session.email }, { merge: true });
+    .set(
+      {
+        ...parsed.data,
+        narration: narration.data,
+        updatedAt: Date.now(),
+        updatedBy: session.email,
+      },
+      { merge: true }
+    );
 
   await writeAuditLog({
     actor: session.email,
