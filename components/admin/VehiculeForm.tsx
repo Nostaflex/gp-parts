@@ -121,6 +121,7 @@ export function VehiculeForm({ initial }: { initial?: Vehicule }) {
             <option>Essence</option>
             <option>Diesel</option>
             <option>Hybride</option>
+            <option>Électrique</option>
           </select>
           <FieldError name="energie" />
         </div>

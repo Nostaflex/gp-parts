@@ -10,12 +10,12 @@ import { WHATSAPP_URL } from '@/lib/config';
 // Tri des cartes : la vitrine montre d'abord ce qui s'achète encore.
 const DISPO_ORDRE: Record<Disponibilite, number> = { disponible: 0, reserve: 1, vendu: 2 };
 
-type Energie = 'Toutes' | 'Essence' | 'Diesel' | 'Hybride';
+type Energie = 'Toutes' | 'Essence' | 'Diesel' | 'Hybride' | 'Électrique';
 type BudgetMax = 15000 | 20000 | 30000 | 999999;
 type TypeFiltre = 'Tous' | 'Occasion' | 'Neuf';
 
 const TYPES: TypeFiltre[] = ['Tous', 'Occasion', 'Neuf'];
-const ENERGIES: Energie[] = ['Toutes', 'Essence', 'Diesel', 'Hybride'];
+const ENERGIES: Energie[] = ['Toutes', 'Essence', 'Diesel', 'Hybride', 'Électrique'];
 const BUDGETS: { label: string; val: BudgetMax }[] = [
   { label: 'Tous budgets', val: 999999 },
   { label: '< 15 000 €', val: 15000 },

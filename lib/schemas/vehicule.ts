@@ -28,7 +28,7 @@ export const VehiculeSchema = z.object({
     .min(1990)
     .max(currentYear + 1),
   km: z.number().int().min(0),
-  energie: z.enum(['Essence', 'Diesel', 'Hybride']),
+  energie: z.enum(['Essence', 'Diesel', 'Hybride', 'Électrique']),
   transmission: z.string().min(1),
   places: z.number().int().min(1).max(9),
   options: z.array(z.string()),

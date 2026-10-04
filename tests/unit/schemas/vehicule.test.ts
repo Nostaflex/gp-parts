@@ -28,6 +28,10 @@ describe('VehiculeSchema', () => {
     expect(() => parseVehicule(valid)).not.toThrow();
   });
 
+  it('accepte une voiture électrique', () => {
+    expect(() => parseVehicule({ ...valid, energie: 'Électrique' })).not.toThrow();
+  });
+
   it('rejette une année hors borne (avant 1990)', () => {
     expect(() => parseVehicule({ ...valid, annee: 1980 })).toThrow();
   });
