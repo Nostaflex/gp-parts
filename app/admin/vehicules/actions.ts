@@ -7,6 +7,7 @@ import { writeAuditLog } from '@/lib/admin/audit';
 import { getAdminFirestore } from '@/lib/firebase-admin';
 import { VehiculeSchema } from '@/lib/schemas/vehicule';
 import { computeDiff } from '@/lib/admin/diff';
+import { PARSE_FR } from '@/lib/admin/form-errors';
 
 import type { FormActionState } from '@/components/admin/FormShell';
 
@@ -82,7 +83,7 @@ export async function createVehicule(
 ): Promise<FormActionState> {
   const session = await requireAdmin();
 
-  const parsed = VehiculeSchema.safeParse(parseForm(formData));
+  const parsed = VehiculeSchema.safeParse(parseForm(formData), PARSE_FR);
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
   }
@@ -109,7 +110,7 @@ export async function updateVehicule(
 ): Promise<FormActionState> {
   const session = await requireAdmin();
 
-  const parsed = VehiculeSchema.safeParse(parseForm(formData));
+  const parsed = VehiculeSchema.safeParse(parseForm(formData), PARSE_FR);
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
   }

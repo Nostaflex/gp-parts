@@ -320,7 +320,7 @@ export function VehiculeForm({ initial }: { initial?: Vehicule }) {
           onChange={setImages}
           max={5}
         />
-        <FieldError name="image" />
+        {/* `image` = images[0] : son erreur doublonnerait celle de `images`. */}
         <FieldError name="images" />
       </div>
 

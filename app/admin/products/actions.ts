@@ -7,6 +7,7 @@ import { writeAuditLog } from '@/lib/admin/audit';
 import { getAdminFirestore } from '@/lib/firebase-admin';
 import { ProductWriteSchema, SLUG_RE } from '@/lib/schemas/product';
 import { computeDiff } from '@/lib/admin/diff';
+import { PARSE_FR } from '@/lib/admin/form-errors';
 import { slugify } from '@/lib/utils';
 
 import type { FormActionState } from '@/components/admin/FormShell';
@@ -156,7 +157,7 @@ export async function createProduct(
     return { errors: { _form: [rawParsed._parseError] } };
   }
 
-  const validation = ProductWriteSchema.safeParse(rawParsed);
+  const validation = ProductWriteSchema.safeParse(rawParsed, PARSE_FR);
   if (!validation.success) {
     return { errors: validation.error.flatten().fieldErrors };
   }
@@ -245,7 +246,7 @@ export async function updateProduct(
     return { errors: { _form: [rawParsed._parseError] } };
   }
 
-  const validation = ProductWriteSchema.safeParse(rawParsed);
+  const validation = ProductWriteSchema.safeParse(rawParsed, PARSE_FR);
   if (!validation.success) {
     return { errors: validation.error.flatten().fieldErrors };
   }

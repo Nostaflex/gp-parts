@@ -7,6 +7,7 @@ import { getAdminFirestore } from '@/lib/firebase-admin';
 import type { FeatureFlags } from '@/lib/feature-flags';
 import { ContactInfoSchema } from '@/lib/contact-info';
 import { LegalInfoSchema } from '@/lib/legal-info';
+import { PARSE_FR } from '@/lib/admin/form-errors';
 import { z } from 'zod';
 import { normalizeLocationSettings } from '@/lib/location-settings';
 import type { FormActionState } from '@/components/admin/FormShell';
@@ -115,7 +116,7 @@ export async function updateContactInfo(
     social: { facebook: str('facebook'), instagram: str('instagram'), google: str('google') },
   };
 
-  const parsed = ContactInfoSchema.safeParse(candidate);
+  const parsed = ContactInfoSchema.safeParse(candidate, PARSE_FR);
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
   }
@@ -147,12 +148,15 @@ export async function updateLegalInfo(
   const session = await requireAdmin();
 
   const str = (k: string) => String(formData.get(k) ?? '').trim();
-  const parsed = LegalInfoSchema.safeParse({
-    tvaIntracom: str('tvaIntracom'),
-    mediateurNom: str('mediateurNom'),
-    mediateurUrl: str('mediateurUrl'),
-    rcPro: str('rcPro'),
-  });
+  const parsed = LegalInfoSchema.safeParse(
+    {
+      tvaIntracom: str('tvaIntracom'),
+      mediateurNom: str('mediateurNom'),
+      mediateurUrl: str('mediateurUrl'),
+      rcPro: str('rcPro'),
+    },
+    PARSE_FR
+  );
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
   }
@@ -187,11 +191,14 @@ export async function updateMaintenance(
 ): Promise<FormActionState> {
   const session = await requireAdmin();
 
-  const parsed = MaintenanceSchema.safeParse({
-    enabled: formData.get('enabled') === 'on',
-    titre: String(formData.get('titre') ?? '').trim(),
-    message: String(formData.get('message') ?? '').trim(),
-  });
+  const parsed = MaintenanceSchema.safeParse(
+    {
+      enabled: formData.get('enabled') === 'on',
+      titre: String(formData.get('titre') ?? '').trim(),
+      message: String(formData.get('message') ?? '').trim(),
+    },
+    PARSE_FR
+  );
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
   }

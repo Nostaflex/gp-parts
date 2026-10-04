@@ -5,6 +5,7 @@ import { requireAdmin } from '@/lib/admin/auth';
 import { writeAuditLog } from '@/lib/admin/audit';
 import { moderateAvisAdmin } from '@/lib/server/avis';
 import { AvisReponseSchema } from '@/lib/schemas/avis';
+import { PARSE_FR } from '@/lib/admin/form-errors';
 import type { ModerationResult } from '@/lib/server/avis';
 
 // CADRE LÉGAL (L121-4 C. conso) : la modération = publier / rejeter /
@@ -45,7 +46,7 @@ export async function saveAvisReponse(
   reponse: string,
   expectedUpdatedAt: string
 ): Promise<ModerationResult> {
-  const parsed = AvisReponseSchema.safeParse(reponse);
+  const parsed = AvisReponseSchema.safeParse(reponse, PARSE_FR);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? 'Réponse invalide.' };
   }

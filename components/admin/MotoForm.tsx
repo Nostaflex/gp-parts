@@ -301,7 +301,7 @@ export function MotoForm({ initial }: { initial?: Moto }) {
           onChange={setImages}
           max={5}
         />
-        <FieldError name="image" />
+        {/* `image` = images[0] : son erreur doublonnerait celle de `images`. */}
         <FieldError name="images" />
       </div>
 

@@ -7,6 +7,7 @@ import { writeAuditLog } from '@/lib/admin/audit';
 import { getAdminFirestore } from '@/lib/firebase-admin';
 import { MotoSchema } from '@/lib/schemas/moto';
 import { computeDiff } from '@/lib/admin/diff';
+import { PARSE_FR } from '@/lib/admin/form-errors';
 
 import type { FormActionState } from '@/components/admin/FormShell';
 
@@ -75,7 +76,7 @@ export async function createMoto(
 ): Promise<FormActionState> {
   const session = await requireAdmin();
 
-  const parsed = MotoSchema.safeParse(parseForm(formData));
+  const parsed = MotoSchema.safeParse(parseForm(formData), PARSE_FR);
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
   }
@@ -102,7 +103,7 @@ export async function updateMoto(
 ): Promise<FormActionState> {
   const session = await requireAdmin();
 
-  const parsed = MotoSchema.safeParse(parseForm(formData));
+  const parsed = MotoSchema.safeParse(parseForm(formData), PARSE_FR);
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
   }
