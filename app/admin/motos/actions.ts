@@ -6,7 +6,7 @@ import { requireAdmin } from '@/lib/admin/auth';
 import { writeAuditLog } from '@/lib/admin/audit';
 import { getAdminFirestore } from '@/lib/firebase-admin';
 import { MotoSchema } from '@/lib/schemas/moto';
-import { computeDiff } from '@/lib/admin/diff';
+import { computePatchDiff } from '@/lib/admin/diff';
 import { PARSE_FR } from '@/lib/admin/form-errors';
 
 import type { FormActionState } from '@/components/admin/FormShell';
@@ -123,7 +123,7 @@ export async function updateMoto(
       return;
     }
     tx.update(ref, data);
-    auditDiff = computeDiff(before, data as Record<string, unknown>);
+    auditDiff = computePatchDiff(before, data as Record<string, unknown>);
   });
 
   if (conflict) {

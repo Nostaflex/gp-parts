@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeDiff } from '@/lib/admin/diff';
+import { computeDiff, computePatchDiff } from '@/lib/admin/diff';
 
 describe('computeDiff', () => {
   it('retourne les champs changés avec before/after', () => {
@@ -38,5 +38,20 @@ describe('computeDiff', () => {
   it('inclut les clés présentes uniquement dans before (champ supprimé)', () => {
     const d = computeDiff({ a: 1, b: 2 }, { a: 1 });
     expect(d).toEqual({ b: { before: 2, after: undefined } });
+  });
+});
+
+describe('computePatchDiff — mise à jour partielle (tx.update = fusion)', () => {
+  it('ignore les champs du document absents du formulaire (deletedAt, createdAt…)', () => {
+    const before = { prix: 18900, deletedAt: '2026-10-04T10:00:00.000Z', createdAt: 'x' };
+    expect(computePatchDiff(before, { prix: 17900 })).toEqual({
+      prix: { before: 18900, after: 17900 },
+    });
+  });
+
+  it('garde une clé nouvelle apportée par le patch', () => {
+    expect(computePatchDiff({ a: 1 }, { a: 1, b: 2 })).toEqual({
+      b: { before: undefined, after: 2 },
+    });
   });
 });

@@ -16,6 +16,23 @@ describe('writeAuditLog', () => {
     vi.clearAllMocks();
   });
 
+  it('écrit null à la place d’undefined dans le diff (Firestore refuse undefined)', async () => {
+    await writeAuditLog({
+      actor: 'djemil.david@gmail.com',
+      action: 'update',
+      resourceType: 'vehicule',
+      resourceId: 'peugeot-308sw',
+      diff: {
+        couleur: { before: undefined, after: 'Bleu' },
+        option: { before: 'GPS', after: undefined },
+      },
+    });
+    expect(setMock.mock.calls[0][0].diff).toEqual({
+      couleur: { before: null, after: 'Bleu' },
+      option: { before: 'GPS', after: null },
+    });
+  });
+
   it('écrit un doc dans la collection audit_log avec expiresAt à +12 mois', async () => {
     await writeAuditLog({
       actor: 'djemil.david@gmail.com',

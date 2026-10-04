@@ -72,7 +72,13 @@ export async function writeAuditLog(input: WriteAuditLogInput): Promise<void> {
   // RGPD : jamais de diff PII pour les demandes. Sinon, n'ajouter la clé
   // que si un diff est réellement fourni (create n'en a pas).
   if (input.resourceType !== 'demande' && input.diff !== undefined) {
-    entry.diff = input.diff;
+    // Firestore refuse `undefined` : une clé nouvelle ou retirée s'écrit `null`.
+    entry.diff = Object.fromEntries(
+      Object.entries(input.diff).map(([key, v]) => [
+        key,
+        { before: v.before ?? null, after: v.after ?? null },
+      ])
+    );
   }
 
   await getAdminFirestore().collection('audit_log').doc().set(entry);

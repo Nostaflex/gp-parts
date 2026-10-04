@@ -6,7 +6,7 @@ import { requireAdmin } from '@/lib/admin/auth';
 import { writeAuditLog } from '@/lib/admin/audit';
 import { getAdminFirestore } from '@/lib/firebase-admin';
 import { LocationCarWriteSchema } from '@/lib/schemas/location-car';
-import { computeDiff } from '@/lib/admin/diff';
+import { computePatchDiff } from '@/lib/admin/diff';
 import { PARSE_FR } from '@/lib/admin/form-errors';
 
 import type { FormActionState } from '@/components/admin/FormShell';
@@ -103,7 +103,7 @@ export async function updateLocationCar(
       return;
     }
     tx.update(ref, data);
-    auditDiff = computeDiff(before, data as Record<string, unknown>);
+    auditDiff = computePatchDiff(before, data as Record<string, unknown>);
   });
 
   if (conflict) {

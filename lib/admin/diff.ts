@@ -23,3 +23,19 @@ export function computeDiff(
   }
   return diff;
 }
+
+/**
+ * Diff d'une mise à jour PARTIELLE (`tx.update` = fusion) : seules les clés du
+ * patch peuvent avoir changé. Les champs du document absents du formulaire
+ * (deletedAt, createdAt…) ne sont pas « supprimés » : les comparer produisait
+ * `after: undefined`, que Firestore refuse à l'écriture de l'audit — l'audit
+ * des pièces échouait en silence, la modification d'une voiture de location
+ * levait une erreur après l'enregistrement.
+ */
+export function computePatchDiff(
+  before: Record<string, unknown>,
+  patch: Record<string, unknown>
+): Record<string, { before: unknown; after: unknown }> {
+  const concerne = Object.fromEntries(Object.keys(patch).map((key) => [key, before[key]]));
+  return computeDiff(concerne, patch);
+}

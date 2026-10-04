@@ -6,7 +6,7 @@ import { requireAdmin } from '@/lib/admin/auth';
 import { writeAuditLog } from '@/lib/admin/audit';
 import { getAdminFirestore } from '@/lib/firebase-admin';
 import { ProductWriteSchema, SLUG_RE } from '@/lib/schemas/product';
-import { computeDiff } from '@/lib/admin/diff';
+import { computePatchDiff } from '@/lib/admin/diff';
 import { PARSE_FR } from '@/lib/admin/form-errors';
 import { slugify } from '@/lib/utils';
 
@@ -300,7 +300,7 @@ export async function updateProduct(
       }
     }
 
-    auditDiff = computeDiff(before, updatePayload);
+    auditDiff = computePatchDiff(before, updatePayload);
     tx.update(ref, updatePayload);
   });
 
