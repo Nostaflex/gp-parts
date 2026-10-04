@@ -149,15 +149,17 @@ export async function updateMoto(
 
 /**
  * Écrit `patch` sous lock optimiste (même transaction que updateMoto) :
- * « Vendu » et « Supprimer » n'écrasent jamais silencieusement une édition
- * concurrente. Retourne les erreurs à afficher, ou `null` si l'écriture est faite.
+ * « Vendu », « Supprimer » et « Restaurer » n'écrasent jamais silencieusement
+ * une édition concurrente. Retourne les erreurs à afficher, ou le nouvel
+ * horodatage du document.
  */
 async function patchMoto(
   id: string,
   clientUpdatedAt: string,
   patch: Record<string, unknown>
-): Promise<FormActionState> {
+): Promise<{ errors: Record<string, string[]> } | { updatedAt: string }> {
   const db = getAdminFirestore();
+  const updatedAt = new Date().toISOString();
   let conflict = false;
   let missing = false;
   await db.runTransaction(async (tx) => {
@@ -172,7 +174,7 @@ async function patchMoto(
       conflict = true;
       return;
     }
-    tx.update(ref, { ...patch, updatedAt: new Date().toISOString() });
+    tx.update(ref, { ...patch, updatedAt });
   });
 
   if (missing) {
@@ -181,47 +183,51 @@ async function patchMoto(
   if (conflict) {
     return { errors: { _form: ['Cette moto a été modifiée entre-temps. Rechargez la page.'] } };
   }
-  return null;
+  return { updatedAt };
+}
+
+/** Patch + audit + revalidation : le tronc commun des trois actions de ligne. */
+async function ligneMoto(
+  id: string,
+  clientUpdatedAt: string,
+  patch: Record<string, unknown>,
+  action: 'update' | 'delete' | 'restore',
+  message: string
+): Promise<FormActionState> {
+  const session = await requireAdmin();
+
+  const res = await patchMoto(id, clientUpdatedAt, patch);
+  if ('errors' in res) return res;
+
+  await writeAuditLog({ actor: session.email, action, resourceType: 'moto', resourceId: id });
+
+  revalidateTag('motos');
+  revalidateTag(`moto:${id}`);
+  return { ok: true, message, updatedAt: res.updatedAt };
 }
 
 /** « Vendu » : l'annonce reste affichée sur le site public, en fin de grille. */
 export async function markMotoVendu(id: string, clientUpdatedAt: string): Promise<FormActionState> {
-  const session = await requireAdmin();
-
-  const refus = await patchMoto(id, clientUpdatedAt, { disponibilite: 'vendu' });
-  if (refus) return refus;
-
-  await writeAuditLog({
-    actor: session.email,
-    action: 'update',
-    resourceType: 'moto',
-    resourceId: id,
-  });
-
-  revalidateTag('motos');
-  revalidateTag(`moto:${id}`);
-  return { ok: true, message: 'Moto marquée comme vendue.' };
+  return ligneMoto(
+    id,
+    clientUpdatedAt,
+    { disponibilite: 'vendu' },
+    'update',
+    'Moto marquée comme vendue.'
+  );
 }
 
 /**
- * « Supprimer » : retrait réel par soft-delete (`deletedAt`). L'annonce
- * disparaît du site et du BO (filtre dans FirebaseAdapter.getMotos) et reste
- * récupérable en base.
+ * « Supprimer » : part à la corbeille (soft-delete `deletedAt`). L'annonce
+ * disparaît du site (filtre dans FirebaseAdapter.getMotos) et se retrouve
+ * dans l'onglet Corbeille du BO.
  */
 export async function deleteMoto(id: string, clientUpdatedAt: string): Promise<FormActionState> {
-  const session = await requireAdmin();
+  const deletedAt = new Date().toISOString();
+  return ligneMoto(id, clientUpdatedAt, { deletedAt }, 'delete', 'Moto supprimée.');
+}
 
-  const refus = await patchMoto(id, clientUpdatedAt, { deletedAt: new Date().toISOString() });
-  if (refus) return refus;
-
-  await writeAuditLog({
-    actor: session.email,
-    action: 'delete',
-    resourceType: 'moto',
-    resourceId: id,
-  });
-
-  revalidateTag('motos');
-  revalidateTag(`moto:${id}`);
-  return { ok: true, message: 'Moto supprimée.' };
+/** « Restaurer » : sort de la corbeille, dans l'état qu'elle avait (disponibilité intacte). */
+export async function restoreMoto(id: string, clientUpdatedAt: string): Promise<FormActionState> {
+  return ligneMoto(id, clientUpdatedAt, { deletedAt: null }, 'restore', 'Moto restaurée.');
 }

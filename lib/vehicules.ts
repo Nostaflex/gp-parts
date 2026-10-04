@@ -42,6 +42,7 @@ export type Vehicule = {
   reference: string;
   disponibilite: Disponibilite;
   updatedAt: string; // ISO date — optimistic lock + tri admin (Phase 4)
+  deletedAt?: string | null; // ISO si l'annonce est dans la corbeille du BO
 };
 
 export const VEHICULES: Vehicule[] = [

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { requireAdminPage } from '@/lib/admin/auth';
 
-import { getAdapter } from '@/lib/data';
+import { getProductsAdmin } from '@/lib/admin/catalogue-server';
 
 import { ProductsTable } from './ProductsTable';
 
@@ -15,8 +15,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function AdminProductsPage() {
   await requireAdminPage();
-  const adapter = await getAdapter();
-  const products = await adapter.getProducts({ includeDeleted: true });
+  const products = await getProductsAdmin();
 
   return (
     <div className="p-4">

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { requireAdminPage } from '@/lib/admin/auth';
 
-import { getAdapter } from '@/lib/data';
+import { getMotosAdmin } from '@/lib/admin/catalogue-server';
 
 import { MotosTable } from './MotosTable';
 
@@ -15,8 +15,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function AdminMotosPage() {
   await requireAdminPage();
-  const adapter = await getAdapter();
-  const motos = await adapter.getMotos();
+  const motos = await getMotosAdmin();
 
   return (
     <div className="p-4">

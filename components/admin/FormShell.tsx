@@ -12,7 +12,9 @@ import type { ReactNode } from 'react';
  * Soit succès, soit erreurs de champ Zod (`flatten().fieldErrors`).
  */
 export type FormActionState =
-  | { ok: true; message?: string }
+  // `updatedAt` : nouvel horodatage du document, pour enchaîner une action
+  // sous lock optimiste (« Annuler » après une suppression).
+  | { ok: true; message?: string; updatedAt?: string }
   | { ok?: false; errors: Record<string, string[] | undefined> }
   | null;
 

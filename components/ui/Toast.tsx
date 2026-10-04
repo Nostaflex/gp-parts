@@ -11,7 +11,8 @@ interface Toast {
   id: string;
   type: ToastType;
   message: string;
-  action?: { label: string; href: string };
+  /** Lien de suite, ou geste immédiat (« Annuler ») : le toast reste alors plus longtemps. */
+  action?: { label: string; href: string } | { label: string; onClick: () => void };
 }
 
 interface ToastContextValue {
@@ -66,9 +67,10 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
   const Icon = ICONS[toast.type];
 
   useEffect(() => {
-    const timer = setTimeout(onClose, 4000);
+    const delai = toast.action && 'onClick' in toast.action ? 7000 : 4000;
+    const timer = setTimeout(onClose, delai);
     return () => clearTimeout(timer);
-  }, [onClose]);
+  }, [onClose, toast.action]);
 
   return (
     <div
@@ -81,13 +83,25 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
       <Icon size={18} strokeWidth={2} className="mt-0.5 flex-shrink-0" />
       <div className="flex-1 text-body-sm font-medium">
         {toast.message}
-        {toast.action && (
+        {toast.action && 'href' in toast.action && (
           <Link
             href={toast.action.href}
             className="block mt-1 underline text-caption font-medium opacity-90 hover:opacity-100"
           >
             {toast.action.label} →
           </Link>
+        )}
+        {toast.action && 'onClick' in toast.action && (
+          <button
+            type="button"
+            onClick={() => {
+              (toast.action as { onClick: () => void }).onClick();
+              onClose();
+            }}
+            className="ml-3 underline font-semibold opacity-95 hover:opacity-100"
+          >
+            {toast.action.label}
+          </button>
         )}
       </div>
       <button

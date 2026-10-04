@@ -156,15 +156,17 @@ export async function updateVehicule(
 
 /**
  * Écrit `patch` sous lock optimiste (même transaction que updateVehicule) :
- * « Vendu » et « Supprimer » n'écrasent jamais silencieusement une édition
- * concurrente. Retourne les erreurs à afficher, ou `null` si l'écriture est faite.
+ * « Vendu », « Supprimer » et « Restaurer » n'écrasent jamais silencieusement
+ * une édition concurrente. Retourne les erreurs à afficher, ou le nouvel
+ * horodatage du document.
  */
 async function patchVehicule(
   id: string,
   clientUpdatedAt: string,
   patch: Record<string, unknown>
-): Promise<FormActionState> {
+): Promise<{ errors: Record<string, string[]> } | { updatedAt: string }> {
   const db = getAdminFirestore();
+  const updatedAt = new Date().toISOString();
   let conflict = false;
   let missing = false;
   await db.runTransaction(async (tx) => {
@@ -179,7 +181,7 @@ async function patchVehicule(
       conflict = true;
       return;
     }
-    tx.update(ref, { ...patch, updatedAt: new Date().toISOString() });
+    tx.update(ref, { ...patch, updatedAt });
   });
 
   if (missing) {
@@ -188,7 +190,27 @@ async function patchVehicule(
   if (conflict) {
     return { errors: { _form: ['Ce véhicule a été modifié entre-temps. Rechargez la page.'] } };
   }
-  return null;
+  return { updatedAt };
+}
+
+/** Patch + audit + revalidation : le tronc commun des trois actions de ligne. */
+async function ligneVehicule(
+  id: string,
+  clientUpdatedAt: string,
+  patch: Record<string, unknown>,
+  action: 'update' | 'delete' | 'restore',
+  message: string
+): Promise<FormActionState> {
+  const session = await requireAdmin();
+
+  const res = await patchVehicule(id, clientUpdatedAt, patch);
+  if ('errors' in res) return res;
+
+  await writeAuditLog({ actor: session.email, action, resourceType: 'vehicule', resourceId: id });
+
+  revalidateTag('vehicules');
+  revalidateTag(`vehicule:${id}`);
+  return { ok: true, message, updatedAt: res.updatedAt };
 }
 
 /** « Vendu » : l'annonce reste affichée sur le site public, en fin de grille. */
@@ -196,45 +218,32 @@ export async function markVehiculeVendu(
   id: string,
   clientUpdatedAt: string
 ): Promise<FormActionState> {
-  const session = await requireAdmin();
-
-  const refus = await patchVehicule(id, clientUpdatedAt, { disponibilite: 'vendu' });
-  if (refus) return refus;
-
-  await writeAuditLog({
-    actor: session.email,
-    action: 'update',
-    resourceType: 'vehicule',
-    resourceId: id,
-  });
-
-  revalidateTag('vehicules');
-  revalidateTag(`vehicule:${id}`);
-  return { ok: true, message: 'Véhicule marqué comme vendu.' };
+  return ligneVehicule(
+    id,
+    clientUpdatedAt,
+    { disponibilite: 'vendu' },
+    'update',
+    'Véhicule marqué comme vendu.'
+  );
 }
 
 /**
- * « Supprimer » : retrait réel par soft-delete (`deletedAt`). L'annonce
- * disparaît du site et du BO (filtre dans FirebaseAdapter.getVehicules) et reste
- * récupérable en base.
+ * « Supprimer » : part à la corbeille (soft-delete `deletedAt`). L'annonce
+ * disparaît du site (filtre dans FirebaseAdapter.getVehicules) et se retrouve
+ * dans l'onglet Corbeille du BO.
  */
 export async function deleteVehicule(
   id: string,
   clientUpdatedAt: string
 ): Promise<FormActionState> {
-  const session = await requireAdmin();
+  const deletedAt = new Date().toISOString();
+  return ligneVehicule(id, clientUpdatedAt, { deletedAt }, 'delete', 'Véhicule supprimé.');
+}
 
-  const refus = await patchVehicule(id, clientUpdatedAt, { deletedAt: new Date().toISOString() });
-  if (refus) return refus;
-
-  await writeAuditLog({
-    actor: session.email,
-    action: 'delete',
-    resourceType: 'vehicule',
-    resourceId: id,
-  });
-
-  revalidateTag('vehicules');
-  revalidateTag(`vehicule:${id}`);
-  return { ok: true, message: 'Véhicule supprimé.' };
+/** « Restaurer » : sort de la corbeille, dans l'état qu'elle avait (disponibilité intacte). */
+export async function restoreVehicule(
+  id: string,
+  clientUpdatedAt: string
+): Promise<FormActionState> {
+  return ligneVehicule(id, clientUpdatedAt, { deletedAt: null }, 'restore', 'Véhicule restauré.');
 }

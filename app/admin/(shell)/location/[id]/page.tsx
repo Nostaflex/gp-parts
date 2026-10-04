@@ -2,7 +2,9 @@ import { notFound } from 'next/navigation';
 import { requireAdminPage } from '@/lib/admin/auth';
 
 import { LocationCarForm } from '@/components/admin/LocationCarForm';
-import { getAdapter } from '@/lib/data';
+import { TrashBanner } from '@/components/admin/Trash';
+import { restoreLocationCar } from '@/app/admin/location/actions';
+import { getLocationCarByIdAdmin } from '@/lib/admin/catalogue-server';
 
 import type { Metadata } from 'next';
 
@@ -15,8 +17,7 @@ export const dynamic = 'force-dynamic';
 export default async function EditLocationCarPage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdminPage();
   const { id } = await params;
-  const adapter = await getAdapter();
-  const car = await adapter.getLocationCarById(id);
+  const car = await getLocationCarByIdAdmin(id);
   if (!car) notFound();
 
   return (
@@ -24,6 +25,9 @@ export default async function EditLocationCarPage({ params }: { params: Promise<
       <h1 className="text-title font-semibold text-[var(--text)] mb-4">
         {car.marque} {car.modele}
       </h1>
+      {car.deletedAt && (
+        <TrashBanner id={car.id} updatedAt={car.updatedAt} restoreAction={restoreLocationCar} />
+      )}
       <LocationCarForm initial={car} />
     </div>
   );

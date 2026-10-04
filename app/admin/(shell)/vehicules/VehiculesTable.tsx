@@ -1,63 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import { useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 
 import { DataTable, type Column } from '@/components/admin/DataTable';
 import { StatusBadge, type BadgeTone } from '@/components/admin/StatusBadge';
-import { deleteVehicule, markVehiculeVendu } from '@/app/admin/vehicules/actions';
-import type { FormActionState } from '@/components/admin/FormShell';
+import {
+  DeleteRowAction,
+  RowAction,
+  TrashTabs,
+  trashColumns,
+  useTrashView,
+} from '@/components/admin/Trash';
+import { deleteVehicule, markVehiculeVendu, restoreVehicule } from '@/app/admin/vehicules/actions';
 
 import type { Vehicule, Disponibilite } from '@/lib/vehicules';
-
-/**
- * Action de ligne sous lock optimiste : « Vendu » (l'annonce reste affichée
- * sur le site) ou « Supprimer » (retrait réel du site et de la liste).
- */
-function ActionVehiculeButton({
-  label,
-  confirmation,
-  action,
-  id,
-  updatedAt,
-  color,
-  disabled = false,
-}: {
-  label: string;
-  confirmation: string;
-  action: (id: string, updatedAt: string) => Promise<FormActionState>;
-  id: string;
-  updatedAt: string;
-  color: string;
-  disabled?: boolean;
-}) {
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
-
-  const onClick = () => {
-    if (disabled || pending) return;
-    if (!window.confirm(confirmation)) return;
-    startTransition(async () => {
-      const res = await action(id, updatedAt);
-      // Conflit de lock optimiste : jamais silencieux (la ligne réapparaîtrait sans explication).
-      if (res && 'errors' in res && res.errors._form?.[0]) window.alert(res.errors._form[0]);
-      router.refresh();
-    });
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled || pending}
-      className="text-body-sm font-semibold ml-4 disabled:opacity-40"
-      style={{ color }}
-    >
-      {pending ? '…' : label}
-    </button>
-  );
-}
 
 const DISPO: Record<Disponibilite, { tone: BadgeTone; label: string }> = {
   disponible: { tone: 'success', label: 'Disponible' },
@@ -112,7 +68,7 @@ const columns: Column<Vehicule>[] = [
         >
           Éditer
         </Link>
-        <ActionVehiculeButton
+        <RowAction
           label="Vendu"
           confirmation="Marquer ce véhicule comme vendu ? Il reste affiché sur le site, avec la mention « vendu »."
           action={markVehiculeVendu}
@@ -121,29 +77,54 @@ const columns: Column<Vehicule>[] = [
           color="var(--orange)"
           disabled={v.disponibilite === 'vendu'}
         />
-        <ActionVehiculeButton
-          label="Supprimer"
-          confirmation="Supprimer cette annonce ? Elle disparaît du site et de cette liste."
-          action={deleteVehicule}
+        <DeleteRowAction
+          name={`${v.marque} ${v.modele}`}
           id={v.id}
           updatedAt={v.updatedAt}
-          color="var(--red)"
+          deleteAction={deleteVehicule}
+          restoreAction={restoreVehicule}
         />
       </>
     ),
   },
 ];
 
+const corbeille = trashColumns<Vehicule>({
+  header: 'Véhicule',
+  name: (v) => `${v.marque} ${v.modele}`,
+  detail: (v) => `était « ${DISPO[v.disponibilite].label} »`,
+  editHref: (v) => `/admin/vehicules/${v.id}`,
+  restoreAction: restoreVehicule,
+});
+
 export function VehiculesTable({ vehicules }: { vehicules: Vehicule[] }) {
+  const { view, setView, live, trash } = useTrashView(vehicules);
   return (
-    <DataTable
-      rows={vehicules}
-      columns={columns}
-      getRowId={(v) => v.id}
-      searchText={(v) => `${v.marque} ${v.modele} ${v.reference}`}
-      searchPlaceholder="Rechercher un véhicule…"
-      emptyTitle="Aucun véhicule"
-      emptyDescription="Ajoutez votre premier véhicule avec le bouton ci-dessus."
-    />
+    <>
+      <TrashTabs view={view} onChange={setView} liveCount={live.length} trashCount={trash.length} />
+      {view === 'live' ? (
+        <DataTable
+          key="live"
+          rows={live}
+          columns={columns}
+          getRowId={(r) => r.id}
+          searchText={(v) => `${v.marque} ${v.modele} ${v.reference}`}
+          searchPlaceholder="Rechercher un véhicule…"
+          emptyTitle="Aucun véhicule"
+          emptyDescription="Ajoutez votre premier véhicule avec le bouton ci-dessus."
+        />
+      ) : (
+        <DataTable
+          key="trash"
+          rows={trash}
+          columns={corbeille}
+          getRowId={(r) => r.id}
+          searchText={(v) => `${v.marque} ${v.modele} ${v.reference}`}
+          searchPlaceholder="Rechercher un véhicule…"
+          emptyTitle="La corbeille est vide"
+          emptyDescription="Les véhicules supprimés apparaissent ici : tu peux les modifier ou les restaurer."
+        />
+      )}
+    </>
   );
 }

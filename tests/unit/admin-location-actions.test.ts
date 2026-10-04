@@ -72,6 +72,7 @@ import {
   createLocationCar,
   updateLocationCar,
   deleteLocationCar,
+  restoreLocationCar,
 } from '@/app/admin/location/actions';
 
 function fd(obj: Record<string, string>): FormData {
@@ -191,6 +192,43 @@ describe('Server Actions location', () => {
     );
     expect(revalidatePathMock).toHaveBeenCalledWith('/location');
     expect(res).toMatchObject({ ok: true });
+  });
+
+  it('deleteLocationCar rend le nouvel horodatage, pour pouvoir « Annuler »', async () => {
+    txGetMock.mockResolvedValue({
+      exists: true,
+      data: () => ({ updatedAt: '2026-05-01T00:00:00.000Z' }),
+    });
+    const res = await deleteLocationCar('clio-v', '2026-05-01T00:00:00.000Z');
+    const patch = txUpdateMock.mock.calls[0][1];
+    expect(res).toMatchObject({ ok: true, updatedAt: patch.updatedAt });
+  });
+
+  it('restoreLocationCar : sort de la corbeille sous lock + audit « restore »', async () => {
+    txGetMock.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        updatedAt: '2026-05-01T00:00:00.000Z',
+        deletedAt: '2026-05-01T00:00:00.000Z',
+      }),
+    });
+    const res = await restoreLocationCar('clio-v', '2026-05-01T00:00:00.000Z');
+    expect(txUpdateMock.mock.calls[0][1].deletedAt).toBeNull();
+    expect(writeAuditLogMock).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'restore', resourceType: 'location-car' })
+    );
+    expect(revalidatePathMock).toHaveBeenCalledWith('/location');
+    expect(res).toMatchObject({ ok: true });
+  });
+
+  it('restoreLocationCar : conflit lock → refus, aucune écriture', async () => {
+    txGetMock.mockResolvedValue({
+      exists: true,
+      data: () => ({ updatedAt: '2026-05-10T00:00:00.000Z' }),
+    });
+    const res = await restoreLocationCar('clio-v', '2026-05-01T00:00:00.000Z');
+    expect(txUpdateMock).not.toHaveBeenCalled();
+    expect(res).toMatchObject({ errors: { _form: expect.any(Array) } });
   });
 
   it('deleteLocationCar : conflit lock (édition concurrente) → refus, aucune écriture', async () => {

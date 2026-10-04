@@ -70,6 +70,7 @@ import {
   updateVehicule,
   deleteVehicule,
   markVehiculeVendu,
+  restoreVehicule,
 } from '@/app/admin/vehicules/actions';
 
 function fd(obj: Record<string, string>): FormData {
@@ -178,6 +179,27 @@ describe('Server Actions véhicules', () => {
     expect(res).toMatchObject({ ok: true });
   });
 
+  it('updateVehicule sur une annonce dans la corbeille : elle y reste, et l’audit ne parle pas de deletedAt', async () => {
+    txGetMock.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        ...base,
+        prix: 18900,
+        updatedAt: '2026-05-01T00:00:00.000Z',
+        deletedAt: '2026-05-01T00:00:00.000Z',
+      }),
+    });
+    const res = await updateVehicule(
+      null,
+      fd({ ...base, prix: '17900', updatedAt: '2026-05-01T00:00:00.000Z' })
+    );
+    expect(res).toMatchObject({ ok: true });
+    expect(txUpdateMock.mock.calls[0][1]).not.toHaveProperty('deletedAt');
+    const diff = writeAuditLogMock.mock.calls[0][0].diff;
+    expect(diff).not.toHaveProperty('deletedAt');
+    expect(diff.prix).toEqual({ before: 18900, after: 17900 });
+  });
+
   it('updateVehicule : conflit optimistic lock → { errors._form }', async () => {
     txGetMock.mockResolvedValue({
       exists: true,
@@ -203,6 +225,46 @@ describe('Server Actions véhicules', () => {
     );
     expect(revalidateTagMock).toHaveBeenCalledWith('vehicules');
     expect(res).toMatchObject({ ok: true });
+  });
+
+  it('deleteVehicule rend le nouvel horodatage, pour pouvoir « Annuler »', async () => {
+    txGetMock.mockResolvedValue({
+      exists: true,
+      data: () => ({ updatedAt: '2026-05-01T00:00:00.000Z' }),
+    });
+    const res = await deleteVehicule('peugeot-308sw', '2026-05-01T00:00:00.000Z');
+    const patch = txUpdateMock.mock.calls[0][1];
+    expect(res).toMatchObject({ ok: true, updatedAt: patch.updatedAt });
+  });
+
+  it('restoreVehicule : sort de la corbeille sous lock, sans toucher à la disponibilité', async () => {
+    txGetMock.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        updatedAt: '2026-05-01T00:00:00.000Z',
+        deletedAt: '2026-05-01T00:00:00.000Z',
+        disponibilite: 'vendu',
+      }),
+    });
+    const res = await restoreVehicule('peugeot-308sw', '2026-05-01T00:00:00.000Z');
+    const patch = txUpdateMock.mock.calls[0][1];
+    expect(patch.deletedAt).toBeNull();
+    expect(patch).not.toHaveProperty('disponibilite');
+    expect(writeAuditLogMock).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'restore', resourceType: 'vehicule' })
+    );
+    expect(revalidateTagMock).toHaveBeenCalledWith('vehicules');
+    expect(res).toMatchObject({ ok: true });
+  });
+
+  it('restoreVehicule : conflit lock → refus, aucune écriture', async () => {
+    txGetMock.mockResolvedValue({
+      exists: true,
+      data: () => ({ updatedAt: '2026-05-10T00:00:00.000Z' }),
+    });
+    const res = await restoreVehicule('peugeot-308sw', '2026-05-01T00:00:00.000Z');
+    expect(txUpdateMock).not.toHaveBeenCalled();
+    expect(res).toMatchObject({ errors: { _form: expect.any(Array) } });
   });
 
   it('markVehiculeVendu : passe en « vendu » sous lock, sans retirer l’annonce', async () => {

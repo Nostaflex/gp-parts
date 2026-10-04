@@ -254,7 +254,8 @@ export class FirebaseAdapter implements DataAdapter {
   // Soft-delete (`deletedAt`, bouton « Supprimer » du BO) filtré ICI : point de
   // passage unique de tous les lecteurs (site public via le cache, listes BO,
   // posts sociaux, export Leboncoin, tableau de bord). Filtre en mémoire et
-  // non where() : les annonces historiques n'ont pas le champ.
+  // non where() : les annonces historiques n'ont pas le champ. La corbeille
+  // du BO lit par l'Admin SDK (lib/admin/catalogue-server).
   async getVehicules(): Promise<Vehicule[]> {
     const snapshot = await getDocs(this.vehiculesRef);
     return snapshot.docs

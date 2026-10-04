@@ -392,7 +392,7 @@ export async function deleteProduct(
   });
 
   revalidateProducts(productSlug);
-  return { ok: true, message: 'Produit supprimé (soft-delete).' };
+  return { ok: true, message: 'Produit supprimé.', updatedAt: now };
 }
 
 // ─── restoreProduct ───────────────────────────────────────────────────────────

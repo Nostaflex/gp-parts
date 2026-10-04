@@ -1,44 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 
 import { DataTable, type Column } from '@/components/admin/DataTable';
 import { StatusBadge, type BadgeTone } from '@/components/admin/StatusBadge';
-import { deleteLocationCar } from '@/app/admin/location/actions';
+import { DeleteRowAction, TrashTabs, trashColumns, useTrashView } from '@/components/admin/Trash';
+import { deleteLocationCar, restoreLocationCar } from '@/app/admin/location/actions';
 import { formatPrice } from '@/lib/utils';
 
 import type { LocationCar } from '@/lib/location-cars';
-
-/** Bouton de suppression (soft-delete → retirée du site public). */
-function DeleteLocationCarButton({ car }: { car: LocationCar }) {
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
-
-  const onDelete = () => {
-    if (pending) return;
-    if (!window.confirm(`Retirer « ${car.marque} ${car.modele} » du parc de location ?`)) return;
-    startTransition(async () => {
-      const res = await deleteLocationCar(car.id, car.updatedAt);
-      // Conflit de lock optimiste : jamais silencieux.
-      if (res && 'errors' in res && res.errors._form?.[0]) window.alert(res.errors._form[0]);
-      router.refresh();
-    });
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={onDelete}
-      disabled={pending}
-      className="text-body-sm font-semibold ml-4 disabled:opacity-40"
-      style={{ color: 'var(--red)' }}
-    >
-      {pending ? '…' : 'Supprimer'}
-    </button>
-  );
-}
 
 const columns: Column<LocationCar>[] = [
   {
@@ -87,22 +57,54 @@ const columns: Column<LocationCar>[] = [
         >
           Éditer
         </Link>
-        <DeleteLocationCarButton car={c} />
+        <DeleteRowAction
+          name={`${c.marque} ${c.modele}`}
+          id={c.id}
+          updatedAt={c.updatedAt}
+          deleteAction={deleteLocationCar}
+          restoreAction={restoreLocationCar}
+        />
       </>
     ),
   },
 ];
 
+const corbeille = trashColumns<LocationCar>({
+  header: 'Voiture',
+  name: (c) => `${c.marque} ${c.modele}`,
+  detail: (c) => c.categorie,
+  editHref: (c) => `/admin/location/${c.id}`,
+  restoreAction: restoreLocationCar,
+});
+
 export function LocationCarsTable({ cars }: { cars: LocationCar[] }) {
+  const { view, setView, live, trash } = useTrashView(cars);
   return (
-    <DataTable
-      rows={cars}
-      columns={columns}
-      getRowId={(c) => c.id}
-      searchText={(c) => `${c.marque} ${c.modele} ${c.reference}`}
-      searchPlaceholder="Rechercher une voiture…"
-      emptyTitle="Aucune voiture"
-      emptyDescription="Ajoutez votre première voiture de location avec le bouton ci-dessus."
-    />
+    <>
+      <TrashTabs view={view} onChange={setView} liveCount={live.length} trashCount={trash.length} />
+      {view === 'live' ? (
+        <DataTable
+          key="live"
+          rows={live}
+          columns={columns}
+          getRowId={(r) => r.id}
+          searchText={(c) => `${c.marque} ${c.modele} ${c.reference}`}
+          searchPlaceholder="Rechercher une voiture…"
+          emptyTitle="Aucune voiture"
+          emptyDescription="Ajoutez votre première voiture de location avec le bouton ci-dessus."
+        />
+      ) : (
+        <DataTable
+          key="trash"
+          rows={trash}
+          columns={corbeille}
+          getRowId={(r) => r.id}
+          searchText={(c) => `${c.marque} ${c.modele} ${c.reference}`}
+          searchPlaceholder="Rechercher une voiture…"
+          emptyTitle="La corbeille est vide"
+          emptyDescription="Les voitures supprimées apparaissent ici : tu peux les modifier ou les restaurer."
+        />
+      )}
+    </>
   );
 }

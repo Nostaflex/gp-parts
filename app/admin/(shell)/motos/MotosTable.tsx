@@ -1,63 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import { useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 
 import { DataTable, type Column } from '@/components/admin/DataTable';
 import { StatusBadge, type BadgeTone } from '@/components/admin/StatusBadge';
-import { deleteMoto, markMotoVendu } from '@/app/admin/motos/actions';
-import type { FormActionState } from '@/components/admin/FormShell';
+import {
+  DeleteRowAction,
+  RowAction,
+  TrashTabs,
+  trashColumns,
+  useTrashView,
+} from '@/components/admin/Trash';
+import { deleteMoto, markMotoVendu, restoreMoto } from '@/app/admin/motos/actions';
 
 import type { Moto, Disponibilite } from '@/lib/motos';
-
-/**
- * Action de ligne sous lock optimiste : « Vendu » (l'annonce reste affichée
- * sur le site) ou « Supprimer » (retrait réel du site et de la liste).
- */
-function ActionMotoButton({
-  label,
-  confirmation,
-  action,
-  id,
-  updatedAt,
-  color,
-  disabled = false,
-}: {
-  label: string;
-  confirmation: string;
-  action: (id: string, updatedAt: string) => Promise<FormActionState>;
-  id: string;
-  updatedAt: string;
-  color: string;
-  disabled?: boolean;
-}) {
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
-
-  const onClick = () => {
-    if (disabled || pending) return;
-    if (!window.confirm(confirmation)) return;
-    startTransition(async () => {
-      const res = await action(id, updatedAt);
-      // Conflit de lock optimiste : jamais silencieux (la ligne réapparaîtrait sans explication).
-      if (res && 'errors' in res && res.errors._form?.[0]) window.alert(res.errors._form[0]);
-      router.refresh();
-    });
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled || pending}
-      className="text-body-sm font-semibold ml-4 disabled:opacity-40"
-      style={{ color }}
-    >
-      {pending ? '…' : label}
-    </button>
-  );
-}
 
 const DISPO: Record<Disponibilite, { tone: BadgeTone; label: string }> = {
   disponible: { tone: 'success', label: 'Disponible' },
@@ -118,7 +74,7 @@ const columns: Column<Moto>[] = [
         >
           Éditer
         </Link>
-        <ActionMotoButton
+        <RowAction
           label="Vendu"
           confirmation="Marquer cette moto comme vendue ? Elle reste affichée sur le site, avec la mention « vendu »."
           action={markMotoVendu}
@@ -127,29 +83,54 @@ const columns: Column<Moto>[] = [
           color="var(--orange)"
           disabled={m.disponibilite === 'vendu'}
         />
-        <ActionMotoButton
-          label="Supprimer"
-          confirmation="Supprimer cette annonce ? Elle disparaît du site et de cette liste."
-          action={deleteMoto}
+        <DeleteRowAction
+          name={`${m.marque} ${m.modele}`}
           id={m.id}
           updatedAt={m.updatedAt}
-          color="var(--red)"
+          deleteAction={deleteMoto}
+          restoreAction={restoreMoto}
         />
       </>
     ),
   },
 ];
 
+const corbeille = trashColumns<Moto>({
+  header: 'Moto',
+  name: (m) => `${m.marque} ${m.modele}`,
+  detail: (m) => `était « ${DISPO[m.disponibilite].label} »`,
+  editHref: (m) => `/admin/motos/${m.id}`,
+  restoreAction: restoreMoto,
+});
+
 export function MotosTable({ motos }: { motos: Moto[] }) {
+  const { view, setView, live, trash } = useTrashView(motos);
   return (
-    <DataTable
-      rows={motos}
-      columns={columns}
-      getRowId={(m) => m.id}
-      searchText={(m) => `${m.marque} ${m.modele} ${m.reference}`}
-      searchPlaceholder="Rechercher une moto…"
-      emptyTitle="Aucune moto"
-      emptyDescription="Ajoutez votre première moto avec le bouton ci-dessus."
-    />
+    <>
+      <TrashTabs view={view} onChange={setView} liveCount={live.length} trashCount={trash.length} />
+      {view === 'live' ? (
+        <DataTable
+          key="live"
+          rows={live}
+          columns={columns}
+          getRowId={(r) => r.id}
+          searchText={(m) => `${m.marque} ${m.modele} ${m.reference}`}
+          searchPlaceholder="Rechercher une moto…"
+          emptyTitle="Aucune moto"
+          emptyDescription="Ajoutez votre première moto avec le bouton ci-dessus."
+        />
+      ) : (
+        <DataTable
+          key="trash"
+          rows={trash}
+          columns={corbeille}
+          getRowId={(r) => r.id}
+          searchText={(m) => `${m.marque} ${m.modele} ${m.reference}`}
+          searchPlaceholder="Rechercher une moto…"
+          emptyTitle="La corbeille est vide"
+          emptyDescription="Les motos supprimées apparaissent ici : tu peux les modifier ou les restaurer."
+        />
+      )}
+    </>
   );
 }
