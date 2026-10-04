@@ -154,15 +154,17 @@ export async function updateVehicule(
   return { ok: true, message: 'Véhicule mis à jour.' };
 }
 
-export async function deleteVehicule(
+/**
+ * Écrit `patch` sous lock optimiste (même transaction que updateVehicule) :
+ * « Vendu » et « Supprimer » n'écrasent jamais silencieusement une édition
+ * concurrente. Retourne les erreurs à afficher, ou `null` si l'écriture est faite.
+ */
+async function patchVehicule(
   id: string,
-  clientUpdatedAt: string
+  clientUpdatedAt: string,
+  patch: Record<string, unknown>
 ): Promise<FormActionState> {
-  const session = await requireAdmin();
-
   const db = getAdminFirestore();
-  // Lock optimiste (même transaction que updateVehicule) : un « Supprimer »
-  // n'écrase jamais silencieusement une édition concurrente.
   let conflict = false;
   let missing = false;
   await db.runTransaction(async (tx) => {
@@ -177,10 +179,7 @@ export async function deleteVehicule(
       conflict = true;
       return;
     }
-    tx.update(ref, {
-      disponibilite: 'vendu',
-      updatedAt: new Date().toISOString(),
-    });
+    tx.update(ref, { ...patch, updatedAt: new Date().toISOString() });
   });
 
   if (missing) {
@@ -189,6 +188,44 @@ export async function deleteVehicule(
   if (conflict) {
     return { errors: { _form: ['Ce véhicule a été modifié entre-temps. Rechargez la page.'] } };
   }
+  return null;
+}
+
+/** « Vendu » : l'annonce reste affichée sur le site public, en fin de grille. */
+export async function markVehiculeVendu(
+  id: string,
+  clientUpdatedAt: string
+): Promise<FormActionState> {
+  const session = await requireAdmin();
+
+  const refus = await patchVehicule(id, clientUpdatedAt, { disponibilite: 'vendu' });
+  if (refus) return refus;
+
+  await writeAuditLog({
+    actor: session.email,
+    action: 'update',
+    resourceType: 'vehicule',
+    resourceId: id,
+  });
+
+  revalidateTag('vehicules');
+  revalidateTag(`vehicule:${id}`);
+  return { ok: true, message: 'Véhicule marqué comme vendu.' };
+}
+
+/**
+ * « Supprimer » : retrait réel par soft-delete (`deletedAt`). L'annonce
+ * disparaît du site et du BO (filtre dans FirebaseAdapter.getVehicules) et reste
+ * récupérable en base.
+ */
+export async function deleteVehicule(
+  id: string,
+  clientUpdatedAt: string
+): Promise<FormActionState> {
+  const session = await requireAdmin();
+
+  const refus = await patchVehicule(id, clientUpdatedAt, { deletedAt: new Date().toISOString() });
+  if (refus) return refus;
 
   await writeAuditLog({
     actor: session.email,
@@ -199,5 +236,5 @@ export async function deleteVehicule(
 
   revalidateTag('vehicules');
   revalidateTag(`vehicule:${id}`);
-  return { ok: true, message: 'Véhicule marqué comme vendu.' };
+  return { ok: true, message: 'Véhicule supprimé.' };
 }

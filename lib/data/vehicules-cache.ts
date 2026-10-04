@@ -14,8 +14,9 @@ const cachedRawVehicules = unstable_cache(
   async (): Promise<Vehicule[]> => {
     const adapter = await getAdapter();
     // Les véhicules « vendus » restent affichés publiquement (grisés + bandeau
-    // VENDU, non-cliquables) — la présentation gère le tri/état. Seul un hard
-    // delete les retirerait. La page détail 404 quand même sur un vendu.
+    // VENDU, non-cliquables) — la présentation gère le tri/état. Seul
+    // « Supprimer » (soft-delete `deletedAt`, filtré par l'adapter) les
+    // retire. La page détail 404 quand même sur un vendu.
     return adapter.getVehicules();
   },
   ['vehicules-public'],

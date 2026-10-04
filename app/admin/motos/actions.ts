@@ -147,12 +147,17 @@ export async function updateMoto(
   return { ok: true, message: 'Moto mise à jour.' };
 }
 
-export async function deleteMoto(id: string, clientUpdatedAt: string): Promise<FormActionState> {
-  const session = await requireAdmin();
-
+/**
+ * Écrit `patch` sous lock optimiste (même transaction que updateMoto) :
+ * « Vendu » et « Supprimer » n'écrasent jamais silencieusement une édition
+ * concurrente. Retourne les erreurs à afficher, ou `null` si l'écriture est faite.
+ */
+async function patchMoto(
+  id: string,
+  clientUpdatedAt: string,
+  patch: Record<string, unknown>
+): Promise<FormActionState> {
   const db = getAdminFirestore();
-  // Lock optimiste (même transaction que updateMoto) : un « Supprimer »
-  // n'écrase jamais silencieusement une édition concurrente.
   let conflict = false;
   let missing = false;
   await db.runTransaction(async (tx) => {
@@ -167,10 +172,7 @@ export async function deleteMoto(id: string, clientUpdatedAt: string): Promise<F
       conflict = true;
       return;
     }
-    tx.update(ref, {
-      disponibilite: 'vendu',
-      updatedAt: new Date().toISOString(),
-    });
+    tx.update(ref, { ...patch, updatedAt: new Date().toISOString() });
   });
 
   if (missing) {
@@ -179,6 +181,38 @@ export async function deleteMoto(id: string, clientUpdatedAt: string): Promise<F
   if (conflict) {
     return { errors: { _form: ['Cette moto a été modifiée entre-temps. Rechargez la page.'] } };
   }
+  return null;
+}
+
+/** « Vendu » : l'annonce reste affichée sur le site public, en fin de grille. */
+export async function markMotoVendu(id: string, clientUpdatedAt: string): Promise<FormActionState> {
+  const session = await requireAdmin();
+
+  const refus = await patchMoto(id, clientUpdatedAt, { disponibilite: 'vendu' });
+  if (refus) return refus;
+
+  await writeAuditLog({
+    actor: session.email,
+    action: 'update',
+    resourceType: 'moto',
+    resourceId: id,
+  });
+
+  revalidateTag('motos');
+  revalidateTag(`moto:${id}`);
+  return { ok: true, message: 'Moto marquée comme vendue.' };
+}
+
+/**
+ * « Supprimer » : retrait réel par soft-delete (`deletedAt`). L'annonce
+ * disparaît du site et du BO (filtre dans FirebaseAdapter.getMotos) et reste
+ * récupérable en base.
+ */
+export async function deleteMoto(id: string, clientUpdatedAt: string): Promise<FormActionState> {
+  const session = await requireAdmin();
+
+  const refus = await patchMoto(id, clientUpdatedAt, { deletedAt: new Date().toISOString() });
+  if (refus) return refus;
 
   await writeAuditLog({
     actor: session.email,
@@ -189,5 +223,5 @@ export async function deleteMoto(id: string, clientUpdatedAt: string): Promise<F
 
   revalidateTag('motos');
   revalidateTag(`moto:${id}`);
-  return { ok: true, message: 'Moto marquée comme vendue.' };
+  return { ok: true, message: 'Moto supprimée.' };
 }

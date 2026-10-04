@@ -6,29 +6,41 @@ import { useRouter } from 'next/navigation';
 
 import { DataTable, type Column } from '@/components/admin/DataTable';
 import { StatusBadge, type BadgeTone } from '@/components/admin/StatusBadge';
-import { deleteMoto } from '@/app/admin/motos/actions';
+import { deleteMoto, markMotoVendu } from '@/app/admin/motos/actions';
+import type { FormActionState } from '@/components/admin/FormShell';
 
 import type { Moto, Disponibilite } from '@/lib/motos';
 
-/** Bouton de suppression (soft-delete → « vendu », retiré du site public). */
-function DeleteMotoButton({
+/**
+ * Action de ligne sous lock optimiste : « Vendu » (l'annonce reste affichée
+ * sur le site) ou « Supprimer » (retrait réel du site et de la liste).
+ */
+function ActionMotoButton({
+  label,
+  confirmation,
+  action,
   id,
   updatedAt,
-  disabled,
+  color,
+  disabled = false,
 }: {
+  label: string;
+  confirmation: string;
+  action: (id: string, updatedAt: string) => Promise<FormActionState>;
   id: string;
   updatedAt: string;
-  disabled: boolean;
+  color: string;
+  disabled?: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
-  const onDelete = () => {
+  const onClick = () => {
     if (disabled || pending) return;
-    if (!window.confirm('Retirer cette moto du site ? (elle sera marquée comme vendue)')) return;
+    if (!window.confirm(confirmation)) return;
     startTransition(async () => {
-      const res = await deleteMoto(id, updatedAt);
-      // Conflit de lock optimiste : jamais silencieux.
+      const res = await action(id, updatedAt);
+      // Conflit de lock optimiste : jamais silencieux (la ligne réapparaîtrait sans explication).
       if (res && 'errors' in res && res.errors._form?.[0]) window.alert(res.errors._form[0]);
       router.refresh();
     });
@@ -37,12 +49,12 @@ function DeleteMotoButton({
   return (
     <button
       type="button"
-      onClick={onDelete}
+      onClick={onClick}
       disabled={disabled || pending}
       className="text-body-sm font-semibold ml-4 disabled:opacity-40"
-      style={{ color: 'var(--red)' }}
+      style={{ color }}
     >
-      {pending ? '…' : 'Supprimer'}
+      {pending ? '…' : label}
     </button>
   );
 }
@@ -106,10 +118,22 @@ const columns: Column<Moto>[] = [
         >
           Éditer
         </Link>
-        <DeleteMotoButton
+        <ActionMotoButton
+          label="Vendu"
+          confirmation="Marquer cette moto comme vendue ? Elle reste affichée sur le site, avec la mention « vendu »."
+          action={markMotoVendu}
           id={m.id}
           updatedAt={m.updatedAt}
+          color="var(--orange)"
           disabled={m.disponibilite === 'vendu'}
+        />
+        <ActionMotoButton
+          label="Supprimer"
+          confirmation="Supprimer cette annonce ? Elle disparaît du site et de cette liste."
+          action={deleteMoto}
+          id={m.id}
+          updatedAt={m.updatedAt}
+          color="var(--red)"
         />
       </>
     ),

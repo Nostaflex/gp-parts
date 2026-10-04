@@ -14,8 +14,9 @@ const cachedRawMotos = unstable_cache(
   async (): Promise<Moto[]> => {
     const adapter = await getAdapter();
     // Les motos « vendues » restent affichées publiquement (grisées + bandeau
-    // VENDU, non-cliquables) — la présentation gère le tri/état. Seul un hard
-    // delete les retirerait. La page détail 404 quand même sur une vendue.
+    // VENDU, non-cliquables) — la présentation gère le tri/état. Seul
+    // « Supprimer » (soft-delete `deletedAt`, filtré par l'adapter) les
+    // retire. La page détail 404 quand même sur une vendue.
     return adapter.getMotos();
   },
   ['motos-public'],
