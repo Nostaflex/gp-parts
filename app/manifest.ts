@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Car Performance — Garage auto & moto Guadeloupe',
+    name: 'Car Performance — Centre de maintenance et réparation automobile en Guadeloupe',
     short_name: 'Car Performance',
     description: 'Réparation, location et vente de véhicules en Guadeloupe.',
     start_url: '/',

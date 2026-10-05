@@ -168,8 +168,9 @@ export function LegalSections({
           <Bloc>
             <TitreSection num="01">Qui édite ce site</TitreSection>
             <EnClair>
-              Car Performance Guadeloupe, garage établi en Guadeloupe. Une vraie société, un vrai
-              numéro : tout est ci-dessous — et ce qui manque encore est nommé, pas maquillé.
+              Car Performance Guadeloupe, centre de maintenance et réparation automobile établi en
+              Guadeloupe. Une vraie société, un vrai numéro : tout est ci-dessous — et ce qui manque
+              encore est nommé, pas maquillé.
             </EnClair>
             <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-[#E5DDD3] sm:grid-cols-2">
               {/* Identité alignée sur le Kbis du 11/09/2026 (RCS Pointe-à-Pitre,
