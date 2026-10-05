@@ -24,10 +24,10 @@ export function absoluteUrl(path = '/'): string {
 // --- NAP (Name / Address / Phone) — identique partout + Google Business ---
 export const BUSINESS = {
   name: 'Car Performance',
-  // TODO(Stéphane): vrai numéro de téléphone (format E.164 pour `phone`,
-  //   format lisible pour `phoneDisplay`).
-  phone: '+590590000000',
-  phoneDisplay: '0590 00 00 00',
+  // Numéro WhatsApp pro de Car Performance (Djemil, 2026-10-05) : E.164 pour
+  // `phone`, lisible pour `phoneDisplay`. Modifiable au BO → Coordonnées.
+  phone: '+590690684307',
+  phoneDisplay: '0690 68 43 07',
   // TODO(Stéphane): vraie adresse e-mail qui recevra les leads.
   email: 'contact@car-performance.gp',
   address: {

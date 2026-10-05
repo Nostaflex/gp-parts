@@ -44,9 +44,9 @@ export const LOW_STOCK_THRESHOLD = 5;
 export const ORDER_PREFIX = 'GP';
 
 // --- Contact ---
-// Configurer NEXT_PUBLIC_WHATSAPP_NUMBER dans .env.local (ex: 590123456789)
-export const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '590000000000';
-export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
+// Défaut de la fiche de contact (format international sans +). Le numéro
+// réellement affiché est celui du BO → Coordonnées (lib/contact-info).
+export const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '590690684307';
 
 // --- Feature flags ---
 // Filtre catalogue par VIN (décodage NHTSA → pièces compatibles).

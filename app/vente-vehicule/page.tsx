@@ -6,6 +6,8 @@ import { CpUniversStrip } from '@/components/cp/CpUniversStrip';
 import { VenteVehiculeClient } from './VenteVehiculeClient';
 import { getCachedVehicules } from '@/lib/data/vehicules-cache';
 import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
+import { getCachedContactInfo } from '@/lib/data/contact-info-cache';
+import { whatsappUrl } from '@/lib/contact-info';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -24,7 +26,10 @@ export const metadata: Metadata = {
 export default async function VenteVehiculePage() {
   const flags = await getCachedFeatureFlags();
   if (!flags.venteVehicule) notFound();
-  const vehicules = await getCachedVehicules();
+  const [vehicules, contactInfo] = await Promise.all([
+    getCachedVehicules(),
+    getCachedContactInfo(),
+  ]);
   // Le stock annoncé au hero = les VRAIS disponibles (ni réservés ni vendus).
   const nbDisponibles = vehicules.filter((v) => v.disponibilite === 'disponible').length;
   const nbReserves = vehicules.filter((v) => v.disponibilite === 'reserve').length;
@@ -215,7 +220,7 @@ export default async function VenteVehiculePage() {
       <CpBridge fromColor="#FFFFFF" toColor="#F4EDE0" accentColor="#D92627" />
 
       {/* ── CLIENT COMPONENT (catalogue + financement) ── */}
-      <VenteVehiculeClient vehicules={vehicules} />
+      <VenteVehiculeClient vehicules={vehicules} whatsappHref={whatsappUrl(contactInfo)} />
 
       {/* Bridge financement → footer */}
       <CpBridge fromColor="#2C1A08" toColor="#1A0F06" />

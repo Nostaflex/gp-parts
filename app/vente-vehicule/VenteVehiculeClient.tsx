@@ -5,7 +5,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { Vehicule, Disponibilite } from '@/lib/vehicules';
 import { DispoRibbon } from '@/components/cp/DispoRibbon';
-import { WHATSAPP_URL } from '@/lib/config';
 
 // Tri des cartes : la vitrine montre d'abord ce qui s'achète encore.
 const DISPO_ORDRE: Record<Disponibilite, number> = { disponible: 0, reserve: 1, vendu: 2 };
@@ -23,7 +22,14 @@ const BUDGETS: { label: string; val: BudgetMax }[] = [
   { label: '< 30 000 €', val: 30000 },
 ];
 
-export function VenteVehiculeClient({ vehicules }: { vehicules: Vehicule[] }) {
+export function VenteVehiculeClient({
+  vehicules,
+  whatsappHref,
+}: {
+  vehicules: Vehicule[];
+  /** Lien wa.me de la fiche de contact (BO → Coordonnées). */
+  whatsappHref: string;
+}) {
   const [typeFiltre, setTypeFiltre] = useState<TypeFiltre>('Tous');
   const [energie, setEnergie] = useState<Energie>('Toutes');
   const [budget, setBudget] = useState<BudgetMax>(999999);
@@ -192,7 +198,7 @@ export function VenteVehiculeClient({ vehicules }: { vehicules: Vehicule[] }) {
               organise l&apos;essai et répond sur WhatsApp.
             </p>
             <a
-              href={WHATSAPP_URL}
+              href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
               className="cp-tap shrink-0 rounded-xl bg-cp-red px-5 py-3 text-sm font-semibold text-cp-cream transition-colors hover:bg-[#B81F20] sm:ml-auto"
