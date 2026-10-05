@@ -7,10 +7,18 @@ import type { FormActionState } from '@/components/admin/FormShell';
 
 const FIELDS: { name: string; label: string; value: (c: ContactInfo) => string; type?: string }[] =
   [
-    { name: 'phone', label: 'Téléphone (E.164, +590…)', value: (c) => c.phone },
+    {
+      name: 'phone',
+      label: 'Téléphone pour les appels (ex. 0690 68 43 07)',
+      value: (c) => c.phone,
+    },
     { name: 'phoneDisplay', label: 'Téléphone affiché', value: (c) => c.phoneDisplay },
     { name: 'email', label: 'Email', value: (c) => c.email, type: 'email' },
-    { name: 'whatsappNumber', label: 'WhatsApp (sans +)', value: (c) => c.whatsappNumber },
+    {
+      name: 'whatsappNumber',
+      label: 'WhatsApp (ex. 0690 68 43 07)',
+      value: (c) => c.whatsappNumber,
+    },
     { name: 'street', label: 'Rue', value: (c) => c.address.street },
     { name: 'postalCode', label: 'Code postal', value: (c) => c.address.postalCode },
     { name: 'city', label: 'Ville', value: (c) => c.address.city },

@@ -7,6 +7,8 @@ import {
   openingHoursSpec,
   sameAs,
   ContactInfoSchema,
+  normalizePhone,
+  normalizeWhatsapp,
 } from '@/lib/contact-info';
 
 describe('contact-info', () => {
@@ -41,6 +43,32 @@ describe('contact-info', () => {
   it('whatsappUrl', () => {
     const ci = normalizeContactInfo({ whatsappNumber: '590690112233' });
     expect(whatsappUrl(ci)).toBe('https://wa.me/590690112233');
+  });
+
+  // Fiche prod du 2026-10-05 : WhatsApp saisi « 0690684307 » → wa.me refusait
+  // le lien (il lui faut l'indicatif), téléphone resté au numéro d'exemple.
+  it('whatsappUrl accepte un numéro saisi à la locale (Guadeloupe → indicatif 590)', () => {
+    for (const saisie of ['0690684307', '0690 68 43 07', '+590 690 68 43 07', '590690684307']) {
+      expect(whatsappUrl(normalizeContactInfo({ whatsappNumber: saisie }))).toBe(
+        'https://wa.me/590690684307'
+      );
+    }
+  });
+
+  it('normalizeWhatsapp / normalizePhone : une saisie locale devient internationale', () => {
+    expect(normalizeWhatsapp('0690 68 43 07')).toBe('590690684307');
+    expect(normalizePhone('0690 68 43 07')).toBe('+590690684307');
+    expect(normalizePhone('06.90.68.43.07')).toBe('+590690684307');
+    expect(normalizePhone('590690684307')).toBe('+590690684307');
+    expect(normalizePhone('+590690684307')).toBe('+590690684307');
+    // Un numéro d'un autre pays, déjà international, n'est pas touché.
+    expect(normalizePhone('+33612345678')).toBe('+33612345678');
+    expect(normalizeWhatsapp('33612345678')).toBe('33612345678');
+  });
+
+  it('les coordonnées par défaut sont le vrai numéro de Car Performance', () => {
+    expect(DEFAULT_CONTACT_INFO.phone).toBe('+590690684307');
+    expect(DEFAULT_CONTACT_INFO.phoneDisplay).toBe('0690 68 43 07');
   });
 
   it('openingHoursSpec → 2 plages schema.org', () => {

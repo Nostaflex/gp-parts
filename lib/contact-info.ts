@@ -81,8 +81,25 @@ export function addressOneLine(ci: ContactInfo): string {
   return `${a.street}, ${a.postalCode} ${a.city}, ${a.region}`;
 }
 
+// Le site ne sert que la Guadeloupe : un numéro saisi à la locale (0690 68 43 07)
+// reçoit l'indicatif 590. Sans ça, wa.me refuse le lien et `tel:` compose un
+// numéro incomplet — la fiche prod du 2026-10-05 portait « 0690684307 ».
+const INDICATIF = '590';
+
+/** Numéro WhatsApp au format attendu par wa.me : international, chiffres seuls. */
+export function normalizeWhatsapp(saisie: string): string {
+  const chiffres = saisie.replace(/\D/g, '');
+  return /^0\d{9}$/.test(chiffres) ? INDICATIF + chiffres.slice(1) : chiffres;
+}
+
+/** Téléphone au format E.164 (+590…), quelle que soit la façon dont il est saisi. */
+export function normalizePhone(saisie: string): string {
+  const chiffres = normalizeWhatsapp(saisie);
+  return chiffres ? `+${chiffres}` : '';
+}
+
 export function whatsappUrl(ci: ContactInfo): string {
-  return `https://wa.me/${ci.whatsappNumber}`;
+  return `https://wa.me/${normalizeWhatsapp(ci.whatsappNumber)}`;
 }
 
 export function openingHoursSpec(
@@ -107,10 +124,10 @@ const urlOrEmpty = z.string().refine((v) => v === '' || /^https?:\/\/.+/.test(v)
 });
 
 export const ContactInfoSchema = z.object({
-  phone: z.string().regex(/^\+\d{6,}$/, 'Téléphone E.164 invalide (ex +590690112233)'),
+  phone: z.string().regex(/^\+\d{6,}$/, 'Numéro de téléphone invalide (ex. 0690 68 43 07)'),
   phoneDisplay: z.string().min(1),
   email: z.string().email(),
-  whatsappNumber: z.string().regex(/^\d{6,}$/, 'Numéro WhatsApp invalide'),
+  whatsappNumber: z.string().regex(/^\d{6,}$/, 'Numéro WhatsApp invalide (ex. 0690 68 43 07)'),
   address: z.object({
     street: z.string().min(1),
     postalCode: z.string().min(1),
