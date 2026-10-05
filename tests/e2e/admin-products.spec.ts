@@ -63,10 +63,19 @@ test.describe('Admin produits (émulateur)', () => {
     await expect(page.getByRole('link', { name: /Nouveau produit/i })).toBeVisible();
   });
 
-  test('page nouveau produit affiche le formulaire', async ({ page }) => {
+  test('page nouveau produit : la fiche se remplit en trois étapes', async ({ page }) => {
     await page.goto('/admin/products/new');
-    await expect(page.getByLabel('Nom')).toBeVisible();
+    // Étape 1 — La pièce : « Suivant » exige les champs obligatoires.
+    await expect(page.getByText(/Étape 1 sur 3/)).toBeVisible();
+    await page.getByLabel('Nom', { exact: true }).fill('Plaquettes de frein avant');
+    await page.getByLabel('Référence', { exact: true }).fill('PEU-E2E-PFA-01');
+    await page.getByLabel('Description courte', { exact: true }).fill('Jeu de 4 plaquettes.');
+    await page.getByLabel('Description', { exact: true }).fill('Pièce de test.');
+    await page.getByRole('button', { name: 'Suivant' }).click();
+    // Étape 2 — Prix et stock.
     await expect(page.getByLabel('Prix (€)')).toBeVisible();
+    await page.getByRole('button', { name: 'Suivant' }).click();
+    // Étape 3 — Photos : le bouton de création n'existe qu'à la dernière étape.
     await expect(page.getByRole('button', { name: /Créer le produit/i })).toBeVisible();
   });
 
