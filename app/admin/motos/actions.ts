@@ -6,7 +6,8 @@ import { requireAdmin } from '@/lib/admin/auth';
 import { writeAuditLog } from '@/lib/admin/audit';
 import { getAdminFirestore } from '@/lib/firebase-admin';
 import { MotoSchema } from '@/lib/schemas/moto';
-import { computeDiff } from '@/lib/admin/diff';
+import { computePatchDiff } from '@/lib/admin/diff';
+import { PARSE_FR } from '@/lib/admin/form-errors';
 
 import type { FormActionState } from '@/components/admin/FormShell';
 
@@ -75,7 +76,7 @@ export async function createMoto(
 ): Promise<FormActionState> {
   const session = await requireAdmin();
 
-  const parsed = MotoSchema.safeParse(parseForm(formData));
+  const parsed = MotoSchema.safeParse(parseForm(formData), PARSE_FR);
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
   }
@@ -102,7 +103,7 @@ export async function updateMoto(
 ): Promise<FormActionState> {
   const session = await requireAdmin();
 
-  const parsed = MotoSchema.safeParse(parseForm(formData));
+  const parsed = MotoSchema.safeParse(parseForm(formData), PARSE_FR);
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
   }
@@ -122,7 +123,7 @@ export async function updateMoto(
       return;
     }
     tx.update(ref, data);
-    auditDiff = computeDiff(before, data as Record<string, unknown>);
+    auditDiff = computePatchDiff(before, data as Record<string, unknown>);
   });
 
   if (conflict) {
@@ -146,12 +147,19 @@ export async function updateMoto(
   return { ok: true, message: 'Moto mise à jour.' };
 }
 
-export async function deleteMoto(id: string, clientUpdatedAt: string): Promise<FormActionState> {
-  const session = await requireAdmin();
-
+/**
+ * Écrit `patch` sous lock optimiste (même transaction que updateMoto) :
+ * « Vendu », « Supprimer » et « Restaurer » n'écrasent jamais silencieusement
+ * une édition concurrente. Retourne les erreurs à afficher, ou le nouvel
+ * horodatage du document.
+ */
+async function patchMoto(
+  id: string,
+  clientUpdatedAt: string,
+  patch: Record<string, unknown>
+): Promise<{ errors: Record<string, string[]> } | { updatedAt: string }> {
   const db = getAdminFirestore();
-  // Lock optimiste (même transaction que updateMoto) : un « Supprimer »
-  // n'écrase jamais silencieusement une édition concurrente.
+  const updatedAt = new Date().toISOString();
   let conflict = false;
   let missing = false;
   await db.runTransaction(async (tx) => {
@@ -166,10 +174,7 @@ export async function deleteMoto(id: string, clientUpdatedAt: string): Promise<F
       conflict = true;
       return;
     }
-    tx.update(ref, {
-      disponibilite: 'vendu',
-      updatedAt: new Date().toISOString(),
-    });
+    tx.update(ref, { ...patch, updatedAt });
   });
 
   if (missing) {
@@ -178,15 +183,51 @@ export async function deleteMoto(id: string, clientUpdatedAt: string): Promise<F
   if (conflict) {
     return { errors: { _form: ['Cette moto a été modifiée entre-temps. Rechargez la page.'] } };
   }
+  return { updatedAt };
+}
 
-  await writeAuditLog({
-    actor: session.email,
-    action: 'delete',
-    resourceType: 'moto',
-    resourceId: id,
-  });
+/** Patch + audit + revalidation : le tronc commun des trois actions de ligne. */
+async function ligneMoto(
+  id: string,
+  clientUpdatedAt: string,
+  patch: Record<string, unknown>,
+  action: 'update' | 'delete' | 'restore',
+  message: string
+): Promise<FormActionState> {
+  const session = await requireAdmin();
+
+  const res = await patchMoto(id, clientUpdatedAt, patch);
+  if ('errors' in res) return res;
+
+  await writeAuditLog({ actor: session.email, action, resourceType: 'moto', resourceId: id });
 
   revalidateTag('motos');
   revalidateTag(`moto:${id}`);
-  return { ok: true, message: 'Moto marquée comme vendue.' };
+  return { ok: true, message, updatedAt: res.updatedAt };
+}
+
+/** « Vendu » : l'annonce reste affichée sur le site public, en fin de grille. */
+export async function markMotoVendu(id: string, clientUpdatedAt: string): Promise<FormActionState> {
+  return ligneMoto(
+    id,
+    clientUpdatedAt,
+    { disponibilite: 'vendu' },
+    'update',
+    'Moto marquée comme vendue.'
+  );
+}
+
+/**
+ * « Supprimer » : part à la corbeille (soft-delete `deletedAt`). L'annonce
+ * disparaît du site (filtre dans FirebaseAdapter.getMotos) et se retrouve
+ * dans l'onglet Corbeille du BO.
+ */
+export async function deleteMoto(id: string, clientUpdatedAt: string): Promise<FormActionState> {
+  const deletedAt = new Date().toISOString();
+  return ligneMoto(id, clientUpdatedAt, { deletedAt }, 'delete', 'Moto supprimée.');
+}
+
+/** « Restaurer » : sort de la corbeille, dans l'état qu'elle avait (disponibilité intacte). */
+export async function restoreMoto(id: string, clientUpdatedAt: string): Promise<FormActionState> {
+  return ligneMoto(id, clientUpdatedAt, { deletedAt: null }, 'restore', 'Moto restaurée.');
 }

@@ -4,7 +4,7 @@
 // photos des véhicules réels de Stephane (idéalement 5 angles par véhicule :
 // face, profil, arrière, intérieur tableau de bord, intérieur sièges).
 
-export type Energie = 'Essence' | 'Diesel' | 'Hybride';
+export type Energie = 'Essence' | 'Diesel' | 'Hybride' | 'Électrique';
 export type Disponibilite = 'disponible' | 'reserve' | 'vendu';
 export type TypeVehicule = 'occasion' | 'neuf';
 
@@ -42,6 +42,7 @@ export type Vehicule = {
   reference: string;
   disponibilite: Disponibilite;
   updatedAt: string; // ISO date — optimistic lock + tri admin (Phase 4)
+  deletedAt?: string | null; // ISO si l'annonce est dans la corbeille du BO
 };
 
 export const VEHICULES: Vehicule[] = [

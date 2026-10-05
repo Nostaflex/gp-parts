@@ -1,51 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import { useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 
 import { DataTable, type Column } from '@/components/admin/DataTable';
 import { StatusBadge, type BadgeTone } from '@/components/admin/StatusBadge';
-import { deleteMoto } from '@/app/admin/motos/actions';
+import {
+  DeleteRowAction,
+  RowAction,
+  TrashTabs,
+  trashColumns,
+  useTrashView,
+} from '@/components/admin/Trash';
+import { deleteMoto, markMotoVendu, restoreMoto } from '@/app/admin/motos/actions';
 
 import type { Moto, Disponibilite } from '@/lib/motos';
-
-/** Bouton de suppression (soft-delete → « vendu », retiré du site public). */
-function DeleteMotoButton({
-  id,
-  updatedAt,
-  disabled,
-}: {
-  id: string;
-  updatedAt: string;
-  disabled: boolean;
-}) {
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
-
-  const onDelete = () => {
-    if (disabled || pending) return;
-    if (!window.confirm('Retirer cette moto du site ? (elle sera marquée comme vendue)')) return;
-    startTransition(async () => {
-      const res = await deleteMoto(id, updatedAt);
-      // Conflit de lock optimiste : jamais silencieux.
-      if (res && 'errors' in res && res.errors._form?.[0]) window.alert(res.errors._form[0]);
-      router.refresh();
-    });
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={onDelete}
-      disabled={disabled || pending}
-      className="text-body-sm font-semibold ml-4 disabled:opacity-40"
-      style={{ color: 'var(--red)' }}
-    >
-      {pending ? '…' : 'Supprimer'}
-    </button>
-  );
-}
 
 const DISPO: Record<Disponibilite, { tone: BadgeTone; label: string }> = {
   disponible: { tone: 'success', label: 'Disponible' },
@@ -106,26 +74,63 @@ const columns: Column<Moto>[] = [
         >
           Éditer
         </Link>
-        <DeleteMotoButton
+        <RowAction
+          label="Vendu"
+          confirmation="Marquer cette moto comme vendue ? Elle reste affichée sur le site, avec la mention « vendu »."
+          action={markMotoVendu}
           id={m.id}
           updatedAt={m.updatedAt}
+          color="var(--orange)"
           disabled={m.disponibilite === 'vendu'}
+        />
+        <DeleteRowAction
+          name={`${m.marque} ${m.modele}`}
+          id={m.id}
+          updatedAt={m.updatedAt}
+          deleteAction={deleteMoto}
+          restoreAction={restoreMoto}
         />
       </>
     ),
   },
 ];
 
+const corbeille = trashColumns<Moto>({
+  header: 'Moto',
+  name: (m) => `${m.marque} ${m.modele}`,
+  detail: (m) => `était « ${DISPO[m.disponibilite].label} »`,
+  editHref: (m) => `/admin/motos/${m.id}`,
+  restoreAction: restoreMoto,
+});
+
 export function MotosTable({ motos }: { motos: Moto[] }) {
+  const { view, setView, live, trash } = useTrashView(motos);
   return (
-    <DataTable
-      rows={motos}
-      columns={columns}
-      getRowId={(m) => m.id}
-      searchText={(m) => `${m.marque} ${m.modele} ${m.reference}`}
-      searchPlaceholder="Rechercher une moto…"
-      emptyTitle="Aucune moto"
-      emptyDescription="Ajoutez votre première moto avec le bouton ci-dessus."
-    />
+    <>
+      <TrashTabs view={view} onChange={setView} liveCount={live.length} trashCount={trash.length} />
+      {view === 'live' ? (
+        <DataTable
+          key="live"
+          rows={live}
+          columns={columns}
+          getRowId={(r) => r.id}
+          searchText={(m) => `${m.marque} ${m.modele} ${m.reference}`}
+          searchPlaceholder="Rechercher une moto…"
+          emptyTitle="Aucune moto"
+          emptyDescription="Ajoutez votre première moto avec le bouton ci-dessus."
+        />
+      ) : (
+        <DataTable
+          key="trash"
+          rows={trash}
+          columns={corbeille}
+          getRowId={(r) => r.id}
+          searchText={(m) => `${m.marque} ${m.modele} ${m.reference}`}
+          searchPlaceholder="Rechercher une moto…"
+          emptyTitle="La corbeille est vide"
+          emptyDescription="Les motos supprimées apparaissent ici : tu peux les modifier ou les restaurer."
+        />
+      )}
+    </>
   );
 }

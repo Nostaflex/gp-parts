@@ -19,7 +19,11 @@ export const LocationCarWriteSchema = z.object({
   updatedAt: z.string(),
 });
 
-// Lecture tolérante : même forme, mais strip les champs document (deletedAt).
+// Lecture tolérante : même forme. `deletedAt` (champ document) n'est gardé
+// que s'il est posé : la corbeille du BO en a besoin, le site public ne lit
+// jamais une voiture supprimée.
 export function parseLocationCar(data: unknown): LocationCar {
-  return LocationCarWriteSchema.parse(data);
+  const car = LocationCarWriteSchema.parse(data);
+  const deletedAt = (data as { deletedAt?: unknown } | null)?.deletedAt;
+  return typeof deletedAt === 'string' ? { ...car, deletedAt } : car;
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { X } from 'lucide-react';
 
 import { STORAGE_KEYS } from '@/lib/config';
@@ -33,6 +34,7 @@ const BTN_OUTLINE =
 const CONSENT_MAX_AGE_MS = 182 * 24 * 60 * 60 * 1000;
 
 export function CookieBanner() {
+  const pathname = usePathname();
   const [visible, setVisible] = useState(false);
   const [showPrefs, setShowPrefs] = useState(false);
   const [prefs, setPrefs] = useState({ analytics: false, marketing: false });
@@ -72,7 +74,9 @@ export function CookieBanner() {
   const rejectAll = () => saveConsent({ analytics: false, marketing: false });
   const savePrefs = () => saveConsent(prefs);
 
-  if (!visible) return null;
+  // Pas de bandeau dans le back-office : c'est un outil de travail, le choix
+  // de cookies se fait sur le site public.
+  if (!visible || pathname?.startsWith('/admin')) return null;
 
   return (
     <div

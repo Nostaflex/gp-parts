@@ -12,13 +12,20 @@ import type { ReactNode } from 'react';
  * Soit succès, soit erreurs de champ Zod (`flatten().fieldErrors`).
  */
 export type FormActionState =
-  | { ok: true; message?: string }
+  // `updatedAt` : nouvel horodatage du document, pour enchaîner une action
+  // sous lock optimiste (« Annuler » après une suppression).
+  | { ok: true; message?: string; updatedAt?: string }
   | { ok?: false; errors: Record<string, string[] | undefined> }
   | null;
 
 type FormAction = (prevState: FormActionState, formData: FormData) => Promise<FormActionState>;
 
 const FieldErrorsContext = createContext<Record<string, string[] | undefined>>({});
+
+/** Erreurs de champ rendues par le serveur (vide tant que rien n'a été refusé). */
+export function useFieldErrors(): Record<string, string[] | undefined> {
+  return useContext(FieldErrorsContext);
+}
 
 /** Affiche l'erreur Zod du champ `name` si présente (placée sous l'input). */
 export function FieldError({ name }: { name: string }) {

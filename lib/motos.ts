@@ -41,6 +41,7 @@ export type Moto = {
   reference: string;
   disponibilite: Disponibilite;
   updatedAt: string; // ISO date — optimistic lock + tri admin (Phase 4b)
+  deletedAt?: string | null; // ISO si l'annonce est dans la corbeille du BO
 };
 
 export const MOTOS: Moto[] = [

@@ -1,0 +1,283 @@
+{
+  "title": "Centre, pas garage — et des formulaires qui tiennent à l'écran",
+  "eyebrow": "Car Performance · site et back-office · conception du 5 octobre 2026",
+  "question": "Comment le site doit-il nommer Car Performance pour qu'on ne le prenne pas pour un garage, et comment raccourcir les formulaires du back-office que Stéphane remplit au téléphone ?",
+  "lede": "Deux retouches avant d'envoyer les branches en ligne. La première touche aux mots du site public, la seconde à la forme des fiches du back-office. Aucune ne change les données.",
+  "hors": "Hors périmètre : nouvelles fonctions du dossier France 2030 (suivi digital des dossiers, sinistre, véhicules de remplacement), refonte visuelle du site public, formulaires publics de prise de rendez-vous.",
+  "url": "https://claude.ai/artifact/BbXNKqw5u7b3Jpg8r82UCY",
+  "sections": [
+    {
+      "heading": "Les mots : ce que Stéphane a demandé, ce que le site dit",
+      "blocks": [
+        {
+          "kind": "table",
+          "head": ["Source", "Ses mots"],
+          "rows": [
+            [
+              "Son mail du 12 août 2026, point 5",
+              "Remplacer « Votre garage de confiance en Guadeloupe » par « Centre de maintenance et réparation automobile digital — L'innovation automobile au service de la performance »."
+            ],
+            [
+              "Sa signature de mail",
+              "« Centre automobile premium en Guadeloupe — Maintenance, Réparation, Carrosserie, Gestion sinistre, Mobilité »."
+            ]
+          ]
+        },
+        {
+          "kind": "measures",
+          "head": ["Relevé dans le code du site public, le 5 octobre 2026", "Valeur"],
+          "rows": [
+            ["Phrase demandée par Stéphane, présente dans le bandeau d'accueil", "oui"],
+            ["Passages visibles qui disent encore « garage »", "17"],
+            ["Fichiers concernés", "12"]
+          ],
+          "note": "Le site se contredit : le bandeau dit « centre de maintenance et réparation », et juste au-dessus une ligne dit « Garage · Guadeloupe 971 »."
+        },
+        {
+          "kind": "table",
+          "head": ["Où", "Aujourd'hui", "Proposé"],
+          "rows": [
+            [
+              "Titre du site dans Google et dans l'onglet",
+              "Car Performance — Garage auto & moto Guadeloupe",
+              "Car Performance — Centre de maintenance et réparation automobile en Guadeloupe"
+            ],
+            [
+              "Ligne au-dessus du grand titre d'accueil",
+              "Garage · Guadeloupe 971",
+              "Centre automobile · Guadeloupe 971"
+            ],
+            [
+              "Pied de page, accueil et boutique (3 fois)",
+              "Votre garage de confiance en Guadeloupe — passion, conseil technique…",
+              "Votre centre automobile en Guadeloupe — passion, conseil technique…"
+            ],
+            [
+              "Page À propos, présentation",
+              "Car Performance est un garage indépendant qui prend soin des voitures et des motos…",
+              "Car Performance est un centre de maintenance et de réparation indépendant qui prend soin des voitures et des motos…"
+            ],
+            [
+              "Page À propos, titre de l'équipe",
+              "Les gens derrière le garage",
+              "Les gens derrière Car Performance"
+            ],
+            [
+              "Mentions légales",
+              "garage établi en Guadeloupe",
+              "centre de maintenance et réparation automobile établi en Guadeloupe"
+            ],
+            ["Avis clients", "Réponse du garage", "Réponse de Car Performance"],
+            [
+              "Mail envoyé à un client",
+              "Car Performance — Garage auto & moto, Guadeloupe",
+              "Car Performance — Centre de maintenance et réparation automobile, Guadeloupe"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Dire la différence avec un garage",
+      "blocks": [
+        {
+          "kind": "text",
+          "paragraphs": [
+            "Changer le mot ne suffit pas à faire comprendre le concept. Stéphane a déjà écrit ce qui le distingue, dans son mail du 12 août ; ces quatre points sont aujourd'hui sur la seule page Réparation."
+          ]
+        },
+        {
+          "kind": "table",
+          "head": ["Ce qu'un garage fait", "Ce que le centre ajoute (mots de Stéphane)"],
+          "rows": [
+            [
+              "Il répare ce qu'on lui amène.",
+              "Prise en charge personnalisée : chaque demande est étudiée pour orienter vers la prise en charge adaptée."
+            ],
+            [
+              "Le prix se découvre à la fin.",
+              "Transparence avant intervention : les prestations et leur estimation sont présentées avant toute intervention."
+            ],
+            [
+              "Le client se débrouille sans voiture.",
+              "Solution de mobilité : une location peut être proposée pendant l'immobilisation."
+            ],
+            [
+              "Il faut se déplacer pour un avis.",
+              "Expertise multimarque, avec une expertise à distance pour gagner en réactivité."
+            ]
+          ]
+        },
+        {
+          "kind": "text",
+          "paragraphs": [
+            "Proposition : un bloc court « Plus qu'un garage » qui reprend ces quatre points avec ses mots. La colonne de gauche est de moi : à faire valider par Stéphane, ou à retirer pour ne garder que ses quatre points."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Les formulaires du back-office, tels qu'ils sont",
+      "blocks": [
+        {
+          "kind": "measures",
+          "head": ["Mesuré sur les captures du 4 octobre 2026", "Valeur"],
+          "rows": [
+            ["Fiche véhicule : nombre de champs", "28"],
+            ["Fiche véhicule : hauteur sur ordinateur (écran de 800 px)", "1 522 px"],
+            ["Fiche moto : hauteur sur ordinateur", "1 385 px"],
+            ["Fiche pièce : hauteur sur ordinateur", "1 204 px"],
+            ["Fiche location : hauteur sur ordinateur", "910 px"],
+            ["Sur téléphone : largeur d'un champ", "un peu plus de la moitié de l'écran"],
+            ["Sur téléphone : champs par ligne", "1"]
+          ],
+          "note": "Cause relevée dans le code : les champs n'occupent pas la largeur de leur colonne, et sur téléphone tout est empilé sur une seule colonne. Le bouton d'enregistrement n'existe qu'en bas de page."
+        },
+        {
+          "kind": "diagram",
+          "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 760 400' width='760' height='400' font-family='inherit' font-size='12'><text x='95' y='18' text-anchor='middle' font-weight='700' fill='var(--ink)'>Aujourd'hui</text><rect x='10' y='28' width='170' height='362' rx='14' fill='var(--panel)' stroke='var(--line)'/><text x='22' y='52' font-size='13' font-weight='700' fill='var(--ink)'>Nouveau véhicule</text><text x='22' y='72' fill='var(--muted)'>Marque</text><rect x='22' y='78' width='92' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/><text x='22' y='120' fill='var(--muted)'>Modèle</text><rect x='22' y='126' width='92' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/><text x='22' y='168' fill='var(--muted)'>Type</text><rect x='22' y='174' width='60' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/><text x='22' y='216' fill='var(--muted)'>Référence</text><rect x='22' y='222' width='92' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/><text x='22' y='264' fill='var(--muted)'>Année</text><rect x='22' y='270' width='92' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/><text x='22' y='312' fill='var(--muted)'>Kilométrage</text><rect x='22' y='318' width='92' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/><text x='22' y='362' fill='var(--dead)'>… 22 champs plus bas,</text><text x='22' y='378' fill='var(--dead)'>le bouton Créer</text><rect x='122' y='70' width='50' height='280' rx='6' fill='var(--dead-soft)'/><text x='147' y='214' text-anchor='middle' fill='var(--dead)' transform='rotate(-90 147 214)'>largeur perdue</text><text x='330' y='18' text-anchor='middle' font-weight='700' fill='var(--ink)'>Option A — compact</text><rect x='245' y='28' width='170' height='362' rx='14' fill='var(--panel)' stroke='var(--line)'/><text x='257' y='52' font-size='13' font-weight='700' fill='var(--ink)'>Nouveau véhicule</text><rect x='253' y='60' width='154' height='112' rx='8' fill='none' stroke='var(--line)'/><text x='261' y='76' font-weight='700' fill='var(--ink)'>Identité</text><rect x='261' y='84' width='66' height='20' rx='5' fill='var(--code)' stroke='var(--line)'/><rect x='333' y='84' width='66' height='20' rx='5' fill='var(--code)' stroke='var(--line)'/><rect x='261' y='110' width='66' height='20' rx='5' fill='var(--code)' stroke='var(--line)'/><rect x='333' y='110' width='66' height='20' rx='5' fill='var(--code)' stroke='var(--line)'/><text x='261' y='148' fill='var(--muted)'>Marque · Modèle</text><text x='261' y='163' fill='var(--muted)'>Type · Référence</text><rect x='253' y='178' width='154' height='86' rx='8' fill='none' stroke='var(--line)'/><text x='261' y='194' font-weight='700' fill='var(--ink)'>Technique</text><rect x='261' y='202' width='42' height='20' rx='5' fill='var(--code)' stroke='var(--line)'/><rect x='309' y='202' width='42' height='20' rx='5' fill='var(--code)' stroke='var(--line)'/><rect x='357' y='202' width='42' height='20' rx='5' fill='var(--code)' stroke='var(--line)'/><text x='261' y='242' fill='var(--muted)'>Année · Km · Places</text><rect x='253' y='270' width='154' height='40' rx='8' fill='none' stroke='var(--line)'/><text x='261' y='294' font-weight='700' fill='var(--ink)'>Prix · Photos · …</text><rect x='245' y='350' width='170' height='40' rx='0' fill='var(--prop-soft)' stroke='var(--prop)'/><rect x='261' y='358' width='138' height='24' rx='7' fill='var(--prop)'/><text x='330' y='375' text-anchor='middle' font-weight='700' fill='var(--panel)'>Créer le véhicule</text><text x='565' y='18' text-anchor='middle' font-weight='700' fill='var(--ink)'>Option B — par étapes</text><rect x='480' y='28' width='170' height='362' rx='14' fill='var(--panel)' stroke='var(--line)'/><text x='492' y='52' font-size='13' font-weight='700' fill='var(--ink)'>Nouveau véhicule</text><rect x='492' y='62' width='44' height='6' rx='3' fill='var(--prop)'/><rect x='542' y='62' width='44' height='6' rx='3' fill='var(--line)'/><rect x='592' y='62' width='44' height='6' rx='3' fill='var(--line)'/><text x='492' y='88' fill='var(--muted)'>Étape 1 sur 3 · Le véhicule</text><rect x='492' y='98' width='146' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/><rect x='492' y='128' width='146' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/><rect x='492' y='158' width='70' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/><rect x='568' y='158' width='70' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/><rect x='492' y='188' width='70' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/><rect x='568' y='188' width='70' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/><rect x='558' y='352' width='80' height='26' rx='7' fill='var(--prop)'/><text x='598' y='370' text-anchor='middle' font-weight='700' fill='var(--panel)'>Suivant</text><text x='664' y='120' fill='var(--muted)'>2 · Prix et</text><text x='664' y='136' fill='var(--muted)'>description</text><text x='664' y='170' fill='var(--muted)'>3 · Photos</text></svg>",
+          "caption": "Fiche véhicule sur téléphone : l'état actuel et deux façons de la raccourcir. Maquette de principe."
+        }
+      ]
+    },
+    {
+      "heading": "Trois façons de raccourcir les fiches",
+      "blocks": [
+        {
+          "kind": "options",
+          "items": [
+            {
+              "tag": "A",
+              "title": "Compact, en une page",
+              "cost": "travail moyen",
+              "body": "Les champs occupent toute la largeur. Les champs courts vont à deux ou trois par ligne, même sur téléphone. Les groupes deviennent des cartes. Le bouton d'enregistrement reste collé en bas de l'écran.",
+              "gain": [
+                "Tout reste visible d'un coup d'œil",
+                "Le bouton est toujours à portée de pouce",
+                "Aucun geste nouveau à apprendre",
+                "S'applique aux quatre fiches d'un seul réglage commun"
+              ],
+              "forbid": ["La fiche véhicule reste la plus longue : 28 champs"]
+            },
+            {
+              "tag": "B",
+              "title": "Par étapes",
+              "cost": "le plus de travail",
+              "body": "La fiche est découpée en trois écrans : le véhicule, le prix et la description, les photos. Un bouton Suivant fait avancer.",
+              "gain": [
+                "Chaque écran tient sans faire défiler",
+                "Guide quelqu'un qui crée sa première annonce"
+              ],
+              "forbid": [
+                "Corriger un seul champ oblige à traverser les étapes",
+                "Trois écrans à maintenir par fiche",
+                "Une erreur peut être sur un écran qu'on ne voit pas"
+              ]
+            },
+            {
+              "tag": "C",
+              "title": "Détails repliés",
+              "cost": "le moins de travail",
+              "body": "On ne touche pas à la mise en page. Le groupe « Détails » (11 champs facultatifs) est replié par défaut et s'ouvre d'un geste.",
+              "gain": ["Très peu de code", "Retire d'un coup 11 champs de la vue"],
+              "forbid": [
+                "Les champs restent étroits et un par ligne sur téléphone",
+                "Le bouton reste tout en bas"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "paragraphs": [
+            "Recommandation : A, avec le groupe « Détails » replié par défaut repris de C. Après réalisation, je remesure les hauteurs et je te donne les chiffres avant et après."
+          ]
+        }
+      ]
+    }
+  ],
+  "arbitrages": {
+    "heading": "Les choix qui t'appartiennent",
+    "intro": "Coche une réponse par question, commente si besoin, puis « Envoyer à Claude » et dis-moi « envoyé » dans la conversation : l'envoi ne me réveille pas tout seul.",
+    "questions": [
+      {
+        "id": "terme",
+        "label": "Quel nom le site donne-t-il à Car Performance ?",
+        "options": [
+          "« Centre de maintenance et réparation automobile » dans les titres, « centre automobile » dans les phrases courtes (recommandé)",
+          "« Centre de maintenance et réparation automobile » partout",
+          "« Centre automobile premium » partout"
+        ],
+        "ratified": "« Centre de maintenance et réparation automobile » dans les titres, « centre automobile » dans les phrases courtes (recommandé)",
+        "ratified_on": "2026-10-05"
+      },
+      {
+        "id": "moto",
+        "label": "Le site vend aussi des motos. Garde-t-on « auto & moto » dans le titre ?",
+        "options": [
+          "Non : le titre suit les mots de Stéphane, « automobile » ; la moto reste dans sa rubrique (recommandé)",
+          "Oui : « Centre de maintenance et réparation auto & moto »"
+        ],
+        "ratified": "Non : le titre suit les mots de Stéphane, « automobile » ; la moto reste dans sa rubrique (recommandé)",
+        "ratified_on": "2026-10-05"
+      },
+      {
+        "id": "difference",
+        "label": "Ajoute-t-on un bloc « Plus qu'un garage » avec les quatre points de Stéphane ?",
+        "options": [
+          "Oui, sur la page À propos (recommandé)",
+          "Oui, sur la page d'accueil",
+          "Non : on change seulement les mots"
+        ],
+        "ratified": "Non : on change seulement les mots",
+        "ratified_on": "2026-10-05"
+      },
+      {
+        "id": "recherche",
+        "label": "Beaucoup de gens tapent « garage Guadeloupe » dans Google. Garde-t-on ce mot quelque part ?",
+        "options": [
+          "Oui, dans une seule phrase du bloc « Plus qu'un garage » (recommandé)",
+          "Non, le mot disparaît complètement du site"
+        ],
+        "ratified": "Oui, dans une seule phrase du bloc « Plus qu'un garage » (recommandé)",
+        "ratified_on": "2026-10-05"
+      },
+      {
+        "id": "formulaires",
+        "label": "Quelle forme pour les fiches du back-office ?",
+        "options": [
+          "A — compact, avec « Détails » replié par défaut (recommandé)",
+          "A — compact, tout déplié",
+          "B — par étapes",
+          "C — seulement « Détails » replié"
+        ],
+        "ratified": "B — par étapes",
+        "ratified_on": "2026-10-05"
+      },
+      {
+        "id": "perimetre",
+        "label": "Quelles pages du back-office sont concernées ?",
+        "options": [
+          "Les quatre fiches : véhicule, moto, pièce, location (recommandé)",
+          "Les quatre fiches, plus Paramètres et Lavage"
+        ],
+        "ratified": "Les quatre fiches : véhicule, moto, pièce, location (recommandé)",
+        "ratified_on": "2026-10-05"
+      }
+    ]
+  },
+  "answers": {
+    "sent": "2026-10-05 18:35",
+    "ack": "2026-10-05 18:36",
+    "choices": {
+      "terme": "« Centre de maintenance et réparation automobile » dans les titres, « centre automobile » dans les phrases courtes (recommandé)",
+      "moto": "Non : le titre suit les mots de Stéphane, « automobile » ; la moto reste dans sa rubrique (recommandé)",
+      "difference": "Non : on change seulement les mots",
+      "recherche": "Oui, dans une seule phrase du bloc « Plus qu'un garage » (recommandé)",
+      "formulaires": "B — par étapes",
+      "perimetre": "Les quatre fiches : véhicule, moto, pièce, location (recommandé)"
+    },
+    "comments": {},
+    "notes": ""
+  }
+}

@@ -6,7 +6,8 @@ import { requireAdmin } from '@/lib/admin/auth';
 import { writeAuditLog } from '@/lib/admin/audit';
 import { getAdminFirestore } from '@/lib/firebase-admin';
 import { VehiculeSchema } from '@/lib/schemas/vehicule';
-import { computeDiff } from '@/lib/admin/diff';
+import { computePatchDiff } from '@/lib/admin/diff';
+import { PARSE_FR } from '@/lib/admin/form-errors';
 
 import type { FormActionState } from '@/components/admin/FormShell';
 
@@ -82,7 +83,7 @@ export async function createVehicule(
 ): Promise<FormActionState> {
   const session = await requireAdmin();
 
-  const parsed = VehiculeSchema.safeParse(parseForm(formData));
+  const parsed = VehiculeSchema.safeParse(parseForm(formData), PARSE_FR);
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
   }
@@ -109,7 +110,7 @@ export async function updateVehicule(
 ): Promise<FormActionState> {
   const session = await requireAdmin();
 
-  const parsed = VehiculeSchema.safeParse(parseForm(formData));
+  const parsed = VehiculeSchema.safeParse(parseForm(formData), PARSE_FR);
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
   }
@@ -129,7 +130,7 @@ export async function updateVehicule(
       return;
     }
     tx.update(ref, data);
-    auditDiff = computeDiff(before, data as Record<string, unknown>);
+    auditDiff = computePatchDiff(before, data as Record<string, unknown>);
   });
 
   if (conflict) {
@@ -153,15 +154,19 @@ export async function updateVehicule(
   return { ok: true, message: 'Véhicule mis à jour.' };
 }
 
-export async function deleteVehicule(
+/**
+ * Écrit `patch` sous lock optimiste (même transaction que updateVehicule) :
+ * « Vendu », « Supprimer » et « Restaurer » n'écrasent jamais silencieusement
+ * une édition concurrente. Retourne les erreurs à afficher, ou le nouvel
+ * horodatage du document.
+ */
+async function patchVehicule(
   id: string,
-  clientUpdatedAt: string
-): Promise<FormActionState> {
-  const session = await requireAdmin();
-
+  clientUpdatedAt: string,
+  patch: Record<string, unknown>
+): Promise<{ errors: Record<string, string[]> } | { updatedAt: string }> {
   const db = getAdminFirestore();
-  // Lock optimiste (même transaction que updateVehicule) : un « Supprimer »
-  // n'écrase jamais silencieusement une édition concurrente.
+  const updatedAt = new Date().toISOString();
   let conflict = false;
   let missing = false;
   await db.runTransaction(async (tx) => {
@@ -176,10 +181,7 @@ export async function deleteVehicule(
       conflict = true;
       return;
     }
-    tx.update(ref, {
-      disponibilite: 'vendu',
-      updatedAt: new Date().toISOString(),
-    });
+    tx.update(ref, { ...patch, updatedAt });
   });
 
   if (missing) {
@@ -188,15 +190,60 @@ export async function deleteVehicule(
   if (conflict) {
     return { errors: { _form: ['Ce véhicule a été modifié entre-temps. Rechargez la page.'] } };
   }
+  return { updatedAt };
+}
 
-  await writeAuditLog({
-    actor: session.email,
-    action: 'delete',
-    resourceType: 'vehicule',
-    resourceId: id,
-  });
+/** Patch + audit + revalidation : le tronc commun des trois actions de ligne. */
+async function ligneVehicule(
+  id: string,
+  clientUpdatedAt: string,
+  patch: Record<string, unknown>,
+  action: 'update' | 'delete' | 'restore',
+  message: string
+): Promise<FormActionState> {
+  const session = await requireAdmin();
+
+  const res = await patchVehicule(id, clientUpdatedAt, patch);
+  if ('errors' in res) return res;
+
+  await writeAuditLog({ actor: session.email, action, resourceType: 'vehicule', resourceId: id });
 
   revalidateTag('vehicules');
   revalidateTag(`vehicule:${id}`);
-  return { ok: true, message: 'Véhicule marqué comme vendu.' };
+  return { ok: true, message, updatedAt: res.updatedAt };
+}
+
+/** « Vendu » : l'annonce reste affichée sur le site public, en fin de grille. */
+export async function markVehiculeVendu(
+  id: string,
+  clientUpdatedAt: string
+): Promise<FormActionState> {
+  return ligneVehicule(
+    id,
+    clientUpdatedAt,
+    { disponibilite: 'vendu' },
+    'update',
+    'Véhicule marqué comme vendu.'
+  );
+}
+
+/**
+ * « Supprimer » : part à la corbeille (soft-delete `deletedAt`). L'annonce
+ * disparaît du site (filtre dans FirebaseAdapter.getVehicules) et se retrouve
+ * dans l'onglet Corbeille du BO.
+ */
+export async function deleteVehicule(
+  id: string,
+  clientUpdatedAt: string
+): Promise<FormActionState> {
+  const deletedAt = new Date().toISOString();
+  return ligneVehicule(id, clientUpdatedAt, { deletedAt }, 'delete', 'Véhicule supprimé.');
+}
+
+/** « Restaurer » : sort de la corbeille, dans l'état qu'elle avait (disponibilité intacte). */
+export async function restoreVehicule(
+  id: string,
+  clientUpdatedAt: string
+): Promise<FormActionState> {
+  return ligneVehicule(id, clientUpdatedAt, { deletedAt: null }, 'restore', 'Véhicule restauré.');
 }

@@ -20,6 +20,7 @@ export type LocationCar = {
   reference: string;
   cautionEnCents?: number; // caution annoncée (L112-1) ; absente → défaut catégorie
   updatedAt: string; // ISO — optimistic lock + tri admin
+  deletedAt?: string | null; // ISO si la voiture est dans la corbeille du BO
 };
 
 export const LOCATION_CARS: LocationCar[] = [

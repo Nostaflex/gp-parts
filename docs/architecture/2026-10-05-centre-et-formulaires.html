@@ -1,0 +1,178 @@
+<meta charset="utf-8">
+<title>Centre, pas garage — et des formulaires qui tiennent à l&#x27;écran</title>
+<link id="fonts" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;600&display=swap">
+<style id="theme">
+:root{--bg:#F3F5F7;--panel:#FFFFFF;--ink:#14202B;--muted:#5B6B7A;--line:#D6DCE2;--accent:#C57A16;--accent-soft:#FBEFD9;--live:#2E7D5B;--live-soft:#E2F1E9;--dead:#B3392B;--dead-soft:#F7E1DD;--prop:#4A5FA8;--prop-soft:#E3E8F6;--code:#EEF1F4;--focus:#4A5FA8}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0F161D;--panel:#172029;--ink:#E6ECF1;--muted:#9AA8B5;--line:#2A3641;--accent:#E39A3B;--accent-soft:#3A2B14;--live:#5FBF93;--live-soft:#16302A;--dead:#E0695A;--dead-soft:#3A1E1A;--prop:#8FA3E6;--prop-soft:#1F2740;--code:#101820;--focus:#8FA3E6}}
+:root[data-theme="dark"]{--bg:#0F161D;--panel:#172029;--ink:#E6ECF1;--muted:#9AA8B5;--line:#2A3641;--accent:#E39A3B;--accent-soft:#3A2B14;--live:#5FBF93;--live-soft:#16302A;--dead:#E0695A;--dead-soft:#3A1E1A;--prop:#8FA3E6;--prop-soft:#1F2740;--code:#101820;--focus:#8FA3E6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Geist",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.55}
+main{max-width:1080px;margin:0 auto;padding:40px 24px 80px}
+h1,h2,h3{font-family:"Geist",sans-serif;text-wrap:balance;line-height:1.15;margin:0;letter-spacing:-.01em}
+h1{font-size:2.3rem;font-weight:700}
+h2{font-size:1.45rem;font-weight:600;margin-top:48px;padding-top:18px;border-top:1px solid var(--line)}
+h3{font-size:1.05rem;font-weight:600}
+p{max-width:68ch}
+.mono,.eyebrow,th,.tag,.cost,td.num,code,pre{font-family:"Geist Mono",ui-monospace,monospace}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.question{margin:14px 0 0;font-size:1.2rem;font-weight:600;max-width:none}
+.lede{color:var(--muted);margin-top:8px}
+.tag{display:inline-block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.tag.live{color:var(--ink);border-color:var(--live);background:var(--live-soft)}
+.tag.dead{color:var(--ink);border-color:var(--dead);background:var(--dead-soft)}
+.tag.prop{color:var(--ink);border-color:var(--prop);background:var(--prop-soft)}
+.tag.acc{color:var(--ink);border-color:var(--accent);background:var(--accent-soft)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.option h3{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.option .cost{font-size:12px;color:var(--muted);white-space:nowrap}
+.option p{font-size:15px}
+.option ul{margin:10px 0 0 18px;padding:0}
+.option li{margin:6px 0}
+.option .forbid{color:var(--dead)}
+.option .gain{color:var(--live)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.scroll{overflow-x:auto}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.88em}
+.text{max-width:none}
+.text p{max-width:72ch}
+.diagram{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;overflow-x:auto}
+.diagram svg{width:auto;max-width:100%;height:auto;display:block;margin:0 auto}
+.diagram figcaption{margin-top:8px;font-size:14px;color:var(--muted)}
+.arb{margin-top:28px;border:2px solid var(--accent);border-radius:12px;padding:20px 22px;background:var(--accent-soft)}
+.arb h2{border:0;margin:0;padding:0;font-size:1.3rem}
+.arb .sub{color:var(--muted);font-size:14px;margin:6px 0 14px}
+.q{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-top:12px}
+.q .qt{font-weight:600;margin-bottom:8px}
+.q .qt b{color:var(--accent);margin-right:6px}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer;font-size:14.5px;background:var(--bg)}
+.opt:has(input:checked){border-color:var(--prop);background:var(--prop-soft);color:var(--ink)}
+.opt input{accent-color:var(--prop);margin:0}
+.opt:focus-within{outline:2px solid var(--focus);outline-offset:2px}
+.q textarea,.arb textarea{width:100%;min-height:64px;margin-top:10px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font:inherit;font-size:14.5px;background:var(--bg);color:var(--ink);resize:vertical}
+.arb textarea{min-height:110px}
+textarea:focus{outline:2px solid var(--focus);outline-offset:1px}
+.send{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:16px}
+button.primary{font:inherit;font-weight:600;font-size:15px;padding:10px 18px;border-radius:10px;border:0;background:var(--accent);color:#14202B;cursor:pointer}
+button.primary:disabled{opacity:.5;cursor:not-allowed}
+button.primary:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.status{font-size:14px;color:var(--muted)}
+.status.ok{color:var(--live)}
+.status.err{color:var(--dead)}
+.hors{margin-top:24px;color:var(--muted);font-size:15px}
+.banner.ro{margin-top:0;margin-bottom:16px;border:1px solid var(--dead);background:var(--dead-soft)}
+.banner a{color:var(--prop);font-weight:600}
+.banner{margin-top:14px;padding:10px 14px;border-radius:8px;background:var(--prop-soft);color:var(--ink);font-size:14px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+<script id="plan-data" type="application/json">{"title": "Centre, pas garage — et des formulaires qui tiennent à l'écran", "eyebrow": "Car Performance · site et back-office · conception du 5 octobre 2026", "question": "Comment le site doit-il nommer Car Performance pour qu'on ne le prenne pas pour un garage, et comment raccourcir les formulaires du back-office que Stéphane remplit au téléphone ?", "lede": "Deux retouches avant d'envoyer les branches en ligne. La première touche aux mots du site public, la seconde à la forme des fiches du back-office. Aucune ne change les données.", "hors": "Hors périmètre : nouvelles fonctions du dossier France 2030 (suivi digital des dossiers, sinistre, véhicules de remplacement), refonte visuelle du site public, formulaires publics de prise de rendez-vous.", "url": "https://claude.ai/artifact/BbXNKqw5u7b3Jpg8r82UCY", "sections": [{"heading": "Les mots : ce que Stéphane a demandé, ce que le site dit", "blocks": [{"kind": "table", "head": ["Source", "Ses mots"], "rows": [["Son mail du 12 août 2026, point 5", "Remplacer « Votre garage de confiance en Guadeloupe » par « Centre de maintenance et réparation automobile digital — L'innovation automobile au service de la performance »."], ["Sa signature de mail", "« Centre automobile premium en Guadeloupe — Maintenance, Réparation, Carrosserie, Gestion sinistre, Mobilité »."]]}, {"kind": "measures", "head": ["Relevé dans le code du site public, le 5 octobre 2026", "Valeur"], "rows": [["Phrase demandée par Stéphane, présente dans le bandeau d'accueil", "oui"], ["Passages visibles qui disent encore « garage »", "17"], ["Fichiers concernés", "12"]], "note": "Le site se contredit : le bandeau dit « centre de maintenance et réparation », et juste au-dessus une ligne dit « Garage · Guadeloupe 971 »."}, {"kind": "table", "head": ["Où", "Aujourd'hui", "Proposé"], "rows": [["Titre du site dans Google et dans l'onglet", "Car Performance — Garage auto & moto Guadeloupe", "Car Performance — Centre de maintenance et réparation automobile en Guadeloupe"], ["Ligne au-dessus du grand titre d'accueil", "Garage · Guadeloupe 971", "Centre automobile · Guadeloupe 971"], ["Pied de page, accueil et boutique (3 fois)", "Votre garage de confiance en Guadeloupe — passion, conseil technique…", "Votre centre automobile en Guadeloupe — passion, conseil technique…"], ["Page À propos, présentation", "Car Performance est un garage indépendant qui prend soin des voitures et des motos…", "Car Performance est un centre de maintenance et de réparation indépendant qui prend soin des voitures et des motos…"], ["Page À propos, titre de l'équipe", "Les gens derrière le garage", "Les gens derrière Car Performance"], ["Mentions légales", "garage établi en Guadeloupe", "centre de maintenance et réparation automobile établi en Guadeloupe"], ["Avis clients", "Réponse du garage", "Réponse de Car Performance"], ["Mail envoyé à un client", "Car Performance — Garage auto & moto, Guadeloupe", "Car Performance — Centre de maintenance et réparation automobile, Guadeloupe"]]}]}, {"heading": "Dire la différence avec un garage", "blocks": [{"kind": "text", "paragraphs": ["Changer le mot ne suffit pas à faire comprendre le concept. Stéphane a déjà écrit ce qui le distingue, dans son mail du 12 août ; ces quatre points sont aujourd'hui sur la seule page Réparation."]}, {"kind": "table", "head": ["Ce qu'un garage fait", "Ce que le centre ajoute (mots de Stéphane)"], "rows": [["Il répare ce qu'on lui amène.", "Prise en charge personnalisée : chaque demande est étudiée pour orienter vers la prise en charge adaptée."], ["Le prix se découvre à la fin.", "Transparence avant intervention : les prestations et leur estimation sont présentées avant toute intervention."], ["Le client se débrouille sans voiture.", "Solution de mobilité : une location peut être proposée pendant l'immobilisation."], ["Il faut se déplacer pour un avis.", "Expertise multimarque, avec une expertise à distance pour gagner en réactivité."]]}, {"kind": "text", "paragraphs": ["Proposition : un bloc court « Plus qu'un garage » qui reprend ces quatre points avec ses mots. La colonne de gauche est de moi : à faire valider par Stéphane, ou à retirer pour ne garder que ses quatre points."]}]}, {"heading": "Les formulaires du back-office, tels qu'ils sont", "blocks": [{"kind": "measures", "head": ["Mesuré sur les captures du 4 octobre 2026", "Valeur"], "rows": [["Fiche véhicule : nombre de champs", "28"], ["Fiche véhicule : hauteur sur ordinateur (écran de 800 px)", "1 522 px"], ["Fiche moto : hauteur sur ordinateur", "1 385 px"], ["Fiche pièce : hauteur sur ordinateur", "1 204 px"], ["Fiche location : hauteur sur ordinateur", "910 px"], ["Sur téléphone : largeur d'un champ", "un peu plus de la moitié de l'écran"], ["Sur téléphone : champs par ligne", "1"]], "note": "Cause relevée dans le code : les champs n'occupent pas la largeur de leur colonne, et sur téléphone tout est empilé sur une seule colonne. Le bouton d'enregistrement n'existe qu'en bas de page."}, {"kind": "diagram", "svg": "\u003csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 760 400' width='760' height='400' font-family='inherit' font-size='12'>\u003ctext x='95' y='18' text-anchor='middle' font-weight='700' fill='var(--ink)'>Aujourd'hui\u003c/text>\u003crect x='10' y='28' width='170' height='362' rx='14' fill='var(--panel)' stroke='var(--line)'/>\u003ctext x='22' y='52' font-size='13' font-weight='700' fill='var(--ink)'>Nouveau véhicule\u003c/text>\u003ctext x='22' y='72' fill='var(--muted)'>Marque\u003c/text>\u003crect x='22' y='78' width='92' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/>\u003ctext x='22' y='120' fill='var(--muted)'>Modèle\u003c/text>\u003crect x='22' y='126' width='92' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/>\u003ctext x='22' y='168' fill='var(--muted)'>Type\u003c/text>\u003crect x='22' y='174' width='60' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/>\u003ctext x='22' y='216' fill='var(--muted)'>Référence\u003c/text>\u003crect x='22' y='222' width='92' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/>\u003ctext x='22' y='264' fill='var(--muted)'>Année\u003c/text>\u003crect x='22' y='270' width='92' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/>\u003ctext x='22' y='312' fill='var(--muted)'>Kilométrage\u003c/text>\u003crect x='22' y='318' width='92' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/>\u003ctext x='22' y='362' fill='var(--dead)'>… 22 champs plus bas,\u003c/text>\u003ctext x='22' y='378' fill='var(--dead)'>le bouton Créer\u003c/text>\u003crect x='122' y='70' width='50' height='280' rx='6' fill='var(--dead-soft)'/>\u003ctext x='147' y='214' text-anchor='middle' fill='var(--dead)' transform='rotate(-90 147 214)'>largeur perdue\u003c/text>\u003ctext x='330' y='18' text-anchor='middle' font-weight='700' fill='var(--ink)'>Option A — compact\u003c/text>\u003crect x='245' y='28' width='170' height='362' rx='14' fill='var(--panel)' stroke='var(--line)'/>\u003ctext x='257' y='52' font-size='13' font-weight='700' fill='var(--ink)'>Nouveau véhicule\u003c/text>\u003crect x='253' y='60' width='154' height='112' rx='8' fill='none' stroke='var(--line)'/>\u003ctext x='261' y='76' font-weight='700' fill='var(--ink)'>Identité\u003c/text>\u003crect x='261' y='84' width='66' height='20' rx='5' fill='var(--code)' stroke='var(--line)'/>\u003crect x='333' y='84' width='66' height='20' rx='5' fill='var(--code)' stroke='var(--line)'/>\u003crect x='261' y='110' width='66' height='20' rx='5' fill='var(--code)' stroke='var(--line)'/>\u003crect x='333' y='110' width='66' height='20' rx='5' fill='var(--code)' stroke='var(--line)'/>\u003ctext x='261' y='148' fill='var(--muted)'>Marque · Modèle\u003c/text>\u003ctext x='261' y='163' fill='var(--muted)'>Type · Référence\u003c/text>\u003crect x='253' y='178' width='154' height='86' rx='8' fill='none' stroke='var(--line)'/>\u003ctext x='261' y='194' font-weight='700' fill='var(--ink)'>Technique\u003c/text>\u003crect x='261' y='202' width='42' height='20' rx='5' fill='var(--code)' stroke='var(--line)'/>\u003crect x='309' y='202' width='42' height='20' rx='5' fill='var(--code)' stroke='var(--line)'/>\u003crect x='357' y='202' width='42' height='20' rx='5' fill='var(--code)' stroke='var(--line)'/>\u003ctext x='261' y='242' fill='var(--muted)'>Année · Km · Places\u003c/text>\u003crect x='253' y='270' width='154' height='40' rx='8' fill='none' stroke='var(--line)'/>\u003ctext x='261' y='294' font-weight='700' fill='var(--ink)'>Prix · Photos · …\u003c/text>\u003crect x='245' y='350' width='170' height='40' rx='0' fill='var(--prop-soft)' stroke='var(--prop)'/>\u003crect x='261' y='358' width='138' height='24' rx='7' fill='var(--prop)'/>\u003ctext x='330' y='375' text-anchor='middle' font-weight='700' fill='var(--panel)'>Créer le véhicule\u003c/text>\u003ctext x='565' y='18' text-anchor='middle' font-weight='700' fill='var(--ink)'>Option B — par étapes\u003c/text>\u003crect x='480' y='28' width='170' height='362' rx='14' fill='var(--panel)' stroke='var(--line)'/>\u003ctext x='492' y='52' font-size='13' font-weight='700' fill='var(--ink)'>Nouveau véhicule\u003c/text>\u003crect x='492' y='62' width='44' height='6' rx='3' fill='var(--prop)'/>\u003crect x='542' y='62' width='44' height='6' rx='3' fill='var(--line)'/>\u003crect x='592' y='62' width='44' height='6' rx='3' fill='var(--line)'/>\u003ctext x='492' y='88' fill='var(--muted)'>Étape 1 sur 3 · Le véhicule\u003c/text>\u003crect x='492' y='98' width='146' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/>\u003crect x='492' y='128' width='146' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/>\u003crect x='492' y='158' width='70' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/>\u003crect x='568' y='158' width='70' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/>\u003crect x='492' y='188' width='70' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/>\u003crect x='568' y='188' width='70' height='22' rx='6' fill='var(--code)' stroke='var(--line)'/>\u003crect x='558' y='352' width='80' height='26' rx='7' fill='var(--prop)'/>\u003ctext x='598' y='370' text-anchor='middle' font-weight='700' fill='var(--panel)'>Suivant\u003c/text>\u003ctext x='664' y='120' fill='var(--muted)'>2 · Prix et\u003c/text>\u003ctext x='664' y='136' fill='var(--muted)'>description\u003c/text>\u003ctext x='664' y='170' fill='var(--muted)'>3 · Photos\u003c/text>\u003c/svg>", "caption": "Fiche véhicule sur téléphone : l'état actuel et deux façons de la raccourcir. Maquette de principe."}]}, {"heading": "Trois façons de raccourcir les fiches", "blocks": [{"kind": "options", "items": [{"tag": "A", "title": "Compact, en une page", "cost": "travail moyen", "body": "Les champs occupent toute la largeur. Les champs courts vont à deux ou trois par ligne, même sur téléphone. Les groupes deviennent des cartes. Le bouton d'enregistrement reste collé en bas de l'écran.", "gain": ["Tout reste visible d'un coup d'œil", "Le bouton est toujours à portée de pouce", "Aucun geste nouveau à apprendre", "S'applique aux quatre fiches d'un seul réglage commun"], "forbid": ["La fiche véhicule reste la plus longue : 28 champs"]}, {"tag": "B", "title": "Par étapes", "cost": "le plus de travail", "body": "La fiche est découpée en trois écrans : le véhicule, le prix et la description, les photos. Un bouton Suivant fait avancer.", "gain": ["Chaque écran tient sans faire défiler", "Guide quelqu'un qui crée sa première annonce"], "forbid": ["Corriger un seul champ oblige à traverser les étapes", "Trois écrans à maintenir par fiche", "Une erreur peut être sur un écran qu'on ne voit pas"]}, {"tag": "C", "title": "Détails repliés", "cost": "le moins de travail", "body": "On ne touche pas à la mise en page. Le groupe « Détails » (11 champs facultatifs) est replié par défaut et s'ouvre d'un geste.", "gain": ["Très peu de code", "Retire d'un coup 11 champs de la vue"], "forbid": ["Les champs restent étroits et un par ligne sur téléphone", "Le bouton reste tout en bas"]}]}, {"kind": "text", "paragraphs": ["Recommandation : A, avec le groupe « Détails » replié par défaut repris de C. Après réalisation, je remesure les hauteurs et je te donne les chiffres avant et après."]}]}], "arbitrages": {"heading": "Les choix qui t'appartiennent", "intro": "Coche une réponse par question, commente si besoin, puis « Envoyer à Claude » et dis-moi « envoyé » dans la conversation : l'envoi ne me réveille pas tout seul.", "questions": [{"id": "terme", "label": "Quel nom le site donne-t-il à Car Performance ?", "options": ["« Centre de maintenance et réparation automobile » dans les titres, « centre automobile » dans les phrases courtes (recommandé)", "« Centre de maintenance et réparation automobile » partout", "« Centre automobile premium » partout"], "ratified": "« Centre de maintenance et réparation automobile » dans les titres, « centre automobile » dans les phrases courtes (recommandé)", "ratified_on": "2026-10-05"}, {"id": "moto", "label": "Le site vend aussi des motos. Garde-t-on « auto & moto » dans le titre ?", "options": ["Non : le titre suit les mots de Stéphane, « automobile » ; la moto reste dans sa rubrique (recommandé)", "Oui : « Centre de maintenance et réparation auto & moto »"], "ratified": "Non : le titre suit les mots de Stéphane, « automobile » ; la moto reste dans sa rubrique (recommandé)", "ratified_on": "2026-10-05"}, {"id": "difference", "label": "Ajoute-t-on un bloc « Plus qu'un garage » avec les quatre points de Stéphane ?", "options": ["Oui, sur la page À propos (recommandé)", "Oui, sur la page d'accueil", "Non : on change seulement les mots"], "ratified": "Non : on change seulement les mots", "ratified_on": "2026-10-05"}, {"id": "recherche", "label": "Beaucoup de gens tapent « garage Guadeloupe » dans Google. Garde-t-on ce mot quelque part ?", "options": ["Oui, dans une seule phrase du bloc « Plus qu'un garage » (recommandé)", "Non, le mot disparaît complètement du site"], "ratified": "Oui, dans une seule phrase du bloc « Plus qu'un garage » (recommandé)", "ratified_on": "2026-10-05"}, {"id": "formulaires", "label": "Quelle forme pour les fiches du back-office ?", "options": ["A — compact, avec « Détails » replié par défaut (recommandé)", "A — compact, tout déplié", "B — par étapes", "C — seulement « Détails » replié"], "ratified": "B — par étapes", "ratified_on": "2026-10-05"}, {"id": "perimetre", "label": "Quelles pages du back-office sont concernées ?", "options": ["Les quatre fiches : véhicule, moto, pièce, location (recommandé)", "Les quatre fiches, plus Paramètres et Lavage"], "ratified": "Les quatre fiches : véhicule, moto, pièce, location (recommandé)", "ratified_on": "2026-10-05"}]}}</script>
+<script id="plan-answers" type="application/json">{"sent": "2026-10-05 18:35", "ack": "2026-10-05 18:36", "choices": {"terme": "« Centre de maintenance et réparation automobile » dans les titres, « centre automobile » dans les phrases courtes (recommandé)", "moto": "Non : le titre suit les mots de Stéphane, « automobile » ; la moto reste dans sa rubrique (recommandé)", "difference": "Non : on change seulement les mots", "recherche": "Oui, dans une seule phrase du bloc « Plus qu'un garage » (recommandé)", "formulaires": "B — par étapes", "perimetre": "Les quatre fiches : véhicule, moto, pièce, location (recommandé)"}, "comments": {}, "notes": ""}</script>
+<div id="app"></div>
+<script id="renderer">
+(function(){
+  const PLAN = JSON.parse(document.getElementById('plan-data').textContent);
+  const ANS = JSON.parse(document.getElementById('plan-answers').textContent);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  function block(b){
+    switch (b.kind) {
+      case 'measures':
+        return '<div class="panel scroll"><table><tr><th>'+esc(b.head ? b.head[0] : 'Mesure')+'</th><th>'+esc(b.head ? b.head[1] : 'Valeur')+'</th></tr>'+
+          b.rows.map(r=>'<tr><td>'+esc(r[0])+'</td><td class="num">'+esc(r[1])+'</td></tr>').join('')+'</table>'+(b.note?'<p style="margin:12px 0 0;font-size:14px;color:var(--muted)">'+esc(b.note)+'</p>':'')+'</div>';
+      case 'table':
+        return '<div class="panel scroll"><table><tr>'+b.head.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr>'+
+          b.rows.map(r=>'<tr>'+r.map((c,i)=>'<td'+(b.num && b.num.includes(i)?' class="num"':'')+'>'+esc(c)+'</td>').join('')+'</tr>').join('')+'</table></div>';
+      case 'diagram':
+        return '<figure class="diagram">'+(b.svg||'')+(b.caption?'<figcaption>'+esc(b.caption)+'</figcaption>':'')+'</figure>';
+      case 'options':
+        return '<div class="grid g3">'+b.items.map(o=>'<div class="panel option"><h3><span class="tag prop">'+esc(o.tag)+'</span> '+esc(o.title)+(o.cost?' <span class="cost">'+esc(o.cost)+'</span>':'')+'</h3><p>'+esc(o.body)+'</p><ul>'+
+          (o.gain||[]).map(g=>'<li class="gain">'+esc(g)+'</li>').join('')+(o.forbid||[]).map(f=>'<li class="forbid">'+esc(f)+'</li>').join('')+'</ul></div>').join('')+'</div>';
+      case 'text':
+        return '<div class="text">'+(b.paragraphs||[]).map(p=>'<p>'+esc(p)+'</p>').join('')+'</div>';
+      case 'columns':
+        return '<div class="grid g2">'+b.blocks.map(block).join('')+'</div>';
+      default:
+        return '<div class="panel">Bloc inconnu : '+esc(b.kind)+'</div>';
+    }
+  }
+  function section(s, i){
+    return '<h2>'+(i+1)+' · '+esc(s.heading)+'</h2>'+(s.blocks||[]).map(block).join('');
+  }
+  function questionBlock(q, i){
+    const chosen = (ANS.choices && ANS.choices[q.id] != null) ? ANS.choices[q.id] : q.ratified;
+    const opts = q.options.map(o=>'<label class="opt"><input type="radio" name="'+esc(q.id)+'" value="'+esc(o)+'"'+(chosen===o?' checked':'')+'> '+esc(o)+'</label>').join('');
+    const rat = q.ratified ? '<span class="tag live" style="margin-left:8px">ratifié'+(q.ratified_on?' '+esc(q.ratified_on):'')+'</span>' : '<span class="tag acc" style="margin-left:8px">à trancher</span>';
+    return '<div class="q" data-q="'+esc(q.id)+'"><div class="qt"><b>'+(i+1)+'.</b>'+esc(q.label)+rat+'</div><div class="opts">'+opts+'</div><textarea data-comment="'+esc(q.id)+'" placeholder="Remarque sur ce point (optionnel)">'+esc((ANS.comments||{})[q.id]||'')+'</textarea></div>';
+  }
+  function render(){
+    const A = PLAN.arbitrages || {questions: []};
+    const sentLine = ANS.sent ? '<div class="banner" id="sent-banner">Réponses envoyées le '+esc(ANS.sent)+(ANS.ack ? ' · <b>Reçues par Claude le '+esc(ANS.ack)+'</b>' : ' · en attente de lecture par Claude')+'. Modifier et renvoyer reste possible.</div>' : '';
+    document.getElementById('app').innerHTML =
+      '<main><div class="eyebrow">'+esc(PLAN.eyebrow||'')+'</div><h1>'+esc(PLAN.title)+'</h1><p class="question">'+esc(PLAN.question)+'</p>'+(PLAN.lede?'<p class="lede">'+esc(PLAN.lede)+'</p>':'')+sentLine+
+      (PLAN.sections||[]).map(section).join('')+
+      '<section class="arb"><h2>'+esc(A.heading||'Arbitrages qui t\'appartiennent')+'</h2><p class="sub">'+esc(A.intro||'Coche, commente si besoin, puis « Envoyer à Claude ». La page se republie avec tes réponses ; la session Claude est notifiée et les lit ici.')+'</p>'+
+      (A.questions||[]).map(questionBlock).join('')+
+      '<div class="q"><div class="qt"><b>+</b>'+esc(A.notes_label||'Remarques libres')+'</div><textarea id="notes" placeholder="Optionnel — vide = rien à ajouter.">'+esc(ANS.notes||'')+'</textarea></div>'+
+      '<div class="send"><button class="primary" id="send">Envoyer à Claude</button><span class="status" id="status"></span></div></section>'+
+      (PLAN.hors?'<p class="hors"><b>Hors scope</b> : '+esc(PLAN.hors)+'</p>':'')+'</main>';
+    document.getElementById('send').addEventListener('click', send);
+    detectReadOnly();
+  }
+  async function detectReadOnly(){
+    let api = null;
+    try { api = (window.claude && window.claude.use) ? await window.claude.use('artifact') : null; } catch(e){ api = null; }
+    if (api) return;
+    const link = PLAN.url ? '<a href="'+esc(PLAN.url)+'" target="_blank" rel="noopener">ouvrir la version interactive sur claude.ai</a>' : 'ouvrir le lien claude.ai de cette page';
+    const b = document.createElement('div'); b.className = 'banner ro';
+    b.innerHTML = '<b>Aperçu en lecture seule</b> (fichier local ou panneau VS Code) — pour répondre : '+link+'.';
+    const main = document.querySelector('main'); main.insertBefore(b, main.firstChild);
+    const btn = document.getElementById('send'); btn.disabled = true;
+    document.getElementById('status').textContent = 'Réponse impossible dans cet aperçu.';
+  }
+  function collect(){
+    const choices = {}, comments = {};
+    ((PLAN.arbitrages||{}).questions||[]).forEach(q=>{
+      const r = document.querySelector('input[name="'+CSS.escape(q.id)+'"]:checked'); if (r) choices[q.id] = r.value;
+      const c = document.querySelector('textarea[data-comment="'+CSS.escape(q.id)+'"]'); if (c && c.value.trim()) comments[q.id] = c.value.trim();
+    });
+    const d = new Date(); const pad = n => String(n).padStart(2,'0');
+    return {sent: d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes()), choices, comments, notes: document.getElementById('notes').value.trim()};
+  }
+  function buildDocument(plan, answers){
+    const theme = document.getElementById('theme').textContent;
+    const renderer = document.getElementById('renderer').textContent;
+    const fonts = document.getElementById('fonts') ? document.getElementById('fonts').getAttribute('href') : '';
+    const safe = s => s.replace(/<\/script/gi, '<\\/script');
+    return '<!doctype html>\n<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>'+esc(plan.title)+'</title>'+
+      (fonts?'<link id="fonts" rel="stylesheet" href="'+esc(fonts)+'">':'')+
+      '<style id="theme">'+theme+'</style></head><body>'+
+      '<script id="plan-data" type="application/json">'+safe(JSON.stringify(plan))+'<\/script>'+
+      '<script id="plan-answers" type="application/json">'+safe(JSON.stringify(answers))+'<\/script>'+
+      '<div id="app"></div><script id="renderer">'+safe(renderer)+'<\/script></body></html>';
+  }
+  async function send(){
+    const btn = document.getElementById('send'), st = document.getElementById('status');
+    const answers = collect();
+    btn.disabled = true; st.className='status'; st.textContent='Publication…';
+    let api = null;
+    try { api = (window.claude && window.claude.use) ? await window.claude.use('artifact') : null; } catch(e){ api = null; }
+    if (!api){ st.className='status err'; st.textContent='Cette vue est en lecture seule : ouvre le lien claude.ai pour répondre.'; btn.disabled=false; return; }
+    try {
+      await api.publish(buildDocument(PLAN, answers));
+      st.className='status ok'; st.textContent='Envoyé à '+esc(answers.sent)+' — la page se rafraîchit (1 s) et affichera « Reçues par Claude » dès lecture.';
+    } catch(e){
+      const code = e && e.code;
+      if (code === 'conflict'){ st.className='status'; st.textContent='Une version plus récente existe : la page se recharge.'; return; }
+      if (code === 'not_writer' || code === 'not_granted' || code === 'not_declared'){ st.className='status err'; st.textContent='Lecture seule sur ce compte : impossible d\'envoyer.'; return; }
+      st.className='status err'; st.textContent='Envoi impossible ('+esc(code||'erreur')+'). Tes réponses restent dans la page ; réessaie dans un instant.'; btn.disabled=false;
+    }
+  }
+  render();
+})();
+</script>

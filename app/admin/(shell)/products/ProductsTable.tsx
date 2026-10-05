@@ -6,36 +6,10 @@ import { useRouter } from 'next/navigation';
 
 import { DataTable, type Column } from '@/components/admin/DataTable';
 import { StatusBadge, type BadgeTone } from '@/components/admin/StatusBadge';
-import { deleteProduct, updateProductStock } from '@/app/admin/products/actions';
+import { DeleteRowAction, TrashTabs, trashColumns, useTrashView } from '@/components/admin/Trash';
+import { deleteProduct, restoreProduct, updateProductStock } from '@/app/admin/products/actions';
 
 import type { Product } from '@/lib/types';
-
-/** Bouton de suppression (soft-delete, lock optimiste via updatedAt). */
-function DeleteProductButton({ product }: { product: Product }) {
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
-
-  const onDelete = () => {
-    if (pending) return;
-    if (!window.confirm(`Supprimer « ${product.name} » ? (soft-delete, restaurable)`)) return;
-    startTransition(async () => {
-      await deleteProduct(product.id, product.updatedAt);
-      router.refresh();
-    });
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={onDelete}
-      disabled={pending}
-      className="text-body-sm font-semibold ml-4 disabled:opacity-40"
-      style={{ color: 'var(--red)' }}
-    >
-      {pending ? '…' : 'Supprimer'}
-    </button>
-  );
-}
 
 /** Édition stock inline −/+ : delta atomique côté serveur, pas de form. */
 function StockStepper({ product }: { product: Product }) {
@@ -152,22 +126,54 @@ const columns: Column<Product>[] = [
         >
           Éditer
         </Link>
-        {!p.deletedAt && <DeleteProductButton product={p} />}
+        <DeleteRowAction
+          name={p.name}
+          id={p.id}
+          updatedAt={p.updatedAt}
+          deleteAction={deleteProduct}
+          restoreAction={restoreProduct}
+        />
       </>
     ),
   },
 ];
 
+const corbeille = trashColumns<Product>({
+  header: 'Produit',
+  name: (p) => p.name,
+  detail: (p) => p.reference,
+  editHref: (p) => `/admin/products/${p.id}`,
+  restoreAction: restoreProduct,
+});
+
 export function ProductsTable({ products }: { products: Product[] }) {
+  const { view, setView, live, trash } = useTrashView(products);
   return (
-    <DataTable
-      rows={products}
-      columns={columns}
-      getRowId={(p) => p.id}
-      searchText={(p) => `${p.name} ${p.reference} ${p.category}`}
-      searchPlaceholder="Rechercher un produit…"
-      emptyTitle="Aucun produit"
-      emptyDescription="Ajoutez votre premier produit avec le bouton ci-dessus."
-    />
+    <>
+      <TrashTabs view={view} onChange={setView} liveCount={live.length} trashCount={trash.length} />
+      {view === 'live' ? (
+        <DataTable
+          key="live"
+          rows={live}
+          columns={columns}
+          getRowId={(r) => r.id}
+          searchText={(p) => `${p.name} ${p.reference} ${p.category}`}
+          searchPlaceholder="Rechercher un produit…"
+          emptyTitle="Aucun produit"
+          emptyDescription="Ajoutez votre premier produit avec le bouton ci-dessus."
+        />
+      ) : (
+        <DataTable
+          key="trash"
+          rows={trash}
+          columns={corbeille}
+          getRowId={(r) => r.id}
+          searchText={(p) => `${p.name} ${p.reference} ${p.category}`}
+          searchPlaceholder="Rechercher un produit…"
+          emptyTitle="La corbeille est vide"
+          emptyDescription="Les produits supprimés apparaissent ici : tu peux les modifier ou les restaurer."
+        />
+      )}
+    </>
   );
 }

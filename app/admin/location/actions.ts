@@ -6,7 +6,8 @@ import { requireAdmin } from '@/lib/admin/auth';
 import { writeAuditLog } from '@/lib/admin/audit';
 import { getAdminFirestore } from '@/lib/firebase-admin';
 import { LocationCarWriteSchema } from '@/lib/schemas/location-car';
-import { computeDiff } from '@/lib/admin/diff';
+import { computePatchDiff } from '@/lib/admin/diff';
+import { PARSE_FR } from '@/lib/admin/form-errors';
 
 import type { FormActionState } from '@/components/admin/FormShell';
 
@@ -56,7 +57,7 @@ export async function createLocationCar(
 ): Promise<FormActionState> {
   const session = await requireAdmin();
 
-  const parsed = LocationCarWriteSchema.safeParse(parseForm(formData));
+  const parsed = LocationCarWriteSchema.safeParse(parseForm(formData), PARSE_FR);
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
   }
@@ -82,7 +83,7 @@ export async function updateLocationCar(
 ): Promise<FormActionState> {
   const session = await requireAdmin();
 
-  const parsed = LocationCarWriteSchema.safeParse(parseForm(formData));
+  const parsed = LocationCarWriteSchema.safeParse(parseForm(formData), PARSE_FR);
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
   }
@@ -102,7 +103,7 @@ export async function updateLocationCar(
       return;
     }
     tx.update(ref, data);
-    auditDiff = computeDiff(before, data as Record<string, unknown>);
+    auditDiff = computePatchDiff(before, data as Record<string, unknown>);
   });
 
   if (conflict) {
@@ -123,15 +124,20 @@ export async function updateLocationCar(
   return { ok: true, message: 'Voiture mise à jour.' };
 }
 
-export async function deleteLocationCar(
+/**
+ * Pose ou retire `deletedAt` sous lock optimiste (même transaction que
+ * updateLocationCar) : ni « Supprimer » ni « Restaurer » n'écrasent une
+ * édition concurrente.
+ */
+async function corbeilleLocationCar(
   id: string,
-  clientUpdatedAt: string
+  clientUpdatedAt: string,
+  action: 'delete' | 'restore'
 ): Promise<FormActionState> {
   const session = await requireAdmin();
 
   const db = getAdminFirestore();
-  // Lock optimiste (même transaction que updateLocationCar) : un « Supprimer »
-  // n'écrase jamais silencieusement une édition concurrente.
+  const now = new Date().toISOString();
   let conflict = false;
   let missing = false;
   await db.runTransaction(async (tx) => {
@@ -146,8 +152,7 @@ export async function deleteLocationCar(
       conflict = true;
       return;
     }
-    const now = new Date().toISOString();
-    tx.update(ref, { deletedAt: now, updatedAt: now });
+    tx.update(ref, { deletedAt: action === 'delete' ? now : null, updatedAt: now });
   });
 
   if (missing) {
@@ -159,11 +164,31 @@ export async function deleteLocationCar(
 
   await writeAuditLog({
     actor: session.email,
-    action: 'delete',
+    action,
     resourceType: 'location-car',
     resourceId: id,
   });
 
   revalidateLocation();
-  return { ok: true, message: 'Voiture supprimée.' };
+  return {
+    ok: true,
+    message: action === 'delete' ? 'Voiture supprimée.' : 'Voiture restaurée.',
+    updatedAt: now,
+  };
+}
+
+/** « Supprimer » : part à la corbeille, disparaît du site public. */
+export async function deleteLocationCar(
+  id: string,
+  clientUpdatedAt: string
+): Promise<FormActionState> {
+  return corbeilleLocationCar(id, clientUpdatedAt, 'delete');
+}
+
+/** « Restaurer » : sort de la corbeille, à nouveau proposée à la location. */
+export async function restoreLocationCar(
+  id: string,
+  clientUpdatedAt: string
+): Promise<FormActionState> {
+  return corbeilleLocationCar(id, clientUpdatedAt, 'restore');
 }

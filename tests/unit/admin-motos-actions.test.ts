@@ -65,7 +65,13 @@ vi.mock('@/lib/firebase-admin', () => ({
 vi.mock('next/cache', () => ({ revalidateTag: revalidateTagMock }));
 vi.mock('next/navigation', () => ({ redirect: vi.fn() }));
 
-import { createMoto, updateMoto, deleteMoto } from '@/app/admin/motos/actions';
+import {
+  createMoto,
+  updateMoto,
+  deleteMoto,
+  markMotoVendu,
+  restoreMoto,
+} from '@/app/admin/motos/actions';
 
 function fd(obj: Record<string, string>): FormData {
   const f = new FormData();
@@ -187,21 +193,94 @@ describe('Server Actions motos', () => {
     expect(res).toMatchObject({ errors: { _form: expect.any(Array) } });
   });
 
-  it('deleteMoto : soft-delete verrouillé + audit', async () => {
+  it('deleteMoto : retrait réel (deletedAt) verrouillé + audit — ne marque plus « vendu »', async () => {
     txGetMock.mockResolvedValue({
       exists: true,
       data: () => ({ updatedAt: '2026-05-01T00:00:00.000Z' }),
     });
     const res = await deleteMoto('yamaha-mt07', '2026-05-01T00:00:00.000Z');
-    expect(txUpdateMock).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({ disponibilite: 'vendu' })
-    );
+    const patch = txUpdateMock.mock.calls[0][1];
+    expect(typeof patch.deletedAt).toBe('string');
+    expect(patch).not.toHaveProperty('disponibilite');
     expect(writeAuditLogMock).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'delete', resourceType: 'moto' })
     );
     expect(revalidateTagMock).toHaveBeenCalledWith('motos');
     expect(res).toMatchObject({ ok: true });
+  });
+
+  it('deleteMoto rend le nouvel horodatage, pour pouvoir « Annuler »', async () => {
+    txGetMock.mockResolvedValue({
+      exists: true,
+      data: () => ({ updatedAt: '2026-05-01T00:00:00.000Z' }),
+    });
+    const res = await deleteMoto('yamaha-mt07', '2026-05-01T00:00:00.000Z');
+    const patch = txUpdateMock.mock.calls[0][1];
+    expect(res).toMatchObject({ ok: true, updatedAt: patch.updatedAt });
+  });
+
+  it('restoreMoto : sort de la corbeille sous lock, sans toucher à la disponibilité', async () => {
+    txGetMock.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        updatedAt: '2026-05-01T00:00:00.000Z',
+        deletedAt: '2026-05-01T00:00:00.000Z',
+        disponibilite: 'vendu',
+      }),
+    });
+    const res = await restoreMoto('yamaha-mt07', '2026-05-01T00:00:00.000Z');
+    const patch = txUpdateMock.mock.calls[0][1];
+    expect(patch.deletedAt).toBeNull();
+    expect(patch).not.toHaveProperty('disponibilite');
+    expect(writeAuditLogMock).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'restore', resourceType: 'moto' })
+    );
+    expect(revalidateTagMock).toHaveBeenCalledWith('motos');
+    expect(res).toMatchObject({ ok: true });
+  });
+
+  it('restoreMoto : conflit lock → refus, aucune écriture', async () => {
+    txGetMock.mockResolvedValue({
+      exists: true,
+      data: () => ({ updatedAt: '2026-05-10T00:00:00.000Z' }),
+    });
+    const res = await restoreMoto('yamaha-mt07', '2026-05-01T00:00:00.000Z');
+    expect(txUpdateMock).not.toHaveBeenCalled();
+    expect(res).toMatchObject({ errors: { _form: expect.any(Array) } });
+  });
+
+  it('markMotoVendu : passe en « vendu » sous lock, sans retirer l’annonce', async () => {
+    txGetMock.mockResolvedValue({
+      exists: true,
+      data: () => ({ updatedAt: '2026-05-01T00:00:00.000Z', disponibilite: 'disponible' }),
+    });
+    const res = await markMotoVendu('yamaha-mt07', '2026-05-01T00:00:00.000Z');
+    const patch = txUpdateMock.mock.calls[0][1];
+    expect(patch.disponibilite).toBe('vendu');
+    expect(patch).not.toHaveProperty('deletedAt');
+    expect(writeAuditLogMock).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'update', resourceType: 'moto' })
+    );
+    expect(revalidateTagMock).toHaveBeenCalledWith('motos');
+    expect(res).toMatchObject({ ok: true });
+  });
+
+  it('markMotoVendu : conflit lock → refus, aucune écriture', async () => {
+    txGetMock.mockResolvedValue({
+      exists: true,
+      data: () => ({ updatedAt: '2026-05-10T00:00:00.000Z' }),
+    });
+    const res = await markMotoVendu('yamaha-mt07', '2026-05-01T00:00:00.000Z');
+    expect(txUpdateMock).not.toHaveBeenCalled();
+    expect(res).toMatchObject({ errors: { _form: expect.any(Array) } });
+  });
+
+  it('createMoto : formulaire vide → erreurs en français, aucune écriture', async () => {
+    const res = await createMoto(null, fd({ ...base, marque: '', images: '', image: '' }));
+    expect(setMock).not.toHaveBeenCalled();
+    expect(res).toMatchObject({
+      errors: { marque: ['Champ obligatoire.'], images: ['Ajoute au moins une photo.'] },
+    });
   });
 
   it('deleteMoto : conflit lock (édition concurrente) → refus, aucune écriture', async () => {

@@ -64,10 +64,20 @@ test.describe('Admin motos (émulateur)', () => {
     await expect(page.getByRole('link', { name: /Nouvelle moto/i })).toBeVisible();
   });
 
-  test('page nouvelle moto affiche le formulaire', async ({ page }) => {
+  test('page nouvelle moto : la fiche se remplit en trois étapes', async ({ page }) => {
     await page.goto('/admin/motos/new');
-    await expect(page.getByLabel('Marque')).toBeVisible();
+    // Étape 1 — La moto : « Suivant » exige les champs obligatoires.
+    await expect(page.getByText(/Étape 1 sur 3/)).toBeVisible();
+    await page.getByLabel('Marque', { exact: true }).fill('Yamaha');
+    await page.getByLabel('Modèle', { exact: true }).fill('MT-07');
+    await page.getByLabel('Référence', { exact: true }).fill('MO-E2E-01');
+    await page.getByLabel('Année', { exact: true }).fill('2023');
+    await page.getByRole('button', { name: 'Suivant' }).click();
+    // Étape 2 — Prix et description.
     await expect(page.getByLabel('Prix (€)')).toBeVisible();
+    await page.getByLabel('Description', { exact: true }).fill('Moto de test.');
+    await page.getByRole('button', { name: 'Suivant' }).click();
+    // Étape 3 — Photos : le bouton de création n'existe qu'à la dernière étape.
     await expect(page.getByRole('button', { name: /Créer la moto/i })).toBeVisible();
   });
 

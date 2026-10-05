@@ -50,9 +50,11 @@ describe('ProductForm — mode creation (sans initial)', () => {
     mockShowToast.mockClear();
   });
 
-  it('rend le bouton "Créer le produit"', () => {
+  it('création : la fiche s’ouvre à l’étape 1 ; « Créer le produit » n’arrive qu’à la dernière', () => {
     render(<ProductForm />);
-    expect(screen.getByRole('button', { name: /Créer le produit/i })).toBeInTheDocument();
+    expect(screen.getByText(/Étape 1 sur 3/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Suivant' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Créer le produit/i })).toBeNull();
   });
 
   it('rend le label Nom', () => {
@@ -98,21 +100,23 @@ describe('ProductForm — mode creation (sans initial)', () => {
   it('rend le select Catégorie avec ses 8 options', () => {
     render(<ProductForm />);
     expect(screen.getByLabelText('Catégorie')).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Freinage' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Moteur' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Transmission' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Éclairage' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Filtres' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Suspension' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Électronique' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Refroidissement' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'Freinage' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'Moteur' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'Transmission' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'Éclairage' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'Filtres' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'Suspension' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'Électronique' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('option', { hidden: true, name: 'Refroidissement' })
+    ).toBeInTheDocument();
   });
 
   it('rend le select Type de véhicule avec Auto et Moto', () => {
     render(<ProductForm />);
     expect(screen.getByLabelText('Type de véhicule')).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Auto' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Moto' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'Auto' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'Moto' })).toBeInTheDocument();
   });
 
   it('rend le composant ImageUploader', () => {
@@ -135,13 +139,17 @@ describe('ProductForm — mode creation (sans initial)', () => {
 
   it('le bouton "+ Ajouter compatibilité" est présent', () => {
     render(<ProductForm />);
-    expect(screen.getByRole('button', { name: /\+ Ajouter compatibilité/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { hidden: true, name: /\+ Ajouter compatibilité/i })
+    ).toBeInTheDocument();
   });
 
   it("ajout d'une ligne compat → 2 inputs Marque visibles", () => {
     render(<ProductForm />);
     expect(screen.getAllByPlaceholderText('Marque')).toHaveLength(1);
-    fireEvent.click(screen.getByRole('button', { name: /\+ Ajouter compatibilité/i }));
+    fireEvent.click(
+      screen.getByRole('button', { hidden: true, name: /\+ Ajouter compatibilité/i })
+    );
     expect(screen.getAllByPlaceholderText('Marque')).toHaveLength(2);
   });
 
@@ -272,7 +280,10 @@ describe('ProductForm — mode édition (avec initial = PRODUCTS[0])', () => {
     const { container } = render(<ProductForm initial={peugeotFixture} />);
     // 2 lignes initiales
     expect(container.querySelectorAll('input[name^="compat_"][name$="_brand"]')).toHaveLength(2);
-    const removeButtons = screen.getAllByRole('button', { name: /Supprimer la ligne/i });
+    const removeButtons = screen.getAllByRole('button', {
+      hidden: true,
+      name: /Supprimer la ligne/i,
+    });
     fireEvent.click(removeButtons[1]);
     expect(container.querySelectorAll('input[name^="compat_"][name$="_brand"]')).toHaveLength(1);
   });

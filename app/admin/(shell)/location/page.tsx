@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { requireAdminPage } from '@/lib/admin/auth';
 
-import { getAdapter } from '@/lib/data';
+import { getLocationCarsAdmin } from '@/lib/admin/catalogue-server';
 
 import { LocationCarsTable } from './LocationCarsTable';
 
@@ -15,8 +15,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function AdminLocationPage() {
   await requireAdminPage();
-  const adapter = await getAdapter();
-  const cars = await adapter.getLocationCars();
+  const cars = await getLocationCarsAdmin();
 
   return (
     <div className="p-4">

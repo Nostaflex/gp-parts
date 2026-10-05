@@ -58,9 +58,11 @@ describe('MotoForm — mode creation (sans initial)', () => {
     mockShowToast.mockClear();
   });
 
-  it('rend le bouton "Creer la moto"', () => {
+  it('création : la fiche s’ouvre à l’étape 1 ; « Créer la moto » n’arrive qu’à la dernière', () => {
     render(<MotoForm />);
-    expect(screen.getByRole('button', { name: /Créer la moto/i })).toBeInTheDocument();
+    expect(screen.getByText(/Étape 1 sur 3/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Suivant' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Créer la moto/i })).toBeNull();
   });
 
   it('rend le label Marque', () => {
@@ -92,45 +94,45 @@ describe('MotoForm — mode creation (sans initial)', () => {
     render(<MotoForm />);
     const select = screen.getByLabelText('Catégorie');
     expect(select).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Roadster' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Sport' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Trail' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Scooter' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Custom' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Routière' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'Roadster' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'Sport' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'Trail' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'Scooter' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'Custom' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'Routière' })).toBeInTheDocument();
   });
 
   it('rend le select Energie avec Essence et Electrique', () => {
     render(<MotoForm />);
     const select = screen.getByLabelText('Énergie');
     expect(select).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Essence' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Électrique' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'Essence' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'Électrique' })).toBeInTheDocument();
   });
 
   it('rend le select Permis avec les options A1 A2 A AM', () => {
     render(<MotoForm />);
     const select = screen.getByLabelText('Permis');
     expect(select).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'A1' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'A2' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'A' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'AM' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'A1' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'A2' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'A' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'AM' })).toBeInTheDocument();
   });
 
   it('rend le select Disponibilite avec ses options', () => {
     render(<MotoForm />);
     const select = screen.getByLabelText('Disponibilité');
     expect(select).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Disponible' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Réservé' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Vendu' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'Disponible' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'Réservé' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'Vendu' })).toBeInTheDocument();
   });
 
   it('rend le select Type avec Occasion et Neuf', () => {
     render(<MotoForm />);
-    expect(screen.getByRole('option', { name: 'Occasion' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Neuf' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'Occasion' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { hidden: true, name: 'Neuf' })).toBeInTheDocument();
   });
 
   it('rend les champs Details (Puissance Cylindree Couleur etc)', () => {

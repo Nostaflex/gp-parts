@@ -251,14 +251,23 @@ export class FirebaseAdapter implements DataAdapter {
   // Validation Zod des documents : Phase 4 (lib/schemas/vehicule|moto|
   // demande.ts). Ici, lecture brute typée — cohérent avec le découpage spec.
 
+  // Soft-delete (`deletedAt`, bouton « Supprimer » du BO) filtré ICI : point de
+  // passage unique de tous les lecteurs (site public via le cache, listes BO,
+  // posts sociaux, export Leboncoin, tableau de bord). Filtre en mémoire et
+  // non where() : les annonces historiques n'ont pas le champ. La corbeille
+  // du BO lit par l'Admin SDK (lib/admin/catalogue-server).
   async getVehicules(): Promise<Vehicule[]> {
     const snapshot = await getDocs(this.vehiculesRef);
-    return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }) as Vehicule);
+    return snapshot.docs
+      .filter((d) => !d.data().deletedAt)
+      .map((d) => ({ ...d.data(), id: d.id }) as Vehicule);
   }
 
   async getMotos(): Promise<Moto[]> {
     const snapshot = await getDocs(this.motosRef);
-    return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }) as Moto);
+    return snapshot.docs
+      .filter((d) => !d.data().deletedAt)
+      .map((d) => ({ ...d.data(), id: d.id }) as Moto);
   }
 
   async getLocationCars(opts?: { includeDeleted?: boolean }): Promise<LocationCar[]> {

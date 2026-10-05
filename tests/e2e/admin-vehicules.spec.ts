@@ -18,7 +18,8 @@ import { test, expect } from '@playwright/test';
  * components/admin/VehiculeForm.tsx) :
  *   - liste : <h1>Véhicules</h1>, lien "+ Nouveau véhicule"
  *   - form  : <label for="marque">Marque</label>, <label for="prix">Prix (€)</label>
- *   - submit (create) : bouton "Créer le véhicule"
+ *   - fiche par étapes (components/admin/FormSteps.tsx) : « Suivant », puis
+ *     submit (create) à la dernière étape : bouton "Créer le véhicule"
  */
 
 const TEST_EMAIL = process.env.TEST_ADMIN_EMAIL;
@@ -65,10 +66,21 @@ test.describe('Admin véhicules (émulateur)', () => {
     await expect(page.getByRole('link', { name: /Nouveau véhicule/i })).toBeVisible();
   });
 
-  test('page nouveau véhicule affiche le formulaire', async ({ page }) => {
+  test('page nouveau véhicule : la fiche se remplit en trois étapes', async ({ page }) => {
     await page.goto('/admin/vehicules/new');
-    await expect(page.getByLabel('Marque')).toBeVisible();
+    // Étape 1 — Le véhicule : « Suivant » exige les champs obligatoires.
+    await expect(page.getByText(/Étape 1 sur 3/)).toBeVisible();
+    await page.getByLabel('Marque', { exact: true }).fill('Peugeot');
+    await page.getByLabel('Modèle', { exact: true }).fill('3008 GT');
+    await page.getByLabel('Référence', { exact: true }).fill('VO-E2E-01');
+    await page.getByLabel('Année', { exact: true }).fill('2022');
+    await page.getByLabel('Transmission', { exact: true }).fill('Automatique');
+    await page.getByRole('button', { name: 'Suivant' }).click();
+    // Étape 2 — Prix et description.
     await expect(page.getByLabel('Prix (€)')).toBeVisible();
+    await page.getByLabel('Description', { exact: true }).fill('Véhicule de test.');
+    await page.getByRole('button', { name: 'Suivant' }).click();
+    // Étape 3 — Photos : le bouton de création n'existe qu'à la dernière étape.
     await expect(page.getByRole('button', { name: /Créer le véhicule/i })).toBeVisible();
   });
 

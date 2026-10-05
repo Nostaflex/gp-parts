@@ -1,51 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import { useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 
 import { DataTable, type Column } from '@/components/admin/DataTable';
 import { StatusBadge, type BadgeTone } from '@/components/admin/StatusBadge';
-import { deleteVehicule } from '@/app/admin/vehicules/actions';
+import {
+  DeleteRowAction,
+  RowAction,
+  TrashTabs,
+  trashColumns,
+  useTrashView,
+} from '@/components/admin/Trash';
+import { deleteVehicule, markVehiculeVendu, restoreVehicule } from '@/app/admin/vehicules/actions';
 
 import type { Vehicule, Disponibilite } from '@/lib/vehicules';
-
-/** Bouton de suppression (soft-delete → « vendu », retiré du site public). */
-function DeleteVehiculeButton({
-  id,
-  updatedAt,
-  disabled,
-}: {
-  id: string;
-  updatedAt: string;
-  disabled: boolean;
-}) {
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
-
-  const onDelete = () => {
-    if (disabled || pending) return;
-    if (!window.confirm('Retirer ce véhicule du site ? (il sera marqué comme vendu)')) return;
-    startTransition(async () => {
-      const res = await deleteVehicule(id, updatedAt);
-      // Conflit de lock optimiste : jamais silencieux (la ligne réapparaîtrait sans explication).
-      if (res && 'errors' in res && res.errors._form?.[0]) window.alert(res.errors._form[0]);
-      router.refresh();
-    });
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={onDelete}
-      disabled={disabled || pending}
-      className="text-body-sm font-semibold ml-4 disabled:opacity-40"
-      style={{ color: 'var(--red)' }}
-    >
-      {pending ? '…' : 'Supprimer'}
-    </button>
-  );
-}
 
 const DISPO: Record<Disponibilite, { tone: BadgeTone; label: string }> = {
   disponible: { tone: 'success', label: 'Disponible' },
@@ -100,26 +68,63 @@ const columns: Column<Vehicule>[] = [
         >
           Éditer
         </Link>
-        <DeleteVehiculeButton
+        <RowAction
+          label="Vendu"
+          confirmation="Marquer ce véhicule comme vendu ? Il reste affiché sur le site, avec la mention « vendu »."
+          action={markVehiculeVendu}
           id={v.id}
           updatedAt={v.updatedAt}
+          color="var(--orange)"
           disabled={v.disponibilite === 'vendu'}
+        />
+        <DeleteRowAction
+          name={`${v.marque} ${v.modele}`}
+          id={v.id}
+          updatedAt={v.updatedAt}
+          deleteAction={deleteVehicule}
+          restoreAction={restoreVehicule}
         />
       </>
     ),
   },
 ];
 
+const corbeille = trashColumns<Vehicule>({
+  header: 'Véhicule',
+  name: (v) => `${v.marque} ${v.modele}`,
+  detail: (v) => `était « ${DISPO[v.disponibilite].label} »`,
+  editHref: (v) => `/admin/vehicules/${v.id}`,
+  restoreAction: restoreVehicule,
+});
+
 export function VehiculesTable({ vehicules }: { vehicules: Vehicule[] }) {
+  const { view, setView, live, trash } = useTrashView(vehicules);
   return (
-    <DataTable
-      rows={vehicules}
-      columns={columns}
-      getRowId={(v) => v.id}
-      searchText={(v) => `${v.marque} ${v.modele} ${v.reference}`}
-      searchPlaceholder="Rechercher un véhicule…"
-      emptyTitle="Aucun véhicule"
-      emptyDescription="Ajoutez votre premier véhicule avec le bouton ci-dessus."
-    />
+    <>
+      <TrashTabs view={view} onChange={setView} liveCount={live.length} trashCount={trash.length} />
+      {view === 'live' ? (
+        <DataTable
+          key="live"
+          rows={live}
+          columns={columns}
+          getRowId={(r) => r.id}
+          searchText={(v) => `${v.marque} ${v.modele} ${v.reference}`}
+          searchPlaceholder="Rechercher un véhicule…"
+          emptyTitle="Aucun véhicule"
+          emptyDescription="Ajoutez votre premier véhicule avec le bouton ci-dessus."
+        />
+      ) : (
+        <DataTable
+          key="trash"
+          rows={trash}
+          columns={corbeille}
+          getRowId={(r) => r.id}
+          searchText={(v) => `${v.marque} ${v.modele} ${v.reference}`}
+          searchPlaceholder="Rechercher un véhicule…"
+          emptyTitle="La corbeille est vide"
+          emptyDescription="Les véhicules supprimés apparaissent ici : tu peux les modifier ou les restaurer."
+        />
+      )}
+    </>
   );
 }

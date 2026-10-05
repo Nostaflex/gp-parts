@@ -1,0 +1,269 @@
+{
+  "title": "Corbeille du back-office",
+  "eyebrow": "Car Performance · back-office · conception du 4 octobre 2026",
+  "question": "Quand Stéphane supprime une annonce ou une pièce, où la retrouve-t-il, comment la modifie-t-il et comment la remet-il en ligne ?",
+  "lede": "Aujourd'hui, supprimer fait disparaître l'élément sans laisser de chemin de retour, sauf pour les pièces où le retour existe mais reste caché dans la fiche. La proposition : une corbeille, la même partout, où l'on retrouve, modifie et restaure en un geste.",
+  "hors": "Hors périmètre : corbeille pour les commandes, réservations, demandes et avis ; historique des modifications d'une fiche ; restauration d'une photo retirée d'une annonce.",
+  "url": "https://claude.ai/artifact/KgxrdHJNmBXwWZF3cMMdUQ",
+  "sections": [
+    {
+      "heading": "Aujourd'hui : quatre rubriques, trois comportements",
+      "blocks": [
+        {
+          "kind": "table",
+          "head": ["Rubrique", "Ce que fait « Supprimer »", "Retrouver", "Modifier", "Restaurer"],
+          "rows": [
+            [
+              "Pièces",
+              "Retire la pièce du site, la garde en base",
+              "Oui, mêlée aux autres dans la liste, badge « Supprimé »",
+              "Oui",
+              "Oui, mais le bouton est caché dans la fiche, avec un texte technique (« soft-delete »)"
+            ],
+            [
+              "Véhicules",
+              "En prod : marque « vendu ». Sur la branche de correction : retire du site, garde en base",
+              "Non",
+              "Non",
+              "Non"
+            ],
+            ["Motos", "Comme les véhicules", "Non", "Non", "Non"],
+            ["Location", "Retire la voiture du parc, la garde en base", "Non", "Non", "Non"]
+          ]
+        },
+        {
+          "kind": "measures",
+          "head": ["Constat relevé dans le code le 4 octobre 2026", "Valeur"],
+          "rows": [
+            ["Rubriques du catalogue avec un bouton Supprimer", "4"],
+            ["Rubriques où l'on peut retrouver un élément supprimé", "1 (pièces)"],
+            ["Rubriques où l'on peut le restaurer", "1 (pièces)"],
+            ["Rubriques où l'on peut supprimer définitivement", "0"]
+          ],
+          "note": "Rien n'est jamais détruit : chaque suppression pose une date de suppression sur la fiche. Il ne manque que l'écran pour s'en servir."
+        }
+      ]
+    },
+    {
+      "heading": "Ce que font les outils connus",
+      "blocks": [
+        {
+          "kind": "table",
+          "head": ["Outil", "Modèle", "Ce qu'on en retient"],
+          "rows": [
+            [
+              "WordPress",
+              "Une corbeille par type de contenu, dans un onglet de la liste. « Restaurer » remet l'élément dans l'état qu'il avait avant. « Supprimer définitivement » existe. Purge automatique après 30 jours par défaut.",
+              "L'onglet dans la liste ; restaurer rend l'état d'avant."
+            ],
+            [
+              "Shopify",
+              "Pas de corbeille : un statut « Archivé » dans un onglet de la liste des produits, que l'on peut désarchiver à tout moment. Supprimer est définitif.",
+              "L'onglet dans la liste ; rien ne disparaît par surprise."
+            ]
+          ]
+        },
+        {
+          "kind": "text",
+          "paragraphs": [
+            "Sources consultées le 4 octobre 2026 : la documentation WordPress (codex, page « Trash status ») ; pour Shopify, des guides tiers concordants, l'aide officielle n'ayant pas été consultée."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Le cycle de vie proposé",
+      "blocks": [
+        {
+          "kind": "diagram",
+          "layout": "elk",
+          "d2": "direction: right\ncreer: Créer\nligne: \"En ligne\\ndisponible · réservé · vendu\"\ncorbeille: \"Corbeille\\ninvisible sur le site\"\ncreer -> ligne\nligne -> ligne: \"Modifier · Vendu\"\nligne -> corbeille: Supprimer\ncorbeille -> ligne: \"Restaurer\\n(état d'avant)\"\ncorbeille -> corbeille: Modifier",
+          "caption": "Supprimer n'est plus une fin : c'est un aller vers la corbeille, avec un retour."
+        },
+        {
+          "kind": "table",
+          "head": ["Geste", "Où", "Résultat"],
+          "rows": [
+            [
+              "Supprimer",
+              "Sur la ligne, dans la liste",
+              "L'élément quitte le site et part à la corbeille."
+            ],
+            [
+              "Retrouver",
+              "Dans la corbeille",
+              "Liste des éléments supprimés, le plus récent en premier, avec la date de suppression et la recherche."
+            ],
+            [
+              "Modifier",
+              "Corbeille, puis Éditer",
+              "La fiche s'ouvre avec un bandeau « Dans la corbeille ». Enregistrer ne la remet pas en ligne."
+            ],
+            [
+              "Restaurer",
+              "Sur la ligne de la corbeille, ou dans le bandeau de la fiche",
+              "L'élément revient en ligne tel qu'il était : disponible, réservé ou vendu."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Trois façons de la construire",
+      "blocks": [
+        {
+          "kind": "options",
+          "items": [
+            {
+              "tag": "A",
+              "title": "Un onglet Corbeille dans chaque liste",
+              "cost": "le plus de travail",
+              "body": "En tête de Pièces, Véhicules, Motos et Location, deux onglets : « En ligne » et « Corbeille », avec le nombre d'éléments. La liste principale ne montre plus que ce qui est en ligne.",
+              "gain": [
+                "On cherche là où on a supprimé",
+                "La liste principale reste propre",
+                "Le même geste dans les quatre rubriques",
+                "Tient sur téléphone"
+              ],
+              "forbid": [
+                "Quatre listes et quatre fiches à modifier",
+                "Les pièces changent de comportement : les supprimées quittent la liste principale"
+              ]
+            },
+            {
+              "tag": "B",
+              "title": "Une page Corbeille unique",
+              "cost": "travail moyen",
+              "body": "Une entrée « Corbeille » dans le menu Système. Elle liste tout ce qui a été supprimé, tous types confondus, avec un filtre par type.",
+              "gain": ["Un seul endroit à connaître", "Une seule page à construire"],
+              "forbid": [
+                "Loin de l'endroit où l'on a supprimé",
+                "Une entrée de menu en plus",
+                "Un tableau qui mélange pièces, voitures et motos"
+              ]
+            },
+            {
+              "tag": "C",
+              "title": "Tout dans la même liste",
+              "cost": "le moins de travail",
+              "body": "Les éléments supprimés restent dans la liste, grisés, avec un badge « Supprimé » et un bouton Restaurer sur la ligne. C'est le comportement actuel des pièces, étendu aux autres.",
+              "gain": ["Rien de nouveau à apprendre", "Peu de code"],
+              "forbid": [
+                "La liste s'encombre pour toujours",
+                "« Supprimé » et « Vendu » se confondent à l'œil",
+                "La recherche remonte des éléments supprimés"
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "text",
+          "paragraphs": [
+            "Recommandation : A. C'est le modèle des deux outils étudiés, et le seul où Stéphane retrouve un élément à l'endroit même où il l'a supprimé."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "À quoi ressemble l'option A",
+      "blocks": [
+        {
+          "kind": "diagram",
+          "svg": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 760 372' width='760' height='372' font-family='inherit' font-size='13'><rect x='1' y='1' width='430' height='370' rx='14' fill='var(--panel)' stroke='var(--line)'/><text x='22' y='36' font-size='19' font-weight='700' fill='var(--ink)'>Véhicules</text><rect x='278' y='16' width='134' height='30' rx='9' fill='var(--prop)'/><text x='345' y='36' text-anchor='middle' font-weight='600' fill='var(--panel)'>+ Nouveau véhicule</text><rect x='22' y='62' width='390' height='36' rx='10' fill='var(--code)' stroke='var(--line)'/><text x='119' y='85' text-anchor='middle' fill='var(--muted)'>En ligne · 6</text><rect x='219' y='65' width='190' height='30' rx='8' fill='var(--panel)' stroke='var(--prop)'/><text x='314' y='85' text-anchor='middle' font-weight='700' fill='var(--ink)'>Corbeille · 2</text><line x1='22' y1='114' x2='412' y2='114' stroke='var(--line)'/><text x='22' y='140' font-weight='600' fill='var(--ink)'>Dacia Sandero Essential</text><text x='22' y='159' font-size='12' fill='var(--muted)'>Supprimée le 4 oct. · était « Disponible »</text><text x='296' y='149' font-weight='600' fill='var(--prop)'>Restaurer</text><text x='372' y='149' font-weight='600' fill='var(--muted)'>Éditer</text><line x1='22' y1='176' x2='412' y2='176' stroke='var(--line)'/><text x='22' y='202' font-weight='600' fill='var(--ink)'>Renault Clio V Intens</text><text x='22' y='221' font-size='12' fill='var(--muted)'>Supprimée le 28 sept. · était « Vendu »</text><text x='296' y='211' font-weight='600' fill='var(--prop)'>Restaurer</text><text x='372' y='211' font-weight='600' fill='var(--muted)'>Éditer</text><line x1='22' y1='238' x2='412' y2='238' stroke='var(--line)'/><text x='22' y='270' font-size='12' fill='var(--muted)'>Les éléments de la corbeille n'apparaissent nulle part sur le site.</text><rect x='86' y='304' width='260' height='40' rx='11' fill='var(--ink)'/><text x='106' y='329' fill='var(--panel)'>Annonce supprimée</text><text x='330' y='329' text-anchor='end' font-weight='700' fill='var(--accent-soft)'>Annuler</text><rect x='456' y='1' width='303' height='210' rx='14' fill='var(--panel)' stroke='var(--line)'/><text x='476' y='36' font-size='17' font-weight='700' fill='var(--ink)'>Dacia Sandero Essential</text><rect x='476' y='52' width='263' height='74' rx='10' fill='var(--accent-soft)' stroke='var(--accent)'/><text x='490' y='76' font-weight='700' fill='var(--ink)'>Dans la corbeille</text><text x='490' y='95' font-size='12' fill='var(--ink)'>Invisible sur le site.</text><text x='490' y='111' font-size='12' fill='var(--ink)'>Tu peux la modifier, puis la restaurer.</text><rect x='640' y='60' width='88' height='28' rx='8' fill='var(--prop)'/><text x='684' y='79' text-anchor='middle' font-weight='600' fill='var(--panel)'>Restaurer</text><text x='476' y='152' font-size='12' fill='var(--muted)'>Marque</text><rect x='476' y='160' width='263' height='30' rx='8' fill='var(--code)' stroke='var(--line)'/><text x='488' y='180' fill='var(--ink)'>Dacia</text><text x='456' y='240' font-size='12' fill='var(--muted)'>À gauche : l'onglet Corbeille d'une liste, et le</text><text x='456' y='257' font-size='12' fill='var(--muted)'>message qui suit un clic sur Supprimer.</text><text x='456' y='282' font-size='12' fill='var(--muted)'>À droite : la fiche d'un élément supprimé,</text><text x='456' y='299' font-size='12' fill='var(--muted)'>ouverte depuis la corbeille.</text></svg>",
+          "caption": "Maquette de principe, pas le rendu final."
+        }
+      ]
+    },
+    {
+      "heading": "Ce que la proposition laisse ouvert",
+      "blocks": [
+        {
+          "kind": "table",
+          "head": ["Point", "État", "Conséquence"],
+          "rows": [
+            [
+              "Suppression définitive",
+              "À trancher ci-dessous",
+              "Sans elle, la corbeille grossit sans limite ; avec elle, une erreur devient irréversible."
+            ],
+            [
+              "Photos des éléments supprimés",
+              "Conservées",
+              "Nécessaire pour restaurer ; le coût de stockage reste faible à cette échelle."
+            ],
+            [
+              "Lecture directe de la base",
+              "Inchangée",
+              "Une annonce supprimée reste lisible par accès direct à la base. C'était une donnée publique."
+            ],
+            [
+              "Texte technique dans la fiche pièce",
+              "À retirer",
+              "« soft-delete » est remplacé par le bandeau « Dans la corbeille »."
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "arbitrages": {
+    "heading": "Les choix qui t'appartiennent",
+    "intro": "Coche une réponse par question, commente si besoin, puis « Envoyer à Claude ». Le développement ne commence qu'après ton envoi.",
+    "questions": [
+      {
+        "id": "emplacement",
+        "label": "Où vit la corbeille ?",
+        "options": [
+          "A — un onglet Corbeille dans chaque liste (recommandé)",
+          "B — une page Corbeille unique dans le menu",
+          "C — dans la même liste, lignes grisées"
+        ],
+        "ratified": "A — un onglet Corbeille dans chaque liste (recommandé)",
+        "ratified_on": "2026-10-04"
+      },
+      {
+        "id": "perimetre",
+        "label": "Quelles rubriques en profitent ?",
+        "options": [
+          "Les quatre : pièces, véhicules, motos, location (recommandé)",
+          "Véhicules et motos d'abord, pièces et location plus tard"
+        ],
+        "ratified": "Les quatre : pièces, véhicules, motos, location (recommandé)",
+        "ratified_on": "2026-10-04"
+      },
+      {
+        "id": "definitif",
+        "label": "Peut-on supprimer définitivement depuis la corbeille ?",
+        "options": [
+          "Non : la corbeille garde tout, rien n'est jamais détruit (recommandé)",
+          "Oui : un bouton « Supprimer définitivement », avec confirmation",
+          "Purge automatique après 30 jours"
+        ],
+        "ratified": "Non : la corbeille garde tout, rien n'est jamais détruit (recommandé)",
+        "ratified_on": "2026-10-04"
+      },
+      {
+        "id": "annuler",
+        "label": "Que se passe-t-il juste après un clic sur Supprimer ?",
+        "options": [
+          "Pas de fenêtre de confirmation : un message « Supprimé · Annuler » quelques secondes (recommandé)",
+          "Garder la fenêtre de confirmation actuelle, sans bouton Annuler"
+        ],
+        "ratified": "Pas de fenêtre de confirmation : un message « Supprimé · Annuler » quelques secondes (recommandé)",
+        "ratified_on": "2026-10-04"
+      }
+    ]
+  },
+  "answers": {
+    "sent": "2026-10-04 20:50",
+    "ack": "2026-10-04 20:51",
+    "choices": {
+      "emplacement": "A — un onglet Corbeille dans chaque liste (recommandé)",
+      "perimetre": "Les quatre : pièces, véhicules, motos, location (recommandé)",
+      "definitif": "Non : la corbeille garde tout, rien n'est jamais détruit (recommandé)",
+      "annuler": "Pas de fenêtre de confirmation : un message « Supprimé · Annuler » quelques secondes (recommandé)"
+    },
+    "comments": {},
+    "notes": ""
+  }
+}

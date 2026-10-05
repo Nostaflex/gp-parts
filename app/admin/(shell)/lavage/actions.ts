@@ -11,6 +11,7 @@ import { LavageSettingsSchema, SemaineTypeSchema } from '@/lib/schemas/lavage';
 import { localDateISO } from '@/lib/utils';
 
 import type { LavageBlocage } from '@/lib/lavage-creneaux';
+import { PARSE_FR } from '@/lib/admin/form-errors';
 import type { FormActionState } from '@/components/admin/FormShell';
 import type { Demande } from '@/lib/types';
 
@@ -32,7 +33,7 @@ export async function updateLavageSettings(
     return { errors: { _form: ['Saisie illisible — recharge la page et réessaie.'] } };
   }
 
-  const parsed = LavageSettingsSchema.safeParse({ formules: candidate });
+  const parsed = LavageSettingsSchema.safeParse({ formules: candidate }, PARSE_FR);
   if (!parsed.success) {
     const messages = parsed.error.issues.map((i) => i.message);
     return { errors: { _form: [...new Set(messages)] } };
@@ -144,7 +145,7 @@ export async function updateSemaineType(
     return { errors: { _form: ['Saisie illisible — recharge la page et réessaie.'] } };
   }
 
-  const parsed = SemaineTypeSchema.safeParse({ jours: candidate });
+  const parsed = SemaineTypeSchema.safeParse({ jours: candidate }, PARSE_FR);
   if (!parsed.success) {
     return { errors: { _form: [...new Set(parsed.error.issues.map((i) => i.message))] } };
   }
