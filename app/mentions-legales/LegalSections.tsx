@@ -14,7 +14,7 @@ import { CookiePrefsCenter } from '@/components/gdpr/CookiePrefsCenter';
 import { submitDemandeDroit } from './actions';
 
 /** Date de mise à jour VERSIONNÉE — à incrémenter à chaque évolution du texte. */
-export const LEGAL_UPDATED_AT = '18 août 2026';
+export const LEGAL_UPDATED_AT = '4 octobre 2026';
 
 const SECTIONS = [
   { id: 'editeur', num: '01', label: 'Qui édite ce site' },
@@ -126,9 +126,6 @@ export function LegalSections({
   }, []);
 
   const email = contactInfo.email;
-  const adresse = contactInfo.address.street
-    ? `${contactInfo.address.street}, ${contactInfo.address.postalCode} ${contactInfo.address.city}`
-    : '';
   const mailto = (sujet: string, corps: string) =>
     `mailto:${email}?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`;
 
@@ -171,32 +168,37 @@ export function LegalSections({
           <Bloc>
             <TitreSection num="01">Qui édite ce site</TitreSection>
             <EnClair>
-              Car Performance Guadeloupe, garage établi en Guadeloupe. Une vraie société, un vrai
-              numéro : tout est ci-dessous — et ce qui manque encore est nommé, pas maquillé.
+              Car Performance Guadeloupe, centre de maintenance et réparation automobile établi en
+              Guadeloupe. Une vraie société, un vrai numéro : tout est ci-dessous — et ce qui manque
+              encore est nommé, pas maquillé.
             </EnClair>
             <div className="grid grid-cols-1 overflow-hidden rounded-2xl border border-[#E5DDD3] sm:grid-cols-2">
-              <IdRow label="Raison sociale" value="Car Performance Guadeloupe" />
-              <IdRow label="Forme & capital" value="SARL au capital de 1 500 €" />
-              {/* SIRET réel fourni par Stéphane le 2026-08-16 (réponse S4). */}
-              <IdRow label="SIRET" value="102 854 023 00011" />
-              <IdRow label="RCS" value="102 854 023" />
+              {/* Identité alignée sur le Kbis du 11/09/2026 (RCS Pointe-à-Pitre,
+                  n° de gestion 2026B01800) : siège transféré de Paris le 05/08/2026. */}
+              <IdRow label="Raison sociale" value="CAR PERFORMANCE" />
+              <IdRow label="Forme & capital" value="SAS à associé unique au capital de 1 500 €" />
+              {/* SIRET du siège au registre INSEE (relevé le 2026-10-04) — le
+                  00011 (Paris) est fermé depuis le transfert. */}
+              <IdRow label="SIRET" value="102 854 023 00037" />
+              <IdRow label="RCS" value="Pointe-à-Pitre 102 854 023" />
               <IdRow
                 label="TVA intracommunautaire"
                 value={legalInfo.tvaIntracom || 'N° TVA'}
                 aFournir={!legalInfo.tvaIntracom}
               />
-              <IdRow
-                label="Siège social"
-                value={adresse || 'Adresse complète'}
-                aFournir={!adresse}
-              />
+              {/* Siège du Kbis — distinct de l'adresse d'accueil (contactInfo). */}
+              <IdRow label="Siège social" value="615 chemin de Morne Bourg, 97170 Petit-Bourg" />
               <IdRow label="Téléphone" value={contactInfo.phoneDisplay} />
               <IdRow label="Email" value={email} />
-              <IdRow label="Directeur de la publication" value="Stéphane M., gérant" />
+              <IdRow label="Directeur de la publication" value="Stéphane Sophie, président" />
               <IdRow label="Hébergeur" value="Vercel Inc. — Covina, CA, États-Unis" />
+              {/* R616-1 conso : le site du médiateur doit être mentionné. */}
               <IdRow
                 label="Médiateur de la consommation"
-                value={legalInfo.mediateurNom || 'Adhésion'}
+                value={
+                  [legalInfo.mediateurNom, legalInfo.mediateurUrl].filter(Boolean).join(' — ') ||
+                  'Adhésion'
+                }
                 aFournir={!legalInfo.mediateurNom}
               />
               <IdRow

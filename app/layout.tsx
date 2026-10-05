@@ -35,7 +35,7 @@ const monoFont = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Car Performance — Garage auto & moto Guadeloupe',
+    default: 'Car Performance — Centre de maintenance et réparation automobile en Guadeloupe',
     template: '%s | Car Performance',
   },
   description:
@@ -55,12 +55,12 @@ export const metadata: Metadata = {
     locale: 'fr_FR',
     siteName: 'Car Performance',
     url: SITE_URL,
-    title: 'Car Performance — Garage auto & moto Guadeloupe',
+    title: 'Car Performance — Centre de maintenance et réparation automobile en Guadeloupe',
     description: 'Réparation, location et vente VO en Guadeloupe.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Car Performance — Garage auto & moto Guadeloupe',
+    title: 'Car Performance — Centre de maintenance et réparation automobile en Guadeloupe',
     description: 'Réparation, location et vente VO en Guadeloupe.',
   },
   robots: {

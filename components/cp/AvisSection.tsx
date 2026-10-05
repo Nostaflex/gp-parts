@@ -70,7 +70,7 @@ export async function AvisSection({ visible }: { visible: boolean }) {
                       <p className="text-cp-cream/80 text-sm leading-relaxed mb-4">{a.texte}</p>
                       {a.reponsePro && (
                         <p className="text-cp-cream/50 text-xs leading-relaxed mb-4 border-l-2 border-cp-gold/40 pl-3">
-                          Réponse du garage : {a.reponsePro}
+                          Réponse de Car Performance : {a.reponsePro}
                         </p>
                       )}
                       <p className="text-cp-cream font-semibold text-sm">{a.prenom}</p>

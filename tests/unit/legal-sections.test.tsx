@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { LegalSections } from '../../app/mentions-legales/LegalSections';
 import { DEFAULT_CONTACT_INFO } from '@/lib/contact-info';
+import { DEFAULT_LEGAL_INFO } from '@/lib/legal-info';
 
 describe('LegalSections — page légale cp-v6', () => {
   it('ne publie JAMAIS de zéros : les champs manquants disent « à fournir »', () => {
@@ -11,9 +12,31 @@ describe('LegalSections — page légale cp-v6', () => {
     expect(screen.getAllByText(/à fournir/).length).toBeGreaterThanOrEqual(2);
   });
 
-  it('le SIRET réel de Stéphane est publié', () => {
+  it("l'identité publiée suit le Kbis du 11/09/2026 (siège transféré à Petit-Bourg)", () => {
     const { container } = render(<LegalSections contactInfo={DEFAULT_CONTACT_INFO} />);
-    expect(container.textContent).toContain('102 854 023 00011');
+    const texte = container.textContent;
+    expect(texte).toContain('CAR PERFORMANCE');
+    expect(texte).toContain('SAS à associé unique au capital de 1 500 €');
+    // SIRET du siège actuel — le 00011 (Paris) est fermé depuis le 05/08/2026.
+    expect(texte).toContain('102 854 023 00037');
+    expect(texte).not.toContain('102 854 023 00011');
+    expect(texte).toContain('Pointe-à-Pitre 102 854 023');
+    expect(texte).toContain('615 chemin de Morne Bourg, 97170 Petit-Bourg');
+    expect(texte).toContain('Stéphane Sophie, président');
+  });
+
+  it('le médiateur est publié avec son site internet (R616-1)', () => {
+    const { container } = render(
+      <LegalSections
+        contactInfo={DEFAULT_CONTACT_INFO}
+        legalInfo={{
+          ...DEFAULT_LEGAL_INFO,
+          mediateurNom: 'CM2C',
+          mediateurUrl: 'https://www.cm2c.net',
+        }}
+      />
+    );
+    expect(container.textContent).toContain('CM2C — https://www.cm2c.net');
   });
 
   it('le registre RGPD déclare le permis de conduire (location) et la preuve de consentement', () => {

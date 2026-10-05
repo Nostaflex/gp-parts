@@ -3,7 +3,7 @@
 // les champs encore inconnus au lancement (TVA, médiateur, RC pro) restent
 // VIDES — la page légale les affiche alors en rouge « — à fournir », jamais
 // remplis de zéros. Doc Firestore : meta/legalInfo (pattern meta/contactInfo).
-// SIRET/RCS/raison sociale restent des constantes du code : ils ne changent
+// SIRET/RCS/raison sociale/siège restent des constantes du code : ils ne changent
 // pas, et une fausse manipulation BO ne doit pas pouvoir les casser.
 
 import { z } from 'zod';
