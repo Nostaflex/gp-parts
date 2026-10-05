@@ -5,7 +5,7 @@ import { requireAdmin } from '@/lib/admin/auth';
 import { writeAuditLog } from '@/lib/admin/audit';
 import { getAdminFirestore } from '@/lib/firebase-admin';
 import type { FeatureFlags } from '@/lib/feature-flags';
-import { ContactInfoSchema } from '@/lib/contact-info';
+import { ContactInfoSchema, normalizePhone, normalizeWhatsapp } from '@/lib/contact-info';
 import { LegalInfoSchema } from '@/lib/legal-info';
 import { z } from 'zod';
 import { normalizeLocationSettings } from '@/lib/location-settings';
@@ -95,10 +95,11 @@ export async function updateContactInfo(
 
   const str = (k: string) => String(formData.get(k) ?? '').trim();
   const candidate = {
-    phone: str('phone'),
+    // Saisie libre (0690 68 43 07, +590…) → format international enregistré.
+    phone: normalizePhone(str('phone')),
     phoneDisplay: str('phoneDisplay'),
     email: str('email'),
-    whatsappNumber: str('whatsappNumber'),
+    whatsappNumber: normalizeWhatsapp(str('whatsappNumber')),
     address: {
       street: str('street'),
       postalCode: str('postalCode'),

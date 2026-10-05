@@ -50,7 +50,7 @@ describe('VenteVehiculeClient — états des cartes', () => {
   ];
 
   it('carte vendue : non cliquable, ruban + « A trouvé preneur » + lien contact', () => {
-    render(<VenteVehiculeClient vehicules={vehicules} />);
+    render(<VenteVehiculeClient vehicules={vehicules} whatsappHref="https://wa.me/590690684307" />);
     const article = screen.getByRole('article', { name: /vendu/i });
     expect(article.textContent).toContain('Vendu'); // ruban
     expect(article.textContent).toContain('A trouvé preneur');
@@ -60,7 +60,7 @@ describe('VenteVehiculeClient — états des cartes', () => {
   });
 
   it('carte réservée : reste cliquable vers la fiche, ruban « Réservé »', () => {
-    render(<VenteVehiculeClient vehicules={vehicules} />);
+    render(<VenteVehiculeClient vehicules={vehicules} whatsappHref="https://wa.me/590690684307" />);
     const link = document.querySelector('a[href="/vente-vehicule/v-res"]');
     expect(link).toBeTruthy();
     expect(link!.textContent).toContain('Réservé');
@@ -68,7 +68,7 @@ describe('VenteVehiculeClient — états des cartes', () => {
   });
 
   it('tri : disponible avant réservé avant vendu', () => {
-    render(<VenteVehiculeClient vehicules={vehicules} />);
+    render(<VenteVehiculeClient vehicules={vehicules} whatsappHref="https://wa.me/590690684307" />);
     const cards = Array.from(document.querySelectorAll('a[href^="/vente-vehicule/"], article')).map(
       (el) => el.textContent ?? ''
     );

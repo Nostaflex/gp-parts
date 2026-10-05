@@ -36,13 +36,13 @@ const vendu: Vehicule = {
 
 describe('VenteVehiculeClient — véhicules vendus visibles mais non-interactifs', () => {
   it('le véhicule disponible est un lien vers sa fiche', () => {
-    render(<VenteVehiculeClient vehicules={[dispo]} />);
+    render(<VenteVehiculeClient vehicules={[dispo]} whatsappHref="https://wa.me/590690684307" />);
     const hrefs = screen.getAllByRole('link').map((a) => a.getAttribute('href'));
     expect(hrefs).toContain('/vente-vehicule/v-dispo');
   });
 
   it('le véhicule vendu n’est PAS un lien et affiche le ruban « Vendu »', () => {
-    render(<VenteVehiculeClient vehicules={[vendu]} />);
+    render(<VenteVehiculeClient vehicules={[vendu]} whatsappHref="https://wa.me/590690684307" />);
     const hrefs = screen.getAllByRole('link').map((a) => a.getAttribute('href'));
     expect(hrefs).not.toContain('/vente-vehicule/v-vendu');
     expect(screen.getByText('Vendu')).toBeTruthy();
@@ -50,12 +50,22 @@ describe('VenteVehiculeClient — véhicules vendus visibles mais non-interactif
 
   it('les vendus sont triés après les disponibles (ordre DOM)', () => {
     // Entrée volontairement vendu-d’abord : sans tri il serait en tête.
-    render(<VenteVehiculeClient vehicules={[vendu, dispo]} />);
+    render(
+      <VenteVehiculeClient vehicules={[vendu, dispo]} whatsappHref="https://wa.me/590690684307" />
+    );
     const dispoEl = screen.getByText('DispoModele');
     const venduEl = screen.getByText('VenduModele');
     // DOCUMENT_POSITION_FOLLOWING : venduEl vient APRÈS dispoEl.
     expect(
       dispoEl.compareDocumentPosition(venduEl) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
+  });
+
+  it('« Écrire sur WhatsApp » ouvre le numéro de la fiche de contact (BO), pas une constante', () => {
+    render(<VenteVehiculeClient vehicules={[dispo]} whatsappHref="https://wa.me/590690684307" />);
+    expect(screen.getByRole('link', { name: 'Écrire sur WhatsApp' })).toHaveAttribute(
+      'href',
+      'https://wa.me/590690684307'
+    );
   });
 });
