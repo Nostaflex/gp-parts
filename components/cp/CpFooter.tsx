@@ -20,8 +20,7 @@ export async function CpFooter() {
           <div>
             <CpLogo tone="dark" size="footer" className="mb-4" />
             <p className="text-cp-cream/40 text-sm leading-relaxed">
-              Votre garage de confiance en Guadeloupe — passion, conseil technique, pièces de
-              qualité.
+              Votre centre automobile en Guadeloupe — passion, conseil technique, pièces de qualité.
             </p>
           </div>
           <div>

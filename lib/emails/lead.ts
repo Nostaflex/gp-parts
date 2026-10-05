@@ -80,7 +80,7 @@ export function buildLeadAckEmail(l: Lead): { subject: string; html: string } {
   <h2 style="margin:0 0 12px">Merci ${esc(l.prenom)} !</h2>
   <p style="margin:0 0 12px;font-size:14px;line-height:1.6">${intro}</p>
   <p style="margin:0 0 16px;font-size:14px">Référence : <strong>${esc(l.ref)}</strong></p>
-  <p style="margin:0;color:#777;font-size:13px">Car Performance — Garage auto &amp; moto, Guadeloupe</p>
+  <p style="margin:0;color:#777;font-size:13px">Car Performance — Centre de maintenance et réparation automobile, Guadeloupe</p>
 </div>`.trim();
   return { subject, html };
 }

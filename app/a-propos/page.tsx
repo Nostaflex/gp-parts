@@ -7,7 +7,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'À propos',
   description:
-    'Car Performance Guadeloupe. Garage à Baie-Mahault (Jarry), équipe locale passionnée, conseil technique sur pièces auto et moto.',
+    'Car Performance Guadeloupe. Centre de maintenance et réparation automobile à Baie-Mahault (Jarry), équipe locale passionnée, conseil technique sur pièces auto et moto.',
   alternates: { canonical: '/a-propos' },
 };
 
@@ -219,9 +219,9 @@ export default function AProposPage() {
               PASSION
             </h2>
             <p className="text-cp-ink/55 text-base leading-relaxed mb-6">
-              Lancé par Stéphane à Pointe-à-Pitre, Car Performance est un garage indépendant qui
-              prend soin des voitures et des motos des Guadeloupéens. Ce qui nous anime : la passion
-              du travail bien fait et l&apos;envie de rendre service.
+              Lancé par Stéphane à Pointe-à-Pitre, Car Performance est un centre de maintenance et
+              de réparation indépendant qui prend soin des voitures et des motos des Guadeloupéens.
+              Ce qui nous anime : la passion du travail bien fait et l&apos;envie de rendre service.
             </p>
             <p className="text-cp-ink/55 text-base leading-relaxed mb-8">
               Notre équipe prend en charge toutes les marques — de la vidange express à la
@@ -267,7 +267,7 @@ export default function AProposPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <p className="cp-mono text-cp-mango text-xs tracking-widest uppercase mb-4">
-              Les gens derrière le garage
+              Les gens derrière Car Performance
             </p>
             <h2
               className="cp-title font-black text-cp-cream leading-none"

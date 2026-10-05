@@ -14,9 +14,9 @@ import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
 import { getCachedContactInfo } from '@/lib/data/contact-info-cache';
 
 export const metadata: Metadata = {
-  title: 'Garage auto & moto en Guadeloupe',
+  title: 'Centre de maintenance et réparation automobile en Guadeloupe',
   description:
-    'Car Performance — Garage auto & moto en Guadeloupe. Réparation, location et vente de véhicules.',
+    'Car Performance — Centre de maintenance et réparation automobile en Guadeloupe. Réparation, location et vente de véhicules.',
 };
 
 const UNIVERS = [
@@ -170,7 +170,7 @@ export default async function HomePage() {
         <div className="relative max-w-7xl mx-auto w-full">
           <CpReveal>
             <p className="cp-mono text-cp-mango text-sm tracking-widest uppercase mb-6">
-              Garage · Guadeloupe 971
+              Centre automobile · Guadeloupe 971
             </p>
           </CpReveal>
           <CpReveal delay={1}>
@@ -399,7 +399,7 @@ export default async function HomePage() {
             <div>
               <CpLogo tone="dark" size="footer" className="mb-4" />
               <p className="text-cp-cream/40 text-sm leading-relaxed">
-                Votre garage de confiance en Guadeloupe — passion, conseil technique, pièces de
+                Votre centre automobile en Guadeloupe — passion, conseil technique, pièces de
                 qualité.
               </p>
             </div>
