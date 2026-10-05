@@ -22,6 +22,11 @@ type FormAction = (prevState: FormActionState, formData: FormData) => Promise<Fo
 
 const FieldErrorsContext = createContext<Record<string, string[] | undefined>>({});
 
+/** Erreurs de champ rendues par le serveur (vide tant que rien n'a été refusé). */
+export function useFieldErrors(): Record<string, string[] | undefined> {
+  return useContext(FieldErrorsContext);
+}
+
 /** Affiche l'erreur Zod du champ `name` si présente (placée sous l'input). */
 export function FieldError({ name }: { name: string }) {
   const errors = useContext(FieldErrorsContext);
