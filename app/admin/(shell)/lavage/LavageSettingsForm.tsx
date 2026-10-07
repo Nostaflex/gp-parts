@@ -3,7 +3,7 @@
 import { useActionState, useState } from 'react';
 import { updateLavageSettings } from './actions';
 import { htFromTTCEnCents, serializeFormulesForSave } from '@/lib/lavage-settings';
-import type { LavageFormule, LavageSettings } from '@/lib/lavage-settings';
+import type { LavageFormule, LavageNarration, LavageSettings } from '@/lib/lavage-settings';
 import type { FormActionState } from '@/components/admin/FormShell';
 import { formatPrice } from '@/lib/utils';
 
@@ -14,8 +14,29 @@ const LABEL = 'text-body-sm font-medium text-[var(--text)] mb-1 block';
 /** Ligne éditable — l'état vit côté client, sérialisé en JSON au submit. */
 type Row = LavageFormule & { key: number };
 
+// Les 8 textes de la narration de Splash, dans l'ordre du parcours public.
+const NARRATION_FIELDS: { k: keyof LavageNarration; label: string; aide?: string }[] = [
+  { k: 'etape1', label: 'Étape 1 · La formule' },
+  { k: 'etape2', label: 'Étape 2 · Le créneau (texte général)' },
+  {
+    k: 'etape2Rarete',
+    label: 'Étape 2 · Quand il reste ≤ 2 créneaux',
+    aide: '{restants} = nombre de créneaux libres · {jour} = le jour choisi',
+  },
+  {
+    k: 'etape2Ferie',
+    label: 'Étape 2 · Jour férié',
+    aide: '{jour} = le jour · {ferie} = le nom du férié',
+  },
+  { k: 'etape3', label: 'Étape 3 · Les coordonnées' },
+  { k: 'noteDefaut', label: 'Note du récap (par défaut)' },
+  { k: 'noteSurDevis', label: 'Note du récap · formule sur devis' },
+  { k: 'noteSuv', label: 'Note du récap · gabarit SUV' },
+];
+
 export function LavageSettingsForm({ initial }: { initial: LavageSettings }) {
   const [rows, setRows] = useState<Row[]>(initial.formules.map((f, i) => ({ ...f, key: i })));
+  const [narration, setNarration] = useState<LavageNarration>(initial.narration);
   const [state, formAction, pending] = useActionState<FormActionState, FormData>(
     updateLavageSettings,
     null
@@ -76,6 +97,7 @@ export function LavageSettingsForm({ initial }: { initial: LavageSettings }) {
   return (
     <form action={formAction} className="flex flex-col gap-4 max-w-2xl">
       <input type="hidden" name="formulesJson" value={payload} />
+      <input type="hidden" name="narrationJson" value={JSON.stringify(narration)} />
 
       {rows.map((r, idx) => (
         <fieldset
@@ -237,13 +259,46 @@ export function LavageSettingsForm({ initial }: { initial: LavageSettings }) {
         + Ajouter une formule
       </button>
 
+      <fieldset
+        className="flex flex-col gap-3 rounded-[14px] p-5"
+        style={{ background: 'var(--surface)', border: '1px solid rgba(198, 198, 200, 0.5)' }}
+      >
+        <legend className="text-body-sm font-semibold" style={{ color: 'var(--text)' }}>
+          Narration de Splash (parcours de réservation)
+        </legend>
+        <p className="text-caption" style={{ color: 'var(--text-secondary)' }}>
+          Ce que Splash dit à chaque étape sur la page /lavage. Vide un champ pour revenir au texte
+          d&apos;origine.
+        </p>
+        {NARRATION_FIELDS.map(({ k, label, aide }) => (
+          <div key={k}>
+            <label className={LABEL} htmlFor={`narr-${k}`}>
+              {label}
+            </label>
+            <textarea
+              id={`narr-${k}`}
+              value={narration[k]}
+              onChange={(e) => setNarration((n) => ({ ...n, [k]: e.target.value }))}
+              rows={2}
+              maxLength={300}
+              className={`${FIELD} h-auto py-2`}
+            />
+            {aide && (
+              <p className="text-caption mt-1" style={{ color: 'var(--text-secondary)' }}>
+                {aide}
+              </p>
+            )}
+          </div>
+        ))}
+      </fieldset>
+
       <button
         type="submit"
         disabled={pending}
         className="self-start rounded-[10px] px-4 py-2 h-11 text-body-sm font-medium text-white disabled:opacity-60"
         style={{ background: 'var(--blue)' }}
       >
-        {pending ? 'Enregistrement…' : 'Enregistrer les formules'}
+        {pending ? 'Enregistrement…' : 'Enregistrer formules & narration'}
       </button>
 
       {state?.ok && (

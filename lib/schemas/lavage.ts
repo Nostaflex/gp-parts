@@ -51,6 +51,27 @@ export const LavageSettingsSchema = z.object({
 
 export type LavageSettingsInput = z.infer<typeof LavageSettingsSchema>;
 
+// Narration de Splash (Splash Lane) — 8 textes libres. Vide = texte par
+// défaut côté public (normalizeLavageSettings), donc aucun champ requis.
+const texteNarration = (nom: string) =>
+  z
+    .string()
+    .trim()
+    .max(300, `« ${nom} » : texte trop long (300 caractères max)`)
+    // Champ absent (ancien formulaire en cache) = vide — jamais un refus.
+    .default('');
+
+export const LavageNarrationSchema = z.object({
+  etape1: texteNarration('Étape 1'),
+  etape2: texteNarration('Étape 2'),
+  etape2Rarete: texteNarration('Étape 2 — rareté'),
+  etape2Ferie: texteNarration('Étape 2 — férié'),
+  etape3: texteNarration('Étape 3'),
+  noteDefaut: texteNarration('Note par défaut'),
+  noteSurDevis: texteNarration('Note sur devis'),
+  noteSuv: texteNarration('Note SUV'),
+});
+
 // Semaine type (doc meta/lavageSemaineType) — validation stricte de la saisie
 // BO ; la lecture publique passe par normalizeSemaineType (tolérante).
 export const SemaineTypeSchema = z.object({
