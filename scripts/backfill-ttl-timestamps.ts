@@ -3,7 +3,7 @@
  * en NOMBRES Unix vers des `Timestamp` Firestore natifs — sans ça, les
  * policies TTL n'expirent jamais rien et la purge RGPD promise est morte.
  *
- * Collections couvertes : demandes, reservations, audit_log, lavage-blocages.
+ * Collections couvertes : demandes, reservations, audit_log, lavageDispos.
  * Idempotent : un doc déjà en Timestamp est ignoré.
  *
  * Usage (staging d'abord, prod sur ordre) :
@@ -14,7 +14,7 @@
  * APRÈS le backfill, activer les policies TTL (une fois par collection) :
  *   gcloud firestore fields ttls update expiresAt \
  *     --collection-group=demandes --enable-ttl --project=<PROJECT_ID>
- *   (répéter pour reservations, audit_log, lavage-blocages)
+ *   (répéter pour reservations, audit_log, lavageDispos)
  */
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
@@ -29,7 +29,7 @@ if (!saPath || !projectId) {
 }
 
 const dryRun = process.argv.includes('--dry-run');
-const COLLECTIONS = ['demandes', 'reservations', 'audit_log', 'lavage-blocages'];
+const COLLECTIONS = ['demandes', 'reservations', 'audit_log', 'lavageDispos'];
 
 const sa = JSON.parse(readFileSync(resolve(saPath), 'utf-8'));
 const app = initializeApp({ credential: cert(sa), projectId });
