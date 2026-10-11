@@ -67,6 +67,14 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  // Vérification Search Console / Bing Webmaster (SEO lot 0) : les jetons vivent
+  // dans les variables d'environnement Vercel, jamais dans le code.
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+    other: process.env.BING_SITE_VERIFICATION
+      ? { 'msvalidate.01': process.env.BING_SITE_VERIFICATION }
+      : undefined,
+  },
 };
 
 export const viewport: Viewport = {

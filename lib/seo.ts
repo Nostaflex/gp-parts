@@ -61,9 +61,56 @@ function contactSameAs(ci: ContactInfo): string[] {
   return [ci.social.facebook, ci.social.instagram, ci.social.google].filter((u) => u.length > 0);
 }
 
+/**
+ * Coordonnées encore égales aux valeurs par défaut du code (téléphone sentinelle,
+ * e-mail sur un domaine inexistant) : rien de tout cela ne doit être publié aux
+ * moteurs (SEO lot 1, 2026-10-11 ; P0.2 de l'audit du 19/08). Le BO Paramètres
+ * est la seule source de vérité ; tant qu'il n'est pas renseigné, l'entité reste
+ * muette sur ses coordonnées.
+ */
+export function isPlaceholderContactInfo(ci: ContactInfo): boolean {
+  return ci.phone === BUSINESS.phone || ci.email === BUSINESS.email;
+}
+
+let placeholderWarned = false;
+
 /** JSON-LD AutoRepair (LocalBusiness) — le levier #1 du SEO local. */
 export function localBusinessJsonLd(ci: ContactInfo) {
   const social = contactSameAs(ci);
+  const coords: {
+    telephone?: string;
+    email?: string;
+    address?: {
+      '@type': 'PostalAddress';
+      streetAddress: string;
+      postalCode: string;
+      addressLocality: string;
+      addressRegion: string;
+      addressCountry: string;
+    };
+    geo?: { '@type': 'GeoCoordinates'; latitude: number; longitude: number };
+  } = {};
+  if (isPlaceholderContactInfo(ci)) {
+    // Fail-open signalé : l'entité est publiée sans coordonnées, et on le dit.
+    if (!placeholderWarned) {
+      placeholderWarned = true;
+      console.warn(
+        '[seo] coordonnées non renseignées au BO (Paramètres > Coordonnées) : entité locale publiée sans téléphone, e-mail, adresse ni GPS.'
+      );
+    }
+  } else {
+    coords.telephone = ci.phone;
+    coords.email = ci.email;
+    coords.address = {
+      '@type': 'PostalAddress',
+      streetAddress: ci.address.street,
+      postalCode: ci.address.postalCode,
+      addressLocality: ci.address.city,
+      addressRegion: ci.address.region,
+      addressCountry: BUSINESS.address.country,
+    };
+    coords.geo = { '@type': 'GeoCoordinates', latitude: ci.geo.lat, longitude: ci.geo.lng };
+  }
   return {
     '@context': 'https://schema.org',
     '@type': 'AutoRepair',
@@ -72,18 +119,8 @@ export function localBusinessJsonLd(ci: ContactInfo) {
     url: SITE_URL,
     image: absoluteUrl('/opengraph-image.png'),
     logo: absoluteUrl('/images/logo-carperformance.svg'),
-    telephone: ci.phone,
-    email: ci.email,
+    ...coords,
     priceRange: BUSINESS.priceRange,
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: ci.address.street,
-      postalCode: ci.address.postalCode,
-      addressLocality: ci.address.city,
-      addressRegion: ci.address.region,
-      addressCountry: BUSINESS.address.country,
-    },
-    geo: { '@type': 'GeoCoordinates', latitude: ci.geo.lat, longitude: ci.geo.lng },
     areaServed: { '@type': 'AdministrativeArea', name: 'Guadeloupe' },
     openingHoursSpecification: [
       {
@@ -126,6 +163,53 @@ export function websiteJsonLd() {
     url: SITE_URL,
     name: BUSINESS.name,
     inLanguage: 'fr-FR',
+  };
+}
+
+export type ServiceOffer = { name: string; priceFromCents: number | null };
+
+/**
+ * JSON-LD Service relié à l'entité locale (SEO lot 1, 2026-10-11) : une page de
+ * prestation (lavage, puis réparation) déclare ce qu'elle vend, où, et à partir
+ * de combien. Prix TTC en euros, convention « à partir de » = minimum des tarifs.
+ */
+export function serviceJsonLd(input: {
+  name: string;
+  description: string;
+  path: string;
+  offers?: ServiceOffer[];
+}) {
+  const offers = input.offers ?? [];
+  const catalog: {
+    hasOfferCatalog?: {
+      '@type': 'OfferCatalog';
+      name: string;
+      itemListElement: Record<string, unknown>[];
+    };
+  } = {};
+  if (offers.length) {
+    catalog.hasOfferCatalog = {
+      '@type': 'OfferCatalog',
+      name: input.name,
+      itemListElement: offers.map((o) => ({
+        '@type': 'Offer',
+        itemOffered: { '@type': 'Service', name: o.name },
+        ...(o.priceFromCents != null
+          ? { price: (o.priceFromCents / 100).toFixed(2), priceCurrency: 'EUR' }
+          : {}),
+      })),
+    };
+  }
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: input.name,
+    serviceType: input.name,
+    description: input.description,
+    url: absoluteUrl(input.path),
+    provider: { '@id': `${SITE_URL}/#business` },
+    areaServed: { '@type': 'AdministrativeArea', name: 'Guadeloupe' },
+    ...catalog,
   };
 }
 

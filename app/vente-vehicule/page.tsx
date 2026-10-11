@@ -202,7 +202,10 @@ export default async function VenteVehiculePage() {
                 src="/images/hero-vente-vehicule.webp"
                 alt="Véhicule d'occasion contrôlé — Car Performance Guadeloupe"
                 fill
-                sizes="100vw"
+                // Image LCP sur mobile (Lighthouse 11/10/2026 : 5,1 s en lazy) :
+                // chargement prioritaire, jamais différé (SEO lot 1).
+                priority
+                sizes="(max-width: 768px) 100vw, 0px"
                 className="object-cover"
                 style={{
                   transform: 'scale(2.3)',

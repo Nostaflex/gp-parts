@@ -160,14 +160,14 @@ export function VenteVehiculeClient({
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {vehiculesFiltres.map((v) =>
+              {vehiculesFiltres.map((v, i) =>
                 v.disponibilite === 'vendu' ? (
                   <article
                     key={v.id}
                     aria-label={`${v.marque} ${v.modele} — vendu`}
                     className="bg-white rounded-2xl border border-[#E5DDD3] overflow-hidden cursor-default"
                   >
-                    <VehiculeCardBody v={v} statut="vendu" />
+                    <VehiculeCardBody v={v} statut="vendu" priority={i < 2} />
                   </article>
                 ) : (
                   <Link
@@ -175,7 +175,7 @@ export function VenteVehiculeClient({
                     href={`/vente-vehicule/${v.id}`}
                     className="group bg-white rounded-2xl border border-[#E5DDD3] overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_60px_rgba(26,15,6,0.10)] hover:border-cp-red/40 focus:outline-none focus:ring-2 focus:ring-cp-mango/50"
                   >
-                    <VehiculeCardBody v={v} statut={v.disponibilite} />
+                    <VehiculeCardBody v={v} statut={v.disponibilite} priority={i < 2} />
                   </Link>
                 )
               )}
@@ -535,7 +535,17 @@ export function VenteVehiculeClient({
  * Statuts : ruban de coin DispoRibbon (vendu = rouge, réservé = gold) —
  * la photo reste lisible, légèrement désaturée seulement quand c'est vendu.
  */
-function VehiculeCardBody({ v, statut }: { v: Vehicule; statut: Disponibilite }) {
+function VehiculeCardBody({
+  v,
+  statut,
+  priority = false,
+}: {
+  v: Vehicule;
+  statut: Disponibilite;
+  /** Les deux premières cartes portent l'image LCP : chargement prioritaire,
+   *  jamais différé (Lighthouse 11/10/2026 : LCP 5,1 s sur une image lazy). */
+  priority?: boolean;
+}) {
   const vendu = statut === 'vendu';
   const reserve = statut === 'reserve';
   return (
@@ -546,6 +556,7 @@ function VehiculeCardBody({ v, statut }: { v: Vehicule; statut: Disponibilite })
           src={v.image}
           alt={`${v.marque} ${v.modele}`}
           fill
+          priority={priority}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className={`object-cover transition-transform duration-500 ${
             vendu ? 'grayscale-[0.65] opacity-85' : 'group-hover:scale-105'
