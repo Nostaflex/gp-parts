@@ -8,7 +8,7 @@ import { getCachedMotos } from '@/lib/data/motos-cache';
 import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
 import { getCachedContactInfo } from '@/lib/data/contact-info-cache';
 import type { ContactInfo } from '@/lib/contact-info';
-import { FinancementMotoSimulator } from './FinancementMotoSimulator';
+import { CpFinancementInfo } from '@/components/cp/CpFinancementInfo';
 import { MotoGallery } from './MotoGallery';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { BUSINESS, absoluteUrl, breadcrumbJsonLd } from '@/lib/seo';
@@ -181,12 +181,11 @@ export default async function MotoDetailPage({ params }: Props) {
 
                 <div className="mb-6 pb-6 border-b border-[#F0E8DC]">
                   <p className="cp-title font-black text-cp-ink text-4xl leading-none">
-                    {m.prix.toLocaleString('fr-FR')} €
+                    {m.prix.toLocaleString('fr-FR')} €{' '}
+                    <span className="text-lg text-cp-ink/60">TTC</span>
                   </p>
-                  <p className="text-sm text-cp-ink/50 mt-1">
-                    ou <span className="font-semibold text-cp-ink/80">{m.mensualite} €/mois</span>{' '}
-                    en financement
-                  </p>
+                  {/* Aucun chiffre de crédit (F6, 12/10/2026) : prix TTC, dossier sur demande. */}
+                  <p className="text-sm text-cp-ink/50 mt-1">Financement possible, sur dossier</p>
                 </div>
 
                 <dl className="grid grid-cols-2 gap-x-4 gap-y-3 mb-6 text-xs">
@@ -236,7 +235,7 @@ export default async function MotoDetailPage({ params }: Props) {
                   </svg>
                   {m.type === 'neuf'
                     ? 'Garantie 2 ans constructeur · Neuve'
-                    : 'Garantie 6 mois · Contrôlée par nos techniciens'}
+                    : 'Garantie commerciale 6 mois, en plus de la garantie légale de conformité (2 ans) · Contrôlée par nos techniciens'}
                 </div>
 
                 <div className="flex flex-col gap-3">
@@ -361,15 +360,15 @@ export default async function MotoDetailPage({ params }: Props) {
               <span className="text-cp-mango">payez à votre rythme</span>
             </h2>
             <p className="text-sm text-cp-ink/60 max-w-md mx-auto">
-              Ajustez l&apos;apport et la durée. Calcul instantané sur cette moto précise.
+              Dites-nous votre apport et la durée souhaitée : nous revenons vers vous avec une offre
+              écrite pour cette moto précise.
             </p>
           </div>
 
-          <FinancementMotoSimulator
-            prix={m.prix}
-            marque={m.marque}
-            modele={m.modele}
-            motoId={m.id}
+          <CpFinancementInfo
+            sujet="Vente moto"
+            designation={`${m.marque} ${m.modele}`}
+            reference={m.reference}
           />
         </div>
       </section>

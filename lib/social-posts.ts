@@ -46,9 +46,9 @@ function toHashtag(text: string): string {
   return clean.length > 0 ? `#${clean}` : '';
 }
 
+// Prix TTC seul : une mensualité serait une publicité de crédit (F6, 12/10/2026).
 function prixLine(d: Vehicule | Moto): string {
-  const prix = `${d.prix.toLocaleString('fr-FR')} €`;
-  return d.mensualite > 0 ? `${prix} — ou ${d.mensualite} €/mois` : prix;
+  return `${d.prix.toLocaleString('fr-FR')} € TTC`;
 }
 
 /** Corps commun : titre emoji, specs courtes, prix. */

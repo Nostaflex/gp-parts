@@ -14,7 +14,7 @@ import { CookiePrefsCenter } from '@/components/gdpr/CookiePrefsCenter';
 import { submitDemandeDroit } from './actions';
 
 /** Date de mise à jour VERSIONNÉE — à incrémenter à chaque évolution du texte. */
-export const LEGAL_UPDATED_AT = '4 octobre 2026';
+export const LEGAL_UPDATED_AT = '12 octobre 2026';
 
 const SECTIONS = [
   { id: 'editeur', num: '01', label: 'Qui édite ce site' },
@@ -191,7 +191,11 @@ export function LegalSections({
               <IdRow label="Téléphone" value={contactInfo.phoneDisplay} />
               <IdRow label="Email" value={email} />
               <IdRow label="Directeur de la publication" value="Stéphane Sophie, président" />
-              <IdRow label="Hébergeur" value="Vercel Inc. — Covina, CA, États-Unis" />
+              {/* LCEN art. 6 : nom et adresse ; Vercel ne publie pas de téléphone (privacy-policy, 12/10/2026). */}
+              <IdRow
+                label="Hébergeur"
+                value="Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723, États-Unis — privacy@vercel.com"
+              />
               {/* R616-1 conso : le site du médiateur doit être mentionné. */}
               <IdRow
                 label="Médiateur de la consommation"
@@ -429,10 +433,12 @@ export function LegalSections({
               </table>
             </div>
             <p className="mt-3 text-[0.8rem] leading-relaxed text-cp-ink/55">
-              Sous-traitants : Vercel (hébergement, États-Unis — clauses contractuelles types),
-              Firebase / Google Cloud (base de données, UE), Stripe (paiement), Resend (emails),
-              WhatsApp Business (notifications). Aucun transfert à des fins publicitaires ; vos
-              données ne sont jamais vendues ni louées.
+              Sous-traitants : Vercel (hébergement, États-Unis — certifié Data Privacy Framework,
+              clauses contractuelles types), Firebase / Google Cloud (base de données hébergée aux
+              États-Unis — Google LLC certifié Data Privacy Framework, clauses contractuelles
+              types), Stripe (paiement), Resend (e-mails, États-Unis — certifié Data Privacy
+              Framework, clauses contractuelles types), WhatsApp Business (notifications). Aucun
+              transfert à des fins publicitaires ; vos données ne sont jamais vendues ni louées.
             </p>
           </Bloc>
         </section>

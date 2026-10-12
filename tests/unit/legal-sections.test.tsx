@@ -52,6 +52,18 @@ describe('LegalSections — page légale cp-v6', () => {
     }
   });
 
+  it('transferts hors UE exacts (F4, F5 du 12/10/2026) : base Firestore aux États-Unis, hébergeur avec adresse', () => {
+    const { container } = render(<LegalSections contactInfo={DEFAULT_CONTACT_INFO} />);
+    const t = container.textContent ?? '';
+    // La base (default) est en nam5 : jamais annoncer « UE ».
+    expect(t).not.toContain('base de données, UE');
+    expect(t).toContain('Data Privacy Framework');
+    // LCEN art. 6 : nom, adresse de l'hébergeur (Vercel ne publie pas de téléphone).
+    expect(t).toContain('440 N Barranca Avenue #4133, Covina, CA 91723');
+    // Resend traite aux États-Unis (DPA : DPF + clauses contractuelles types).
+    expect(t).toMatch(/Resend \(e-?mails, États-Unis/);
+  });
+
   it('garantie légale 2 ans (L217-3) DISTINCTE de la garantie commerciale 12 mois', () => {
     const { container } = render(<LegalSections contactInfo={DEFAULT_CONTACT_INFO} />);
     expect(container.textContent).toContain('L217-3');

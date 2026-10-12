@@ -31,6 +31,7 @@ function parseForm(formData: FormData) {
     ['critAir', String(formData.get('car_critair') ?? '').trim()],
     ['premiereCirculation', String(formData.get('car_premiere_circulation') ?? '').trim()],
     ['garantie', String(formData.get('car_garantie') ?? '').trim()],
+    ['controleTechnique', String(formData.get('car_controle_technique') ?? '').trim()],
   ];
   const carac: Record<string, string | number> = Object.fromEntries(
     caracEntries.filter(([, v]) => v !== '')
