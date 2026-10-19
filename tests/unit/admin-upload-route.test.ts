@@ -150,23 +150,34 @@ describe('POST /api/admin/upload — validation (authenticated)', () => {
 describe('POST /api/admin/upload — success (authenticated)', () => {
   beforeEach(() => requireAdminMock.mockResolvedValue({ uid: 'u1', email: 'admin@test.com' }));
 
-  it('200 + writes to deterministic path + returns a firebasestorage download URL', async () => {
+  it('200 + writes to a per-upload path + returns a firebasestorage download URL', async () => {
     const { POST } = await import('@/app/api/admin/upload/route');
     const res = (await POST(
       reqWith({ file: webp(), folder: 'vehicules', entityId: 'vehicule-abc', index: '2' })
     )) as unknown as Json;
 
     expect(res.status).toBe(200);
-    // path déterministe vehicules/{id}/photo-{i}.webp
-    expect(fileMock).toHaveBeenCalledWith('vehicules/vehicule-abc/photo-2.webp');
+    // vehicules/{id}/photo-{i}-{suffixe aléatoire}.webp
+    const [path] = fileMock.mock.calls[0] as unknown as [string];
+    expect(path).toMatch(/^vehicules\/vehicule-abc\/photo-2-[0-9a-f]{8}\.webp$/);
     expect(saveMock).toHaveBeenCalledTimes(1);
 
     const url = res._body.url as string;
     expect(url).toMatch(/^https:\/\/firebasestorage\.googleapis\.com\/v0\/b\//);
     // chemin URL-encodé + token de download présent (URL style getDownloadURL)
-    expect(url).toContain(encodeURIComponent('vehicules/vehicule-abc/photo-2.webp'));
+    expect(url).toContain(encodeURIComponent(path));
     expect(url).toMatch(/[?&]alt=media/);
     expect(url).toMatch(/[?&]token=/);
+  });
+
+  it('deux envois au même numéro → deux fichiers distincts (aucune photo écrasée)', async () => {
+    const { POST } = await import('@/app/api/admin/upload/route');
+    const fields = { folder: 'vehicules', entityId: 'vehicule-abc', index: '1' };
+    await POST(reqWith({ file: webp(), ...fields }));
+    await POST(reqWith({ file: webp(), ...fields }));
+
+    const [first, second] = fileMock.mock.calls.map((c) => (c as unknown as [string])[0]);
+    expect(first).not.toBe(second);
   });
 
   it('save() reçoit le contentType + un download token en metadata', async () => {

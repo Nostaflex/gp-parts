@@ -28,7 +28,8 @@ const COMPRESSION = {
   useWebWorker: false,
 };
 
-type Slot = { url: string; uploading: boolean; progress: number; error?: string };
+/** `key` : identité stable de la case — sa position change quand on en retire une. */
+type Slot = { key: number; url: string; uploading: boolean; progress: number; error?: string };
 
 /**
  * POST le blob compressé à /api/admin/upload (Admin SDK, gardé par le cookie
@@ -70,8 +71,8 @@ function postUpload(fd: FormData, onProgress: (pct: number) => void): Promise<st
 
 /**
  * Upload photos — compression navigateur (WebP ≤2000px, q0.85) puis upload
- * serveur via /api/admin/upload (Admin SDK). Path final déterministe
- * `{folder}/{entityId}/photo-{i}.webp` (pas d'orphelins — risque §12).
+ * serveur via /api/admin/upload (Admin SDK), qui nomme chaque envoi
+ * `{folder}/{entityId}/photo-{i}-{aléa}.webp` — jamais d'écrasement.
  *
  * Émet `onChange(urls)` à chaque changement. Stocke ces URLs dans le doc
  * Firestore au save du form parent.
@@ -89,8 +90,9 @@ export function ImageUploader({
   onChange: (urls: string[]) => void;
   max?: number;
 }) {
-  const [slots, setSlots] = useState<Slot[]>(
-    value.map((url) => ({ url, uploading: false, progress: 100 }))
+  const nextKey = useRef(0);
+  const [slots, setSlots] = useState<Slot[]>(() =>
+    value.map((url) => ({ key: nextKey.current++, url, uploading: false, progress: 100 }))
   );
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -99,67 +101,62 @@ export function ImageUploader({
     onChange(next.filter((s) => !s.uploading && !s.error).map((s) => s.url));
   }
 
+  /** Met à jour la case `key` ; `emit` renvoie la liste des URLs au formulaire. */
+  function patch(key: number, change: Partial<Slot>, emit = false) {
+    setSlots((prev) => {
+      const next = prev.map((s) => (s.key === key ? { ...s, ...change } : s));
+      if (emit) onChange(next.filter((s) => !s.uploading && !s.error).map((s) => s.url));
+      return next;
+    });
+  }
+
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
     const room = max - slots.length;
-    const picked = Array.from(files).slice(0, room);
+    // Chaque fichier reçoit SA case et SON numéro dès la sélection : calculés
+    // une seule fois pour toute la sélection, ils faisaient viser la même case
+    // à toutes les photos (analyse BO du 18/10, F2).
+    const picked = Array.from(files)
+      .slice(0, room)
+      .map((file, i) => ({
+        file,
+        key: nextKey.current++,
+        index: slots.length + i + 1,
+        error: !ACCEPTED.includes(file.type)
+          ? `${file.name}: format non supporté`
+          : file.size > MAX_BYTES
+            ? `${file.name}: > 25 Mo`
+            : undefined,
+      }));
+    setSlots((prev) => [
+      ...prev,
+      ...picked.map(({ key, error }) => ({ key, url: '', uploading: !error, progress: 0, error })),
+    ]);
 
-    for (const file of picked) {
-      if (!ACCEPTED.includes(file.type)) {
-        commit([
-          ...slots,
-          { url: '', uploading: false, progress: 0, error: `${file.name}: format non supporté` },
-        ]);
-        continue;
-      }
-      if (file.size > MAX_BYTES) {
-        commit([
-          ...slots,
-          { url: '', uploading: false, progress: 0, error: `${file.name}: > 25 Mo` },
-        ]);
-        continue;
-      }
-
-      const slotIndex = slots.length;
-      setSlots((prev) => [...prev, { url: '', uploading: true, progress: 0 }]);
-
+    for (const { file, key, index, error } of picked) {
+      if (error) continue;
       try {
         const compressed = await imageCompression(file, COMPRESSION);
         const fd = new FormData();
-        fd.append('file', compressed, `photo-${slotIndex + 1}.webp`);
+        fd.append('file', compressed, `photo-${index}.webp`);
         fd.append('folder', folder);
         fd.append('entityId', entityId);
-        fd.append('index', String(slotIndex + 1));
+        fd.append('index', String(index));
 
-        const url = await postUpload(fd, (pct) =>
-          setSlots((prev) => prev.map((s, i) => (i === slotIndex ? { ...s, progress: pct } : s)))
-        );
-
-        setSlots((prev) => {
-          const next = prev.map((s, i) =>
-            i === slotIndex ? { url, uploading: false, progress: 100 } : s
-          );
-          onChange(next.filter((s) => !s.uploading && !s.error).map((s) => s.url));
-          return next;
-        });
+        const url = await postUpload(fd, (pct) => patch(key, { progress: pct }));
+        patch(key, { url, uploading: false, progress: 100 }, true);
       } catch (err) {
         // Surface le vrai motif (session expirée, format, réseau…) — l'ancien
         // `catch {}` masquait tout en "échec upload" → debug impossible en prod.
         const reason = err instanceof Error ? err.message : 'échec upload';
-        setSlots((prev) =>
-          prev.map((s, i) =>
-            i === slotIndex
-              ? { url: '', uploading: false, progress: 0, error: `${file.name}: ${reason}` }
-              : s
-          )
-        );
+        patch(key, { uploading: false, progress: 0, error: `${file.name}: ${reason}` });
       }
     }
     if (inputRef.current) inputRef.current.value = '';
   }
 
-  function removeAt(index: number) {
-    commit(slots.filter((_, i) => i !== index));
+  function remove(key: number) {
+    commit(slots.filter((s) => s.key !== key));
   }
 
   return (
@@ -167,7 +164,7 @@ export function ImageUploader({
       <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
         {slots.map((slot, i) => (
           <div
-            key={i}
+            key={slot.key}
             className="relative aspect-square rounded-[10px] overflow-hidden flex items-center justify-center"
             style={{ background: IOS.bg, border: `1px solid ${IOS.borderFaint}` }}
           >
@@ -187,16 +184,20 @@ export function ImageUploader({
                 {/* next/image inutilisable : URL Storage dynamique runtime */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={slot.url} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
-                <button
-                  type="button"
-                  onClick={() => removeAt(i)}
-                  aria-label={`Supprimer la photo ${i + 1}`}
-                  className="absolute top-1 right-1 w-7 h-7 flex items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                  style={{ background: 'rgba(0, 0, 0, 0.55)', color: '#fff' }}
-                >
-                  <X size={14} strokeWidth={2.5} />
-                </button>
               </>
+            )}
+            {!slot.uploading && (
+              <button
+                type="button"
+                onClick={() => remove(slot.key)}
+                aria-label={
+                  slot.error ? `Retirer la photo ${i + 1} en erreur` : `Supprimer la photo ${i + 1}`
+                }
+                className="absolute top-1 right-1 w-7 h-7 flex items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                style={{ background: 'rgba(0, 0, 0, 0.55)', color: '#fff' }}
+              >
+                <X size={14} strokeWidth={2.5} />
+              </button>
             )}
           </div>
         ))}

@@ -96,8 +96,11 @@ export async function POST(request: NextRequest) {
   if (!magicBytesMatch(buffer, file.type))
     return bad('contenu ne correspond pas au format déclaré');
 
-  // 4) Écriture Admin SDK — chemin déterministe (pas d'orphelins) + token download
-  const path = `${folder}/${entityId}/photo-${index}.${ext}`;
+  // 4) Écriture Admin SDK — chemin PROPRE À CHAQUE ENVOI + token download.
+  // Un chemin déterministe photo-{i} écrasait une photo conservée dès qu'un
+  // numéro resservait (retrait puis ajout, analyse BO du 18/10 F2). Une photo
+  // retirée de la fiche reste dans le stockage (orphelin assumé).
+  const path = `${folder}/${entityId}/photo-${index}-${randomUUID().slice(0, 8)}.${ext}`;
   const token = randomUUID();
 
   const bucket = getAdminStorage().bucket();
