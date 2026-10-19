@@ -84,6 +84,19 @@ it('ProductSchema (read) accepte un doc complet avec updatedAt+deletedAt', () =>
     }).success
   ).toBe(true);
 });
+it('ProductSchema (read) accepte l’identifiant auto Firestore d’une pièce créée au BO (F1)', () => {
+  // Refusé auparavant (regex du slug) : la lecture levait une erreur et faisait
+  // tomber la liste des pièces et le tableau de bord.
+  const doc = {
+    ...validWrite,
+    slug: 'plaquettes',
+    createdAt: '2026-01-01T00:00:00.000Z',
+    updatedAt: '2026-01-02T00:00:00.000Z',
+    deletedAt: null,
+  };
+  expect(ProductSchema.safeParse({ ...doc, id: 'QMXlNT7wOjhtWcgNqxmK' }).success).toBe(true);
+  expect(ProductSchema.safeParse({ ...doc, id: '../x' }).success).toBe(false);
+});
 it('asymétrie write/read images (spec §2): write strict rejette chemin local, read tolérant accepte', () => {
   const localImages = ['/images/placeholder-disque.jpg'];
   // WRITE : input admin → host/https obligatoire

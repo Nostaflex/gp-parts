@@ -240,11 +240,14 @@ describe('ProductForm — mode édition (avec initial = PRODUCTS[0])', () => {
     expect(hidden!.value).toBe(peugeotFixture.updatedAt);
   });
 
-  it('contient un champ caché id égal au slug du produit', () => {
+  it("contient un champ caché id égal à l'identifiant du document (pas au slug)", () => {
+    // Analyse BO du 18/10, F1 : le slug envoyé comme id visait un document
+    // inexistant — aucune pièce n'a id = slug (seed prod-001…, BO identifiant auto).
     const { container } = render(<ProductForm initial={peugeotFixture} />);
     const hidden = container.querySelector<HTMLInputElement>('input[name="id"]');
     expect(hidden).not.toBeNull();
-    expect(hidden!.value).toBe(peugeotFixture.slug);
+    expect(peugeotFixture.id).not.toBe(peugeotFixture.slug);
+    expect(hidden!.value).toBe(peugeotFixture.id);
   });
 
   it('pré-remplit la Description (contient "Disque de frein")', () => {

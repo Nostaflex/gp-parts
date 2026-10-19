@@ -70,10 +70,15 @@ export const ProductWriteSchema = z.object(baseShape).strict();
 // d'INPUT (write path), pas un invariant de donnée stockée : l'imposer en lecture
 // ferait throw firebase.ts parseProduct sur tout doc à chemin local (catalogue prod cassé).
 export const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+// Identifiant de DOCUMENT, distinct du slug : identifiant auto Firestore
+// (majuscules, posé par createProduct) ou du seed (prod-001). Le valider comme
+// un slug faisait échouer la lecture et les actions BO de toute pièce créée au
+// BO (analyse BO du 18/10, F1). Ni « / » ni « . » : anti-traversée de chemin.
+export const PRODUCT_ID_RE = /^[A-Za-z0-9_-]{1,80}$/;
 export const ProductSchema = z.object({
   ...baseShape,
   images: z.array(z.string().min(1)).min(1).max(8),
-  id: z.string().min(1).max(80).regex(SLUG_RE),
+  id: z.string().min(1).max(80).regex(PRODUCT_ID_RE),
   slug: z.string().min(1).max(80).regex(SLUG_RE),
   createdAt: z.string(),
   updatedAt: z.string(),

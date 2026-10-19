@@ -36,7 +36,7 @@ export function ProductForm({ initial }: { initial?: Product }) {
   const router = useRouter();
   const isEdit = !!initial;
 
-  const [productId] = useState(() => initial?.slug ?? `product-${Date.now().toString(36)}`);
+  const [productId] = useState(() => initial?.id ?? `product-${Date.now().toString(36)}`);
   const [images, setImages] = useState<string[]>(initial?.images ?? []);
 
   const priceEuros = initial ? (initial.price / 100).toString() : '';
