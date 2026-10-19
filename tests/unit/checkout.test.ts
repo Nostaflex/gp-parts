@@ -7,6 +7,9 @@ vi.mock('@/lib/server/intake', async (importOriginal) => ({
 }));
 vi.mock('@/lib/emails/send', () => ({ sendOrderEmails: vi.fn() }));
 
+const { revalidateTagMock } = vi.hoisted(() => ({ revalidateTagMock: vi.fn() }));
+vi.mock('next/cache', () => ({ revalidateTag: revalidateTagMock }));
+
 vi.mock('@/lib/stripe', () => ({
   createOrderPaymentIntent: vi.fn(async () => ({
     clientSecret: 'pi_test_secret_xyz',
@@ -164,6 +167,12 @@ describe('validateCheckout — paiement', () => {
     expect(result.success).toBe(true);
     expect(result.orderNumber).toMatch(/^GP-/);
     expect(result.clientSecret).toBeUndefined();
+  });
+
+  it('commande créée : le stock a baissé → cache des pièces invalidé (F5)', async () => {
+    revalidateTagMock.mockClear();
+    await validateCheckout({ ...validData, paymentMethod: 'on_site' });
+    expect(revalidateTagMock).toHaveBeenCalledWith('products');
   });
 
   it('chemin carte : renvoie clientSecret et orderId', async () => {

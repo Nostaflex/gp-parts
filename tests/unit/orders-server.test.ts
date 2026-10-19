@@ -28,10 +28,11 @@ const orderData: Record<string, unknown> = {
 };
 
 const updates: Array<{ id: string; patch: Record<string, unknown> }> = [];
+const wheres: unknown[][] = [];
 
 function fakeQuery(docs: Array<{ id: string; data: () => unknown }>) {
   const q = {
-    where: () => q,
+    where: (...args: unknown[]) => (wheres.push(args), q),
     limit: () => q,
     orderBy: () => q,
     get: async () => ({ docs }),
@@ -67,6 +68,7 @@ vi.mock('@/lib/firebase-admin', () => ({ getAdminFirestore: () => fakeDb }));
 
 beforeEach(() => {
   updates.length = 0;
+  wheres.length = 0;
 });
 
 describe('orders-server (Admin SDK — contourne les rules isAdmin)', () => {
@@ -88,6 +90,15 @@ describe('orders-server (Admin SDK — contourne les rules isAdmin)', () => {
     expect(updates[0].patch.status).toBe('confirmee');
   });
 
+  it('getOrdersAdmin since : borne au format écrit (texte ISO), pas une Date (F3)', async () => {
+    // Firestore ne compare que des valeurs de même type : une borne Date ne
+    // trouve aucune commande écrite en texte ISO (reproduit sur l'émulateur
+    // le 19/10 : 0 trouvée au lieu de 1) — CA du mois et commandes du jour à 0.
+    const { getOrdersAdmin } = await import('@/lib/admin/orders-server');
+    await getOrdersAdmin({ since: new Date('2026-10-01T04:00:00.000Z') });
+    expect(wheres).toContainEqual(['createdAt', '>=', '2026-10-01T04:00:00.000Z']);
+  });
+
   it('getOrdersAdmin : renvoie la liste parsée', async () => {
     const { getOrdersAdmin } = await import('@/lib/admin/orders-server');
     const list = await getOrdersAdmin({ limit: 10 });
@@ -104,6 +115,30 @@ describe('updateOrderStatusAdmin — restock à l’annulation (S2-3)', () => {
     expect(stockPatch, 'restock du produit attendu').toBeTruthy();
     const statusPatch = updates.find((u) => u.id === 'o1');
     expect(statusPatch?.patch.status).toBe('annulee');
+  });
+
+  it('transition contrôlée DANS la transaction : statut changé entre-temps → refus, rien écrit (F6)', async () => {
+    // Analyse BO du 18/10, F6 : la route lisait le statut hors transaction ;
+    // un second onglet pouvait annuler (et réassortir) une commande expédiée.
+    const { updateOrderStatusAdmin } = await import('@/lib/admin/orders-server');
+    const prev = orderData.status;
+    orderData.status = 'expediee';
+    try {
+      const res = await updateOrderStatusAdmin('o1', 'annulee');
+      expect(res).toEqual({ ok: false, reason: 'transition', current: 'expediee' });
+      expect(updates).toHaveLength(0);
+    } finally {
+      orderData.status = prev;
+    }
+  });
+
+  it('commande absente → introuvable, rien écrit', async () => {
+    const { updateOrderStatusAdmin } = await import('@/lib/admin/orders-server');
+    expect(await updateOrderStatusAdmin('missing', 'confirmee')).toEqual({
+      ok: false,
+      reason: 'introuvable',
+    });
+    expect(updates).toHaveLength(0);
   });
 
   it('déjà annulée → PAS de second restock', async () => {

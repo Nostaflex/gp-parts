@@ -144,7 +144,7 @@ const BADGE_ROUTES: Record<string, keyof NavBadges> = {
   '/admin/avis': 'avis',
 };
 
-function NavContent({ pathname, badges }: { pathname: string; badges?: NavBadges }) {
+function NavContent({ pathname, badges }: { pathname: string; badges?: NavBadges | null }) {
   return (
     <nav className="flex flex-col gap-1 px-3 py-4" aria-label="Navigation admin">
       {SECTIONS.map((section, i) => (
@@ -177,7 +177,7 @@ function NavContent({ pathname, badges }: { pathname: string; badges?: NavBadges
  * Le collapse tablet 60px (spec §7) est reporté : nécessite un mode icônes-only
  * avec tooltips, hors scope Phase 1 (aucune route ne le requiert encore).
  */
-export function AdminSidebar({ badges }: { badges?: NavBadges }) {
+export function AdminSidebar({ badges }: { badges?: NavBadges | null }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 

@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { requireAdmin } from '@/lib/admin/auth';
 import { writeAuditLog } from '@/lib/admin/audit';
 import { getAdminFirestore } from '@/lib/firebase-admin';
-import { ProductWriteSchema, SLUG_RE } from '@/lib/schemas/product';
+import { PRODUCT_ID_RE, ProductWriteSchema } from '@/lib/schemas/product';
 import { computePatchDiff } from '@/lib/admin/diff';
 import { PARSE_FR } from '@/lib/admin/form-errors';
 import { slugify } from '@/lib/utils';
@@ -233,8 +233,8 @@ export async function updateProduct(
   }
 
   const productId = sanitize(formData.get('id'));
-  // FIX 1: validate productId against SLUG_RE before constructing any doc ref
-  if (!productId || !SLUG_RE.test(productId)) {
+  // FIX 1: validate productId (identifiant de document, pas le slug) before any doc ref
+  if (!productId || !PRODUCT_ID_RE.test(productId)) {
     return { errors: { _form: ['Identifiant produit invalide.'] } };
   }
 
@@ -344,7 +344,7 @@ export async function deleteProduct(
   }
 
   // FIX 1: validate productId before constructing any doc ref
-  if (!productId || !SLUG_RE.test(productId)) {
+  if (!productId || !PRODUCT_ID_RE.test(productId)) {
     return { errors: { _form: ['Identifiant produit invalide.'] } };
   }
 
@@ -411,7 +411,7 @@ export async function restoreProduct(
   }
 
   // FIX 1: validate productId before constructing any doc ref
-  if (!productId || !SLUG_RE.test(productId)) {
+  if (!productId || !PRODUCT_ID_RE.test(productId)) {
     return { errors: { _form: ['Identifiant produit invalide.'] } };
   }
 
@@ -476,7 +476,7 @@ export async function updateProductStock(
     throw e;
   }
 
-  if (!productId || !SLUG_RE.test(productId)) {
+  if (!productId || !PRODUCT_ID_RE.test(productId)) {
     return { errors: { _form: ['Identifiant produit invalide.'] } };
   }
   if (!Number.isInteger(delta) || delta === 0 || Math.abs(delta) > 1000) {

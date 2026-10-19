@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidateTag } from 'next/cache';
 import { generateOrderNumber } from '@/lib/utils';
 import { getAdapter } from '@/lib/data';
 import { createOrderIntake, StockInsuffisantError } from '@/lib/server/intake';
@@ -242,6 +243,10 @@ export async function validateCheckout(formData: {
     }
     return { success: true, errors: {}, orderNumber: existingNumber };
   }
+
+  // Le stock a baissé : cache public des pièces et indicateurs du tableau de
+  // bord rafraîchis (analyse BO du 18/10, F5).
+  revalidateTag('products');
 
   // ── Chemin carte ──────────────────────────────────────────────────
   // La commande est créée 'pending'. On crée le PaymentIntent (montant =

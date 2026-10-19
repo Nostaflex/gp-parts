@@ -369,6 +369,35 @@ describe('Server Actions products', () => {
     expect(runTransactionMock).not.toHaveBeenCalled();
   });
 
+  // ─── Identifiant auto Firestore (analyse BO du 18/10, F1) ───────────────────
+  // createProduct crée le document avec un identifiant auto (majuscules) : la
+  // garde SLUG_RE le refusait → modifier, supprimer, restaurer, stock −/+ échouaient.
+
+  const AUTO_ID = 'QMXlNT7wOjhtWcgNqxmK';
+
+  it('identifiant auto : updateProduct vise ce document', async () => {
+    txGetMock.mockResolvedValue(makeExistingSnap({ id: AUTO_ID }));
+    const res = await updateProduct(
+      null,
+      fd({ ...base, id: AUTO_ID, clientUpdatedAt: '2026-05-01T00:00:00.000Z' })
+    );
+    expect(res).toMatchObject({ ok: true });
+    expect(docMock).toHaveBeenCalledWith(AUTO_ID);
+  });
+
+  it('identifiant auto : deleteProduct et restoreProduct acceptés', async () => {
+    txGetMock.mockResolvedValue(makeExistingSnap({ id: AUTO_ID }));
+    expect(await deleteProduct(AUTO_ID, '2026-05-01T00:00:00.000Z')).toMatchObject({ ok: true });
+    expect(await restoreProduct(AUTO_ID, '2026-05-01T00:00:00.000Z')).toMatchObject({ ok: true });
+  });
+
+  it('identifiant auto : updateProductStock appliqué', async () => {
+    txGetMock.mockResolvedValue(makeExistingSnap({ id: AUTO_ID }));
+    const res = await updateProductStock(AUTO_ID, 1);
+    expect(res).toMatchObject({ ok: true });
+    expect(txUpdateMock.mock.calls[0][1].stock).toBe(13);
+  });
+
   // ─── FIX 3: empty slug guard ───────────────────────────────────────────────
 
   it('createProduct : nom ponctuation seule "!!!" → { errors.name }, 0 write', async () => {

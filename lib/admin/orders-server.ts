@@ -32,12 +32,16 @@ function docToOrder(id: string, data: Record<string, unknown>): Order {
 export async function getOrdersAdmin(opts?: {
   status?: OrderStatus;
   limit?: number;
-  /** Borne basse sur createdAt (Timestamp Firestore) — ex. début du mois pour le dashboard. */
+  /** Borne basse sur createdAt — ex. début du mois pour le dashboard. */
   since?: Date;
 }): Promise<Order[]> {
   let q = getAdminFirestore().collection('orders').orderBy('createdAt', 'desc');
   if (opts?.status) q = q.where('status', '==', opts.status) as typeof q;
-  if (opts?.since) q = q.where('createdAt', '>=', opts.since) as typeof q;
+  // Borne au format ÉCRIT (texte ISO, checkout Admin SDK depuis le 18/08) :
+  // Firestore ne compare que des valeurs de même type, une Date ne trouvait
+  // aucune commande (analyse BO du 18/10, F3). Les commandes antérieures au
+  // 18/08 (Timestamp) sont hors de toute borne de mois postérieure.
+  if (opts?.since) q = q.where('createdAt', '>=', opts.since.toISOString()) as typeof q;
   if (opts?.limit) q = q.limit(opts.limit) as typeof q;
   const snap = await q.get();
   return snap.docs.map((d) => docToOrder(d.id, d.data() as Record<string, unknown>));
@@ -75,17 +79,45 @@ export async function settlePaymentAdmin(
   });
 }
 
-export async function updateOrderStatusAdmin(id: string, status: OrderStatus): Promise<void> {
+/** Transitions autorisées — miroir de STATUS_TRANSITIONS côté client. */
+export const ORDER_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+  nouvelle: ['confirmee', 'annulee'],
+  confirmee: ['preparation', 'annulee'],
+  preparation: ['expediee', 'annulee'],
+  expediee: ['livree'],
+  livree: [],
+  annulee: [],
+};
+
+export type OrderTransitionResult =
+  | { ok: true }
+  | { ok: false; reason: 'introuvable' }
+  | { ok: false; reason: 'transition'; current: OrderStatus };
+
+/**
+ * Transition de statut TRANSACTIONNELLE : lecture + garde + écriture dans la
+ * même transaction, comme transitionReservationStatusAdmin. Lue hors
+ * transaction, la garde laissait deux onglets (ou un double clic) agir sur un
+ * statut déjà changé — y compris une annulation qui remet du stock
+ * (analyse BO du 18/10, F6).
+ */
+export async function updateOrderStatusAdmin(
+  id: string,
+  status: OrderStatus
+): Promise<OrderTransitionResult> {
   const db = getAdminFirestore();
   const ref = db.collection('orders').doc(id);
-  await db.runTransaction(async (tx) => {
+  return db.runTransaction(async (tx): Promise<OrderTransitionResult> => {
     const snap = await tx.get(ref);
-    if (!snap.exists) return;
+    if (!snap.exists) return { ok: false, reason: 'introuvable' };
     const order = snap.data() as Order;
+    if (!ORDER_TRANSITIONS[order.status]?.includes(status)) {
+      return { ok: false, reason: 'transition', current: order.status };
+    }
     // Annulation : le stock décrémenté au checkout REVIENT tout seul
-    // (décision Djemil 2026-08-18). Garde anti-double-restock : seulement
-    // au premier passage vers 'annulee'.
-    if (status === 'annulee' && order.status !== 'annulee') {
+    // (décision Djemil 2026-08-18). Une seule fois : aucune transition ne
+    // part de 'annulee'.
+    if (status === 'annulee') {
       for (const item of order.items ?? []) {
         tx.update(db.collection('products').doc(item.productId), {
           stock: FieldValue.increment(item.quantity),
@@ -93,5 +125,6 @@ export async function updateOrderStatusAdmin(id: string, status: OrderStatus): P
       }
     }
     tx.update(ref, { status, updatedAt: new Date().toISOString() });
+    return { ok: true };
   });
 }
