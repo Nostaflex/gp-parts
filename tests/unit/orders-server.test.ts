@@ -28,10 +28,11 @@ const orderData: Record<string, unknown> = {
 };
 
 const updates: Array<{ id: string; patch: Record<string, unknown> }> = [];
+const wheres: unknown[][] = [];
 
 function fakeQuery(docs: Array<{ id: string; data: () => unknown }>) {
   const q = {
-    where: () => q,
+    where: (...args: unknown[]) => (wheres.push(args), q),
     limit: () => q,
     orderBy: () => q,
     get: async () => ({ docs }),
@@ -67,6 +68,7 @@ vi.mock('@/lib/firebase-admin', () => ({ getAdminFirestore: () => fakeDb }));
 
 beforeEach(() => {
   updates.length = 0;
+  wheres.length = 0;
 });
 
 describe('orders-server (Admin SDK — contourne les rules isAdmin)', () => {
@@ -86,6 +88,15 @@ describe('orders-server (Admin SDK — contourne les rules isAdmin)', () => {
     const { updateOrderStatusAdmin } = await import('@/lib/admin/orders-server');
     await updateOrderStatusAdmin('o1', 'confirmee');
     expect(updates[0].patch.status).toBe('confirmee');
+  });
+
+  it('getOrdersAdmin since : borne au format écrit (texte ISO), pas une Date (F3)', async () => {
+    // Firestore ne compare que des valeurs de même type : une borne Date ne
+    // trouve aucune commande écrite en texte ISO (reproduit sur l'émulateur
+    // le 19/10 : 0 trouvée au lieu de 1) — CA du mois et commandes du jour à 0.
+    const { getOrdersAdmin } = await import('@/lib/admin/orders-server');
+    await getOrdersAdmin({ since: new Date('2026-10-01T04:00:00.000Z') });
+    expect(wheres).toContainEqual(['createdAt', '>=', '2026-10-01T04:00:00.000Z']);
   });
 
   it('getOrdersAdmin : renvoie la liste parsée', async () => {
