@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { DataTable, type Column } from '@/components/admin/DataTable';
 import { StatusBadge, type BadgeTone } from '@/components/admin/StatusBadge';
 import { DeleteRowAction, TrashTabs, trashColumns, useTrashView } from '@/components/admin/Trash';
+import { useToast } from '@/components/ui/Toast';
 import { deleteProduct, restoreProduct, updateProductStock } from '@/app/admin/products/actions';
 
 import type { Product } from '@/lib/types';
@@ -14,12 +15,17 @@ import type { Product } from '@/lib/types';
 /** Édition stock inline −/+ : delta atomique côté serveur, pas de form. */
 function StockStepper({ product }: { product: Product }) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [pending, startTransition] = useTransition();
 
   const bump = (delta: number) => {
     if (pending) return;
     startTransition(async () => {
-      await updateProductStock(product.id, delta);
+      const res = await updateProductStock(product.id, delta);
+      // Refus : jamais silencieux (analyse BO du 18/10, F7) — comme la corbeille.
+      if (res && 'errors' in res) {
+        showToast({ type: 'error', message: res.errors._form?.[0] ?? 'Stock non modifié.' });
+      }
       router.refresh();
     });
   };
