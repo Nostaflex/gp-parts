@@ -1,19 +1,11 @@
 import { revalidateTag } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
-import { getOrderByIdAdmin, updateOrderStatusAdmin } from '@/lib/admin/orders-server';
+import { ORDER_TRANSITIONS, updateOrderStatusAdmin } from '@/lib/admin/orders-server';
 import type { OrderStatus } from '@/lib/types';
 import { requireAdmin, AdminError } from '@/lib/admin/auth';
 
-// Transitions autorisées — miroir de STATUS_TRANSITIONS côté client
-// Valider ici empêche un PATCH direct qui bypasse l'UI admin
-const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  nouvelle: ['confirmee', 'annulee'],
-  confirmee: ['preparation', 'annulee'],
-  preparation: ['expediee', 'annulee'],
-  expediee: ['livree'],
-  livree: [],
-  annulee: [],
-};
+// Les transitions sont validées côté serveur, dans la transaction
+// (updateOrderStatusAdmin) : un PATCH direct ne contourne pas l'UI admin.
 
 export async function PATCH(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -29,25 +21,20 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
   try {
     const { status: newStatus } = (await request.json()) as { status: OrderStatus };
 
-    if (!newStatus || !(newStatus in ALLOWED_TRANSITIONS)) {
+    if (!newStatus || !(newStatus in ORDER_TRANSITIONS)) {
       return NextResponse.json({ error: 'Statut invalide' }, { status: 400 });
     }
 
-    const order = await getOrderByIdAdmin(params.id);
-
-    if (!order) {
+    const result = await updateOrderStatusAdmin(params.id, newStatus);
+    if (!result.ok && result.reason === 'introuvable') {
       return NextResponse.json({ error: 'Commande introuvable' }, { status: 404 });
     }
-
-    const allowed = ALLOWED_TRANSITIONS[order.status];
-    if (!allowed.includes(newStatus)) {
+    if (!result.ok) {
       return NextResponse.json(
-        { error: `Transition interdite : ${order.status} → ${newStatus}` },
+        { error: `Transition interdite : ${result.current} → ${newStatus}` },
         { status: 422 }
       );
     }
-
-    await updateOrderStatusAdmin(params.id, newStatus);
     // Annulation : le stock revient, cache des pièces rafraîchi (analyse BO du 18/10, F5).
     if (newStatus === 'annulee') revalidateTag('products');
     return NextResponse.json({ ok: true });

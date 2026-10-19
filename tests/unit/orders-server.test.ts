@@ -117,6 +117,30 @@ describe('updateOrderStatusAdmin — restock à l’annulation (S2-3)', () => {
     expect(statusPatch?.patch.status).toBe('annulee');
   });
 
+  it('transition contrôlée DANS la transaction : statut changé entre-temps → refus, rien écrit (F6)', async () => {
+    // Analyse BO du 18/10, F6 : la route lisait le statut hors transaction ;
+    // un second onglet pouvait annuler (et réassortir) une commande expédiée.
+    const { updateOrderStatusAdmin } = await import('@/lib/admin/orders-server');
+    const prev = orderData.status;
+    orderData.status = 'expediee';
+    try {
+      const res = await updateOrderStatusAdmin('o1', 'annulee');
+      expect(res).toEqual({ ok: false, reason: 'transition', current: 'expediee' });
+      expect(updates).toHaveLength(0);
+    } finally {
+      orderData.status = prev;
+    }
+  });
+
+  it('commande absente → introuvable, rien écrit', async () => {
+    const { updateOrderStatusAdmin } = await import('@/lib/admin/orders-server');
+    expect(await updateOrderStatusAdmin('missing', 'confirmee')).toEqual({
+      ok: false,
+      reason: 'introuvable',
+    });
+    expect(updates).toHaveLength(0);
+  });
+
   it('déjà annulée → PAS de second restock', async () => {
     const { updateOrderStatusAdmin } = await import('@/lib/admin/orders-server');
     const prev = orderData.status;
