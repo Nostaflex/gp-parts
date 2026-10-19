@@ -34,19 +34,6 @@ export function VenteVehiculeClient({
   const [energie, setEnergie] = useState<Energie>('Toutes');
   const [budget, setBudget] = useState<BudgetMax>(999999);
 
-  // Simulateur financement
-  const [simPrix, setSimPrix] = useState(15000);
-  const [simApport, setSimApport] = useState(3000);
-  const [simDuree, setSimDuree] = useState(48);
-
-  const mensualiteSimulee = useMemo(() => {
-    const montant = Math.max(0, simPrix - simApport);
-    const tauxMensuel = 0.0499 / 12;
-    if (montant <= 0) return 0;
-    const m = (montant * tauxMensuel) / (1 - Math.pow(1 + tauxMensuel, -simDuree));
-    return Math.round(m);
-  }, [simPrix, simApport, simDuree]);
-
   const vehiculesFiltres = useMemo(() => {
     const filtered = vehicules.filter((v) => {
       const matchType =
@@ -380,7 +367,10 @@ export function VenteVehiculeClient({
 
             {/* Options financement */}
             {[
-              { title: 'Crédit auto classique', desc: 'De 12 à 72 mois, taux compétitif' },
+              {
+                title: 'Crédit auto classique',
+                desc: 'Sur dossier, via nos partenaires financiers',
+              },
               { title: 'LOA / LLD', desc: "Louer sans acheter, option d'achat possible" },
               {
                 title: 'Reprise de votre véhicule',
@@ -409,118 +399,24 @@ export function VenteVehiculeClient({
             ))}
           </div>
 
-          {/* Simulateur */}
-          <div className="bg-white rounded-2xl overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.3)]">
-            <div className="px-6 py-4 bg-cp-ink">
-              <p className="cp-title font-black text-cp-cream text-lg">Simulateur de financement</p>
-              <p className="text-cp-cream/40 text-xs mt-0.5">
-                Estimation indicative — taux 4,99% TAEG
-              </p>
-            </div>
-            <div className="p-6 flex flex-col gap-5">
-              {/* Prix */}
-              <div>
-                <div className="flex justify-between mb-2">
-                  <label className="text-xs font-semibold text-cp-ink/50 uppercase tracking-wider">
-                    Prix du véhicule
-                  </label>
-                  <span className="cp-title font-black text-cp-mango text-sm">
-                    {simPrix.toLocaleString('fr-FR')} €
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min={5000}
-                  max={30000}
-                  step={500}
-                  value={simPrix}
-                  onChange={(e) => setSimPrix(Number(e.target.value))}
-                  className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-cp-mango"
-                  style={{
-                    background: `linear-gradient(to right, #E87200 ${((simPrix - 5000) / 25000) * 100}%, #E5DDD3 ${((simPrix - 5000) / 25000) * 100}%)`,
-                  }}
-                />
-                <div className="flex justify-between mt-1 text-[0.65rem] text-cp-ink/30">
-                  <span>5 000 €</span>
-                  <span>30 000 €</span>
-                </div>
-              </div>
-
-              {/* Apport */}
-              <div>
-                <div className="flex justify-between mb-2">
-                  <label className="text-xs font-semibold text-cp-ink/50 uppercase tracking-wider">
-                    Apport personnel
-                  </label>
-                  <span className="cp-title font-black text-cp-ink text-sm">
-                    {simApport.toLocaleString('fr-FR')} €
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min={0}
-                  max={Math.min(simPrix, 10000)}
-                  step={500}
-                  value={simApport}
-                  onChange={(e) => setSimApport(Number(e.target.value))}
-                  className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-cp-mango"
-                  style={{
-                    background: `linear-gradient(to right, #1A0F06 ${(simApport / Math.min(simPrix, 10000)) * 100}%, #E5DDD3 ${(simApport / Math.min(simPrix, 10000)) * 100}%)`,
-                  }}
-                />
-                <div className="flex justify-between mt-1 text-[0.65rem] text-cp-ink/30">
-                  <span>0 €</span>
-                  <span>{Math.min(simPrix, 10000).toLocaleString('fr-FR')} €</span>
-                </div>
-              </div>
-
-              {/* Durée */}
-              <div>
-                <div className="flex justify-between mb-2">
-                  <label className="text-xs font-semibold text-cp-ink/50 uppercase tracking-wider">
-                    Durée
-                  </label>
-                  <span className="cp-title font-black text-cp-ink text-sm">{simDuree} mois</span>
-                </div>
-                <div className="flex gap-2">
-                  {[24, 36, 48, 60, 72].map((d) => (
-                    <button
-                      key={d}
-                      onClick={() => setSimDuree(d)}
-                      className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${simDuree === d ? 'bg-cp-ink text-cp-cream' : 'border border-[#E5DDD3] text-cp-ink/50 hover:border-cp-red hover:text-cp-mango'}`}
-                    >
-                      {d}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Résultat */}
-              <div className="bg-[#F8F5F0] rounded-xl p-5 text-center">
-                <p className="text-xs text-cp-ink/40 mb-1">Mensualité estimée</p>
-                <p
-                  className="cp-title font-black text-cp-mango"
-                  style={{ fontSize: 'clamp(2rem,4vw,3rem)' }}
-                >
-                  {mensualiteSimulee} €
-                  <span className="text-lg font-normal text-cp-ink/40">/mois</span>
-                </p>
-                <p className="text-xs text-cp-ink/35 mt-1">
-                  Montant financé : {Math.max(0, simPrix - simApport).toLocaleString('fr-FR')} € ·{' '}
-                  {simDuree} mois
-                </p>
-              </div>
-
-              <a
-                href={`/contact?sujet=${encodeURIComponent('Financement véhicule')}&financement=1`}
-                className="w-full py-3 rounded-xl bg-cp-ink text-cp-cream text-sm font-semibold hover:bg-cp-red transition-colors text-center block"
-              >
-                Je suis intéressé par ce financement
-              </a>
-              <p className="text-[0.65rem] text-cp-ink/30 text-center leading-relaxed">
-                Simulation non contractuelle. TAEG fixe 4,99%. Offre soumise à acceptation.
-              </p>
-            </div>
+          {/* Aucun simulateur ni chiffre de crédit (F6, 12/10/2026) : dossier sur demande. */}
+          <div className="bg-white rounded-2xl p-6 md:p-8 shadow-[0_8px_40px_rgba(0,0,0,0.3)] flex flex-col gap-5">
+            <p className="cp-title font-black text-cp-ink text-2xl">Financement sur dossier</p>
+            <p className="text-sm text-cp-ink/70 leading-relaxed">
+              Dites-nous le véhicule, votre apport et la durée souhaitée. Nous montons le dossier
+              avec nos partenaires financiers et vous remettons une offre écrite, avec toutes les
+              mentions légales, avant tout engagement.
+            </p>
+            <a
+              href={`/contact?sujet=${encodeURIComponent('Financement véhicule')}&financement=1`}
+              className="w-full py-3 rounded-xl bg-cp-ink text-cp-cream text-sm font-semibold hover:bg-cp-red transition-colors text-center block"
+            >
+              Demander un dossier de financement
+            </a>
+            <p className="text-[0.65rem] text-cp-ink/30 text-center leading-relaxed">
+              Un crédit vous engage et doit être remboursé. Vérifiez vos capacités de remboursement
+              avant de vous engager.
+            </p>
           </div>
         </div>
       </section>
@@ -618,7 +514,7 @@ function VehiculeCardBody({
             <p className="cp-title font-black text-cp-ink text-2xl leading-none">
               {v.prix.toLocaleString('fr-FR')} €
             </p>
-            <p className="text-xs text-cp-ink/35 mt-0.5">ou {v.mensualite} €/mois</p>
+            <p className="text-xs text-cp-ink/35 mt-0.5">TTC</p>
           </div>
           {vendu ? (
             <span className="px-4 py-2 rounded-xl border border-cp-red/30 text-cp-red text-xs font-semibold bg-cp-red/[0.06]">

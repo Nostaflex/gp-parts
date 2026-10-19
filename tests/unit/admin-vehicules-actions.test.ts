@@ -168,6 +168,12 @@ describe('Server Actions véhicules', () => {
     expect(written.caracteristiques.proprietaires).toBe(2);
   });
 
+  it('createVehicule : car_controle_technique → caracteristiques.controleTechnique (F7, 12/10/2026)', async () => {
+    await createVehicule(null, fd({ ...base, car_controle_technique: '14/09/2026' }));
+    const written = setMock.mock.calls[0][0];
+    expect(written.caracteristiques.controleTechnique).toBe('14/09/2026');
+  });
+
   it('createVehicule : car_portes vide → clé absente (pas de undefined/NaN, Firestore reject)', async () => {
     await createVehicule(null, fd(base)); // base ne fournit pas car_portes
     const written = setMock.mock.calls[0][0];

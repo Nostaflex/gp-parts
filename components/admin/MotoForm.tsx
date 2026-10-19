@@ -177,6 +177,10 @@ export function MotoForm({ initial }: { initial?: Moto }) {
                 className={FIELD}
               />
               <FieldError name="mensualite" />
+              <p className="text-xs mt-1" style={{ color: '#8E8E93' }}>
+                Non affichée sur le site depuis le 12/10/2026 (un chiffre de crédit sans mentions
+                légales est interdit).
+              </p>
             </div>
             <div>
               <label className={LABEL} htmlFor="disponibilite">

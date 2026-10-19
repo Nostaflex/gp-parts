@@ -358,7 +358,7 @@ function generateAnnonce(item: Item): { titre: string; description: string } {
     lines.push(`• ${d.caracteristiques.garantie ?? 'Garantie 12 mois Car Performance'}`);
     lines.push('• Contrôlé par nos techniciens');
   }
-  lines.push('• Financement sur mesure disponible (TAEG 4,99%)');
+  lines.push('• Financement possible sur dossier, via nos partenaires');
   lines.push('• Reprise possible — estimation gratuite');
   lines.push('• Disponible à Pointe-à-Pitre, Guadeloupe (971)');
   lines.push('');

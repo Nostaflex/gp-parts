@@ -95,7 +95,7 @@ const STATS = [
   { value: '971', unit: '', label: 'Guadeloupe' },
   { value: '48h', unit: '', label: 'délai de réponse — jours ouvrés' },
   { value: '12', unit: 'mois', label: 'garantie pièces' },
-  { value: '4.99', unit: '%', label: 'financement TAEG' },
+  { value: '6', unit: 'j/7', label: 'ouvert du lundi au samedi' },
 ];
 
 const HORAIRES = [

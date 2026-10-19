@@ -15,6 +15,7 @@ const vehiculeCaracteristiquesSchema = z.object({
   premiereCirculation: z.string().optional(),
   proprietaires: z.number().int().optional(),
   garantie: z.string().optional(),
+  controleTechnique: z.string().optional(),
 });
 
 export const VehiculeSchema = z.object({
