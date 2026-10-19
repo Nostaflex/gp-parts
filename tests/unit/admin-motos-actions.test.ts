@@ -62,7 +62,7 @@ vi.mock('@/lib/firebase-admin', () => ({
     runTransaction: runTransactionMock,
   })),
 }));
-vi.mock('next/cache', () => ({ revalidateTag: revalidateTagMock }));
+vi.mock('next/cache', () => ({ revalidateTag: revalidateTagMock, revalidatePath: vi.fn() }));
 vi.mock('next/navigation', () => ({ redirect: vi.fn() }));
 
 import {

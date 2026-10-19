@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 vi.mock('@/lib/data/feature-flags-cache', () => ({ getCachedFeatureFlags: vi.fn() }));
+vi.mock('@/lib/data/vehicules-cache', () => ({ getCachedVehicules: vi.fn(async () => []) }));
+vi.mock('@/lib/data/motos-cache', () => ({ getCachedMotos: vi.fn(async () => []) }));
 vi.mock('@/lib/data', () => ({
   getAdapter: vi.fn(async () => ({
     getProducts: async () => [],

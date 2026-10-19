@@ -173,16 +173,17 @@ export default async function HomePage() {
               Centre automobile · Guadeloupe 971
             </p>
           </CpReveal>
-          <CpReveal delay={1}>
-            <h1
-              className="cp-title font-black leading-none mb-8 text-cp-cream"
-              style={{ fontSize: 'clamp(2rem, 10.5vw, 9rem)' }}
-            >
-              CAR
-              <br />
-              <span className="text-cp-red">PERFORMANCE</span>
-            </h1>
-          </CpReveal>
+          {/* Le H1 est l'élément LCP de la page : rendu dès le premier affichage,
+              sans animation de révélation (Lighthouse 11/10/2026 : 4,1 s de
+              retard de rendu, SEO lot 1). L'espace avant le <br /> évite
+              « CARPERFORMANCE » dans le texte lu par les moteurs. */}
+          <h1
+            className="cp-title font-black leading-none mb-8 text-cp-cream"
+            style={{ fontSize: 'clamp(2rem, 10.5vw, 9rem)' }}
+          >
+            CAR <br />
+            <span className="text-cp-red">PERFORMANCE</span>
+          </h1>
           <CpReveal delay={2}>
             <p className="text-cp-cream/60 text-lg max-w-xl mb-10 leading-relaxed">
               Centre de maintenance et réparation automobile digital.

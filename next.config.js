@@ -25,6 +25,11 @@ const nextConfig = {
     return [
       { source: '/vente-vo', destination: '/vente-vehicule', permanent: true },
       { source: '/vente-vo/:id', destination: '/vente-vehicule/:id', permanent: true },
+      // Pages légales fusionnées dans /mentions-legales : 308 permanent (SEO lot 1,
+      // 2026-10-11, P2.4 de l'audit) — avant : redirect() 307 dans trois pages.
+      { source: '/cgv', destination: '/mentions-legales', permanent: true },
+      { source: '/cookies', destination: '/mentions-legales', permanent: true },
+      { source: '/confidentialite', destination: '/mentions-legales', permanent: true },
       // Domaine canonique : apex → www (évite le duplicate content SEO).
       {
         source: '/:path*',
@@ -37,6 +42,14 @@ const nextConfig = {
   // Security headers
   async headers() {
     return [
+      // Surfaces privées : noindex aussi en en-tête HTTP, lisible même quand le
+      // crawl est bloqué par robots.txt (SEO lot 1, P1.1 de l'audit du 19/08).
+      ...['/admin', '/admin/:path*', '/panier', '/commande/:path*', '/compte/:path*'].map(
+        (source) => ({
+          source,
+          headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+        })
+      ),
       {
         source: '/(.*)',
         headers: [
