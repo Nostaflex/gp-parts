@@ -46,6 +46,9 @@ vi.mock('@/lib/admin/orders-server', () => ({
   updateOrderStatusAdmin: updateOrderStatusMock,
 }));
 
+const { revalidateTagMock } = vi.hoisted(() => ({ revalidateTagMock: vi.fn() }));
+vi.mock('next/cache', () => ({ revalidateTag: revalidateTagMock }));
+
 // Keep NextResponse.json working but capture responses for assertions.
 // next/server works in vitest with happy-dom, but we need it to return
 // a plain object so we can inspect .status without a real Response.
@@ -212,6 +215,21 @@ describe('PATCH /api/admin/orders/[id]', () => {
 
     expect(updateOrderStatusMock).toHaveBeenCalledWith('o1', 'confirmee');
     expect((res as { status: number }).status).toBe(200);
+  });
+
+  it('annulation : le stock revient → cache des pièces invalidé (F5)', async () => {
+    requireAdminMock.mockResolvedValue({ uid: 'u1', email: 'admin@test.com' });
+
+    const { PATCH } = await import('@/app/api/admin/orders/[id]/route');
+    const req = new Request('http://localhost/api/admin/orders/o1', {
+      method: 'PATCH',
+      body: JSON.stringify({ status: 'annulee' }),
+      headers: { 'content-type': 'application/json' },
+    }) as unknown as import('next/server').NextRequest;
+
+    const res = await PATCH(req, { params: Promise.resolve({ id: 'o1' }) });
+    expect((res as { status: number }).status).toBe(200);
+    expect(revalidateTagMock).toHaveBeenCalledWith('products');
   });
 
   it('returns 422 for invalid transition even when authenticated', async () => {

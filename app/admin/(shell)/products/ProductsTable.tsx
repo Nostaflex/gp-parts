@@ -9,6 +9,7 @@ import { StatusBadge, type BadgeTone } from '@/components/admin/StatusBadge';
 import { DeleteRowAction, TrashTabs, trashColumns, useTrashView } from '@/components/admin/Trash';
 import { useToast } from '@/components/ui/Toast';
 import { deleteProduct, restoreProduct, updateProductStock } from '@/app/admin/products/actions';
+import { LOW_STOCK_THRESHOLD } from '@/lib/config';
 
 import type { Product } from '@/lib/types';
 
@@ -59,15 +60,16 @@ function StockStepper({ product }: { product: Product }) {
   );
 }
 
+// Même seuil que l'alerte du tableau de bord (analyse BO du 18/10, F5).
 function stockTone(stock: number): BadgeTone {
   if (stock <= 0) return 'danger';
-  if (stock < 5) return 'warning';
+  if (stock <= LOW_STOCK_THRESHOLD) return 'warning';
   return 'success';
 }
 
 function stockLabel(stock: number): string {
   if (stock <= 0) return 'Rupture';
-  if (stock < 5) return `Bas (${stock})`;
+  if (stock <= LOW_STOCK_THRESHOLD) return `Bas (${stock})`;
   return String(stock);
 }
 

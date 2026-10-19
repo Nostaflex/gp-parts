@@ -33,6 +33,11 @@ const monter = (products: Product[]) =>
 describe('Liste des pièces — stock −/+', () => {
   beforeEach(() => vi.clearAllMocks());
 
+  it('stock égal au seuil (5) : « Bas », comme l’alerte du tableau de bord (F5)', () => {
+    monter([{ ...piece, stock: 5 }]);
+    expect(screen.getByText('Bas (5)')).toBeInTheDocument();
+  });
+
   it('un refus du serveur s’affiche', async () => {
     updateProductStock.mockResolvedValue({ errors: { _form: ['Identifiant produit invalide.'] } });
     monter([piece]);

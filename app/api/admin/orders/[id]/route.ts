@@ -1,3 +1,4 @@
+import { revalidateTag } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrderByIdAdmin, updateOrderStatusAdmin } from '@/lib/admin/orders-server';
 import type { OrderStatus } from '@/lib/types';
@@ -47,6 +48,8 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
     }
 
     await updateOrderStatusAdmin(params.id, newStatus);
+    // Annulation : le stock revient, cache des pièces rafraîchi (analyse BO du 18/10, F5).
+    if (newStatus === 'annulee') revalidateTag('products');
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('[api/admin/orders/[id]] PATCH error:', err);
