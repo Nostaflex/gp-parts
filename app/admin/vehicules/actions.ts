@@ -1,10 +1,11 @@
 'use server';
 
-import { revalidateTag } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { requireAdmin } from '@/lib/admin/auth';
 import { writeAuditLog } from '@/lib/admin/audit';
 import { getAdminFirestore } from '@/lib/firebase-admin';
+import { isGeneratedId, readableId, uniqueReadableId } from '@/lib/readable-id';
 import { VehiculeSchema } from '@/lib/schemas/vehicule';
 import { computePatchDiff } from '@/lib/admin/diff';
 import { PARSE_FR } from '@/lib/admin/form-errors';
@@ -89,8 +90,16 @@ export async function createVehicule(
     return { errors: parsed.error.flatten().fieldErrors };
   }
 
-  const data = parsed.data;
   const db = getAdminFirestore();
+  // Identifiant lisible marque-modele-annee à la place du technique du formulaire
+  // (SEO lot 1, 2026-10-11) ; une fiche existante garde toujours son identifiant.
+  const id = isGeneratedId(parsed.data.id)
+    ? await uniqueReadableId(
+        readableId(parsed.data.marque, parsed.data.modele, parsed.data.annee),
+        async (candidate) => (await db.doc(`vehicules/${candidate}`).get()).exists
+      )
+    : parsed.data.id;
+  const data = { ...parsed.data, id };
   await db.doc(`vehicules/${data.id}`).set(data);
 
   await writeAuditLog({
@@ -101,6 +110,7 @@ export async function createVehicule(
   });
 
   revalidateTag('vehicules');
+  revalidatePath('/sitemap.xml');
   revalidateTag(`vehicule:${data.id}`);
   redirect('/admin/vehicules');
 }
@@ -151,6 +161,7 @@ export async function updateVehicule(
   });
 
   revalidateTag('vehicules');
+  revalidatePath('/sitemap.xml');
   revalidateTag(`vehicule:${data.id}`);
   return { ok: true, message: 'Véhicule mis à jour.' };
 }
@@ -210,6 +221,7 @@ async function ligneVehicule(
   await writeAuditLog({ actor: session.email, action, resourceType: 'vehicule', resourceId: id });
 
   revalidateTag('vehicules');
+  revalidatePath('/sitemap.xml');
   revalidateTag(`vehicule:${id}`);
   return { ok: true, message, updatedAt: res.updatedAt };
 }
