@@ -16,7 +16,8 @@ import { getCachedMotos } from '@/lib/data/motos-cache';
 import type { Order } from '@/lib/types';
 
 export type DashboardData = {
-  badges: NavBadges;
+  /** null = comptage indisponible (jamais confondu avec zéro). */
+  badges: NavBadges | null;
   orders: OrderKpis;
   stock: StockKpis;
   /** Compteurs de la grille pôles : annonces disponibles à la vente. */

@@ -59,7 +59,7 @@ function formatDateGuadeloupe(iso: string): string {
   }).format(new Date(iso));
 }
 
-/** Tuile « à traiter » : compteur cliquable vers la section. Count 0 = estompée. */
+/** Tuile « à traiter » : compteur cliquable vers la section. Count 0 = estompée, null = « — ». */
 function ActionTile({
   href,
   label,
@@ -68,10 +68,10 @@ function ActionTile({
 }: {
   href: string;
   label: string;
-  count: number;
+  count: number | null;
   icon: LucideIcon;
 }) {
-  const active = count > 0;
+  const active = count !== null && count > 0;
   return (
     <Link
       href={href}
@@ -93,7 +93,7 @@ function ActionTile({
           className="font-title text-h3 leading-none"
           style={{ color: active ? IOS.blue : IOS.text }}
         >
-          {count}
+          {count ?? '—'}
         </p>
         <p className="text-caption truncate" style={{ color: IOS.textMuted }}>
           {label}
@@ -167,7 +167,9 @@ export default async function AdminDashboardPage() {
   await requireAdminPage();
   const { badges, orders, stock, catalogue, recentOrders } = await getDashboardData();
 
-  const aTraiter = badges.commandes + badges.reservations + badges.demandes + badges.avis;
+  const aTraiter = badges
+    ? badges.commandes + badges.reservations + badges.demandes + badges.avis
+    : 0;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
@@ -180,9 +182,11 @@ export default async function AdminDashboardPage() {
           Tableau de bord
         </h1>
         <p className="text-body mt-2" style={{ color: IOS.textMuted }}>
-          {aTraiter > 0
-            ? `${aTraiter} élément${aTraiter > 1 ? 's' : ''} en attente de traitement.`
-            : 'Tout est traité — rien en attente.'}
+          {!badges
+            ? 'Compteurs indisponibles pour le moment — rechargez la page.'
+            : aTraiter > 0
+              ? `${aTraiter} élément${aTraiter > 1 ? 's' : ''} en attente de traitement.`
+              : 'Aucun dossier ni avis en attente.'}
         </p>
       </div>
 
@@ -195,20 +199,25 @@ export default async function AdminDashboardPage() {
           <ActionTile
             href="/admin/commandes"
             label="Commandes ouvertes"
-            count={badges.commandes}
+            count={badges?.commandes ?? null}
             icon={ShoppingCart}
           />
-          <ActionTile href="/admin/avis" label="Avis à modérer" count={badges.avis} icon={Star} />
+          <ActionTile
+            href="/admin/avis"
+            label="Avis à modérer"
+            count={badges?.avis ?? null}
+            icon={Star}
+          />
           <ActionTile
             href="/admin/reservations"
             label="Réservations ouvertes"
-            count={badges.reservations}
+            count={badges?.reservations ?? null}
             icon={CalendarCheck}
           />
           <ActionTile
             href="/admin/demandes"
             label="Demandes ouvertes"
-            count={badges.demandes}
+            count={badges?.demandes ?? null}
             icon={MessageSquare}
           />
         </div>

@@ -41,14 +41,14 @@ describe('getNavBadges', () => {
     expect(collectionMock).toHaveBeenCalledWith('demandes');
   });
 
-  it('fail-open : erreur Firestore → zéros + console.warn (jamais muet)', async () => {
+  it('fail-open : erreur Firestore → null (indisponible, distinct de zéro) + console.warn', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     countsByCollection.orders = new Error('boom');
     countsByCollection.reservations = 1;
     countsByCollection.demandes = 2;
     countsByCollection.avis = 0;
     const badges = await getNavBadges();
-    expect(badges).toEqual({ commandes: 0, reservations: 0, demandes: 0, avis: 0 });
+    expect(badges).toBeNull();
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();
   });

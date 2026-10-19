@@ -19,7 +19,7 @@ export function AdminShell({
 }: {
   children: ReactNode;
   modal?: ReactNode;
-  badges?: NavBadges;
+  badges?: NavBadges | null;
 }) {
   return (
     <div className="flex min-h-screen" style={{ background: 'var(--bg)' }}>
