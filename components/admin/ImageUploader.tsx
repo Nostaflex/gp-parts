@@ -96,18 +96,22 @@ export function ImageUploader({
   );
   const inputRef = useRef<HTMLInputElement>(null);
 
-  function commit(next: Slot[]) {
-    setSlots(next);
-    onChange(next.filter((s) => !s.uploading && !s.error).map((s) => s.url));
-  }
-
-  /** Met à jour la case `key` ; `emit` renvoie la liste des URLs au formulaire. */
-  function patch(key: number, change: Partial<Slot>, emit = false) {
+  /**
+   * Toute modification part de l'état le plus récent (`prev`) : une copie du
+   * dernier rendu écrasait une fin d'envoi déjà en file. `emit` renvoie la
+   * liste des URLs au formulaire.
+   */
+  function update(change: (prev: Slot[]) => Slot[], emit = false) {
     setSlots((prev) => {
-      const next = prev.map((s) => (s.key === key ? { ...s, ...change } : s));
+      const next = change(prev);
       if (emit) onChange(next.filter((s) => !s.uploading && !s.error).map((s) => s.url));
       return next;
     });
+  }
+
+  /** Met à jour la case `key`. */
+  function patch(key: number, change: Partial<Slot>, emit = false) {
+    update((prev) => prev.map((s) => (s.key === key ? { ...s, ...change } : s)), emit);
   }
 
   async function handleFiles(files: FileList | null) {
@@ -128,7 +132,7 @@ export function ImageUploader({
             ? `${file.name}: > 25 Mo`
             : undefined,
       }));
-    setSlots((prev) => [
+    update((prev) => [
       ...prev,
       ...picked.map(({ key, error }) => ({ key, url: '', uploading: !error, progress: 0, error })),
     ]);
@@ -156,7 +160,7 @@ export function ImageUploader({
   }
 
   function remove(key: number) {
-    commit(slots.filter((s) => s.key !== key));
+    update((prev) => prev.filter((s) => s.key !== key), true);
   }
 
   return (

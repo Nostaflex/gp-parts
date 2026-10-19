@@ -12,6 +12,9 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 vi.mock('browser-image-compression', () => ({ default: async (file: File) => file }));
 
 const sent: FormData[] = [];
+/** Réponses retenues quand `auto` est faux : le test choisit l'instant de la fin d'envoi. */
+const enAttente: Array<() => void> = [];
+let auto = true;
 
 /** XHR minimal : répond 200 avec une URL propre à chaque envoi. */
 class FakeXHR {
@@ -24,11 +27,13 @@ class FakeXHR {
   send(fd: FormData) {
     sent.push(fd);
     const n = sent.length;
-    setTimeout(() => {
+    const repondre = () => {
       this.status = 200;
       this.responseText = JSON.stringify({ url: `https://storage.test/envoi-${n}` });
       this.onload?.();
-    }, 0);
+    };
+    if (auto) setTimeout(repondre, 0);
+    else enAttente.push(repondre);
   }
 }
 vi.stubGlobal('XMLHttpRequest', FakeXHR);
@@ -46,6 +51,8 @@ function choisir(container: HTMLElement, files: File[]) {
 
 beforeEach(() => {
   sent.length = 0;
+  enAttente.length = 0;
+  auto = true;
 });
 
 describe('ImageUploader — sélection de plusieurs photos', () => {
@@ -91,5 +98,31 @@ describe('ImageUploader — sélection de plusieurs photos', () => {
     fireEvent.click(await screen.findByRole('button', { name: /Retirer la photo 1 en erreur/ }));
 
     expect(screen.queryByText(/format non supporté/)).toBeNull();
+  });
+
+  it('retirer une photo pendant la fin d’un envoi : ni envoi figé, ni photo retirée gardée', async () => {
+    // Relecture du 19/10 : « Supprimer » remplaçait la liste par une copie du
+    // dernier rendu et écrasait la fin d'envoi déjà en file (défaut antérieur).
+    auto = false;
+    const onChange = vi.fn();
+    const { container } = render(
+      <ImageUploader
+        folder="vehicules"
+        entityId="vehicule-abc"
+        value={['https://storage.test/a']}
+        onChange={onChange}
+      />
+    );
+    choisir(container, [photo('b.jpg')]);
+    await waitFor(() => expect(enAttente).toHaveLength(1));
+
+    enAttente[0](); // fin d'envoi mise en file, pas encore rendue
+    for (let i = 0; i < 5; i++) await Promise.resolve();
+    fireEvent.click(screen.getByRole('button', { name: 'Supprimer la photo 1' }));
+
+    await waitFor(() =>
+      expect(onChange).toHaveBeenLastCalledWith(['https://storage.test/envoi-1'])
+    );
+    expect(screen.queryByText(/%$/)).toBeNull();
   });
 });
