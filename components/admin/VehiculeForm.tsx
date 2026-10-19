@@ -189,6 +189,10 @@ export function VehiculeForm({ initial }: { initial?: Vehicule }) {
                 className={FIELD}
               />
               <FieldError name="mensualite" />
+              <p className="text-xs mt-1" style={{ color: '#8E8E93' }}>
+                Non affichée sur le site depuis le 12/10/2026 (un chiffre de crédit sans mentions
+                légales est interdit).
+              </p>
             </div>
             <div>
               <label className={LABEL} htmlFor="disponibilite">
@@ -297,6 +301,13 @@ export function VehiculeForm({ initial }: { initial?: Vehicule }) {
               aria-label="Garantie"
               placeholder="Garantie"
               defaultValue={initial?.caracteristiques.garantie}
+              className={FIELD}
+            />
+            <input
+              name="car_controle_technique"
+              aria-label="Contrôle technique"
+              placeholder="Contrôle technique du JJ/MM/AAAA"
+              defaultValue={initial?.caracteristiques.controleTechnique}
               className={FIELD}
             />
             <input

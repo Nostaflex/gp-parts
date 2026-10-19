@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { readableId } from '@/lib/readable-id';
 
 // vi.hoisted : les factories vi.mock(...) sont hissées au top du module ;
 // les mocks qu'elles référencent doivent l'être aussi (sinon ReferenceError).
@@ -62,7 +63,7 @@ vi.mock('@/lib/firebase-admin', () => ({
     runTransaction: runTransactionMock,
   })),
 }));
-vi.mock('next/cache', () => ({ revalidateTag: revalidateTagMock }));
+vi.mock('next/cache', () => ({ revalidateTag: revalidateTagMock, revalidatePath: vi.fn() }));
 vi.mock('next/navigation', () => ({ redirect: vi.fn() }));
 
 import {
@@ -125,6 +126,31 @@ describe('Server Actions véhicules', () => {
     expect(res).toBeUndefined(); // redirect() en succès
   });
 
+  it('createVehicule : un identifiant technique du formulaire devient marque-modele-annee (SEO lot 1)', async () => {
+    getMock.mockResolvedValue({ exists: false });
+    await createVehicule(null, fd({ ...base, id: 'vehicule-muzwihv3' }));
+    const written = setMock.mock.calls[0][0];
+    expect(written.id).toBe(readableId(base.marque, base.modele, Number(base.annee)));
+    expect(written.id).not.toMatch(/^vehicule-/);
+    expect(docMock).toHaveBeenCalledWith(`vehicules/${written.id}`);
+    expect(writeAuditLogMock).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'create', resourceId: written.id })
+    );
+  });
+
+  it('createVehicule : collision d’identifiant lisible → suffixe -2', async () => {
+    getMock.mockResolvedValueOnce({ exists: true }).mockResolvedValueOnce({ exists: false });
+    await createVehicule(null, fd({ ...base, id: 'vehicule-muzwihv3' }));
+    const written = setMock.mock.calls[0][0];
+    expect(written.id).toBe(`${readableId(base.marque, base.modele, Number(base.annee))}-2`);
+  });
+
+  it('createVehicule : un identifiant déjà lisible est conservé tel quel', async () => {
+    await createVehicule(null, fd(base));
+    expect(setMock.mock.calls[0][0].id).toBe('peugeot-308sw');
+    expect(getMock).not.toHaveBeenCalled();
+  });
+
   it('createVehicule : caracteristiques vides ne produisent pas de undefined (Firestore reject)', async () => {
     // base ne fournit aucun champ car_* → toutes les caractéristiques sont vides
     await createVehicule(null, fd(base));
@@ -140,6 +166,12 @@ describe('Server Actions véhicules', () => {
     const written = setMock.mock.calls[0][0];
     expect(written.caracteristiques.portes).toBe(5);
     expect(written.caracteristiques.proprietaires).toBe(2);
+  });
+
+  it('createVehicule : car_controle_technique → caracteristiques.controleTechnique (F7, 12/10/2026)', async () => {
+    await createVehicule(null, fd({ ...base, car_controle_technique: '14/09/2026' }));
+    const written = setMock.mock.calls[0][0];
+    expect(written.caracteristiques.controleTechnique).toBe('14/09/2026');
   });
 
   it('createVehicule : car_portes vide → clé absente (pas de undefined/NaN, Firestore reject)', async () => {

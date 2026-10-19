@@ -377,7 +377,7 @@ function MotoCardBody({ m, statut }: { m: Moto; statut: Disponibilite }) {
             <p className="cp-title font-black text-cp-ink text-2xl leading-none">
               {m.prix.toLocaleString('fr-FR')} €
             </p>
-            <p className="text-xs text-cp-ink/35 mt-0.5">ou {m.mensualite} €/mois</p>
+            <p className="text-xs text-cp-ink/35 mt-0.5">TTC</p>
           </div>
           {vendu ? (
             <span className="px-4 py-2 rounded-xl border border-cp-red/30 text-cp-red text-xs font-semibold bg-cp-red/[0.06]">

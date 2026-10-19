@@ -8,7 +8,7 @@ import { getCachedVehicules } from '@/lib/data/vehicules-cache';
 import { getCachedFeatureFlags } from '@/lib/data/feature-flags-cache';
 import { getCachedContactInfo } from '@/lib/data/contact-info-cache';
 import type { ContactInfo } from '@/lib/contact-info';
-import { FinancementSimulator } from './FinancementSimulator';
+import { CpFinancementInfo } from '@/components/cp/CpFinancementInfo';
 import { VehiculeGallery } from './VehiculeGallery';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { BUSINESS, absoluteUrl, breadcrumbJsonLd } from '@/lib/seo';
@@ -189,12 +189,11 @@ export default async function VehiculeDetailPage({ params }: Props) {
                 {/* Prix */}
                 <div className="mb-6 pb-6 border-b border-[#F0E8DC]">
                   <p className="cp-title font-black text-cp-ink text-4xl leading-none">
-                    {v.prix.toLocaleString('fr-FR')} €
+                    {v.prix.toLocaleString('fr-FR')} €{' '}
+                    <span className="text-lg text-cp-ink/60">TTC</span>
                   </p>
-                  <p className="text-sm text-cp-ink/50 mt-1">
-                    ou <span className="font-semibold text-cp-ink/80">{v.mensualite} €/mois</span>{' '}
-                    en financement
-                  </p>
+                  {/* Aucun chiffre de crédit (F6, 12/10/2026) : prix TTC, dossier sur demande. */}
+                  <p className="text-sm text-cp-ink/50 mt-1">Financement possible, sur dossier</p>
                 </div>
 
                 {/* Specs key */}
@@ -225,6 +224,16 @@ export default async function VehiculeDetailPage({ params }: Props) {
                     </dt>
                     <dd className="font-semibold text-cp-ink mt-0.5">{v.transmission}</dd>
                   </div>
+                  {v.caracteristiques.controleTechnique && (
+                    <div className="col-span-2">
+                      <dt className="text-cp-ink/40 uppercase tracking-wide cp-mono text-[0.6rem]">
+                        Contrôle technique
+                      </dt>
+                      <dd className="font-semibold text-cp-ink mt-0.5">
+                        {v.caracteristiques.controleTechnique}
+                      </dd>
+                    </div>
+                  )}
                 </dl>
 
                 {/* Garantie badge */}
@@ -240,7 +249,8 @@ export default async function VehiculeDetailPage({ params }: Props) {
                   >
                     <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                   </svg>
-                  Garantie 12 mois incluse · Contrôlé par nos techniciens
+                  Garantie commerciale 12 mois, en plus de la garantie légale de conformité (2 ans)
+                  · Contrôlé par nos techniciens
                 </div>
 
                 {/* CTAs */}
@@ -344,7 +354,7 @@ export default async function VehiculeDetailPage({ params }: Props) {
             {[
               {
                 title: 'Garantie 12 mois',
-                desc: 'Toutes pièces mécaniques majeures couvertes.',
+                desc: "Toutes pièces mécaniques majeures couvertes. S'ajoute à la garantie légale de conformité de 2 ans (C. conso L217-3), elle ne la remplace pas.",
               },
               {
                 title: 'Contrôlé par nos techniciens',
@@ -377,15 +387,15 @@ export default async function VehiculeDetailPage({ params }: Props) {
               <span className="text-cp-mango">payez à votre rythme</span>
             </h2>
             <p className="text-sm text-cp-ink/60 max-w-md mx-auto">
-              Ajustez l&apos;apport et la durée. Calcul instantané sur ce véhicule précis.
+              Dites-nous votre apport et la durée souhaitée : nous revenons vers vous avec une offre
+              écrite pour ce véhicule précis.
             </p>
           </div>
 
-          <FinancementSimulator
-            prix={v.prix}
-            marque={v.marque}
-            modele={v.modele}
-            vehiculeId={v.id}
+          <CpFinancementInfo
+            sujet="Vente véhicule"
+            designation={`${v.marque} ${v.modele}`}
+            reference={v.reference}
           />
         </div>
       </section>

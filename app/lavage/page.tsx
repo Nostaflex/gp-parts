@@ -12,6 +12,8 @@ import { feriesPourDates } from '@/lib/jours-feries';
 import { formatPrice, localDateISO } from '@/lib/utils';
 import type { PrisParDate } from '@/lib/lavage-creneaux';
 import { CpBulle } from '@/components/cp/CpBulle';
+import { JsonLd } from '@/components/seo/JsonLd';
+import { serviceJsonLd } from '@/lib/seo';
 import { FormulesGabarit } from './FormulesGabarit';
 import { LavageForm } from './LavageForm';
 
@@ -56,8 +58,21 @@ export default async function LavagePage() {
   const cartes = formules.filter((f) => !estBandeau(f));
   const bandeaux = formules.filter(estBandeau);
 
+  // Service JSON-LD (SEO lot 1) : prestations réelles du BO, prix « à partir de »
+  // = tarif minimum TTC ; une formule sans tarif reste sans prix (sur devis).
+  const serviceLd = serviceJsonLd({
+    name: 'SPLASH — esthétique automobile premium',
+    description: String(metadata.description ?? ''),
+    path: '/lavage',
+    offers: formules.map((f) => ({
+      name: f.nom,
+      priceFromCents: f.tarifs.length ? Math.min(...f.tarifs.map((t) => t.prixTTCEnCents)) : null,
+    })),
+  });
+
   return (
     <>
+      <JsonLd data={serviceLd} />
       <CpHeader darkSectionIds={['lav-hero']} />
 
       {/* ── HERO — l'univers bleu de Splash (handoff cp-v4, écran 2) ── */}

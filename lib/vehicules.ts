@@ -20,6 +20,8 @@ export type Caracteristiques = {
   premiereCirculation?: string;
   proprietaires?: number;
   garantie?: string;
+  /** Date du dernier contrôle technique (JJ/MM/AAAA) — affichée sur la fiche. */
+  controleTechnique?: string;
 };
 
 export type Vehicule = {

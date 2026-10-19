@@ -2,6 +2,8 @@
 // Source de défauts = BUSINESS (lib/seo) ; l'override vient de Firestore.
 import { z } from 'zod';
 import { BUSINESS } from '@/lib/seo';
+
+export { isPlaceholderContactInfo } from '@/lib/seo';
 import { WHATSAPP_NUMBER } from '@/lib/config';
 
 export type ContactInfo = {
