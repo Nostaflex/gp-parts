@@ -31,7 +31,9 @@ const monter = (products: Product[]) =>
   );
 
 describe('Liste des pièces — stock −/+', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
   it('stock égal au seuil (5) : « Bas », comme l’alerte du tableau de bord (F5)', () => {
     monter([{ ...piece, stock: 5 }]);
