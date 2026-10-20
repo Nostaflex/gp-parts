@@ -209,7 +209,8 @@
   font-weight: 900;
   text-transform: uppercase;
   font-size: 1.05rem;
-  color: rgba(244, 237, 224, 0.45);
+  /* 0.45 → 0.6 : contraste AA des libellés d'étapes (audit 2026-08-20). */
+  color: rgba(244, 237, 224, 0.6);
   transition: color 300ms;
 }
 .cp-pl-nd.done i {
@@ -260,6 +261,13 @@
 .cp-pl-stage {
   padding: 22px 24px 26px 32px;
   border-right: 1px solid rgba(244, 237, 224, 0.08);
+  /* min-width:auto d'une piste de grid : sans ce 0, un enfant scrollable
+     (bande 14 jours de la Splash Lane) élargit la colonne au lieu de
+     défiler et éjecte le récap. */
+  min-width: 0;
+  /* Le scroll-to-stage au changement d'étape ne doit pas finir sous le
+     header fixe. */
+  scroll-margin-top: 84px;
 }
 .cp-pl-side {
   padding: 22px 32px 26px 24px;
@@ -308,6 +316,15 @@
   max-width: none;
   margin: -8% 0 0 -45%;
 }
+/* splash-sans-gant.png est déjà un portrait cadré : pas de zoom-recadrage. */
+.cp-pl-ava-splash img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  margin: 0;
+  object-fit: cover;
+  object-position: top;
+}
 
 /* Cartes radio véhicule */
 .cp-pl-opt {
@@ -334,7 +351,9 @@
 }
 .cp-pl-opt.on {
   border-color: var(--acc);
-  background: rgba(82, 200, 138, 0.1);
+  /* Fond = accent adouci — le composant pose --acc-soft (vert location par
+     défaut, bleu lagon sur la Splash Lane). */
+  background: var(--acc-soft, rgba(82, 200, 138, 0.1));
 }
 .cp-pl-opt.off {
   opacity: 0.4;
@@ -426,14 +445,50 @@
     border-color 250ms,
     color 250ms;
 }
-.cp-pl-du:hover {
+.cp-pl-du:hover:not(:disabled) {
   border-color: rgba(244, 237, 224, 0.3);
+}
+.cp-pl-du:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+.cp-pl-du:disabled b {
+  text-decoration: line-through;
 }
 .cp-pl-du.on {
   background: var(--acc);
   border-color: var(--acc);
   color: var(--acc-ink);
   font-weight: 700;
+  animation: cp-pl-drop 600ms var(--ease-out);
+}
+
+/* Bande de jours scrollable (horizon 14 j de la Splash Lane) — mêmes cartes
+   que .cp-pl-days, en ruban horizontal. */
+.cp-pl-lane {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+}
+.cp-pl-lane .cp-pl-dd {
+  flex-shrink: 0;
+  width: 76px;
+}
+
+/* « Goutte d'eau » : anneau accent qui se dissout à la sélection — un seul
+   moment de motion, jamais pendant la saisie (reduced-motion : kill global). */
+@keyframes cp-pl-drop {
+  from {
+    box-shadow: 0 0 0 0 var(--acc-ring, rgba(82, 200, 138, 0.45));
+  }
+  to {
+    box-shadow: 0 0 0 16px rgba(0, 0, 0, 0);
+  }
+}
+.cp-pl-dd.on {
+  animation: cp-pl-drop 600ms var(--ease-out);
 }
 .cp-pl-legend {
   display: flex;
@@ -443,7 +498,9 @@
   font-size: 0.56rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(244, 237, 224, 0.4);
+  /* 0.4 → 0.6 : ~3:1 sous le AA 4,5:1 pour du texte de cette taille
+     (audit 2026-08-20). */
+  color: rgba(244, 237, 224, 0.6);
 }
 .cp-pl-legend span {
   display: flex;
@@ -491,7 +548,8 @@
   color: rgba(244, 237, 224, 0.72);
 }
 .cp-pl-tr.dim {
-  color: rgba(244, 237, 224, 0.42);
+  /* 0.42 → 0.55 : lisibilité AA du petit mono du ticket (audit 2026-08-20). */
+  color: rgba(244, 237, 224, 0.55);
 }
 .cp-pl-tr.tt {
   border-top: 1px dashed rgba(244, 237, 224, 0.22);
@@ -510,6 +568,38 @@
 }
 .cp-pl-tr.tt b.flash {
   opacity: 0.25;
+}
+/* Ligne de ticket cliquable (retour 1 clic vers son étape) : reset bouton +
+   crayon qui apparaît au survol/focus. */
+button.cp-pl-tr-edit {
+  width: 100%;
+  background: none;
+  border: 0;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+  transition: color 200ms;
+}
+button.cp-pl-tr-edit::after {
+  content: '✎';
+  flex-shrink: 0;
+  opacity: 0.25;
+  transition: opacity 200ms;
+}
+button.cp-pl-tr-edit:hover,
+button.cp-pl-tr-edit:focus-visible {
+  color: var(--cream);
+}
+button.cp-pl-tr-edit:hover::after,
+button.cp-pl-tr-edit:focus-visible::after {
+  opacity: 0.9;
+  color: var(--acc);
+}
+
+/* Étape complète → Continuer pulse doucement (2 battements, jamais en
+   boucle) : guide l'œil sans avance automatique. */
+.cp-pl-pulse {
+  animation: cp-pl-drop 1200ms var(--ease-out) 2;
 }
 
 /* Barre collante mobile — n'existe que sous 700 px de conteneur. */
