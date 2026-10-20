@@ -1,41 +1,22 @@
 rules_version = '2';
 
+// DENY-ALL par conception (audit 2026-08-19).
+//
+// Le bucket n'a AUCUN accès légitime via les rules :
+//  - écritures : uniquement /api/admin/upload (Admin SDK = service account,
+//    non soumis aux rules) — c'est là que vivent les gardes réels
+//    (requireAdmin, magic-bytes, 8 Mo, anti path-traversal, MAX_INDEX) ;
+//  - lectures : uniquement des URLs de download à token
+//    (firebasestorage.googleapis.com…token=…), non soumises aux rules.
+//
+// Toute règle allow ici serait un chemin de CONTOURNEMENT de ces gardes
+// (ex. un compte admin compromis uploadant 25 Mo via SDK client), pas une
+// protection. Vérifié en prod le 2026-08-19 : 0 URL stockée ne dépend des
+// rules. Si un jour un accès client direct devient nécessaire, le rouvrir
+// chemin par chemin — jamais en réactivant un allow write générique.
+
 service firebase.storage {
   match /b/{bucket}/o {
-
-    // Helper: vérifie que l'utilisateur est dans la whitelist Firestore meta/admins
-    function isAdmin() {
-      return request.auth != null
-          && request.auth.token.email_verified == true
-          && firestore.exists(/databases/(default)/documents/meta/admins)
-          && firestore.get(/databases/(default)/documents/meta/admins)
-                      .data.emails.hasAny([request.auth.token.email]);
-    }
-
-    // Photos catalogue (véhicules / motos / produits): lecture publique pour servir le site
-    // Écriture admin only + validation taille + content-type
-    match /vehicules/{vehiculeId}/{file=**} {
-      allow read;
-      allow write: if isAdmin()
-                   && request.resource.size < 25 * 1024 * 1024
-                   && request.resource.contentType.matches('image/(webp|jpeg|png)');
-    }
-
-    match /motos/{motoId}/{file=**} {
-      allow read;
-      allow write: if isAdmin()
-                   && request.resource.size < 25 * 1024 * 1024
-                   && request.resource.contentType.matches('image/(webp|jpeg|png)');
-    }
-
-    match /products/{productId}/{file=**} {
-      allow read;
-      allow write: if isAdmin()
-                   && request.resource.size < 25 * 1024 * 1024
-                   && request.resource.contentType.matches('image/(webp|jpeg|png)');
-    }
-
-    // Default deny
     match /{allPaths=**} {
       allow read, write: if false;
     }
